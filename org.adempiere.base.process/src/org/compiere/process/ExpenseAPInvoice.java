@@ -180,13 +180,13 @@ public class ExpenseAPInvoice extends SvrProcess
 					
 					MPriceList pl = MPriceList.get(getCtx(), te.getM_PriceList_ID(), get_TrxName());
 					invoice.setIsTaxIncluded(pl.isTaxIncluded());
-					
+
 					invoice.setSalesRep_ID(te.getDoc_User_ID());
 					StringBuilder descr = new StringBuilder().append(Msg.translate(getCtx(), "S_TimeExpense_ID")) 
 						.append(": ").append(te.getDocumentNo()).append(" " )
 						.append(DisplayType.getDateFormat(DisplayType.Date).format(te.getDateReport()));  
 					invoice.setDescription(descr.toString());
-					if (!invoice.save()) 
+					if (!invoice.save())
 						throw new IllegalStateException("Cannot save Invoice");
 						//MPo,17/7/18 
 						//old_BPartner_ID = bp.getC_BPartner_ID();
@@ -213,9 +213,8 @@ public class ExpenseAPInvoice extends SvrProcess
 					if (line.getC_Project_ID() != 0 && line.getC_Project_ID() != invoice.getC_Project_ID())
 						invoice.setC_Project_ID(line.getC_Project_ID());
 					End ZI,MPo, 13/5/2016 */
-					if (!invoice.save()) {
-						throw new IllegalStateException("Cannot save Invoice"); 
-						}
+					if (!invoice.save())
+						throw new IllegalStateException("Cannot save Invoice");
 					
 					//	Create OrderLine
 					MInvoiceLine il = new MInvoiceLine (invoice);
@@ -233,8 +232,8 @@ public class ExpenseAPInvoice extends SvrProcess
 					// ZI,MPo, 13/5/2016 
 					il.setUser1_ID(line.getUser1_ID()); // UEL1 Profit Center
   					il.setUser2_ID(line.getUser2_ID()); // UEL2 Cost Center
-  					// 
-  					//	il.setPrice();	//	not really a list/limit price for reimbursements
+  					//
+				//	il.setPrice();	//	not really a list/limit price for reimbursements
 					il.setPrice(line.getPriceReimbursed());	//
 					
 					il.setTax();
