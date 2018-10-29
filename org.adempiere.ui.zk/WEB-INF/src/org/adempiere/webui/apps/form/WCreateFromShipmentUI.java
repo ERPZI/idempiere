@@ -503,6 +503,8 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 		initBPRMADetails(C_BPartner_ID, User1_ID);
 		//
 	}
+
+	
 	/**
 	 * Load RMA that are candidates for shipment
 	 * @param C_BPartner_ID BPartner

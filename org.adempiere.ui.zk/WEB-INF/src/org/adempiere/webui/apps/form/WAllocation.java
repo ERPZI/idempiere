@@ -325,7 +325,7 @@ public class WAllocation extends Allocation
 		row.appendCellChild(organizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
-		organizationPick.showMenu();
+		organizationPick.showMenu();		
 		//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr for Allocation Selection
 		row.appendCellChild(prctrLabel.rightAlign());
 		ZKUpdateUtil.setHflex(prctrSearch.getComponent(), "true");
@@ -556,7 +556,7 @@ public class WAllocation extends Allocation
 			allocateButton.setEnabled(true);
 			if (allocation != null) 
 			{
-				DocumentLink link = new DocumentLink(allocation.getDocumentNo(), allocation.get_Table_ID(), allocation.get_ID());				
+				DocumentLink link = new DocumentLink(Msg.getElement(Env.getCtx(), MAllocationHdr.COLUMNNAME_C_AllocationHdr_ID) + ": " + allocation.getDocumentNo(), allocation.get_Table_ID(), allocation.get_ID());				
 				statusBar.appendChild(link);
 			}					
 		}

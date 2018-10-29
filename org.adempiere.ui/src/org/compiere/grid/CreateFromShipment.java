@@ -55,9 +55,9 @@ import org.compiere.util.Msg;
 public abstract class CreateFromShipment extends CreateFrom 
 {
 	/**  Loaded Invoice             */
-	private MInvoice		m_invoice = null;
+	protected MInvoice		m_invoice = null;
 	/**  Loaded RMA             */
-	private MRMA            m_rma = null;
+	protected MRMA            m_rma = null;
 	private int defaultLocator_ID=0;
 
 	/**
@@ -138,6 +138,7 @@ public abstract class CreateFromShipment extends CreateFrom
 		//System.out.println("This is CreateFromShipment.java");
 		//
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
+		
 		StringBuffer display = new StringBuffer("i.DocumentNo||' - '||")
 		.append(DB.TO_CHAR("DateInvoiced", DisplayType.Date, Env.getAD_Language(Env.getCtx())))
 		.append("|| ' - ' ||")
