@@ -349,14 +349,12 @@ public class WMatch extends Match
 		row.appendChild(prCtrLabel.rightAlign());
 		row.appendChild(prCtrSearch.getComponent());
 		//
-				
 		row = rows.newRow();
 		row.appendChild(onlyVendorLabel.rightAlign());
 		row.appendChild(onlyVendor.getComponent());
 		row.appendChild(onlyProductLabel.rightAlign());
-		row.appendChild(onlyProduct.getComponent());
+		row.appendChild(onlyProduct.getComponent());	
 		
-				
 		row = rows.newRow();
 		row.appendChild(dateFromLabel.rightAlign());		
 		row.appendChild(dateFrom.getComponent());
