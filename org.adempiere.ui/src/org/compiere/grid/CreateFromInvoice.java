@@ -155,9 +155,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 */
 	//MPo, 9/8/2016
 	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) 
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) 
-
-	{
+	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) { 
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
