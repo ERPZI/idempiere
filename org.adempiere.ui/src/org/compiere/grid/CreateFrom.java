@@ -91,9 +91,6 @@ public abstract class CreateFrom implements ICreateFrom
 	//-protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
 	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, int User1_ID)
 	{
-		//MPo, 18/7/2016
-		//System.out.println("This is CreateFrom.java");
-		//
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String isSOTrxParam = isSOTrx ? "Y":"N";
@@ -104,17 +101,22 @@ public abstract class CreateFrom implements ICreateFrom
 			.append(DB.TO_CHAR("o.GrandTotal", DisplayType.Amount, Env.getAD_Language(Env.getCtx())));
 		//
 		String column = "ol.QtyDelivered";
+		String colBP = "o.C_BPartner_ID";
 		if (forInvoice)
+		{
 			column = "ol.QtyInvoiced";
-		StringBuffer sql = new StringBuffer("SELECT o.C_Order_ID,").append(display)
-			.append(" FROM C_Order o "
-			+ "WHERE o.C_BPartner_ID=? AND o.IsSOTrx=? AND o.DocStatus IN ('CL','CO')"
+			colBP = "o.Bill_BPartner_ID";
+		}
+		StringBuffer sql = new StringBuffer("SELECT o.C_Order_ID,")
+			.append(display)
+			.append(" FROM C_Order o WHERE ")
+			.append(colBP)
+			.append("=? AND o.IsSOTrx=? AND o.DocStatus IN ('CL','CO') AND o.C_Order_ID IN (SELECT ol.C_Order_ID FROM C_OrderLine ol WHERE ol.QtyOrdered-")
+			.append(column)
+			.append("!=0) ")
 			// Mpo, 18/7/2016
-			+ " AND o.User1_ID=?"
+			.append("AND o.User1_ID=? ");
 			//
-			+ " AND o.C_Order_ID IN "
-				  + "(SELECT ol.C_Order_ID FROM C_OrderLine ol"
-				  + " WHERE ol.QtyOrdered - ").append(column).append(" != 0) ");
 		if(sameWarehouseOnly)
 		{
 			sql = sql.append(" AND o.M_Warehouse_ID=? ");
