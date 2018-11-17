@@ -92,6 +92,7 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 		depexp.setA_Period(A_Period);
 		depexp.setIsDepreciated(true);
 		depexp.setDateAcct(DateAcct);
+		depexp.setC_AcctSchema_ID(assetwk.getC_AcctSchema_ID());
 		//
 		depexp.updateFrom(assetwk);
 		//
