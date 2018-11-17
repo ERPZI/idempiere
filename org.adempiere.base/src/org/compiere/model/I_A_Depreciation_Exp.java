@@ -430,4 +430,20 @@ public interface I_A_Depreciation_Exp
 
 	/** Get Use Life - Months (fiscal)	  */
 	public int getUseLifeMonths_F();
+
+	   /** Column name C_AcctSchema_ID */
+ public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
+
+	/** Set Accounting Schema.
+	  * Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
+
+	/** Get Accounting Schema.
+	  * Rules for accounting
+	  */
+	public int getC_AcctSchema_ID();
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
+
 }
