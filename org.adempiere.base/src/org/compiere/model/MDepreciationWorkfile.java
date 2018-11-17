@@ -228,6 +228,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 	public MDepreciationWorkfile(MAsset asset, String postingType, MAssetGroupAcct assetgrpacct)
 	{
 		this(asset.getCtx(), 0, asset.get_TrxName());
+		setC_AcctSchema_ID(assetgrpacct.getC_AcctSchema_ID());
 		setA_Asset_ID(asset.getA_Asset_ID());
 		setAD_Org_ID(asset.getAD_Org_ID()); //@win added
 		setA_Asset_Cost(asset.getA_Asset_Cost());
@@ -239,10 +240,6 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		setPostingType(postingType);
 		//
 		// Copy UseLife values from asset group to workfile
-		if (assetgrpacct == null)
-		{
-			assetgrpacct = MAssetGroupAcct.forA_Asset_Group_ID(asset.getCtx(), asset.getA_Asset_Group_ID(), postingType);
-		}
 		UseLifeImpl.copyValues(this, assetgrpacct);
 		
 		//
@@ -291,14 +288,16 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 	}
 	
 	/**
-	 * Get/load workfile from cache (if trxName is null)
+	 * 
 	 * @param ctx
 	 * @param A_Asset_ID
 	 * @param postingType
 	 * @param trxName
+	 * @param Account Schema
 	 * @return workfile
+	 * @see #get(Properties, int, String, String)
 	 */
-	public static MDepreciationWorkfile get (Properties ctx, int A_Asset_ID, String postingType, String trxName)
+	public static MDepreciationWorkfile get (Properties ctx, int A_Asset_ID, String postingType,  String trxName, int C_AcctSchema_ID)
 	{
 		if (A_Asset_ID <= 0 || postingType == null)
 		{
@@ -320,9 +319,11 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 											.firstOnly();
 		*/
 		final String whereClause = COLUMNNAME_A_Asset_ID+"=?"
-									+" AND "+COLUMNNAME_PostingType+"=? ";
+									+" AND "+COLUMNNAME_PostingType+"=? AND " +  COLUMNNAME_C_AcctSchema_ID + "=?" ;
+
+		int acctSchemaId =  C_AcctSchema_ID==0 ? MClient.get(ctx).getAcctSchema().get_ID() : C_AcctSchema_ID;
 		MDepreciationWorkfile wk = new Query(ctx, MDepreciationWorkfile.Table_Name, whereClause, trxName)
-				.setParameters(new Object[]{A_Asset_ID, postingType})
+				.setParameters(new Object[]{A_Asset_ID, postingType,acctSchemaId})
 				.firstOnly();
 		
 		
@@ -331,6 +332,19 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			s_cacheAsset.put(key, wk);
 		}
 		return wk;
+	}
+	
+	/**
+	 * Get/load workfile from cache (if trxName is null)
+	 * @param ctx
+	 * @param A_Asset_ID
+	 * @param postingType
+	 * @param trxName
+	 * @return workfile
+	 */
+	public static MDepreciationWorkfile get (Properties ctx, int A_Asset_ID, String postingType, String trxName)
+	{
+		return get(ctx, A_Asset_ID, postingType, trxName, 0);		
 	}
 	/** Static cache: Asset/PostingType -> Workfile */
 	private static CCache<MultiKey, MDepreciationWorkfile>
@@ -362,7 +376,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 	 */
 	public MAssetAcct getA_AssetAcct(Timestamp dateAcct, String trxName)
 	{
-		return MAssetAcct.forA_Asset_ID(getCtx(), getA_Asset_ID(), getPostingType(), dateAcct, trxName);
+		return MAssetAcct.forA_Asset_ID(getCtx(), getC_AcctSchema_ID(), getA_Asset_ID(), getPostingType(), dateAcct, trxName);
 	}
 
 	/**	Returns the current cost of FAs. It is calculated as the difference between acquisition value and the value that you (A_Salvage_Value)
@@ -701,8 +715,9 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 							+" AND "+MDepreciationExp.COLUMNNAME_A_Period+">=?"
 							+" AND "+MDepreciationExp.COLUMNNAME_A_Asset_ID+"=?"
 							+" AND "+MDepreciationExp.COLUMNNAME_PostingType+"=?"
+							+" AND "+MDepreciationExp.COLUMNNAME_C_AcctSchema_ID+"=?"
 		;
-		Object[] params = new Object[]{false, A_Current_Period, getA_Asset_ID(), getPostingType()};
+		Object[] params = new Object[]{false, A_Current_Period, getA_Asset_ID(), getPostingType(), getC_AcctSchema_ID()};
 		int no = DB.executeUpdateEx(sql, params, trxName);
 		if (log.isLoggable(Level.FINE)) log.fine("sql=" + sql + "\nDeleted #" + no);
 	}	//	truncDepreciation
@@ -724,7 +739,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		// Calculate values
 		if (valCofinantare.signum() == 0 && valTert.signum() == 0)
 		{
-			// Values ​​have never been set, so put everything on their own financing
+			// Values éˆ¥å¬§ï¿½åª“ave never been set, so put everything on their own financing
 			valCofinantare = assetCost;
 			valTert = Env.ZERO;
 		}
@@ -786,4 +801,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			return false;
 		return is_ValueChanged(index);
 	}
+	
+	
+
 }	//	MDepreciationWorkfile
