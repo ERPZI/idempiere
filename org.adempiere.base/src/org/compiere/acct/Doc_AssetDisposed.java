@@ -50,23 +50,23 @@ public class Doc_AssetDisposed extends Doc
 		Fact fact = new Fact(this, as, assetDisp.getPostingType());
 		facts.add(fact);
 		//
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct)
+		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct, as)
 				, as.getC_Currency_ID()
 				, Env.ZERO, assetDisp.getA_Disposal_Amt());
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct)
+		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct, as)
 				, as.getC_Currency_ID()
 				, assetDisp.getA_Accumulated_Depr_Delta(), Env.ZERO);
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct)
+		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct, as)
 				, as.getC_Currency_ID()
 				, assetDisp.getExpense(), Env.ZERO);
 		//
 		return facts;
 	}
 	
-	private MAccount getAccount(String accountName)
+	private MAccount getAccount(String accountName, MAcctSchema as)
 	{
 		MAssetDisposed assetDisp = (MAssetDisposed)getPO();
-		MAssetAcct assetAcct = MAssetAcct.forA_Asset_ID(getCtx(), assetDisp.getA_Asset_ID(), assetDisp.getPostingType(), assetDisp.getDateAcct(),null);
+		MAssetAcct assetAcct = MAssetAcct.forA_Asset_ID(getCtx(), as.get_ID(), assetDisp.getA_Asset_ID(), assetDisp.getPostingType(), assetDisp.getDateAcct(),null);
 		int account_id = (Integer)assetAcct.get_Value(accountName);
 		return MAccount.get(getCtx(), account_id);
 	}
