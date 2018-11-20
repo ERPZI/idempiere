@@ -32,7 +32,7 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181108L;
+	private static final long serialVersionUID = 20181119L;
 
     /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName)
@@ -331,6 +331,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return bd;
 	}
 
+	/** Set Entered Amount.
+		@param AssetAmtEntered Entered Amount	  */
+	public void setAssetAmtEntered (BigDecimal AssetAmtEntered)
+	{
+		set_Value (COLUMNNAME_AssetAmtEntered, AssetAmtEntered);
+	}
+
+	/** Get Entered Amount.
+		@return Entered Amount	  */
+	public BigDecimal getAssetAmtEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AssetAmtEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Asset Depreciation Date.
 		@param AssetDepreciationDate 
 		Date of last depreciation
@@ -383,6 +400,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	public Timestamp getAssetServiceDate () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_AssetServiceDate);
+	}
+
+	/** Set Source Amount.
+		@param AssetSourceAmt Source Amount	  */
+	public void setAssetSourceAmt (BigDecimal AssetSourceAmt)
+	{
+		set_Value (COLUMNNAME_AssetSourceAmt, AssetSourceAmt);
+	}
+
+	/** Get Source Amount.
+		@return Source Amount	  */
+	public BigDecimal getAssetSourceAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AssetSourceAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Business Partner Key.
@@ -498,6 +532,34 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	public String getC_City_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_C_City_Value);
+	}
+
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
+			.getPO(getC_Currency_ID(), get_TrxName());	}
+
+	/** Set Currency.
+		@param C_Currency_ID 
+		The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID)
+	{
+		if (C_Currency_ID < 1) 
+			set_Value (COLUMNNAME_C_Currency_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
+	}
+
+	/** Get Currency.
+		@return The Currency for this record
+	  */
+	public int getC_Currency_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
