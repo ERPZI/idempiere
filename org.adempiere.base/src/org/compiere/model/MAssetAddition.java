@@ -334,6 +334,12 @@ public class MAssetAddition extends X_A_Asset_Addition
 		setUser2_ID(ifa.getUser2_ID());
 		setC_Activity_ID(ifa.getC_Activity_ID());
 		//
+		//MPo, 19/11/18 Transfer AmtEntered,AmtSource,AssetCost and Currency to Asset Addition
+		setAssetAmtEntered(ifa.getAssetAmtEntered());
+		setAssetSourceAmt(ifa.getAssetSourceAmt());
+		setC_Currency_ID(ifa.getC_Currency_ID());
+		//setAssetValueAmt(ifa.getA_Asset_Cost());
+		//MPo
 		setI_FixedAsset(ifa);
 	}
 	
