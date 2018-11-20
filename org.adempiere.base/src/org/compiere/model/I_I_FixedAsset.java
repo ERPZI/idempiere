@@ -195,6 +195,15 @@ public interface I_I_FixedAsset
 	/** Get Asset Salvage Value	  */
 	public BigDecimal getA_Salvage_Value();
 
+    /** Column name AssetAmtEntered */
+    public static final String COLUMNNAME_AssetAmtEntered = "AssetAmtEntered";
+
+	/** Set Entered Amount	  */
+	public void setAssetAmtEntered (BigDecimal AssetAmtEntered);
+
+	/** Get Entered Amount	  */
+	public BigDecimal getAssetAmtEntered();
+
     /** Column name AssetDepreciationDate */
     public static final String COLUMNNAME_AssetDepreciationDate = "AssetDepreciationDate";
 
@@ -233,6 +242,15 @@ public interface I_I_FixedAsset
 	  * Date when Asset was put into service
 	  */
 	public Timestamp getAssetServiceDate();
+
+    /** Column name AssetSourceAmt */
+    public static final String COLUMNNAME_AssetSourceAmt = "AssetSourceAmt";
+
+	/** Set Source Amount	  */
+	public void setAssetSourceAmt (BigDecimal AssetSourceAmt);
+
+	/** Get Source Amount	  */
+	public BigDecimal getAssetSourceAmt();
 
     /** Column name BPartner_Value */
     public static final String COLUMNNAME_BPartner_Value = "BPartner_Value";
@@ -300,6 +318,21 @@ public interface I_I_FixedAsset
 
 	/** Get City Value	  */
 	public String getC_City_Value();
+
+    /** Column name C_Currency_ID */
+    public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
+
+	/** Set Currency.
+	  * The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID);
+
+	/** Get Currency.
+	  * The Currency for this record
+	  */
+	public int getC_Currency_ID();
+
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
