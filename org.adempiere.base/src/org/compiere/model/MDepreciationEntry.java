@@ -72,7 +72,7 @@ implements DocAction
 		{
 			return false;
 		}
-		if (!isProcessed() && (newRecord || is_ValueChanged(COLUMNNAME_DateAcct)))
+		if (!isProcessed() && (newRecord || is_ValueChanged(COLUMNNAME_DateAcct) || is_ValueChanged(COLUMNNAME_C_AcctSchema_ID)))
 		{
 			selectLines(); 
 		}
@@ -127,8 +127,7 @@ implements DocAction
 					+ MDepreciationExp.COLUMNNAME_A_Depreciation_Entry_ID + " IS NULL"
 					+ " AND TRUNC("+MDepreciationExp.COLUMNNAME_DateAcct+",'MONTH') = ?"
 					+ " AND AD_Client_ID=? AND AD_Org_ID=?"
-					+ " AND C_ACCTSCHEMA_ID =? ";
-					
+					+ " AND " + MDepreciationExp.COLUMNNAME_C_AcctSchema_ID +"=?" ;
 		;
 		Timestamp dateAcct = TimeUtil.trunc(getDateAcct(), TimeUtil.TRUNC_MONTH);
 		int no = DB.executeUpdateEx(sql, new Object[]{get_ID(), dateAcct, getAD_Client_ID(), getAD_Org_ID(), getC_AcctSchema_ID()}, get_TrxName());
