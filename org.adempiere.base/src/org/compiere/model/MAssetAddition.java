@@ -714,7 +714,16 @@ public class MAssetAddition extends X_A_Asset_Addition
 			MDepreciationExp.checkExistsNotProcessedEntries(assetworkFile.getCtx(), assetworkFile.getA_Asset_ID(), getDateAcct(), assetworkFile.getPostingType(), assetworkFile.get_TrxName());
 			//
 			if (this.getA_Salvage_Value().signum() > 0) {
-				assetworkFile.setA_Salvage_Value(this.getA_Salvage_Value());
+				if (assetworkFile.getC_AcctSchema().getC_Currency_ID() != getC_Currency_ID()) 
+				{
+					BigDecimal salvageValue = MConversionRate.convert(getCtx(), this.getA_Salvage_Value(),
+							getC_Currency_ID(), assetworkFile.getC_AcctSchema().getC_Currency_ID() ,
+							getDateAcct(), getC_ConversionType_ID(),
+							getAD_Client_ID(), getAD_Org_ID());
+					assetworkFile.setA_Salvage_Value(salvageValue);
+				} else{
+					assetworkFile.setA_Salvage_Value(this.getA_Salvage_Value());
+				}
 			}
 			assetworkFile.setDateAcct(getDateAcct());
 			assetworkFile.setProcessed(true);
