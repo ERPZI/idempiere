@@ -141,8 +141,9 @@ implements DocAction
 	{
 		final String trxName = get_TrxName();
 		final List<Object> params = new ArrayList<Object>();
-		String whereClause = MDepreciationExp.COLUMNNAME_A_Depreciation_Entry_ID+"=?";
+		String whereClause = MDepreciationExp.COLUMNNAME_A_Depreciation_Entry_ID+"=? AND " + MDepreciationExp.COLUMNNAME_C_AcctSchema_ID + "=?" ;
 		params.add(get_ID());
+		params.add(getC_AcctSchema_ID());
 		
 		if (onlyNotProcessed)
 		{
