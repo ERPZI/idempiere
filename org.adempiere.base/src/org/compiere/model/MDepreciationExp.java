@@ -190,8 +190,12 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 				throw new AssetNotActiveException(assetwk.getAsset().get_ID());
 			}
 			//
-			setDateAcct(assetwk.getDateAcct());
 			assetwk.adjustAccumulatedDepr(getExpense(), getExpense_F(), false);
+			// Update workfile - Remaining asset cost
+			assetwk.setA_Current_Period();
+			assetwk.saveEx();
+			//adjust to the last day of the month in before save assetwk.
+			setDateAcct(assetwk.getDateAcct());
 		}
 		else
 		{
@@ -203,9 +207,7 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 		saveEx();
 
 		//
-		// Update workfile
-		assetwk.setA_Current_Period();
-		assetwk.saveEx();
+		
 	}
 	
 	
