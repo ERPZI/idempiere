@@ -576,10 +576,11 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		String whereClause = MDepreciationExp.COLUMNNAME_A_Asset_ID+"=?"
 					+" AND "+MDepreciationExp.COLUMNNAME_PostingType+"=?"
 					+" AND "+MDepreciationExp.COLUMNNAME_Processed+"=? AND IsActive=?"
+					+" AND "+MDepreciationExp.COLUMNNAME_C_AcctSchema_ID+"=?"
 		;
 		//
 		MDepreciationExp depexp = new Query(getCtx(), MDepreciationExp.Table_Name, whereClause, get_TrxName())
-									.setParameters(new Object[]{getA_Asset_ID(), getPostingType(), true, true})
+									.setParameters(new Object[]{getA_Asset_ID(), getPostingType(), true, true, getC_AcctSchema_ID()})
 									.setOrderBy(MDepreciationExp.COLUMNNAME_A_Period+" DESC"
 												+","+MDepreciationExp.COLUMNNAME_DateAcct+" DESC")
 									.first();
