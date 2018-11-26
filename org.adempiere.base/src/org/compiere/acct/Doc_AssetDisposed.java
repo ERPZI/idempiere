@@ -8,6 +8,7 @@ import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAssetAcct;
 import org.compiere.model.MAssetDisposed;
+import org.compiere.model.MClientInfo;
 import org.compiere.model.MDocType;
 import org.compiere.util.Env;
 
@@ -49,15 +50,16 @@ public class Doc_AssetDisposed extends Doc
 		ArrayList<Fact> facts = new ArrayList<Fact>();
 		Fact fact = new Fact(this, as, assetDisp.getPostingType());
 		facts.add(fact);
+		int currencyId = MClientInfo.get(Env.getCtx(), getAD_Client_ID()).getC_Currency_ID();
 		//
 		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct, as)
-				, as.getC_Currency_ID()
+				, currencyId
 				, Env.ZERO, assetDisp.getA_Disposal_Amt());
 		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct, as)
-				, as.getC_Currency_ID()
+				, currencyId
 				, assetDisp.getA_Accumulated_Depr_Delta(), Env.ZERO);
 		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct, as)
-				, as.getC_Currency_ID()
+				, currencyId
 				, assetDisp.getExpense(), Env.ZERO);
 		//
 		return facts;
