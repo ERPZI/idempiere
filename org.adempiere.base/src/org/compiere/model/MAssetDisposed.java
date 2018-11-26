@@ -414,17 +414,30 @@ implements DocAction
 	
 	private void createDisposal()
 	{
-		MDepreciationWorkfile assetwk = MDepreciationWorkfile.get(getCtx(), getA_Asset_ID(), getPostingType(), get_TrxName());
-		assetwk.adjustCost(getA_Disposal_Amt().negate(), Env.ZERO, false);
-		assetwk.adjustAccumulatedDepr(getA_Accumulated_Depr_Delta().negate(), getA_Accumulated_Depr_Delta().negate(), false);
-		assetwk.saveEx();
-		assetwk.buildDepreciation();
-		//
-		// Delete not processed expense entries
-		List<MDepreciationExp> list = MDepreciationExp.getNotProcessedEntries(getCtx(), getA_Asset_ID(), getPostingType(), get_TrxName());
-		for (MDepreciationExp ex : list)
+		for (MDepreciationWorkfile assetwk :  MDepreciationWorkfile.forA_Asset_ID(getCtx(), getA_Asset_ID(), get_TrxName()))
 		{
-			ex.deleteEx(false);
-		}	
+			BigDecimal disposalAmt = Env.ZERO;
+			if (assetwk.getC_AcctSchema().getC_Currency_ID() != getC_Currency_ID()) 
+			{
+				disposalAmt  =  MConversionRate.convert(getCtx(), getA_Disposal_Amt(),
+						getC_Currency_ID(), assetwk.getC_AcctSchema().getC_Currency_ID() ,
+						getDateAcct(), MConversionType.getDefault(getAD_Client_ID()),
+						getAD_Client_ID(), getAD_Org_ID());
+			} else
+			{
+				disposalAmt = getA_Disposal_Amt();
+			}
+			assetwk.adjustCost(disposalAmt.negate(), Env.ZERO, false);
+			assetwk.adjustAccumulatedDepr(getA_Accumulated_Depr_Delta().negate(), getA_Accumulated_Depr_Delta().negate(), false);
+			assetwk.saveEx();
+			assetwk.buildDepreciation();
+			//
+			// Delete not processed expense entries
+			List<MDepreciationExp> list = MDepreciationExp.getNotProcessedEntries(getCtx(), getA_Asset_ID(), getPostingType(), get_TrxName());
+			for (MDepreciationExp ex : list)
+			{
+				ex.deleteEx(false);
+			}
+		}
 	}
 }
