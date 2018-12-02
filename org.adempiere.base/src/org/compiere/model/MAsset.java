@@ -427,12 +427,22 @@ public class MAsset extends X_A_Asset
 					// Asset Depreciation Workfile
 					MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
 					assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
-					assetwk.setUseLifeYears(assetgrpacct.getUseLifeYears());
-					assetwk.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
-					assetwk.setUseLifeYears_F(assetgrpacct.getUseLifeYears_F());
-					assetwk.setUseLifeMonths_F(assetgrpacct.getUseLifeMonths_F());
+					//MPo, 1/12/18
+					if (this.getUseLifeMonths() > 0) {
+						assetwk.setUseLifeYears(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeMonths(this.getUseLifeMonths());
+						assetwk.setUseLifeYears_F(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeMonths_F(this.getUseLifeMonths_F());
+						
+					} else {
+					//
+						assetwk.setUseLifeYears(assetgrpacct.getUseLifeYears());
+						assetwk.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
+						assetwk.setUseLifeYears_F(assetgrpacct.getUseLifeYears_F());
+						assetwk.setUseLifeMonths_F(assetgrpacct.getUseLifeMonths_F());
+					}
 					assetwk.saveEx();
-					
+
 					// Change Log
 					MAssetChange.createAndSave(getCtx(), "CRT", new PO[]{this, assetwk, assetacct}, null);
 				}
