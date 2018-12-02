@@ -219,6 +219,10 @@ public class MAssetAddition extends X_A_Asset_Addition
 				asset.setUser1_ID(getUser1_ID());
 				asset.setUser2_ID(getUser2_ID());
 				asset.setC_Activity_ID(getC_Activity_ID());
+				//MPo, 1/12/18
+				asset.setUseLifeMonths(getI_FixedAsset(false).getUseLifeMonths());
+				asset.setUseLifeMonths_F(getI_FixedAsset(false).getUseLifeMonths());
+				//
 				//
 				asset.saveEx();
 				setA_Asset(asset);
