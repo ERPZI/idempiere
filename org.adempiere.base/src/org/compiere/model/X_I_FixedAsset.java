@@ -32,7 +32,7 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181119L;
+	private static final long serialVersionUID = 20181203L;
 
     /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName)
@@ -278,6 +278,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	public String getA_Asset_Type_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_A_Asset_Type_Value);
+	}
+
+	/** Set Functional Area Key.
+		@param Activity_Value 
+		The key for the functional area
+	  */
+	public void setActivity_Value (String Activity_Value)
+	{
+		set_Value (COLUMNNAME_Activity_Value, Activity_Value);
+	}
+
+	/** Get Functional Area Key.
+		@return The key for the functional area
+	  */
+	public String getActivity_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Activity_Value);
 	}
 
 	/** Set Current Period.
@@ -590,6 +607,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Currency Key.
+		@param Currency_Value 
+		The key for the currency
+	  */
+	public void setCurrency_Value (String Currency_Value)
+	{
+		set_Value (COLUMNNAME_Currency_Value, Currency_Value);
+	}
+
+	/** Get Currency Key.
+		@return The key for the currency
+	  */
+	public String getCurrency_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Currency_Value);
+	}
+
 	/** Set Account Date.
 		@param DateAcct 
 		Accounting Date
@@ -851,6 +885,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Set Organization Key.
+		@param Org_Value 
+		The key for the organization
+	  */
+	public void setOrg_Value (String Org_Value)
+	{
+		set_Value (COLUMNNAME_Org_Value, Org_Value);
+	}
+
+	/** Get Organization Key.
+		@return The key for the organization
+	  */
+	public String getOrg_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Org_Value);
+	}
+
 	/** Set Processed.
 		@param Processed 
 		The document has been processed
@@ -1035,6 +1086,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Profit Center Key.
+		@param User1_Value 
+		The key for the profit center
+	  */
+	public void setUser1_Value (String User1_Value)
+	{
+		set_Value (COLUMNNAME_User1_Value, User1_Value);
+	}
+
+	/** Get Profit Center Key.
+		@return The key for the profit center
+	  */
+	public String getUser1_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_User1_Value);
+	}
+
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
     {
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
@@ -1061,5 +1129,22 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Cost Center Key.
+		@param User2_Value 
+		The key for the cost center
+	  */
+	public void setUser2_Value (String User2_Value)
+	{
+		set_Value (COLUMNNAME_User2_Value, User2_Value);
+	}
+
+	/** Get Cost Center Key.
+		@return The key for the cost center
+	  */
+	public String getUser2_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_User2_Value);
 	}
 }
