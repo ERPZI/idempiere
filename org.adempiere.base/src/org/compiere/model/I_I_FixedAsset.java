@@ -147,6 +147,19 @@ public interface I_I_FixedAsset
 	/** Get Asset Type Value	  */
 	public String getA_Asset_Type_Value();
 
+    /** Column name Activity_Value */
+    public static final String COLUMNNAME_Activity_Value = "Activity_Value";
+
+	/** Set Functional Area Key.
+	  * The key for the functional area
+	  */
+	public void setActivity_Value (String Activity_Value);
+
+	/** Get Functional Area Key.
+	  * The key for the functional area
+	  */
+	public String getActivity_Value();
+
     /** Column name A_Current_Period */
     public static final String COLUMNNAME_A_Current_Period = "A_Current_Period";
 
@@ -365,6 +378,19 @@ public interface I_I_FixedAsset
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
+    /** Column name Currency_Value */
+    public static final String COLUMNNAME_Currency_Value = "Currency_Value";
+
+	/** Set Currency Key.
+	  * The key for the currency
+	  */
+	public void setCurrency_Value (String Currency_Value);
+
+	/** Get Currency Key.
+	  * The key for the currency
+	  */
+	public String getCurrency_Value();
+
     /** Column name DateAcct */
     public static final String COLUMNNAME_DateAcct = "DateAcct";
 
@@ -526,6 +552,19 @@ public interface I_I_FixedAsset
 	  */
 	public String getName();
 
+    /** Column name Org_Value */
+    public static final String COLUMNNAME_Org_Value = "Org_Value";
+
+	/** Set Organization Key.
+	  * The key for the organization
+	  */
+	public void setOrg_Value (String Org_Value);
+
+	/** Get Organization Key.
+	  * The key for the organization
+	  */
+	public String getOrg_Value();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -655,6 +694,19 @@ public interface I_I_FixedAsset
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
 
+    /** Column name User1_Value */
+    public static final String COLUMNNAME_User1_Value = "User1_Value";
+
+	/** Set Profit Center Key.
+	  * The key for the profit center
+	  */
+	public void setUser1_Value (String User1_Value);
+
+	/** Get Profit Center Key.
+	  * The key for the profit center
+	  */
+	public String getUser1_Value();
+
     /** Column name User2_ID */
     public static final String COLUMNNAME_User2_ID = "User2_ID";
 
@@ -669,4 +721,17 @@ public interface I_I_FixedAsset
 	public int getUser2_ID();
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name User2_Value */
+    public static final String COLUMNNAME_User2_Value = "User2_Value";
+
+	/** Set Cost Center Key.
+	  * The key for the cost center
+	  */
+	public void setUser2_Value (String User2_Value);
+
+	/** Get Cost Center Key.
+	  * The key for the cost center
+	  */
+	public String getUser2_Value();
 }
