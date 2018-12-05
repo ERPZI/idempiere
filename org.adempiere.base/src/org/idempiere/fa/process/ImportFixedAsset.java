@@ -202,10 +202,13 @@ public class ImportFixedAsset extends SvrProcess
 				
 		// Locator From Value
 		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
-			  + "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Product t"
-			  + " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
-			  + "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
-			  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			//MPo,5/12/18 Derive Locator_ID from M_Locator instead of M_Product  
+			//+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Product t"
+			+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Locator t"
+			//
+			+ " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+			+ "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
+			+ " AND I_IsImported<>'Y'").append (sqlCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Locator from Value=" + no);
 		
@@ -400,8 +403,11 @@ public class ImportFixedAsset extends SvrProcess
 					}
 					//if(p_A_Asset_Group_ID>0)
 					//	assetAdd.getA_Asset().setA_Asset_Group_ID(p_A_Asset_Group_ID);
-					if(p_DateAcct!=null)
-						assetAdd.setDateAcct(p_DateAcct);
+					//MPo, 5/12/18 Transfer DateAcct from import to addition
+					//if(p_DateAcct!=null)
+					//	assetAdd.setDateAcct(p_DateAcct);
+					assetAdd.setDateAcct(ifa.getDateAcct());
+					//MPo
 					assetAdd.saveEx();
 					
 					//Process Asset Addition Based on Document Action
