@@ -205,21 +205,28 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			return false;
 		}
 		
-		// check if is fully depreciated
-		BigDecimal remainingAmt_C = getRemainingCost(null, false);
-		BigDecimal remainingAmt_F = getRemainingCost(null, true);
-		if(remainingAmt_C.signum() == 0 && remainingAmt_F.signum() == 0)
-		{
-			//if A_Asset_Cost is 0 have a voided addition, in this case asset is not full depreciated 
-			if (getA_Asset_Cost().signum() == 0)
+		Collection<MDepreciationWorkfile> workFiles = MDepreciationWorkfile.forA_Asset_ID(getCtx(), getA_Asset_ID(), get_TrxName());
+		for(MDepreciationWorkfile assetwk : workFiles) {	
+			// check if is fully depreciated
+			BigDecimal remainingAmt_C = assetwk.getA_Depreciation_Workfile_ID() == getA_Depreciation_Workfile_ID() 
+					? getRemainingCost(null, false) : assetwk.getRemainingCost(null, false);
+			BigDecimal remainingAmt_F = assetwk.getA_Depreciation_Workfile_ID() == getA_Depreciation_Workfile_ID()
+					? getRemainingCost(null, true) : assetwk.getRemainingCost(null, true);
+			if(remainingAmt_C.signum() == 0 && remainingAmt_F.signum() == 0)
 			{
-			 return false;	
+				//if A_Asset_Cost is 0 have a voided addition, in this case asset is not full depreciated 
+				if (getA_Asset_Cost().signum() == 0)
+				{
+					return false;	
+				}
 			}
-			//
-			return true;
+			else
+			{
+				return false;
+			}
 		}
-		
-		return false;
+				
+		return true;
 	}
 	
 	/**
