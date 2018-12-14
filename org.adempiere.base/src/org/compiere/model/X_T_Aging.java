@@ -32,8 +32,7 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	/**
 	 *
 	 */
-	//private static final long serialVersionUID = 20170906L;
-	private static final long serialVersionUID = 20171031L;
+	private static final long serialVersionUID = 20181214L;
 
     /** Standard Constructor */
     public X_T_Aging (Properties ctx, int T_Aging_ID, String trxName)
@@ -1067,5 +1066,33 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public String getZI_POReference () 
 	{
 		return (String)get_Value(COLUMNNAME_ZI_POReference);
+	}
+
+	public org.compiere.model.I_C_ElementValue getZI_User1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getZI_User1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param ZI_User1_ID 
+		User defined list element #1
+	  */
+	public void setZI_User1_ID (int ZI_User1_ID)
+	{
+		if (ZI_User1_ID < 1) 
+			set_Value (COLUMNNAME_ZI_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_ZI_User1_ID, Integer.valueOf(ZI_User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getZI_User1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }
