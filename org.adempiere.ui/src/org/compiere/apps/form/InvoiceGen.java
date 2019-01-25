@@ -53,6 +53,13 @@ public class InvoiceGen extends GenForm
 	
 	public Object 			m_AD_Org_ID = null;
 	public Object 			m_C_BPartner_ID = null;
+	//MPo, 2/8/2016
+	public Object			m_M_Warehouse_ID = null;
+	//MPo, 3/8/2016
+	public Object			m_ZI_Branch_ID = null;
+	//MPo, 4/8/2016
+	public Object			m_C_DocType_ID = null;
+	//
 	
 	public void dynInit() throws Exception
 	{
@@ -104,6 +111,14 @@ public class InvoiceGen extends GenForm
             sql.append(" AND ic.AD_Org_ID=").append(m_AD_Org_ID);
         if (m_C_BPartner_ID != null)
             sql.append(" AND ic.C_BPartner_ID=").append(m_C_BPartner_ID);
+        //MPo, 2/8/2016 Add Warehouse
+        if (m_M_Warehouse_ID != null)
+            sql.append(" AND ic.M_Warehouse_ID=").append(m_M_Warehouse_ID);
+        //MPo, 3/8/2016 Add Branch
+        if (m_ZI_Branch_ID != null)
+        	sql.append(" AND ic.ZI_Branch_ID=").append(m_ZI_Branch_ID);
+        else sql.append(" AND ic.ZI_Branch_ID IS NULL");
+        //
         sql.append(" ORDER BY o.Name,bp.Name,DateOrdered");
         sql = new StringBuilder(MRole.getDefault().addAccessSQL(sql.toString(), "ic", true, false));
         // Replace C_Order by C_Invoice_Candidate_v
@@ -141,7 +156,13 @@ public class InvoiceGen extends GenForm
             sql.append(" AND rma.AD_Org_ID=").append(m_AD_Org_ID);
         if (m_C_BPartner_ID != null)
             sql.append(" AND bp.C_BPartner_ID=").append(m_C_BPartner_ID);
-        
+        //MPo, 8/8/2016 Select based on warehouse in Customer RMA=>Shipment=>Warehouse (like Vendor RMA=>Receipt=>Warehouse in Vendor RMA/InOutGen.java)
+        if (m_M_Warehouse_ID != null) 
+            sql.append(" AND io.M_Warehouse_ID=").append(m_M_Warehouse_ID);            
+        if (m_ZI_Branch_ID != null)
+        	sql.append(" AND rma.ZI_Branch_ID=").append(m_ZI_Branch_ID);
+        else sql.append(" AND rma.ZI_Branch_ID IS NULL");
+        //
         sql.append(" ORDER BY org.Name, bp.Name, rma.Created ");
         sql = new StringBuilder(MRole.getDefault().addAccessSQL(sql.toString(), "rma", true, false));
         
@@ -242,7 +263,10 @@ public class InvoiceGen extends GenForm
 	/**************************************************************************
 	 *	Generate Invoices
 	 */
-	public String generate(IStatusBar statusBar, KeyNamePair docTypeKNPair, String docActionSelected)
+	//MPo, 4/8/2016
+	//public String generate(IStatusBar statusBar, KeyNamePair docTypeKNPair, String docActionSelected)
+	public String generate(IStatusBar statusBar, KeyNamePair docTypeKNPair, String docActionSelected, Object m_C_DocType_ID)
+	//
 	{
 		String info = "";
 		String trxName = Trx.createTrxName("IVG");
@@ -337,7 +361,18 @@ public class InvoiceGen extends GenForm
 			log.log(Level.SEVERE, msg);
 			return info;
 		}
+		//MPo, 4/8/2016 Add Document Type as parameter
+		para = new MPInstancePara(instance, 30);
+		para.setParameter("DocType", ((Integer)m_C_DocType_ID).intValue());
 		
+		if (!para.save())
+		{
+			String msg = "No DocType Parameter added";  //  not translated
+			info = msg;
+			log.log(Level.SEVERE, msg);
+			return info;
+		}
+		//
 		setTrx(trx);
 		setProcessInfo(pi);
 		

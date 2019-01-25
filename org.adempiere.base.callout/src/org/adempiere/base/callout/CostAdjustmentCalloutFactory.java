@@ -102,11 +102,17 @@ public class CostAdjustmentCalloutFactory implements IColumnCalloutFactory {
 							if (!MCostElement.COSTINGMETHOD_StandardCosting.equals(costingMethod)) {
 								mTab.setValue(mField, null);
 								return Msg.getMsg(Env.getCtx(), "NoCostingRecord");
-							}
+							} 
 						}
-
-						mTab.setValue(I_M_InventoryLine.COLUMNNAME_CurrentCostPrice, cost.getCurrentCostPrice());
-						mTab.setValue(I_M_InventoryLine.COLUMNNAME_NewCostPrice, cost.getCurrentCostPrice());	
+						if (cost == null) 
+						{
+							mTab.setValue(I_M_InventoryLine.COLUMNNAME_CurrentCostPrice, BigDecimal.ZERO);
+							mTab.setValue(I_M_InventoryLine.COLUMNNAME_NewCostPrice, BigDecimal.ZERO);
+						} else 
+						{
+							mTab.setValue(I_M_InventoryLine.COLUMNNAME_CurrentCostPrice, cost.getCurrentCostPrice());
+							mTab.setValue(I_M_InventoryLine.COLUMNNAME_NewCostPrice, cost.getCurrentCostPrice());	
+						}
 					}
 				}
 			}

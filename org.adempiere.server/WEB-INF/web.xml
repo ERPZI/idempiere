@@ -72,7 +72,7 @@
       <url-pattern>/server/*</url-pattern>
    </servlet-mapping>
 	<session-config>
-		<session-timeout>15</session-timeout>
+		<session-timeout>120</session-timeout>
 	</session-config>
 	<mime-mapping>
 		<extension>jar</extension>
@@ -95,9 +95,6 @@
 			<web-resource-name>service</web-resource-name>
 			<url-pattern>/server/*</url-pattern>
 		</web-resource-collection>
-		<user-data-constraint>
-			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
-		</user-data-constraint>
 	</security-constraint>
 	<welcome-file-list>
 		<welcome-file>idempiere.jsp</welcome-file>

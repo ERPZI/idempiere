@@ -109,6 +109,12 @@ public class ClientAcctProcessor extends SvrProcess
 		else	//	only specific accounting schema
 			m_ass = new MAcctSchema[] {new MAcctSchema (getCtx(), p_C_AcctSchema_ID, get_TrxName())};
 
+		if (log.isLoggable(Level.INFO))
+		{
+			log.info("p_C_AcctSchema_ID="+p_C_AcctSchema_ID);
+			log.info("m_ass.lenght="+m_ass.length);
+		}
+		
 		postSession();
 		MCost.create(m_client);
 

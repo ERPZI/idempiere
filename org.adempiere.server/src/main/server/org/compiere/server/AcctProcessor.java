@@ -100,6 +100,13 @@ public class AcctProcessor extends AdempiereServer
 			m_ass = MAcctSchema.getClientAcctSchema(getCtx(), m_model.getAD_Client_ID());
 		else	//	only specific accounting schema
 			m_ass = new MAcctSchema[] {new MAcctSchema (getCtx(), m_model.getC_AcctSchema_ID(), null)};
+		
+		if (log.isLoggable(Level.INFO))
+		{
+			log.info("C_AcctSchema_ID="+m_model.getC_AcctSchema_ID());
+			log.info("m_ass.lenght="+m_ass.length);
+		}
+		
 		//
 		postSession();
 		MCost.create(m_client);
@@ -225,6 +232,8 @@ public class AcctProcessor extends AdempiereServer
 				rs = pstmt.executeQuery();
 				while (!isInterrupted() && rs.next())
 				{
+					//count[i]++;
+
 					boolean ok = true;
 					try
 					{

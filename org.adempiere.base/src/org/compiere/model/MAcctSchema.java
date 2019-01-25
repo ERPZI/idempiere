@@ -25,6 +25,9 @@ import java.util.logging.Level;
 import org.compiere.report.MReportTree;
 import org.compiere.util.CCache;
 import org.compiere.util.KeyNamePair;
+//MPo, 6/6/17
+import java.util.Arrays;
+//
 
 /**
  *  Accounting Schema Model (base)
@@ -398,8 +401,15 @@ public class MAcctSchema extends X_C_AcctSchema
 		if (m_onlyOrgs == null)
 		{
 			MReportTree tree = new MReportTree (getCtx(), 0, true, MAcctSchemaElement.ELEMENTTYPE_Organization);
-			m_onlyOrgs = tree.getChildIDs(getAD_OrgOnly_ID());
+
+			m_onlyOrgs = tree.getChildIDs(getAD_OrgOnly_ID());			
+
 		}
+		//MPo, 9/6/17
+		log.log(Level.INFO, "MPo, Inside getOnlyOrgs()=>getAD_OrgOnly_ID " + getAD_OrgOnly_ID());
+		log.log(Level.INFO, "MPo, Inside getOnlyOrgs()=>MAcctSchemaElement.ELEMENTTYPE_Organization " + MAcctSchemaElement.ELEMENTTYPE_Organization);
+		log.log(Level.INFO, "MPo, Inside getOnlyOrgs()=>m_onlyOrgs " + Arrays.toString(m_onlyOrgs));
+		//
 		return m_onlyOrgs;
 	}	//	getOnlyOrgs
 
@@ -418,9 +428,18 @@ public class MAcctSchema extends X_C_AcctSchema
 		if (m_onlyOrg == null)
 			m_onlyOrg = MOrg.get(getCtx(), getAD_OrgOnly_ID());
 		//	Not Summary Only - i.e. skip it
-		if (!m_onlyOrg.isSummary())
-			return true;
+		if (!m_onlyOrg.isSummary()) 
+		//MPo, 6/6/17
+		//return true;
+		{   
+			log.log(Level.INFO, "MPo, !m_onlyOrg.isSummary() " + m_onlyOrg);
+			return true; 
+		}
+		//
 		final Integer[] onlyOrgs = getOnlyOrgs();
+		//MPo, 9/6/17
+		log.log(Level.INFO, "MPo, MAcctSchema=>getOnlyOrgs()= " + Arrays.toString(onlyOrgs));
+		//
 		if (onlyOrgs == null)
 		{
 			return false;
@@ -430,7 +449,13 @@ public class MAcctSchema extends X_C_AcctSchema
 			if (AD_Org_ID == onlyOrgs[i].intValue())
 				return false;
 		}
+		//MPo, 6/6/17
+		log.log(Level.INFO, "MPo, Last 'return true' m_onlyOrg=" + m_onlyOrg);
+		log.log(Level.INFO, "MPo, Last 'return true' onlyOrgs=" + Arrays.toString(onlyOrgs));
+		log.log(Level.INFO, "MPo, Last 'return true' AD_Org_ID=" + AD_Org_ID);
+		//
 		return true;
+		
 	}	//	isSkipOrg
 	
 	/**

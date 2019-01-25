@@ -231,7 +231,13 @@ public class OrderPOCreate extends SvrProcess
 						poLine.setQtyOrdered(soLines[i].getQtyOrdered());
 						poLine.setDescription(soLines[i].getDescription());
 						poLine.setDatePromised(soLines[i].getDatePromised());
+						//MPo, 15/9/2016, populate Profit center in PO line
+						poLine.setUser1_ID(soLines[i].getUser1_ID());
+						//
 						poLine.setPrice();
+						// MPo, 15/9/2016, populate Original Unit Price with Unit Price
+						poLine.setZI_PriceActualOriginal(poLine.getPriceActual());
+						//
 						poLine.saveEx();
 						
 						soLines[i].setLink_OrderLine_ID(poLine.getC_OrderLine_ID());

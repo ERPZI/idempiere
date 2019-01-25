@@ -31,7 +31,6 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MCashLine;
 import org.compiere.model.MConversionRate;
-import org.compiere.model.MCurrency;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
@@ -75,6 +74,9 @@ public class Doc_AllocationHdr extends Doc
 	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
 	/** Facts						*/
 	private ArrayList<Fact>		m_facts = null;
+	BigDecimal gainLossAmt =Env.ZERO;
+	private BigDecimal cmGainLossAmt=Env.ZERO;
+	private ArrayList<FactLine> gainLossFactList;
 
 
 	/**
@@ -174,6 +176,12 @@ public class Doc_AllocationHdr extends Doc
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		Fact factForRGL = new Fact(this, as, Fact.POST_Actual); // dummy fact (not posted) to calculate Realized Gain & Loss
 		boolean isInterOrg = isInterOrg(as);
+		BigDecimal paymentSelectAmt = Env.ZERO;		
+		BigDecimal totalAllocationSource = Env.ZERO;
+		MPayment payment = null;
+		int lineID = 0;
+		MAccount bpAcct = null;		//	Liability/Receivables
+		gainLossFactList = new ArrayList<FactLine>();
 
 		for (int i = 0; i < p_lines.length; i++)
 		{
@@ -199,10 +207,7 @@ public class Doc_AllocationHdr extends Doc
 
 			FactLine fl = null;
 			FactLine flForRGL = null;
-			MAccount bpAcct = null;		//	Liability/Receivables
-			MAccount payAcct = null;	//	Payment Selection
 			//
-			MPayment payment = null;
 			if (line.getC_Payment_ID() != 0)
 				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
 			MInvoice invoice = null;
@@ -218,6 +223,9 @@ public class Doc_AllocationHdr extends Doc
 				{
 					fl = fact.createLine (line, line.getChargeAccount(as, line.getAmtSource()),
 						getC_Currency_ID(), line.getAmtSource());
+					// MPo, 11/8/17
+					fl.setUser1_ID(payment.getUser1_ID());
+					//
 				}
 				//	Payment Only
 				else if (line.getC_Invoice_ID() == 0 && line.getC_Payment_ID() != 0)
@@ -225,7 +233,12 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), line.getAmtSource(), null);
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}	
 				}
 				else
 				{
@@ -263,11 +276,23 @@ public class Doc_AllocationHdr extends Doc
 					//	Payment/Cash	DR
 					if (line.getC_Payment_ID() != 0)
 					{
-						payAcct = getPaymentAcct(as, line.getC_Payment_ID());
-						fl = fact.createLine (line, payAcct,
+						fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 							getC_Currency_ID(), line.getAmtSource(), null);
 						if (fl != null && payment != null)
+						{	
 							fl.setAD_Org_ID(payment.getAD_Org_ID());
+							// MPo, 29/6/2016
+							fl.setUser1_ID(payment.getUser1_ID());
+							//
+						}	
+						if (payment.getReversal_ID() > 0 )
+							paymentSelectAmt= paymentSelectAmt.add(fl.getAmtAcctCr());
+						else
+						{
+							paymentSelectAmt= paymentSelectAmt.add(fl.getAmtAcctDr());
+							paymentSelectAmt= paymentSelectAmt.subtract(fl.getAmtAcctCr());
+						}
+
 					}
 					else if (line.getC_CashLine_ID() != 0)
 					{
@@ -275,7 +300,12 @@ public class Doc_AllocationHdr extends Doc
 							getC_Currency_ID(), line.getAmtSource(), null);
 						MCashLine cashLine = new MCashLine (getCtx(), line.getC_CashLine_ID(), getTrxName());
 						if (fl != null && cashLine.get_ID() != 0)
+						{	
 							fl.setAD_Org_ID(cashLine.getAD_Org_ID());
+							// MPo, 29/6/2016 future use
+							// fl.setUser1_ID(cashLine.getUser1_ID());
+							//
+						}	
 					}
 
 				}
@@ -287,7 +317,12 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountExp, as),
 						getC_Currency_ID(), line.getDiscountAmt(), null);
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}	
 				}
 				//	Write off		DR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -295,7 +330,19 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), line.getWriteOffAmt(), null);
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}
+					// MPo, 24/1/18 Assign PrCtr from invoice when using 
+					// Payment Allocation instead of payment to write off difference
+					else {
+					//fl.setAD_Org_ID(invoice.getAD_Org_ID());
+					fl.setUser1_ID(invoice.getUser1_ID());
+					}
+					//
 				}
 
 				//	AR Invoice Amount	CR
@@ -307,7 +354,12 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance().negate();
 					if (fl != null && invoice != null)
+					{	
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(invoice.getUser1_ID());
+						//
+					}	
 
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
@@ -360,7 +412,12 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null)
 						allocationAccounted = fl.getAcctBalance();
 					if (fl != null && invoice != null)
+					{	
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(invoice.getUser1_ID());
+						//
+					}	
 
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
@@ -381,7 +438,12 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_DiscountRev, as),
 						getC_Currency_ID(), null, line.getDiscountAmt().negate());
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}	
 				}
 				//	Write off		CR
 				if (Env.ZERO.compareTo(line.getWriteOffAmt()) != 0)
@@ -389,16 +451,34 @@ public class Doc_AllocationHdr extends Doc
 					fl = fact.createLine (line, getAccount(Doc.ACCTTYPE_WriteOff, as),
 						getC_Currency_ID(), null, line.getWriteOffAmt().negate());
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}
+					// MPo, 24/1/18 Assign PrCtr from invoice when using 
+					// Payment Allocation instead of payment to write off difference
+					else {
+					//fl.setAD_Org_ID(invoice.getAD_Org_ID());
+					fl.setUser1_ID(invoice.getUser1_ID());
+					}
+					//
 				}
 				//	Payment/Cash	CR
 				if (isUsingClearing && line.getC_Payment_ID() != 0) // Avoid usage of clearing accounts
 				{
-					payAcct = getPaymentAcct(as, line.getC_Payment_ID());
-					fl = fact.createLine (line, payAcct,
+					fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 						getC_Currency_ID(), null, line.getAmtSource().negate());
 					if (fl != null && payment != null)
+					{	
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						// MPo, 29/6/2016
+						fl.setUser1_ID(payment.getUser1_ID());
+						//
+					}	
+					paymentSelectAmt= paymentSelectAmt.add(fl.getAmtAcctCr());	
+					paymentSelectAmt= paymentSelectAmt.subtract(fl.getAmtAcctDr());
 				}
 				else if (isUsingClearing && line.getC_CashLine_ID() != 0) // Avoid usage of clearing accounts
 				{
@@ -406,7 +486,11 @@ public class Doc_AllocationHdr extends Doc
 						getC_Currency_ID(), null, line.getAmtSource().negate());
 					MCashLine cashLine = new MCashLine (getCtx(), line.getC_CashLine_ID(), getTrxName());
 					if (fl != null && cashLine.get_ID() != 0)
+					{	
 						fl.setAD_Org_ID(cashLine.getAD_Org_ID());
+						// MPo, 29/6/2016 => in future
+						// fl.setUser1_ID(cashLine.getUser1_ID());
+					}	
 				}
 			}
 
@@ -420,6 +504,7 @@ public class Doc_AllocationHdr extends Doc
 					taxCorrectionAmt = taxCorrectionAmt.add(line.getWriteOffAmt());
 				//
 				if (taxCorrectionAmt.signum() != 0)
+
 				{
 					if (!createTaxCorrection(as, fact, line,
 						getAccount(invoice.isSOTrx() ? Doc.ACCTTYPE_DiscountExp : Doc.ACCTTYPE_DiscountRev, as),
@@ -436,14 +521,33 @@ public class Doc_AllocationHdr extends Doc
 				&& (getC_Currency_ID() != as.getC_Currency_ID()			//	payment allocation in foreign currency
 					|| getC_Currency_ID() != line.getInvoiceC_Currency_ID()))	//	allocation <> invoice currency
 			{
-				p_Error = createRealizedGainLoss (line, as, fact, bpAcct, invoice,  payAcct, payment,
+				p_Error = createRealizedGainLoss (line, as, fact, bpAcct, invoice,
 					allocationSource, allocationAccounted);
 				if (p_Error != null)
 					return null;
-			}
-
+			}		
+			totalAllocationSource = totalAllocationSource.add(line.getAmtSource());
+			lineID = line.get_ID();
 		}	//	for all lines
 
+		//		rounding correction
+		if (payment != null && getC_Currency_ID() != as.getC_Currency_ID()	)		//	payment allocation in foreign currency
+		{
+			p_Error = createRoundingCorrection (as, fact,  getPaymentAcct(as, payment.get_ID()), payment,
+					totalAllocationSource, paymentSelectAmt, lineID);
+			if (p_Error != null)
+				return null;		
+		}
+		
+		//MPo, 27/8/18 No longer required as realized gains and losses are always accurate
+		//if (getC_Currency_ID() != as.getC_Currency_ID())
+		//{
+		//	p_Error = createInvoiceRounding (as, fact,  bpAcct);
+		//	if (p_Error != null)
+		//		return null;
+		//}
+		//
+		
 		// FR [ 1840016 ] Avoid usage of clearing accounts - subject to C_AcctSchema.IsPostIfClearingEqual
 		if ( (!as.isPostIfClearingEqual()) && p_lines.length > 0 && (!isInterOrg)) {
 			boolean allEquals = true;
@@ -698,164 +802,134 @@ public class Doc_AllocationHdr extends Doc
 	 * 	Accounted Amount of the Allocation
 	 *	@param as accounting schema
 	 *	@param fact fact
-	 *	@param invAcct invoice account
+	 *	@param acct account
 	 *	@param invoice invoice
-	 *	@param payAcct payment account
-	 *	@param payment payment
 	 *	@param allocationSource source amt
 	 *	@param allocationAccounted acct amt
 	 *	@return Error Message or null if OK
 	 */
-	private String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount invAcct,
-		MInvoice invoice, MAccount payAcct, MPayment payment, BigDecimal allocationSource, BigDecimal allocationAccounted)
+	private String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount acct,
+		MInvoice invoice, BigDecimal allocationSource, BigDecimal allocationAccounted)
 	{
 		BigDecimal invoiceSource = null;
 		BigDecimal invoiceAccounted = null;
-		BigDecimal paymentSource = null;
-		BigDecimal paymentAccounted = null;
 		//
-		StringBuilder sql = new StringBuilder()
-			.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
+
+		StringBuilder sql = new StringBuilder("SELECT ")
+			.append(invoice.isSOTrx()
+			//MPo, 7/9/18 Swap Dr/Cr for CM and reversal
+			//-	? "SUM(AmtSourceDr), SUM(AmtAcctDr)"	//	so
+			//-	: "SUM(AmtSourceCr), SUM(AmtAcctCr)")	//	po
+			? (invoice.getGrandTotal(true).signum() < 0 ? "SUM(AmtSourceCr), SUM(AmtAcctCr)" : "SUM(AmtSourceDr), SUM(AmtAcctDr)")	//	so
+			: (invoice.getGrandTotal(true).signum() < 0 ? "SUM(AmtSourceDr), SUM(AmtAcctDr)" : "SUM(AmtSourceCr), SUM(AmtAcctCr)"))	//	po
+			//
 			.append(" FROM Fact_Acct ")
-			.append("WHERE AD_Table_ID=? AND Record_ID=?")
+			.append("WHERE AD_Table_ID=318 AND Record_ID=?")	//	Invoice
+
 			.append(" AND C_AcctSchema_ID=?")
 			.append(" AND PostingType='A'");
-
-		// For Invoice
-		List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-				MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID());
-		if (valuesInv != null) {
-			if (invoice.isSOTrx()) {
-				invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-				invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-			} else {
-				invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-				invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+			//AND C_Currency_ID=102
+			//MPo, 24/8/18 Exclude currency balancing (412000002.05)
+			if(as.isCurrencyBalancing()) {
+				sql.append(" AND Account_ID <> " + as.getCurrencyBalancing_Acct().getAccount_ID());
 			}
+			//MPo, 6/10/18 Exclude any product and charge lines (=quantities <> 0)
+			sql.append(" AND NOT Qty != 0 ");
+			//
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
+			pstmt.setInt(1, invoice.getC_Invoice_ID());
+			pstmt.setInt(2, as.getC_AcctSchema_ID());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				invoiceSource = rs.getBigDecimal(1);
+				invoiceAccounted = rs.getBigDecimal(2);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally {
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
 		}
 		// 	Requires that Invoice is Posted
 		if (invoiceSource == null || invoiceAccounted == null)
 			return "Gain/Loss - Invoice not posted yet";
 		//
-		String invoiceCur = MCurrency.get(getCtx(), invoice.getC_Currency_ID()).getISO_Code();
-		String allocCur = MCurrency.get(getCtx(), getC_Currency_ID()).getISO_Code();
-		StringBuilder descriptionInv = new StringBuilder("Invoice=(").append(invoiceCur).append(")").append(invoiceSource).append("/").append(invoiceAccounted)
-			.append(" - Allocation=(").append(allocCur).append(")").append(allocationSource).append("/").append(allocationAccounted);
-		if (log.isLoggable(Level.FINE)) log.fine(descriptionInv.toString());
+		StringBuilder description = new StringBuilder("Invoice=(").append(invoice.getC_Currency_ID()).append(")").append(invoiceSource).append("/").append(invoiceAccounted)
+			.append(" - Allocation=(").append(getC_Currency_ID()).append(")").append(allocationSource).append("/").append(allocationAccounted);
+		if (log.isLoggable(Level.FINE)) log.fine(description.toString());
 		//	Allocation not Invoice Currency
-		BigDecimal allocationInvoiceSource = allocationSource;
 		if (getC_Currency_ID() != invoice.getC_Currency_ID())
 		{
-			allocationInvoiceSource = MConversionRate.convert(getCtx(),
+			BigDecimal allocationSourceNew = MConversionRate.convert(getCtx(),
 				allocationSource, getC_Currency_ID(),
 				invoice.getC_Currency_ID(), getDateAcct(),
 				invoice.getC_ConversionType_ID(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID());
-			if (allocationInvoiceSource == null)
+			if (allocationSourceNew == null)
 				return "Gain/Loss - No Conversion from Allocation->Invoice";
-			StringBuilder d2 = new StringBuilder("Allocation=(").append(allocCur).append(")").append(allocationSource)
-				.append("->(").append(invoiceCur).append(")").append(allocationInvoiceSource);
+			StringBuilder d2 = new StringBuilder("Allocation=(").append(getC_Currency_ID()).append(")").append(allocationSource)
+				.append("->(").append(invoice.getC_Currency_ID()).append(")").append(allocationSourceNew);
 			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-			descriptionInv.append(" - ").append(d2);
+			description.append(" - ").append(d2);
+			allocationSource = allocationSourceNew;
 		}
 
-		BigDecimal invoiceDifference = null;	//	gain is negative
-		//	Full Invoice in currency
-		if (allocationInvoiceSource.compareTo(invoiceSource) == 0)
+		BigDecimal acctDifference = null;	//	gain is negative
+		//reversal entry
+		if (allocationSource.signum() > 0 )
 		{
-			invoiceDifference = invoiceAccounted.subtract(allocationAccounted);	//	gain is negative
-			StringBuilder d2 = new StringBuilder("(full) = ").append(invoiceDifference);
+			acctDifference = invoiceAccounted.subtract(allocationAccounted.abs());
+		}
+		//	Full Payment in currency
+		if (allocationSource.compareTo(invoiceSource) == 0)
+		{
+			acctDifference = invoiceAccounted.subtract(allocationAccounted.abs());	//	gain is negative
+
+			StringBuilder d2 = new StringBuilder("(full) = ").append(acctDifference);
 			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-			descriptionInv.append(" - ").append(d2);
+			description.append(" - ").append(d2);
 		}
 		else	//	partial or MC
 		{
 			//	percent of total payment
-			double multiplier = allocationInvoiceSource.doubleValue() / invoiceSource.doubleValue();
+			double multiplier = allocationSource.doubleValue() / invoiceSource.doubleValue();
 			//	Reduce Orig Invoice Accounted
 			invoiceAccounted = invoiceAccounted.multiply(BigDecimal.valueOf(multiplier));
 			//	Difference based on percentage of Orig Invoice
-			invoiceDifference = invoiceAccounted.subtract(allocationAccounted);	//	gain is negative
+			acctDifference = invoiceAccounted.subtract(allocationAccounted);	//	gain is negative
 			//	ignore Tolerance
-			if (invoiceDifference.abs().compareTo(TOLERANCE) < 0)
-				invoiceDifference = Env.ZERO;
+			// MPo, 27/8/18 Ignore tolerance check for credit notes
+			//if (acctDifference.abs().compareTo(TOLERANCE) < 0)
+			//if (!invoice.isCreditMemo() && acctDifference.abs().compareTo(TOLERANCE) < 0)
+			//	acctDifference = Env.ZERO;
+			// MPo
 			//	Round
 			int precision = as.getStdPrecision();
-			if (invoiceDifference.scale() > precision)
-				invoiceDifference = invoiceDifference.setScale(precision, RoundingMode.HALF_UP);
-			StringBuilder d2 = new StringBuilder("(partial) = ").append(invoiceDifference).append(" - Multiplier=").append(multiplier);
+			if (acctDifference.scale() > precision)
+				acctDifference = acctDifference.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			StringBuilder d2 = new StringBuilder("(partial) = ").append(acctDifference).append(" - Multiplier=").append(multiplier);
 			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-			descriptionInv.append(" - ").append(d2);
+			description.append(" - ").append(d2);
 		}
-
-		// For Payment
-		BigDecimal paymentDifference = Env.ZERO;
-		StringBuilder descriptionPay = null;
-		if (payment != null && payment.getC_Payment_ID() > 0) {
-			List<Object> valuesPay = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-					MPayment.Table_ID, payment.getC_Payment_ID(), as.getC_AcctSchema_ID());
-			if (valuesPay != null) {
-				if (invoice.isSOTrx()) {
-					paymentSource = (BigDecimal) valuesPay.get(2); // AmtSourceCr
-					paymentAccounted = (BigDecimal) valuesPay.get(3); // AmtAcctCr
-				} else {
-					paymentSource = (BigDecimal) valuesPay.get(0); // AmtSourceDr
-					paymentAccounted = (BigDecimal) valuesPay.get(1); // AmtAcctDr
-				}
-			}
-			// 	Requires that Payment is Posted
-			if (paymentSource == null || paymentAccounted == null)
-				return "Gain/Loss - Payment not posted yet";
-			//
-			String paymentCur = MCurrency.get(getCtx(), payment.getC_Currency_ID()).getISO_Code();
-			descriptionPay = new StringBuilder("Payment=(").append(paymentCur).append(")").append(paymentSource).append("/").append(paymentAccounted)
-				.append(" - Allocation=(").append(allocCur).append(")").append(allocationSource).append("/").append(allocationAccounted);
-			if (log.isLoggable(Level.FINE)) log.fine(descriptionPay.toString());
-			//	Allocation not Payment Currency
-			BigDecimal allocationPaymentSource = allocationSource;
-			if (getC_Currency_ID() != payment.getC_Currency_ID())
-			{
-				allocationPaymentSource = MConversionRate.convert(getCtx(),
-					allocationSource, getC_Currency_ID(),
-					payment.getC_Currency_ID(), getDateAcct(),
-					payment.getC_ConversionType_ID(), payment.getAD_Client_ID(), payment.getAD_Org_ID());
-				if (allocationPaymentSource == null)
-					return "Gain/Loss - No Conversion from Allocation->Payment";
-				StringBuilder d2 = new StringBuilder("Allocation=(").append(allocCur).append(")").append(allocationSource)
-					.append("->(").append(paymentCur).append(")").append(allocationPaymentSource);
-				if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-				descriptionPay.append(" - ").append(d2);
-			}
-
-			//	Full Payment in currency
-			if (allocationPaymentSource.compareTo(paymentSource) == 0)
-			{
-				paymentDifference = paymentAccounted.subtract(allocationAccounted);	//	gain is negative
-				StringBuilder d2 = new StringBuilder("(full) = ").append(paymentDifference);
-				if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-				descriptionPay.append(" - ").append(d2);
-			}
-			else	//	partial or MC
-			{
-				//	percent of total payment
-				double multiplier = allocationPaymentSource.doubleValue() / paymentSource.doubleValue();
-				//	Reduce Orig Payment Accounted
-				paymentAccounted = paymentAccounted.multiply(BigDecimal.valueOf(multiplier));
-				//	Difference based on percentage of Orig Payment
-				paymentDifference = paymentAccounted.subtract(allocationAccounted);	//	gain is negative
-				//	ignore Tolerance
-				if (paymentDifference.abs().compareTo(TOLERANCE) < 0)
-					paymentDifference = Env.ZERO;
-				//	Round
-				int precision = as.getStdPrecision();
-				if (paymentDifference.scale() > precision)
-					paymentDifference = paymentDifference.setScale(precision, RoundingMode.HALF_UP);
-				StringBuilder d2 = new StringBuilder("(partial) = ").append(paymentDifference).append(" - Multiplier=").append(multiplier);
-				if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-				descriptionPay.append(" - ").append(d2);
-			}
-		}
-
-		if (invoiceDifference.signum() == 0 && paymentDifference.signum() == 0)
+		
+		//MPo, 18/9/18 additional logs for currency balancing
+		log.warning("invoiceSource: " + invoiceSource);
+		log.warning("allocationSource: " + allocationSource);
+		log.warning("invoiceAccounted: " + invoiceAccounted);
+		log.warning("allocationAccounted: " + allocationAccounted);
+		log.warning("acctDifference: " + acctDifference);
+		log.warning("isCreditMemo: " + invoice.isCreditMemo());
+		log.warning("GrandTotal: " + invoice.getGrandTotal());
+		log.warning("GrandTotalAdjusted: " + invoice.getGrandTotal(true));
+		//
+		if (acctDifference.signum() == 0)
 		{
 			log.fine("No Difference");
 			return null;
@@ -863,45 +937,42 @@ public class Doc_AllocationHdr extends Doc
 
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+		if (invoice.isCreditMemo() || invoice.getReversal_ID() > 0)
+			cmGainLossAmt = cmGainLossAmt.add(acctDifference);
+		else 
+			gainLossAmt = gainLossAmt.add(acctDifference);
+		
+
 		//
-		BigDecimal acctDifference = invoiceDifference.subtract(paymentDifference);
+
 		if (invoice.isSOTrx())
 		{
-			if (acctDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
-				StringBuilder description = new StringBuilder(descriptionInv);
-				if (paymentDifference.signum() != 0 && descriptionPay != null) {
-					description.append(" / ").append(descriptionPay);
-				}
-				fl.setDescription(description.toString());
-			}
-			if (invoiceDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, invAcct, as.getC_Currency_ID(), invoiceDifference.negate());
-				fl.setDescription(descriptionInv.toString());
-			}
-			if (paymentDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, payAcct, as.getC_Currency_ID(), paymentDifference);
-				fl.setDescription(descriptionPay.toString());
-			}
+			FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
+			fl.setDescription(description.toString());
+			//MPo, 16/11/17
+			fl.setUser1_ID(invoice.getUser1_ID());
+			//
+			fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
+			//MPo, 16/11/17
+			fl.setUser1_ID(invoice.getUser1_ID());
+			//
+			gainLossFactList.add(fl);
 		}
 		else
 		{
-			if (invoiceDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, invAcct, as.getC_Currency_ID(), invoiceDifference);
-				fl.setDescription(descriptionInv.toString());
-			}
-			if (paymentDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, payAcct, as.getC_Currency_ID(), paymentDifference.negate());
-				fl.setDescription(descriptionPay.toString());
-			}
-			if (acctDifference.signum() != 0) {
-				FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
-				StringBuilder description = new StringBuilder(descriptionInv);
-				if (paymentDifference.signum() != 0 && descriptionPay != null) {
-					description.append(" / ").append(descriptionPay);
-				}
-				fl.setDescription(description.toString());
-			}
+			FactLine fl = fact.createLine (line, acct,
+				as.getC_Currency_ID(), acctDifference);
+			//MPo, 16/11/17
+			fl.setUser1_ID(invoice.getUser1_ID());
+			//
+			gainLossFactList.add(fl);
+			fl = fact.createLine (line, loss, gain,
+				as.getC_Currency_ID(), acctDifference.negate());
+			fl.setDescription(description.toString());
+			//MPo, 16/11/17
+			fl.setUser1_ID(invoice.getUser1_ID());
+			//
+
 		}
 		return null;
 	}	//	createRealizedGainLoss
@@ -977,7 +1048,472 @@ public class Doc_AllocationHdr extends Doc
 
 	}	//	createTaxCorrection
 
+	/**************************************************************************
+	 * 	Create Rounding Correction.
+	 * 	Compares the Accounted Amount of the Payment to the
+	 * 	Accounted Amount of the Allocation
+	 *	@param as accounting schema
+	 *	@param fact fact
+	 *	@param acct account
+	 *	@param payment payment
+	 *	@param paymentSource source amt
+	 *	@param paymentAccounted acct amt
+	 *	@return Error Message or null if OK
+	 */
+	private String createRoundingCorrection (MAcctSchema as, Fact fact, MAccount acct,
+		MPayment payment, BigDecimal allocationSource, BigDecimal totalAllocationAccounted, int lineID)
+	{
+		BigDecimal paymentSource = null;
+		BigDecimal paymentAccounted = null;
+		//
+		StringBuilder sql = new StringBuilder("SELECT ")
+			.append(payment.isReceipt()
+				? "SUM(AmtSourceCr), SUM(AmtAcctCr)"	//	so
+				: "SUM(AmtSourceDr), SUM(AmtAcctDr)")	//	po
+			.append(" FROM Fact_Acct ")
+			.append("WHERE AD_Table_ID=335 " )			//	payment
+			.append(" AND Record_ID = ? ") 	//payment allocation line
+			.append(" AND C_AcctSchema_ID=?")
+			.append(" AND Account_ID = ? ")
+			.append(" AND PostingType='A'");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), getTrxName());
+			pstmt.setInt(1, payment.get_ID());
+			pstmt.setInt(2, as.getC_AcctSchema_ID());
+			pstmt.setInt(3, acct.getAccount_ID());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				paymentSource = rs.getBigDecimal(1);
+				paymentAccounted = rs.getBigDecimal(2);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally {
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		// 	Requires that Allocation is Posted
+		if (paymentSource == null || paymentAccounted == null)
+			return null; //"Gain/Loss - Payment not posted yet";
+		//
+		StringBuilder description = new StringBuilder("Invoice=(").append(payment.getC_Currency_ID()).append(")").append(allocationSource).append("/").append(totalAllocationAccounted)
+			.append(" - Allocation=(").append(getC_Currency_ID()).append(")").append(allocationSource).append("/").append(totalAllocationAccounted);
+		if (log.isLoggable(Level.FINE)) log.fine(description.toString());
+		
+
+		BigDecimal acctDifference = null;	//	gain is negative
+		//	Full Payment in currency
+		if (allocationSource.abs().compareTo(paymentSource.abs()) == 0)
+		{
+			acctDifference = totalAllocationAccounted.subtract(paymentAccounted.abs());	//	gain is negative
+			StringBuilder d2 = new StringBuilder("(full) = ").append(acctDifference);
+			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
+			description.append(" - ").append(d2);
+		}
+
+		if (acctDifference == null || acctDifference.signum() == 0)
+		{
+			log.fine("No Difference");
+			return null;
+		}
+
+		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
+		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+		//
+		if (payment.isReceipt())
+		{
+			FactLine fl = fact.createLine (null, acct,as.getC_Currency_ID(), acctDifference.negate());
+			fl.setDescription(description.toString());
+			//MPo, 16/11/17
+			fl.setUser1_ID(payment.getUser1_ID());
+			//
+			fl.setLine_ID(lineID);
+			if (!fact.isAcctBalanced())
+			{
+				if (as.isCurrencyBalancing() && as.getC_Currency_ID() != payment.getC_Currency_ID()  )
+				{
+					//MPo, 16/11/17
+					//fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+					fl=fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+					//
+				} else
+				{
+					fl = fact.createLine (null, loss, gain,as.getC_Currency_ID(), acctDifference);
+				}
+				//MPo, 16/11/17
+				fl.setUser1_ID(payment.getUser1_ID());
+				//
+			}
+		}
+		else
+		{
+			FactLine fl = fact.createLine (null, acct,as.getC_Currency_ID(), acctDifference);
+			fl.setDescription(description.toString());
+			//MPo, 16/11/17
+			fl.setUser1_ID(payment.getUser1_ID());
+			//
+			fl.setLine_ID(lineID);
+			if (!fact.isAcctBalanced())
+			{
+				if (as.isCurrencyBalancing() && as.getC_Currency_ID() != payment.getC_Currency_ID()  )
+				{
+					//MPo, 16/11/17
+					//fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
+					fl=fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
+					//
+				} else {
+					//MPo, 16/11/17
+					//fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+					fl=fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
+					//
+				}
+				//MPo, 16/11/17
+				fl.setUser1_ID(payment.getUser1_ID());
+				//
+			}
+			
+		}
+		return null;
+	}
+
+	/**************************************************************************
+	 * 	Create Rounding Correction.
+	 * 	Compares the Accounted Amount of the AR/AP Invoice to the
+	 * 	Accounted Amount of the AR/AP Allocation
+	 *	@param as accounting schema
+	 *	@param fact fact
+	 *	@param bpAcct account
+	 *	@param payment payment
+	 *	@return Error Message or null if OK
+	 */
+	private String createInvoiceRounding(MAcctSchema as, Fact fact, MAccount bpAcct) {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		// Invoice AR/AP
+		BigDecimal totalInvoiceSource = BigDecimal.ZERO;
+		BigDecimal totalInvoiceAccounted = BigDecimal.ZERO;
+		boolean isCMReversal =false ; 
+		MInvoice invoice = null;
+		MPayment payment = null;
+		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
+		for (int i = 0; i < p_lines.length; i++)
+		{
+			DocLine_Allocation line = (DocLine_Allocation)p_lines[i];			
+			if (line.getC_Invoice_ID() != 0)
+				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());		
+			if (line.getC_Payment_ID() != 0)
+				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
+
+			if (invoice != null )
+			{
+				boolean isDebit = false;
+				// to cater for invoice reverse-accrual.
+				if (invoice.isSOTrx() && !invoice.isCreditMemo())
+				isDebit = true;
+				else if  (!invoice.isSOTrx() && invoice.isCreditMemo() && invoice.getReversal_ID() > 0 )
+				isDebit = true;
+				else if (invoice.isSOTrx() && invoice.isCreditMemo() && invoice.getReversal_ID() == 0)
+				isDebit = true;
+				//
+				StringBuilder sql = new StringBuilder("SELECT ")
+					.append((isDebit )
+						? "SUM(AmtSourceDr), SUM(AmtAcctDr)"	//	so
+						: "SUM(AmtSourceCr), SUM(AmtAcctCr)")	//	po
+					.append(" FROM Fact_Acct ")
+					.append("WHERE AD_Table_ID=318 AND Record_ID=?")	//	Invoice
+					.append(" AND C_AcctSchema_ID=?")
+					.append(" AND PostingType='A'")
+					.append(" AND Account_ID= ? ");
+				pstmt = null;
+				rs = null;
+				try
+				{
+					pstmt = DB.prepareStatement(sql.toString(), getTrxName());
+					pstmt.setInt(1, invoice.getC_Invoice_ID());
+					pstmt.setInt(2, as.getC_AcctSchema_ID());
+					pstmt.setInt(3, bpAcct.getAccount_ID());
+					rs = pstmt.executeQuery();
+					if (rs.next())
+					{
+						BigDecimal invoiceSource = rs.getBigDecimal(1);
+						BigDecimal invoiceAccounted = rs.getBigDecimal(2);						
+						if ( !invList.contains(invoice))
+						{
+							totalInvoiceSource =totalInvoiceSource.add(invoiceSource);
+							totalInvoiceAccounted =totalInvoiceAccounted.add(invoiceAccounted);
+						} 
+
+				
+						invList.add(invoice);
+					}					
+				}
+				catch (Exception e)
+				{
+					log.log(Level.SEVERE, sql.toString(), e);
+				}
+				finally {
+					DB.close(rs, pstmt);
+					rs = null; pstmt = null;
+				}	
+			}
+		}
+		BigDecimal allocInvoiceSource = BigDecimal.ZERO;
+		BigDecimal allocInvoiceAccounted = BigDecimal.ZERO;
+		MAllocationLine allocationLine = null;
+		FactLine[] factlines = fact.getLines();
+		boolean isExcludeCMGainLoss = false;
+		for (FactLine factLine : factlines) {		
+			if (bpAcct != null) { 		
+				if (factLine.getAccount_ID() == bpAcct.getAccount_ID() )
+				{
+					if (factLine.getLine_ID() != 0 ) 
+						allocationLine = new MAllocationLine(getCtx(), factLine.getLine_ID(), getTrxName());
+					
+					if (allocationLine != null)
+						invoice = allocationLine.getInvoice();
+
+					if (invoice.isSOTrx())
+					{
+						if (factLine.getC_Currency_ID() != as.getC_Currency_ID())							
+							allocInvoiceSource = allocInvoiceSource.add(factLine.getAmtSourceCr());
+						if (!gainLossFactList.contains(factLine) && !invoice.isCreditMemo())
+							allocInvoiceAccounted = allocInvoiceAccounted.add(factLine.getAmtAcctCr());
+						
+						if (!gainLossFactList.contains(factLine)  && invoice.isCreditMemo() && invoice.getReversal_ID() > 0 ) {
+							allocInvoiceAccounted = allocInvoiceAccounted.add(factLine.getAmtAcctDr());
+							if (!invoice.getDateAcct().equals(getDateAcct())) 
+								isCMReversal =true;
+						}
+						if (invoice!=null)	
+						{
+							if (invoice.isCreditMemo()  || invoice.getReversal_ID() > 0 ) {
+								allocInvoiceAccounted = allocInvoiceAccounted.add(cmGainLossAmt.abs());
+								cmGainLossAmt = Env.ZERO;
+							}
+							if (gainLossFactList.contains(factLine)) {
+								isExcludeCMGainLoss = true;								
+							}
+						}
+						
+						if (payment != null && payment.getReversal_ID() > 0 && !gainLossFactList.contains(factLine))
+						{
+							allocInvoiceSource = allocInvoiceSource.add(factLine.getAmtSourceDr());
+							allocInvoiceAccounted = allocInvoiceAccounted.add(factLine.getAmtAcctDr());
+						}
+
+					} else
+					{
+						if (as.getC_Currency_ID() != factLine.getC_Currency_ID())
+							allocInvoiceSource = allocInvoiceSource.add(factLine.getAmtSourceDr());
+
+						if (!gainLossFactList.contains(factLine) && !invoice.isCreditMemo()) 
+							allocInvoiceAccounted = allocInvoiceAccounted.add(factLine.getAmtAcctDr());
+
+						if (!gainLossFactList.contains(factLine)  && invoice.isCreditMemo() && invoice.getReversal_ID() > 0 ) {
+							allocInvoiceAccounted = allocInvoiceAccounted.add(factLine.getAmtAcctCr());
+							// this is to cater for reverse-accrual.
+							if (!invoice.getDateAcct().equals(getDateAcct())) 
+								isCMReversal =true;
+						}
+
+						if (invoice!=null )	
+						{
+							if (invoice.isCreditMemo() || invoice.getReversal_ID() > 0 ) {
+								allocInvoiceAccounted = allocInvoiceAccounted.add(cmGainLossAmt.abs());
+								cmGainLossAmt = Env.ZERO;
+							}
+							if (gainLossFactList.contains(factLine)) {
+								isExcludeCMGainLoss = true;
+							}
+							
+						}
+									
+					}				
+
+				}
+		}
+		}
+
+
+		BigDecimal acctDifference = null;	//	gain is negative
+		//
+		StringBuilder description = new StringBuilder("Invoice=(").append(getC_Currency_ID()).append(")").append(allocInvoiceSource).append("/").append(allocInvoiceAccounted);
+		if (log.isLoggable(Level.FINE)) log.fine(description.toString());
+		boolean isBPartnerAdjust = true;
+		if (allocInvoiceSource.abs().compareTo(totalInvoiceSource.abs()) == 0)
+		{
+			if (isExcludeCMGainLoss)
+				allocInvoiceAccounted = allocInvoiceAccounted.add(cmGainLossAmt);
+			if (payment != null && payment.getReversal_ID() > 0 )	
+				allocInvoiceAccounted = allocInvoiceAccounted.subtract(gainLossAmt);
+			else
+				allocInvoiceAccounted = allocInvoiceAccounted.add(gainLossAmt);
+			if (isCMReversal)
+				acctDifference = totalInvoiceAccounted.subtract(allocInvoiceAccounted.abs());	
+			else
+				acctDifference = allocInvoiceAccounted.subtract(totalInvoiceAccounted.abs());	//	gain is positive for receipt
+			
+			StringBuilder d2 = new StringBuilder("(full) = ").append(acctDifference);
+			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
+			description.append(" - ").append(d2);
+		} else{
+			MAllocationHdr[] allocations = MAllocationHdr.getOfInvoice(getCtx(), invoice.get_ID(), getTrxName());
+			for (MAllocationHdr alloc : allocations)
+			{
+				StringBuilder sql = new StringBuilder("SELECT ")
+						.append(invoice.isSOTrx() 
+							? "SUM(AmtSourceCr), SUM(AmtAcctCr), SUM(AmtAcctDr)"	//	so
+							: "SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtAcctCr)")	//	po
+						.append(" FROM Fact_Acct ")
+						.append("WHERE AD_Table_ID=735 AND Record_ID=?")	//	allocation
+						.append(" AND C_AcctSchema_ID=?")
+						.append(" AND PostingType='A'")
+						.append(" AND Account_ID= ? ");
+					pstmt = null;
+					rs = null;
+					try
+					{
+						pstmt = DB.prepareStatement(sql.toString(), getTrxName());
+						pstmt.setInt(1, alloc.get_ID());
+						pstmt.setInt(2, as.getC_AcctSchema_ID());
+						pstmt.setInt(3, bpAcct.getAccount_ID());
+						rs = pstmt.executeQuery();
+						if (rs.next())
+						{
+							BigDecimal allocateSource = rs.getBigDecimal(1);
+							BigDecimal allocateAccounted = rs.getBigDecimal(2);
+							BigDecimal allocateCredit = rs.getBigDecimal(3);
+							allocInvoiceSource =allocInvoiceSource.add(allocateSource != null ? allocateSource: BigDecimal.ZERO);
+							allocInvoiceAccounted =allocInvoiceAccounted.add(allocateAccounted != null ? allocateAccounted : BigDecimal.ZERO);
+							allocInvoiceAccounted= allocInvoiceAccounted.subtract(allocateCredit != null ? allocateCredit : BigDecimal.ZERO);
+						}
+						
+					}
+					catch (Exception e)
+					{
+						log.log(Level.SEVERE, sql.toString(), e);
+					}
+					finally {
+						DB.close(rs, pstmt);
+						rs = null; pstmt = null;
+				}
+		}
+			double multiplier = allocInvoiceSource.doubleValue() / totalInvoiceSource.doubleValue();
+
+			//	Reduce Orig Invoice Accounted
+			BigDecimal reduceOrigAccounted = totalInvoiceAccounted.multiply(BigDecimal.valueOf(multiplier));
+			if (reduceOrigAccounted.compareTo(totalInvoiceAccounted) < 0 )
+				totalInvoiceAccounted = reduceOrigAccounted;
+			if (isExcludeCMGainLoss)
+				allocInvoiceAccounted = allocInvoiceAccounted.add(cmGainLossAmt);
+			
+			allocInvoiceAccounted = allocInvoiceAccounted.add(gainLossAmt);
+
+			//	Difference based on percentage of Orig Invoice
+			acctDifference = allocInvoiceAccounted.subtract(totalInvoiceAccounted);	
+			//	ignore Tolerance
+			if (acctDifference.abs().compareTo(BigDecimal.valueOf(0.01)) < 0)
+				acctDifference = Env.ZERO;
+
+			//	Round
+			int precision = as.getStdPrecision();
+			if (acctDifference.scale() > precision)
+				acctDifference = acctDifference.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			StringBuilder d2 = new StringBuilder("(partial) = ").append(acctDifference).append(" - Multiplier=").append(multiplier);
+			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
+			description.append(" - ").append(d2);
+		}
+
+		if (acctDifference.signum() == 0)
+		{
+			log.fine("No Difference");
+			return null;
+		}
+
+			
+		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
+		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
+
+		//
+		if (acctDifference.abs().compareTo(TOLERANCE) <= 0)
+		{
+			if (invoice.isSOTrx())
+			{
+				FactLine fl = null;
+					if (!isBPartnerAdjust)
+					{	
+						fl = fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+						//MPo, 16/11/17
+						fl.setUser1_ID(invoice.getUser1_ID());
+						//
+					}	
+					else
+						fl = fact.createLine (null, bpAcct,as.getC_Currency_ID(), acctDifference);
+						fl.setDescription(description.toString());
+						//MPo, 16/11/17
+						fl.setUser1_ID(invoice.getUser1_ID());
+						//
+	
+					if (!fact.isAcctBalanced())
+					{
+						if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID()  )
+						{
+							//MPo, 16/11/17
+							//fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
+							fl=fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
+							//
+						} else
+						{
+							fl = fact.createLine (null, loss, gain,as.getC_Currency_ID(), acctDifference.negate());
+							
+						}
+						//MPo, 16/11/17
+						fl.setUser1_ID(invoice.getUser1_ID());
+						//
+					}
+				}else
+				{
+					FactLine fl = null;
+					if (!isBPartnerAdjust)
+						fl = fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference.negate());
+					else
+						fl = fact.createLine (null, bpAcct,as.getC_Currency_ID(), acctDifference.negate());
+	
+					fl.setDescription(description.toString());
+					//MPo, 16/11/17
+					fl.setUser1_ID(invoice.getUser1_ID());
+					//
+					if (!fact.isAcctBalanced())
+					{
+						if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID()  )
+						{
+							//MPo, 16/11/17
+							//fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+							fl=fact.createLine (null, as.getCurrencyBalancing_Acct(),as.getC_Currency_ID(), acctDifference);
+							//
+						} else {
+							//MPo, 16/11/17
+							//fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
+							fl=fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
+							//
+						}
+						fl.setUser1_ID(invoice.getUser1_ID());
+					}
+				}
+			}
+		return null;		
+		
+	}	//	createInvoiceRounding
+	
 }   //  Doc_Allocation
+
 
 /**
  * 	Allocation Document Tax Handing
@@ -1194,10 +1730,10 @@ class Doc_AllocationTax
 			|| amt.signum() == 0)
 			return Env.ZERO;
 		//
-		BigDecimal multiplier = tax.divide(total, 10, RoundingMode.HALF_UP);
+		BigDecimal multiplier = tax.divide(total, 10, BigDecimal.ROUND_HALF_UP);
 		BigDecimal retValue = multiplier.multiply(amt);
 		if (retValue.scale() > precision)
-			retValue = retValue.setScale(precision, RoundingMode.HALF_UP);
+			retValue = retValue.setScale(precision, BigDecimal.ROUND_HALF_UP);
 		if (log.isLoggable(Level.FINE)) log.fine(retValue + " (Mult=" + multiplier + "(Prec=" + precision + ")");
 		return retValue;
 	}	//	calcAmount

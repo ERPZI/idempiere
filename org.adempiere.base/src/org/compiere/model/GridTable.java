@@ -104,8 +104,7 @@ public class GridTable extends AbstractTableModel
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2741647620577906242L;
-
+	private static final long serialVersionUID = -4651516342985623070L;
 	public static final String DATA_REFRESH_MESSAGE = "Refreshed";
 	public static final String DATA_UPDATE_COPIED_MESSAGE = "UpdateCopied";
 	public static final String DATA_INSERTED_MESSAGE = "Inserted";

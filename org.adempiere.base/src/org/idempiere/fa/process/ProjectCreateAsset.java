@@ -106,10 +106,7 @@ public class ProjectCreateAsset extends SvrProcess
 		assetAdd.setDateAcct(m_DateTrx);
 		assetAdd.setDateDoc(m_DateTrx);
 		assetAdd.setM_Product_ID(m_Product_ID);
-		if(m_UseLifeYears > 0) {
-			assetAdd.setDeltaUseLifeYears(m_UseLifeYears);
-			assetAdd.setDeltaUseLifeYears_F(m_UseLifeYears);
-		}
+		
 		assetAdd.saveEx();
 		if (!assetAdd.processIt(DocAction.ACTION_Complete)) {
 			return "Error Process Asset Addition";

@@ -94,7 +94,7 @@ public class DefaultKeyStore implements IKeyStore {
 
 	private void createLegacyKey() {
 		m_key = new javax.crypto.spec.SecretKeySpec
-				(new byte[] {100,25,28,-122,-26,94,-3,-26}, LEGACY_ALGORITHM);
+				(new byte[] {122,125,125,104,122,125,125,104}, LEGACY_ALGORITHM);
 	}
 	
 	@Override

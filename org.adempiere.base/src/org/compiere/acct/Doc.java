@@ -600,6 +600,9 @@ public abstract class Doc
 			{
 				//	Header Level Org
 				skip = m_as.isSkipOrg(getAD_Org_ID());
+				//MPo,3/6/17 Additional logging to catch secondary schema posting bug
+				log.log(Level.INFO, "MPo, Skip Org? " + getAD_Org_ID() + " " + this.getDocumentNo() + " " + skip);
+				//
 				//	Line Level Org
 				if (p_lines != null)
 				{
@@ -745,6 +748,14 @@ public abstract class Doc
 			if (fact == null)
 				return STATUS_Error;
 			m_fact.add(fact);
+			//MPo, 5/6/17 Additional logging
+			log.log(Level.INFO, "MPo, Fact= " + fact.toString());
+			FactLine[] fl = fact.getLines();
+			for (int i = 0; i < fl.length; i++ )
+			{
+				log.log(Level.INFO, "MPo, FactLine= " + fl[i].toString());
+			}
+			//
 			//
 			p_Status = STATUS_PostPrepared;
 

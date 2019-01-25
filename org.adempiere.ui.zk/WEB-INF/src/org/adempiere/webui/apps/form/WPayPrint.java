@@ -20,6 +20,8 @@ import static org.compiere.model.SystemIDs.COLUMN_C_PAYSELECTIONCHECK_C_PAYSELEC
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -267,7 +269,7 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			return;
 		//
 		m_C_PaySelection_ID = C_PaySelection_ID;
-		paySelectSearch.setValue(Integer.valueOf(m_C_PaySelection_ID));
+		paySelectSearch.setValue(new Integer(m_C_PaySelection_ID));
 		loadPaySelectInfo();
 	}	//	setsetPaySelection
 
@@ -433,8 +435,44 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			if (no >= 0)
 			{
 				//  Get File Info
+				//MPo, 26/5/18 add original change: 1/11/17
+				//MPo, 4/8/18 Add HSBC Direct Deposit payment method 
+				if (PaymentRule.equals("Z") || PaymentRule.equals("T")) {
+					java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
+					java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
+					java.util.Date now = new java.util.Date();
+					//MPo, 4/8/18 Add payment method to file name
+					String sql = "SELECT org.value FROM C_PaySelection ps, ad_org org WHERE C_PaySelection_ID = ? AND ps.ad_org_id = org.ad_org_id";
+					java.sql.PreparedStatement pstmt = null; 
+					ResultSet rs = null;
+					String orgValue = null;
+					try {
+						pstmt = DB.prepareStatement(sql, null);
+						pstmt.setInt(1, m_C_PaySelection_ID);
+						rs = pstmt.executeQuery();
+						if (rs.next()) 	{
+							orgValue = rs.getString(1);
+						}
+					}
+					catch (SQLException e) {
+						
+					}
+					finally {
+						DB.close(rs, pstmt);
+						rs = null;
+						pstmt = null;
+					}	
+					
+					filenameForDownload = "HSBCiFile" + orgValue + (PaymentRule.equals("Z") ? "COS" : "ACH") + dateFormatFile.format(now) + timeFormatFile.format(now);
+					tempFile = File.createTempFile(filenameForDownload, ".txt");
+				}
+				else {
+				//	
 				tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), m_PaymentExport.getFilenameSuffix());
 				filenameForDownload = m_PaymentExport.getFilenamePrefix() + m_PaymentExport.getFilenameSuffix();
+				//MPo, 26/5/18 add original change: 1/11/17	
+				}
+				//
 				
 				no = m_PaymentExport.exportToFile(m_checks,(Boolean) fDepositBatch.getValue(),PaymentRule, tempFile, err);
 			}

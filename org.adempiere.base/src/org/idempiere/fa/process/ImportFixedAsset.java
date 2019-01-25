@@ -202,12 +202,57 @@ public class ImportFixedAsset extends SvrProcess
 				
 		// Locator From Value
 		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
-			  + "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Product t"
-			  + " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
-			  + "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
-			  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			//MPo,5/12/18 Derive Locator_ID from M_Locator instead of M_Product  
+			//+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Product t"
+			+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Locator t"
+			//
+			+ " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+			+ "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
+			+ " AND I_IsImported<>'Y'").append (sqlCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Locator from Value=" + no);
+		
+		//MPo, 3/12/18 Organization From Value
+		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
+				  + "SET AD_Org_ID=(SELECT MAX(AD_Org_ID) FROM AD_Org t"
+				  + " WHERE ifa.Org_Value=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+				  + "WHERE (AD_Org_ID IS NULL OR AD_Org_ID=0) AND Org_Value IS NOT NULL"
+				  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Set Org from Value=" + no);
+		//MPo, 3/12/18 PrCtr/User1_id From Value	
+		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
+				  + "SET User1_ID=(SELECT MAX(c_elementvalue_ID) FROM c_elementvalue t"
+				  + " WHERE ifa.User1_Value=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+				  + "WHERE User1_ID IS NULL AND User1_Value IS NOT NULL"
+				  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Set PrCtr from Value=" + no);
+		//MPo, 3/12/18 CCtr/User2_id From Value			
+		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
+				  + "SET User2_ID=(SELECT MAX(c_elementvalue_ID) FROM c_elementvalue t"
+				  + " WHERE ifa.User2_Value=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+				  + "WHERE User2_ID IS NULL AND User2_Value IS NOT NULL"
+				  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Set CCtr from Value=" + no);	
+		//MPo, 3/12/18 FArea/C_Activity_id From Value			
+		sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
+				  + "SET C_Activity_ID=(SELECT MAX(c_activity_ID) FROM c_activity t"
+				  + " WHERE ifa.Activity_Value=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+				  + "WHERE C_Activity_ID IS NULL AND Activity_Value IS NOT NULL"
+				  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Set FArea from Value=" + no);
+		//MPo, 3/12/18 Currency/C_Currency_id From Value			
+			sql = new StringBuffer ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
+				  + "SET C_Currency_ID=(SELECT MAX(c_currency_ID) FROM c_currency t"
+				  + " WHERE ifa.Currency_Value=t.iso_code) "
+				  + "WHERE C_Currency_ID IS NULL AND Currency_Value IS NOT NULL"
+				  + " AND I_IsImported<>'Y'").append (sqlCheck);
+			no = DB.executeUpdate(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Set Currency from Value=" + no);			
+		//
 				
 		//-- New BPartner ---------------------------------------------------
 
@@ -358,8 +403,11 @@ public class ImportFixedAsset extends SvrProcess
 					}
 					//if(p_A_Asset_Group_ID>0)
 					//	assetAdd.getA_Asset().setA_Asset_Group_ID(p_A_Asset_Group_ID);
-					if(p_DateAcct!=null)
-						assetAdd.setDateAcct(p_DateAcct);
+					//MPo, 5/12/18 Transfer DateAcct from import to addition
+					//if(p_DateAcct!=null)
+					//	assetAdd.setDateAcct(p_DateAcct);
+					assetAdd.setDateAcct(ifa.getDateAcct());
+					//MPo
 					assetAdd.saveEx();
 					
 					//Process Asset Addition Based on Document Action

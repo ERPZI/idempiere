@@ -195,17 +195,39 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			return false;
 		}
 		//	Calculate Converted Amount
-		if (newRecord || is_ValueChanged("ExpenseAmt") || is_ValueChanged("C_Currency_ID"))
-		{
+
+		//  MPo, 11/4/2015
+		//	Get from DB
+			int C_ConversionType_ID = 0;
+			String sql = "SELECT C_ConversionType_ID "
+				+ "FROM ZI_DocumentConversionType "
+				+ "WHERE IsActive='Y'"
+				+ "AND name = 'S_TimeExpense'"
+				+ " AND AD_Org_ID = ?";		//	#1
+			C_ConversionType_ID = DB.getSQLValue(null, sql, getAD_Org_ID());
+			if (C_ConversionType_ID == -1)
+			{
+				C_ConversionType_ID = 0;
+			}
+			
+		// End MPo, 11/4/2015	
+				
+		// ZI,MPo, 18/5/2016 
+		// Fixes Bug where conversion to functional currency doesn't take place if currencies are changed
+		// without saving 
+		// if (newRecord || is_ValueChanged("ExpenseAmt") || is_ValueChanged("C_Currency_ID"))
+		// {
+
 			if (getC_Currency_ID() == getC_Currency_Report_ID())
 				setConvertedAmt(getExpenseAmt());
 			else
 			{
 				setConvertedAmt(MConversionRate.convert (getCtx(),
 					getExpenseAmt(), getC_Currency_ID(), getC_Currency_Report_ID(), 
-					getDateExpense(), 0, getAD_Client_ID(), getAD_Org_ID()) );
+					getDateExpense(), C_ConversionType_ID, getAD_Client_ID(), getAD_Org_ID()) );
 			}
-		}
+		// ZI,MPo, 18/5/2016 } 
+						
 		if (isTimeReport())
 		{
 			setExpenseAmt(Env.ZERO);

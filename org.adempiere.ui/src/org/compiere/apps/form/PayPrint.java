@@ -260,7 +260,6 @@ public class PayPrint {
 						break;
 				}
 			}
-			
 			if (m_PaymentExport == null)
 			{
 				Class<?> clazz = Class.forName (m_PaymentExportClass);

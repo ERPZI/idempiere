@@ -107,7 +107,14 @@ public class PaySelectionCreateCheck extends SvrProcess
 		{
 			MPaySelectionCheck check = (MPaySelectionCheck)m_list.get(i);
 			//	Add to existing
-			if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID())
+			if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID()
+			//MPo, 01/11/2016 Add PrCtr
+				&& check.getUser1_ID() == line.getUser1_ID()
+			//
+		    //MPo, 17/10/18
+				&& check.getZI_Pay_BPartner_ID() == line.getZI_Pay_BPartner_ID()
+				&& check.getZI_Pay_Location_ID() == line.getZI_Pay_Location_ID())
+			//	
 			{
 				check.addLine(line);
 				if (!check.save())
