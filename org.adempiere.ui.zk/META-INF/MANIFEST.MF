@@ -159,7 +159,6 @@ Require-Bundle: org.adempiere.base;bundle-version="0.0.0",
  org.apache.commons.io;bundle-version="0.0.0",
  com.itextpdf;bundle-version="0.0.0",
  org.atmosphere.runtime;bundle-version="0.0.0",
- org.adempiere.base.callout
  zkwebfragment,
  com.sun.activation.jakarta.activation;bundle-version="1.2.1"
 Bundle-Activator: org.adempiere.webui.WebUIActivator
