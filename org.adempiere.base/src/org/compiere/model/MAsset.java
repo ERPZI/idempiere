@@ -108,7 +108,6 @@ public class MAsset extends X_A_Asset
 		MProduct product = MProduct.get(getCtx(), invoiceLine.getM_Product_ID());
 		if (A_Asset_Group_ID <= 0) {
 			A_Asset_Group_ID = product.getA_Asset_Group_ID();
-
 		}
 		setA_Asset_Group_ID(A_Asset_Group_ID);
 		setHelp(Msg.getMsg(MClient.get(getCtx()).getAD_Language(), "CreatedFromInvoiceLine", 
@@ -418,97 +417,6 @@ public class MAsset extends X_A_Asset
 			// for each asset group acounting create an asset accounting and a workfile too
 			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID()))
 			{			
-				// Asset Accounting
-				MAssetAcct assetacct = new MAssetAcct(this, assetgrpacct);
-				assetacct.setAD_Org_ID(getAD_Org_ID()); //added by @win
-				assetacct.saveEx();
-				
-				// Asset Depreciation Workfile
-				MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
-				assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
-				assetwk.setUseLifeYears(0);
-				assetwk.setUseLifeMonths(0);
-				assetwk.setUseLifeYears_F(0);
-				assetwk.setUseLifeMonths_F(0);
-				assetwk.saveEx();
-				
-				// Change Log
-				MAssetChange.createAndSave(getCtx(), "CRT", new PO[]{this, assetwk, assetacct}, null);
-			}
-			
-		}
-		else
-		{
-			MAssetChange.createAndSave(getCtx(), "UPD", new PO[]{this}, null);
-		}
-		
-		//
-		// Update child.IsDepreciated flag
-		if (!newRecord && is_ValueChanged(COLUMNNAME_IsDepreciated))
-		{
-			final String sql = "UPDATE " + MDepreciationWorkfile.Table_Name
-				+" SET " + MDepreciationWorkfile.COLUMNNAME_IsDepreciated+"=?"
-				+" WHERE " + MDepreciationWorkfile.COLUMNNAME_A_Asset_ID+"=?";
-			DB.executeUpdateEx(sql, new Object[]{isDepreciated(), getA_Asset_ID()}, get_TrxName());
-		}
-		
-		return true;
-	}	//	afterSave
-	
-	
-	protected boolean beforeDelete()
-	{
-		// delete addition
-		{
-			String sql = "DELETE FROM "+MAssetAddition.Table_Name+" WHERE "+MAssetAddition.COLUMNNAME_Processed+"=? AND "+MAssetAddition.COLUMNNAME_A_Asset_ID+"=?";
-			int no = DB.executeUpdateEx(sql, new Object[]{false, getA_Asset_ID()}, get_TrxName());
-			if (log.isLoggable(Level.INFO)) log.info("@A_Asset_Addition@ @Deleted@ #" + no);
-		}
-		//
-		// update invoice line
-		{
-			final String sql = "UPDATE "+MInvoiceLine.Table_Name+" SET "
-										+" "+MInvoiceLine.COLUMNNAME_A_Asset_ID+"=?"
-										+","+MInvoiceLine.COLUMNNAME_A_Processed+"=?"
-								+" WHERE "+MInvoiceLine.COLUMNNAME_A_Asset_ID+"=?";
-			int no = DB.executeUpdateEx(sql, new Object[]{null, false, getA_Asset_ID()}, get_TrxName());
-			if (log.isLoggable(Level.INFO)) log.info("@C_InvoiceLine@ @Updated@ #" + no);
-		}
-		return true;
-	}       //      beforeDelete
-	
-	/**
-	 * 
-	 * @see #beforeSave(boolean)
-	 */
-	public void updateStatus()
-	{
-		String status = getA_Asset_Status();
-		setProcessed(!status.equals(A_ASSET_STATUS_New));
-//		setIsDisposed(!status.equals(A_ASSET_STATUS_New) && !status.equals(A_ASSET_STATUS_Activated));
-		setIsDisposed(status.equals(A_ASSET_STATUS_Disposed));
-		setIsFullyDepreciated(status.equals(A_ASSET_STATUS_Depreciated));
-		if(isFullyDepreciated() || status.equals(A_ASSET_STATUS_Disposed))
-		{
-			setIsDepreciated(false);
-		}
-		
-		
-		// If new record, create accounting and workfile
-		if (newRecord)
-		{
-			//@win: set value at asset group as default value for asset
-			MAssetGroup assetgroup = new MAssetGroup(getCtx(), getA_Asset_Group_ID(), get_TrxName());
-			String isDepreciated = (assetgroup.isDepreciated()) ? "Y" : "N";
-			String isOwned = (assetgroup.isOwned()) ? "Y" : "N";
-			setIsDepreciated(assetgroup.isDepreciated());
-			setIsOwned(assetgroup.isOwned());
-			DB.executeUpdateEx("UPDATE A_Asset SET IsDepreciated='" + isDepreciated + "', isOwned ='" + isOwned + "' WHERE A_Asset_ID=" + getA_Asset_ID(), get_TrxName());
-			//end @win
-			
-			// for each asset group acounting create an asset accounting and a workfile too
-			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID()))
-			{			
 				if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
 				{
 					// Asset Accounting
@@ -726,3 +634,4 @@ public class MAsset extends X_A_Asset
 		return false;
 	}
 }
+
