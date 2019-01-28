@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: iDempiere Core
 Bundle-SymbolicName: org.adempiere.base;singleton:=true
 Bundle-Version: 6.2.0.qualifier
-Bundle-ClassPath: base.jar,
+Bundle-ClassPath: .,
  lib/jython-engine.jar,
  lib/jython.jar,
  lib/cron4j.jar,
