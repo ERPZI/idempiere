@@ -314,7 +314,7 @@ public class MReportTree
 				MTreeNode nn = (MTreeNode)en.nextElement();
 				if (!nn.isSummary())
 				{
-					list.add(new Integer(nn.getNode_ID()));
+					list.add(Integer.valueOf(nn.getNode_ID()));
 					//MPo, 9/6/17
 					//if (log.isLoggable(Level.FINEST)) log.finest("- " + nn);
 					if (log.isLoggable(Level.INFO)) log.info("- " + nn);

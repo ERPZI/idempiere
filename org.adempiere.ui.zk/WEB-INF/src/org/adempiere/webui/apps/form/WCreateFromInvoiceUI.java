@@ -300,7 +300,7 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		//MPo, 18/7/2016 PrCtr selection
 		int User1_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID");
 		//
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		//MPo, 18/7/2016 PrCtr selection
