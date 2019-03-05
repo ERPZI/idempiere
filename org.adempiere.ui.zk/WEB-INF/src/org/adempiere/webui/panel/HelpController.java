@@ -15,7 +15,6 @@
 package org.adempiere.webui.panel;
 
 import java.util.Properties;
-
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.desktop.IDesktop;

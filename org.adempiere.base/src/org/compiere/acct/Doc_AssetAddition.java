@@ -53,6 +53,7 @@ public class Doc_AssetAddition extends Doc
 		MAssetAddition assetAdd = getAssetAddition();
 		ArrayList<Fact> facts = new ArrayList<Fact>();
 		Fact fact = new Fact(this, as, assetAdd.getPostingType());
+
 		facts.add(fact);
 		//
 		if (MAssetAddition.A_SOURCETYPE_Imported.equals(assetAdd.getA_SourceType()) 
@@ -62,10 +63,10 @@ public class Doc_AssetAddition extends Doc
 			return facts;
 		}
 		//
-		BigDecimal assetValueAmt = assetAdd.getAssetValueAmt();
+		BigDecimal assetValueAmt = assetAdd.getAssetSourceAmt();
 		FactLine[] fls = FactUtil.createSimpleOperation(fact, null,
-				getA_Asset_Acct(), getP_Asset_Acct(as),
-				as.getC_Currency_ID(),
+				getA_Asset_Acct(as), getP_Asset_Acct(as),
+				getC_Currency_ID(),
 				assetValueAmt,
 				false);
 		// Set BPartner and C_Project dimension for "Imobilizari in curs / Property Being"
@@ -142,11 +143,11 @@ public class Doc_AssetAddition extends Doc
 		return MAccount.get(getCtx(), acct_id);
 	}
 
-	private MAccount getA_Asset_Acct()
+	private MAccount getA_Asset_Acct(MAcctSchema as)
 	{
 		MAssetAddition assetAdd = getAssetAddition();
 		int acct_id = MAssetAcct
-				.forA_Asset_ID(getCtx(), assetAdd.getA_Asset_ID(), assetAdd.getPostingType(), assetAdd.getDateAcct(), null)
+				.forA_Asset_ID(getCtx(), as.get_ID(), assetAdd.getA_Asset_ID(), assetAdd.getPostingType(), assetAdd.getDateAcct(), null)
 				.getA_Asset_Acct();
 		return MAccount.get(getCtx(), acct_id);
 	}

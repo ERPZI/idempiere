@@ -134,6 +134,7 @@ public class Scheduler extends AdempiereServer
 		{
 			if (m_trx != null)
 				m_trx.close();
+			
 		}
 		
 		//

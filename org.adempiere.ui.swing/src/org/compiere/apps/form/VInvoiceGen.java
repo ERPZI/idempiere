@@ -19,7 +19,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.VetoableChangeListener;
 import java.util.ArrayList;
 import java.util.logging.Level;
-
+//MPo, 4/8/2016
+//import org.adempiere.webui.editor.WTableDirEditor;
 import org.compiere.grid.ed.VComboBox;
 import org.compiere.grid.ed.VLookup;
 import org.compiere.model.MLookup;
@@ -52,6 +53,16 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 
 	private CLabel lOrg = new CLabel();
 	private VLookup fOrg;
+	//MPo, 2/8/2016 Add warehouse for selection
+	private CLabel lWarehouse = new CLabel();
+	private VLookup fWarehouse;
+	//MPo, 3/8/2016 Add Branch for selection
+	private CLabel lBranch = new CLabel();
+	private VLookup fBranch;
+	//MPo, 4/8/2016 Add Invoicing document type for selection
+	private CLabel lDT = new CLabel();
+	private VLookup fDT;
+	//
 	private CLabel lBPartner = new CLabel();
 	private VLookup fBPartner;	
 	private CLabel     lDocType = new CLabel();
@@ -110,6 +121,16 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 	{
 		lOrg.setLabelFor(fOrg);
 		lOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
+		//MPo, 2/8/2016 Add Warehouse
+		lWarehouse.setLabelFor(fWarehouse);
+		lWarehouse.setText(Msg.translate(Env.getCtx(), "M_Warehouse_ID"));
+		//MPo, 3/8/2016 Add Branch
+		lBranch.setLabelFor(fBranch);
+		lBranch.setText(Msg.translate(Env.getCtx(), "ZI_Branch_ID"));
+		//MPo, 4/8/2016 Add Document Type
+		lDT.setLabelFor(fDT);
+		lDT.setText(Msg.translate(Env.getCtx(), "C_DocType_ID"));
+		//
 		lBPartner.setLabelFor(fBPartner);
 		lBPartner.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 		lDocAction.setLabelFor(docAction);
@@ -118,6 +139,16 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 		
 		panel.getParameterPanel().add(lOrg, null);
 		panel.getParameterPanel().add(fOrg, null);
+		//MPo, 2/8/2016
+		panel.getParameterPanel().add(lWarehouse, null);
+		panel.getParameterPanel().add(fWarehouse, null);
+		//MPo, 3/8/2016
+		panel.getParameterPanel().add(lBranch, null);
+		panel.getParameterPanel().add(fBranch, null);
+		//MPo, 4/8/2016
+		panel.getParameterPanel().add(lDT, null);
+		panel.getParameterPanel().add(fDT, null);
+		//
 		panel.getParameterPanel().add(lBPartner, null);
 		panel.getParameterPanel().add(fBPartner, null);
 		panel.getParameterPanel().add(lDocType, null);
@@ -137,10 +168,24 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 		fOrg = new VLookup ("AD_Org_ID", false, false, true, orgL);
 		//	lOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		fOrg.addVetoableChangeListener(this);
-		
+		//MPo, 2/8/2016
+		MLookup whL = MLookupFactory.get (Env.getCtx(), m_WindowNo, 0, 2202, DisplayType.TableDir);
+		fWarehouse = new VLookup ("M_Warehouse_ID", false, false, true, whL);
+		fWarehouse.addVetoableChangeListener(this);
+		//MPo, 3/8/2016
+		MLookup brL = MLookupFactory.get (Env.getCtx(), m_WindowNo, 0, 1000168, DisplayType.TableDir);
+		fBranch = new VLookup ("ZI_Branch_ID", false, false, true, brL);
+		fBranch.addVetoableChangeListener(this);
+		//MPo, 4/8/2016
+		MLookup dtL = MLookupFactory.get (Env.getCtx(), m_WindowNo, 1501, 
+				DisplayType.Table, Env.getLanguage(Env.getCtx()), "DocType", 170, 
+			    false, "C_DocType.docbasetype IN ('ARI','ARC')"); // AR Invoices and AR Credit Memos
+		fDT = new VLookup ("C_DocType_ID", false, false, true, dtL);
+		fDT.addVetoableChangeListener(this);
+		//
 		MLookup docActionL = MLookupFactory.get(Env.getCtx(), m_WindowNo, 3494 /* C_Invoice.DocStatus */, 
-				DisplayType.List, Env.getLanguage(Env.getCtx()), "DocAction", 135 /* _Document Action */,
-				false, "AD_Ref_List.Value IN ('CO','PR')");
+		DisplayType.List, Env.getLanguage(Env.getCtx()), "DocAction", 135 /* _Document Action */,
+		false, "AD_Ref_List.Value IN ('CO','PR')");
 		docAction = new VLookup("DocAction", true, false, true,docActionL);
 		//  lDcoACtion.setText((Msg.translate(Env.getCtx(), "DocAction")););
 		docAction.addVetoableChangeListener(this);
@@ -201,11 +246,30 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 		if (log.isLoggable(Level.INFO)) log.info(e.getPropertyName() + "=" + e.getNewValue());
 		if (e.getPropertyName().equals("AD_Org_ID"))
 			m_AD_Org_ID = e.getNewValue();
+		//MPo, 2/8/2016 Add Warehouse
+		if (e.getPropertyName().equals("M_Warehouse_ID"))
+		{
+			m_M_Warehouse_ID = e.getNewValue();
+			fWarehouse.setValue(m_M_Warehouse_ID);	//	display value
+		}
+		//MPo, 3/8/2016 Add Branch
+		if (e.getPropertyName().equals("ZI_Branch_ID"))
+		{
+			m_ZI_Branch_ID = e.getNewValue();
+			fBranch.setValue(m_ZI_Branch_ID);	//	display value
+		}
+		//MPo, 4/8/2016 Add Document Type
+		if (e.getPropertyName().equals("C_DocType_ID"))
+			m_C_DocType_ID = e.getNewValue();
+			fDT.setValue(m_C_DocType_ID);	
+		//
+			
 		if (e.getPropertyName().equals("C_BPartner_ID"))
 		{
 			m_C_BPartner_ID = e.getNewValue();
 			fBPartner.setValue(m_C_BPartner_ID);	//	display value
 		}
+		
 		executeQuery();
 	}	//	vetoableChange
 	
@@ -215,7 +279,9 @@ public class VInvoiceGen extends InvoiceGen implements FormPanel, ActionListener
 	public String generate()
 	{
 		KeyNamePair docTypeKNPair = (KeyNamePair)cmbDocType.getSelectedItem();
-		String docActionSelected = (String)docAction.getValue();	
-		return generate(panel.getStatusBar(), docTypeKNPair, docActionSelected);
+		String docActionSelected = (String)docAction.getValue();
+		//MPo, 4/8/2016
+		// return generate(panel.getStatusBar(), docTypeKNPair, docActionSelected);
+		return generate(panel.getStatusBar(), docTypeKNPair, docActionSelected, m_C_DocType_ID);
 	}	//	generateShipments
 }

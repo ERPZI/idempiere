@@ -78,12 +78,12 @@ public interface I_C_OrderLine
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -780,12 +780,12 @@ public interface I_C_OrderLine
     /** Column name User1_ID */
     public static final String COLUMNNAME_User1_ID = "User1_ID";
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 	  * User defined list element #1
 	  */
 	public void setUser1_ID (int User1_ID);
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 	  * User defined list element #1
 	  */
 	public int getUser1_ID();
@@ -795,15 +795,80 @@ public interface I_C_OrderLine
     /** Column name User2_ID */
     public static final String COLUMNNAME_User2_ID = "User2_ID";
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 	  * User defined list element #2
 	  */
 	public void setUser2_ID (int User2_ID);
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 	  * User defined list element #2
 	  */
 	public int getUser2_ID();
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name ZI_GP */
+    public static final String COLUMNNAME_ZI_GP = "ZI_GP";
+
+	/** Set Gross Profit Margin.
+	  * Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP (BigDecimal ZI_GP);
+
+	/** Get Gross Profit Margin.
+	  * Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP();
+
+    /** Column name ZI_GP_Percent */
+    public static final String COLUMNNAME_ZI_GP_Percent = "ZI_GP_Percent";
+
+	/** Set Gross Profit Margin %.
+	  * Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP_Percent (BigDecimal ZI_GP_Percent);
+
+	/** Get Gross Profit Margin %.
+	  * Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP_Percent();
+
+    /** Column name ZI_PriceActualChange_Percent */
+    public static final String COLUMNNAME_ZI_PriceActualChange_Percent = "ZI_PriceActualChange_Percent";
+
+	/** Set Change of Unit Price %.
+	  * Change of Unit Price % as a result of (C_Orderline.PriceActual - C_Orderline.ZI_PriceActualOriginal) / C_OrderLine.ZI_PriceActualOriginal x 100. 
+	  */
+	public void setZI_PriceActualChange_Percent (BigDecimal ZI_PriceActualChange_Percent);
+
+	/** Get Change of Unit Price %.
+	  * Change of Unit Price % as a result of (C_Orderline.PriceActual - C_Orderline.ZI_PriceActualOriginal) / C_OrderLine.ZI_PriceActualOriginal x 100. 
+	  */
+	public BigDecimal getZI_PriceActualChange_Percent();
+
+    /** Column name ZI_PriceActualOriginal */
+    public static final String COLUMNNAME_ZI_PriceActualOriginal = "ZI_PriceActualOriginal";
+
+	/** Set Original Unit Price.
+	  * Original Actual Price 
+	  */
+	public void setZI_PriceActualOriginal (BigDecimal ZI_PriceActualOriginal);
+
+	/** Get Original Unit Price.
+	  * Original Actual Price 
+	  */
+	public BigDecimal getZI_PriceActualOriginal();
+
+    /** Column name ZI_PriceCost */
+    public static final String COLUMNNAME_ZI_PriceCost = "ZI_PriceCost";
+
+	/** Set Cost.
+	  * Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public void setZI_PriceCost (BigDecimal ZI_PriceCost);
+
+	/** Get Cost.
+	  * Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public BigDecimal getZI_PriceCost();
 }

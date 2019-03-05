@@ -33,6 +33,10 @@ public class FactReconcile {
 	public int			m_M_Product_ID = 0;
 	public Timestamp	m_DateAcct = null;
 	public Timestamp	m_DateAcct2 = null;
+	//MPo, 14/7/18 Add PrCtr, MatchCode as additional field selection
+	public int			m_PrCtr_ID = 0;
+	public String       m_MatchCode = null;
+	//
 
 	public int 			selectedColIndex = 2;
 	public int 			idColIndex = 8;
@@ -42,7 +46,7 @@ public class FactReconcile {
 	static protected int 			col_AD_Org_ID = COLUMN_C_PERIOD_AD_ORG_ID; 			//	C_Period.AD_Org_ID (needed to allow org 0)
 	static protected int 			col_C_BPartner_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;       //  C_Invoice.C_BPartner_ID
 	static protected int 			col_M_Product_ID = COLUMN_FACT_ACCT_M_PRODUCT_ID;        //  Fact_Acct.M_Product_ID
-	
+		
 	
 	public void dynInit() throws Exception
 	{
@@ -66,7 +70,10 @@ public class FactReconcile {
 		columnNames.add(Msg.translate(Env.getCtx(), "MatchCode"));
 		columnNames.add(Msg.translate(Env.getCtx(), "DateTrx"));
 		columnNames.add(Msg.translate(Env.getCtx(), "AD_Org_ID"));
-		
+		//MPo, 14/7/18 Add PrCtr
+		columnNames.add(Msg.translate(Env.getCtx(), "User1_ID"));
+		//
+				
 		return columnNames;
 	}
 	
@@ -81,12 +88,17 @@ public class FactReconcile {
 				.append(DB.TO_STRING(Msg.translate(Env.getCtx(), "DR")))
 				.append(" END), fa.Fact_Acct_ID, bp.name, DateAcct,")
 				.append(" glc.name, p.name, Qty, fa.Description, r.MatchCode, fa.DateTrx, o.value")
+				//MPo, 14/7/18 add PrCtr
+				.append(", ev.value")
+				//
 				.append(" FROM Fact_Acct fa")
 				.append(" LEFT OUTER JOIN Fact_Reconciliation r ON (fa.Fact_Acct_ID=r.Fact_Acct_ID)")
 				.append(" LEFT OUTER JOIN C_BPartner bp ON (fa.C_BPartner_ID=bp.C_BPartner_ID)")
 				.append(" LEFT OUTER JOIN AD_Org o ON (o.AD_Org_ID=fa.AD_Org_ID)")
 				.append(" LEFT OUTER JOIN M_Product p ON (p.M_Product_ID=fa.M_Product_ID)")
 				.append(" LEFT OUTER JOIN GL_Category glc ON (fa.GL_Category_ID=glc.GL_Category_ID)")
+				//MPo, 14/7/18 add PrCtr
+				.append(" LEFT OUTER JOIN C_ElementValue ev ON (fa.User1_ID=ev.C_ElementValue_ID)")
 				.append(" WHERE fa.AD_Client_ID=?");
 		
 		// role security
@@ -106,7 +118,14 @@ public class FactReconcile {
 				+ " INNER JOIN Fact_Acct f ON (f.Fact_Acct_ID = rec.Fact_Acct_ID) "
 				+ " WHERE r.MatchCode=rec.MatchCode) ");
 		if(m_isReconciled)
-			sql.append(" =0)");
+			//MPo, 19/7/18 Add MatchCode
+			//sql.append(" =0)");
+			{
+				sql.append(" =0)");
+				if(m_MatchCode!=null)
+					sql.append(" AND r.MatchCode LIKE ?");
+			} 
+			//
 		else
 			sql.append(" <> 0 OR r.MatchCode IS NULL)");
 		
@@ -122,8 +141,13 @@ public class FactReconcile {
 		if(m_DateAcct2!=null)
 			sql.append(" AND fa.DateAcct<=?");
 		
-		sql.append(" ORDER BY 1,5,3,6");
+		//MPo, 14/7/18 Add PrCtr, MatchCode as additional selection
+		if (m_PrCtr_ID>0)
+			sql.append(" AND fa.User1_ID=?");
+		//
 		
+		sql.append(" ORDER BY 1,5,3,6");
+				
 		if (log.isLoggable(Level.FINE)) log.fine("SQL=" + sql.toString());
 		
 		PreparedStatement pstmt = null;
@@ -143,9 +167,14 @@ public class FactReconcile {
 			if(m_C_AcctSchema_ID>0)
 				pstmt.setInt(i++, m_C_AcctSchema_ID);
 			
+			//MPo, 19/7/18 Add MatchCode
+			if(m_isReconciled && m_MatchCode!=null)
+				pstmt.setString(i++, m_MatchCode);
+			//
+			
 			if(m_C_BPartner_ID>0)
 				pstmt.setInt(i++, m_C_BPartner_ID);
-			
+						
 			if(m_M_Product_ID>0)
 				pstmt.setInt(i++, m_M_Product_ID);
 			
@@ -154,6 +183,12 @@ public class FactReconcile {
 			
 			if(m_DateAcct2!=null)
 				pstmt.setTimestamp(i++,	m_DateAcct2);
+			
+			//MPo, 14/7/18 Add PrCtr, MatchCode as selection
+			if(m_PrCtr_ID>0)
+				pstmt.setInt(i++, m_PrCtr_ID);
+			//
+			
 			
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -173,6 +208,8 @@ public class FactReconcile {
 				line.add(rs.getString(11));		// 11-MatchCode
 				line.add(rs.getTimestamp(12));	// 12-DateTrx
 				line.add(rs.getString(13));		// 13-Org
+				//MPo, 14/7/17 Add PrCtr
+				line.add(rs.getString(14));		// 14-PrCtr
 				//
 				data.add(line);
 			}
@@ -207,6 +244,9 @@ public class FactReconcile {
 		miniTable.setColumnClass(i++, String.class, true);		//	11-MatchCode
 		miniTable.setColumnClass(i++, Timestamp.class, true);	//	12-DateTrx
 		miniTable.setColumnClass(i++, String.class, true);		//	13-Org
+		//MPo, 14/7/18 Add PrCtr
+		miniTable.setColumnClass(i++, String.class, true);		//	14-PrCtr
+		//
 		//  Table UI
 		miniTable.autoSize();
 	}

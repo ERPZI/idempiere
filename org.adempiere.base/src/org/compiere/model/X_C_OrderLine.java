@@ -33,6 +33,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/**
 	 *
 	 */
+
 	private static final long serialVersionUID = 20190106L;
 
     /** Standard Constructor */
@@ -74,6 +75,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 			setQtyOrdered (Env.ZERO);
 // 1
 			setQtyReserved (Env.ZERO);
+			setZI_PriceActualOriginal (Env.ZERO);
         } */
     }
 
@@ -133,7 +135,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
 			.getPO(getC_Activity_ID(), get_TrxName());	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID 
 		Business Activity
 	  */
@@ -145,7 +147,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID () 
@@ -521,9 +523,9 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	public void setC_UOM_ID (int C_UOM_ID)
 	{
 		if (C_UOM_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+			set_Value (COLUMNNAME_C_UOM_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+			set_Value (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
 	}
 
 	/** Get UOM.
@@ -1253,7 +1255,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser1_ID(), get_TrxName());	}
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 		@param User1_ID 
 		User defined list element #1
 	  */
@@ -1265,7 +1267,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 		@return User defined list element #1
 	  */
 	public int getUser1_ID () 
@@ -1281,7 +1283,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser2_ID(), get_TrxName());	}
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 		@param User2_ID 
 		User defined list element #2
 	  */
@@ -1293,7 +1295,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 		@return User defined list element #2
 	  */
 	public int getUser2_ID () 
@@ -1302,5 +1304,102 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Gross Profit Margin.
+		@param ZI_GP 
+		Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP (BigDecimal ZI_GP)
+	{
+		throw new IllegalArgumentException ("ZI_GP is virtual column");	}
+
+	/** Get Gross Profit Margin.
+		@return Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_GP);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Gross Profit Margin %.
+		@param ZI_GP_Percent 
+		Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP_Percent (BigDecimal ZI_GP_Percent)
+	{
+		throw new IllegalArgumentException ("ZI_GP_Percent is virtual column");	}
+
+	/** Get Gross Profit Margin %.
+		@return Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP_Percent () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_GP_Percent);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Change of Unit Price %.
+		@param ZI_PriceActualChange_Percent 
+		Change of Unit Price % as a result of (C_Orderline.PriceActual - C_Orderline.ZI_PriceActualOriginal) / C_OrderLine.ZI_PriceActualOriginal x 100. 
+	  */
+	public void setZI_PriceActualChange_Percent (BigDecimal ZI_PriceActualChange_Percent)
+	{
+		throw new IllegalArgumentException ("ZI_PriceActualChange_Percent is virtual column");	}
+
+	/** Get Change of Unit Price %.
+		@return Change of Unit Price % as a result of (C_Orderline.PriceActual - C_Orderline.ZI_PriceActualOriginal) / C_OrderLine.ZI_PriceActualOriginal x 100. 
+	  */
+	public BigDecimal getZI_PriceActualChange_Percent () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PriceActualChange_Percent);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Original Unit Price.
+		@param ZI_PriceActualOriginal 
+		Original Actual Price 
+	  */
+	public void setZI_PriceActualOriginal (BigDecimal ZI_PriceActualOriginal)
+	{
+		set_ValueNoCheck (COLUMNNAME_ZI_PriceActualOriginal, ZI_PriceActualOriginal);
+	}
+
+	/** Get Original Unit Price.
+		@return Original Actual Price 
+	  */
+	public BigDecimal getZI_PriceActualOriginal () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PriceActualOriginal);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Cost.
+		@param ZI_PriceCost 
+		Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public void setZI_PriceCost (BigDecimal ZI_PriceCost)
+	{
+		set_Value (COLUMNNAME_ZI_PriceCost, ZI_PriceCost);
+	}
+
+	/** Get Cost.
+		@return Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public BigDecimal getZI_PriceCost () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PriceCost);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

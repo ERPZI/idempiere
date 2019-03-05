@@ -84,7 +84,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
+	//MPo, 18/7/2016
+	//-protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
+	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID, int User1_ID)
 	{
 		String isSOTrxParam = isSOTrx ? "Y":"N";
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -96,6 +98,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
 			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO')"
+			//MPo, 18/7/2016
+			+ " AND s.User1_ID=?"
+			//
 			+ " AND s.M_InOut_ID IN "
 				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
 			if(!isSOTrx)
@@ -119,8 +124,12 @@ public abstract class CreateFromInvoice extends CreateFrom
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
-			pstmt.setInt(3, C_BPartner_ID);
-			pstmt.setString(4, isSOTrxParam);
+			//MPo, 18/7/2016
+			//-pstmt.setInt(3, C_BPartner_ID);
+			//-pstmt.setString(4, isSOTrxParam);
+			pstmt.setInt(3, User1_ID);
+			pstmt.setInt(4, C_BPartner_ID);
+			pstmt.setString(5, isSOTrxParam);
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -145,12 +154,17 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 */
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	//MPo, 9/8/2016
+	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) 
+	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) { 
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
 				+ "WHERE ISSOTRX='N' AND r.DocStatus in ('CO', 'CL') "
 				+ "AND r.C_BPartner_ID=? "
+				//MPo, 9/8/2016 Add PrCtr to SQL restriction
+				+ "AND r.User1_ID=? "
+				//
 				+ "AND NOT EXISTS (SELECT * FROM C_Invoice inv "
 				+ "WHERE inv.M_RMA_ID=r.M_RMA_ID AND inv.DocStatus IN ('CO', 'CL'))";
 
@@ -159,6 +173,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 		try {
 			pstmt = DB.prepareStatement(sqlStmt, null);
 			pstmt.setInt(1, C_BPartner_ID);
+			//MPo, 9/8/2016 Add PrCtr to selection
+			pstmt.setInt(2, User1_ID);
+			//
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
@@ -236,7 +253,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(7);
-				line.add(Boolean.FALSE);           //  0-Selection
+				line.add(Boolean.valueOf(false));           //  0-Selection
 				BigDecimal qtyMovement = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyMovement.multiply(multiplier);
@@ -327,7 +344,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	        while (rs.next())
             {
 	            Vector<Object> line = new Vector<Object>(7);
-	            line.add(Boolean.FALSE);   // 0-Selection
+	            line.add(Boolean.valueOf(false));   // 0-Selection
 	            line.add(rs.getBigDecimal(3));  // 1-Qty
 	            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 	            line.add(pp); // 2-UOM

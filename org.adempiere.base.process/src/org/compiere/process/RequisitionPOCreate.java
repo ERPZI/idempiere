@@ -274,6 +274,16 @@ public class RequisitionPOCreate extends SvrProcess
 	private int 		m_M_Requisition_ID = 0;
 	private int 		m_M_Product_ID = 0;
 	private int			m_M_AttributeSetInstance_ID = 0;
+	// MPo, 9/6/2016 Used to check if reference fields change in Requisition lines
+	private int         m_User1_ID = 0;
+	private int         m_User2_ID = 0;
+	private int 		m_C_Project_ID = 0;
+	private int			m_C_Activity_ID = 0;
+	// MPo
+	// MPo, 12/8/18 Used to check if description or unit price change in requisition lines
+	private String 		m_Description = null;
+	private java.math.BigDecimal     m_PriceActual = java.math.BigDecimal.ZERO;
+	// MPo, 
 	/** BPartner				*/
 	private MBPartner	m_bpartner = null;
 	
@@ -302,6 +312,15 @@ public class RequisitionPOCreate extends SvrProcess
 			|| rLine.getC_Charge_ID() != 0		//	single line per charge
 			|| m_order == null
 			|| m_order.getDatePromised().compareTo(rLine.getDateRequired()) != 0
+			// MPo, 9/6/2016 Create a new PO line if any reference field is different
+			|| rLine.getUser1_ID() != m_User1_ID
+			|| rLine.getUser2_ID() != m_User2_ID
+			|| rLine.getC_Project_ID() != m_C_Project_ID
+			|| rLine.getC_Activity_ID() != m_C_Activity_ID
+			// MPo, 12/8/18 Create a new PO line if description or unit price is different
+			|| !(rLine.getDescription()==null?"":rLine.getDescription()).equals(m_Description==null?"":m_Description)
+			|| rLine.getPriceActual().compareTo(m_PriceActual)!=0
+			// MPo 
 			)
 		{
 			newLine(rLine);
@@ -312,6 +331,11 @@ public class RequisitionPOCreate extends SvrProcess
 
 		//	Update Order Line
 		m_orderLine.setQty(m_orderLine.getQtyOrdered().add(rLine.getQty()));
+		//MPo, remove original unit price, original unit price only to be populated when creating PO manually
+		//MPo, 14/9/2016 Populate Original Unit Price with Unit Price
+		//m_orderLine.setZI_PriceActualOriginal(m_orderLine.getZI_PriceActualOriginal().add(rLine.getPriceActual()));
+		//
+		//
 		//	Update Requisition Line
 		rLine.setC_OrderLine_ID(m_orderLine.getC_OrderLine_ID());
 		rLine.saveEx();
@@ -359,6 +383,10 @@ public class RequisitionPOCreate extends SvrProcess
 						.append(": ").append(rLine.getParent().getDocumentNo());
 				m_order.setDescription(msgsd.toString());
 			}
+			// MPo, 9/6/2016 Transfer Reference fields (User1_ID, C_Project_ID) from Requisition to PO
+			m_order.setUser1_ID(rLine.getParent().getUser1_ID());
+			m_order.setC_Project_ID(rLine.getParent().getC_Project_ID());
+			// MPo
 			
 			//	Prepare Save
 			m_order.saveEx();
@@ -463,18 +491,46 @@ public class RequisitionPOCreate extends SvrProcess
 		{
 			m_orderLine.setProduct(product);
 			m_orderLine.setM_AttributeSetInstance_ID(rLine.getM_AttributeSetInstance_ID());
+			//MPo, 11/8/18 for products, transfer description from PR to PO. Purchaser can change description in PO as needed
+			m_orderLine.setDescription(rLine.getDescription());
+			//MPo, 11/8/18 for products, transfer unit price and price entered
+			m_orderLine.setPriceActual(rLine.getPriceActual());
+			m_orderLine.setPriceEntered(rLine.getPriceActual());	
+			
 		}
 		else
 		{
 			m_orderLine.setC_Charge_ID(rLine.getC_Charge_ID());
 			m_orderLine.setPriceActual(rLine.getPriceActual());
+			//MPo, 3/7/18 for charges, unitPrice=Price. Price is required as PO form prints Price as Unit Price
+			//MPo, 3/7/18 for charges, transfer description from PR to PO. Purchaser can change description in PO as needed
+			m_orderLine.setPriceEntered(rLine.getPriceActual());
+			m_orderLine.setDescription(rLine.getDescription());
+			//
 		}
-		m_orderLine.setAD_Org_ID(rLine.getAD_Org_ID());
-				
 		
+		
+		m_orderLine.setAD_Org_ID(rLine.getAD_Org_ID());
+		
+		//MPo, 9/6/2016 Populate PO line with Reference fields from Requisition line
+		m_orderLine.setUser1_ID(rLine.getUser1_ID());
+		m_orderLine.setUser2_ID(rLine.getUser2_ID());
+		m_orderLine.setC_Project_ID(rLine.getC_Project_ID());
+		m_orderLine.setC_Activity_ID(rLine.getC_Activity_ID());
+		//
+								
 		//	Prepare Save
 		m_M_Product_ID = rLine.getM_Product_ID();
 		m_M_AttributeSetInstance_ID = rLine.getM_AttributeSetInstance_ID();
+		// MPo, 9/6/2016 Copy reference fields from Requisition line to PO line
+		m_User1_ID = rLine.getUser1_ID();
+		m_User2_ID = rLine.getUser2_ID();
+		m_C_Project_ID = rLine.getC_Project_ID();
+		m_C_Activity_ID = rLine.getC_Activity_ID();
+		// MPo, 12/8/18 Add description, unit price
+		m_Description = rLine.getDescription();
+		m_PriceActual = rLine.getPriceActual();
+		// MPo, 
 		m_orderLine.saveEx();
 	}	//	newLine
 

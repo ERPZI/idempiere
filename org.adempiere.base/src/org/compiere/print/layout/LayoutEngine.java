@@ -99,6 +99,9 @@ import org.compiere.util.ValueNamePair;
  * 				<li>http://sourceforge.net/tracker/index.php?func=detail&aid=2011567&group_id=176962&atid=879335
  * @author Michael Judd (Akuna Ltd)
  * 				<li>BF [ 2695078 ] Country is not translated on invoice
+ * 
+ * @author Kulvaree (ZI)
+ * 				<li>restart page numbering when the print format item has "Next Page" marked in the same print format.
  */
 public class LayoutEngine implements Pageable, Printable, Doc
 {
@@ -175,6 +178,24 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private ArrayList<Page>		m_pages = new ArrayList<Page>();
 	/**	Header&Footer for all pages	*/
 	private HeaderFooter		m_headerFooter;
+	
+	/**Krc-02/11/17, restart page numbering when the print format item has "Next Page" marked in the same print format.*/
+	/** The Number of Times where a print format item has Next Page checked*/
+	private int 				m_nextPage = 0;
+	/** Number of total document pages per a set*/
+	private int 				m_docSet = 1;
+	/** Page Info as x of Y*/
+	private int					ZI_pageNo = 1, ZI_totalPages =1;
+	private static String		ZI_pageInfo ="";
+	/**Krc-16/11/17 List contains all elements marked as a secondary header*/
+	private ArrayList<PrintElement> 	elementList = new ArrayList<PrintElement>();
+	/**Count for starting a new page from a table and a content*/
+	private int					countTable = 0;
+	private int					countContent = 0;
+	/**When start a new page due to the content in a table, check if all the elements of secondary header are already set up*/
+	private boolean				isShSet = false;
+	/**NPJ-28/11/17 Count number of each element set for the secondary header*/
+	private int					countElementSet = 1;
 
 
 	/**	Header Coordinates			*/
@@ -442,7 +463,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		m_pageNo = 0;
 		m_pages.clear();
 		m_tableElement = null;
-		newPage(true, false);	//	initialize
+		newPage(true, false);	
+		setM_nextPage(0);
+		setM_docSet(1);	//	initialize
 		//
 		if (m_format.isForm())
 			layoutForm();
@@ -471,8 +494,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				element.setLocation(m_content.getLocation());
 				for (int p = 1; p <= element.getPageCount(); p++)
 				{
-					if (p != 1)
+					if (p != 1){
 						newPage(true, false);
+					}
 					m_currPage.addElement (element);
 				}
 			}
@@ -508,14 +532,24 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		
 		//	Update Page Info
 		int pages = m_pages.size();
+		//define the number of total document set = total number of the next page +1
+		if(m_nextPage<1){
+			m_docSet = 1;
+		}
+		else{
+			m_docSet = pages/(m_nextPage+1);
+		}
 		for (int i = 0; i < pages; i++)
 		{
 			Page page = m_pages.get(i);
 			int pageNo = page.getPageNo();
-			pageInfo = String.valueOf(pageNo) + getPageInfo(pageNo);
+			//pageInfo = String.valueOf(pageNo) + getPageInfo(pageNo);
+			/**Krc-07/11/17 use getGetZI_pageInfo page numbering algorithm instead of the main one*/
+			pageInfo = getZI_pageInfo(pageNo);
 			page.setPageInfo(pageInfo);
 			page.setPageCount(pages);
 			page.setBackgroundImage(image);
+			//log.severe("Krc-page info.: "+pageInfo);
 		}
 
 		m_hasLayout = true;
@@ -631,6 +665,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		{
 			m_position[m_area].setLocation(xPos, m_position[m_area].y + m_maxHeightSinceNewLine[m_area]);
 			if (log.isLoggable(Level.FINEST)) log.finest("Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y);
+			isShSet = false;
 		}
 		else if (m_area == AREA_CONTENT)
 		{
@@ -642,7 +677,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		else	//	footer/header
 		{
 			m_position[m_area].setLocation(part.x, m_position[m_area].y + m_maxHeightSinceNewLine[m_area]);
-			log.log(Level.SEVERE, "Outside of Area(" + m_area + "): " + m_position[m_area]);
+			//log.log(Level.SEVERE, "Outside of Area(" + m_area + "): " + m_position[m_area]);
+			isShSet = false;
 		}
 		m_maxHeightSinceNewLine[m_area] = 0f;
 	}	//	newLine
@@ -718,7 +754,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		int pi = m_tableElement.getPageIndex(pageNo);
 		StringBuilder sb = new StringBuilder("(");
 		sb.append(m_tableElement.getPageYIndex(pi)+1).append(",")
-			.append(m_tableElement.getPageXIndex(pi)+1).append(")");
+			.append(m_tableElement.getPageXIndex(pi)+1).append(")");		
 		return sb.toString();
 	}	//	getPageInfo
 
@@ -736,6 +772,46 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		return sb.toString();
 	}	//	getPageInfoMax
 
+	/**
+	 * @author Krc-03/11/17 
+	 * @return PageNo of Total Page as "x of y"
+	 * Tax Invoice document set contains 3 documents per set
+	 * Receipt document set contains 2 documents per set
+	 * Other documents contain only 1 document per set
+	 */
+	public String getZI_pageInfo(int PageNo){
+		if(getM_nextPage()==0){//1 document per set
+			ZI_pageNo = PageNo;
+			ZI_totalPages = m_pages.size();
+		}
+		else if(getM_nextPage()>0){//multiple documents per set
+			if(getM_docSet()==1){//only 1 set of document, so all the pages show "1 of 1"
+				ZI_pageNo = 1; ZI_totalPages = 1;
+			}
+			else{
+				ZI_totalPages = getM_docSet();
+				if(PageNo%getM_docSet()==0) ZI_pageNo = getM_docSet();
+				else ZI_pageNo = PageNo%getM_docSet();
+			}
+					}
+		//log.severe("Krc-x of y: "+x+" of "+y);
+		setZI_pageInfo("Page "+ZI_pageNo+" of "+ZI_totalPages);
+		return "Page "+ZI_pageNo+" of "+ZI_totalPages; 
+	}
+	/** @author Krc-17/11/17*/
+	public void setZI_pageInfo(String zi_pageInfo) {	LayoutEngine.ZI_pageInfo = zi_pageInfo;	}
+	public int getZI_pageNo(){ return ZI_pageNo;}
+	public void setZI_pageNo(int x){ this.ZI_pageNo = x;}
+	public int getZI_totalPage(){ return ZI_totalPages;}
+	public void setZI_totalPages(int y){ this.ZI_totalPages = y;}
+	
+	/**
+	 * @author Krc-16/11/17 
+	 * @return an array list collecting location of a print format item marked as a secondary header 
+	 */
+	public ArrayList<PrintElement> getElementList(){
+		return this.elementList;
+	}
 	/**
 	 * 	Get Format Model
 	 *	@return model
@@ -857,12 +933,26 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			if (log.isLoggable(Level.FINEST)) log.finest("Not enough Y space "
 				+ m_lastHeight[m_area] + " - remaining " + getYspace() + " - Area=" + m_area);
 			newPage(true, true);
+			//log.severe("OUTSIDE*************krc test if this is called? with "+isShSet);
+			/** @author Krc-28/11/17 
+			 *  When starting a new page from the content outside a table (Y Position)
+			 *  add print elements on this current page from the elementList
+			 */
+			for(int j=0;j<getElementList().size();j++){//secondaryList
+				if(j>=countContent){
+					m_currPage.addElement(getElementList().get(countContent));
+					//log.severe("element added with "+j+" AND count="+countContent+" ELEMENT LIST = "+elementList.size()+" on "+m_pageNo+" ***countcontent*** "+countContent);
+				
+					countContent++;
+				}
+			}
+			isShSet = true; //Secondary Header is already set up
 			if (log.isLoggable(Level.FINEST)) log.finest("Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y);
 		}
 		else
 		{
 			m_position[m_area].y += yOffset;
-			log.log(Level.SEVERE, "Outside of Area: " + m_position);
+			//log.log(Level.SEVERE, "Outside of Area: " + m_position);
 		}
 	}	//	addY
 
@@ -1010,14 +1100,23 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			return;
 		//	for every row
 		int rowCount = m_data.getRowCount();
+		//initial
+		countTable = 0;
+		countContent = 0;
+		elementList.clear();
+		isShSet = false;
+		setZI_pageNo(1);
+		setZI_totalPages(1);
+		countElementSet = 1;
+		
 		for (int row = 0; row < rowCount; row++)
 		{
 			if (log.isLoggable(Level.INFO)) log.info("Row=" + row);
 			m_data.setRowIndex(row);
 			if (row > 0)
 				newPage(true, false); // break page per record when the report is a form
-
-			boolean somethingPrinted = true;	//	prevent NL of nothing printed and supress null
+			
+			boolean somethingPrinted = true;	//	prevent NL of nothing printed and suppress null
 			//	for every item
 			for (int i = 0; i < m_format.getItemCount(); i++)
 			{
@@ -1035,8 +1134,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					setArea(AREA_HEADER);
 				else if (item.isFooter())
 					setArea(AREA_FOOTER);
-				else
+				else{
 					setArea(AREA_CONTENT);
+				}
 				//
 				if (item.isSetNLPosition() && item.isRelativePosition())
 					m_tempNLPositon = 0;
@@ -1053,6 +1153,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				if (item.isNextPage())			//	item.isPageBreak()			//	new page
 				{
 					newPage(false, false);
+					//Krc-02/11/17, count the number of next page
+					m_nextPage++;
+					
 				}
 				//	Relative Position space
 				if (item.isRelativePosition())
@@ -1096,7 +1199,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				PrintElement element = null;
 				if (item.isTypePrintFormat())		//** included PrintFormat
 				{
-					element = includeFormat (item, m_data);
+					element = includeFormat (item, m_data);//normal print format item
 				}
 				else if (item.isBarcode())
 				{
@@ -1190,17 +1293,41 @@ public class LayoutEngine implements Pageable, Printable, Doc
 						if (log.isLoggable(Level.FINEST)) log.finest("Not enough Y space "
 								+ m_lastHeight[m_area] + " - remaining " + getYspace() + " - Area=" + m_area);
 						newPage (true, true);
+						m_docSet++;
+						//log.severe("Print sth new page AND count="+countContent+" ELEMENT LIST = "+elementList.size()+" on "+m_pageNo);
+						/** @author Krc-27/11/17 
+						 *  When starting a new page from the content outside a table
+						 *  add print elements on this current page from the elementList
+						 */
+						for(int j=0;j<getElementList().size();j++){//secondaryList
+							if(j>=countContent){
+								m_currPage.addElement(getElementList().get(countContent));
+								//System.out.println("element added with "+j+" AND count="+countContent+" ELEMENT LIST = "+elementList.size()+" on "+m_pageNo);
+								countContent++;
+							}
+						}
+						isShSet = true; //Secondary Header is already set up
+						//System.out.println("AFTER---test new page with shSet="+isShSet);
 					}
 				}
 				//	We know Position and Size
 			//	log.fine( "LayoutEngine.layoutForm",
 			//		"Page=" + m_pageNo + " [" + m_area + "] " + m_position[m_area].x + "/" + m_position[m_area].y
 			//		+ " w=" + lastWidth[m_area] + ",h=" + lastHeight[m_area] + " " + item);
-				if (element != null)
+				if (element != null){
 					element.setLocation(m_position[m_area]);
+					/**Krc-17/11/17 collect all elements marked as secondary header*/
+					if(item.isSecondaryHeader() || item.isNextPage()){
+						elementList.add(element);
+						/**Krc-28/11/17 Count the number of elements per one set only for the first time*/
+						if(item.isNextPage() && countElementSet==1) countElementSet = elementList.size();
+						//log.severe("element size = "+elementList.size()+", added :"+element);
+					}
+				}
 				//	Add to Area
-				if (m_area == AREA_CONTENT)
+				if (m_area == AREA_CONTENT){
 					m_currPage.addElement (element);
+				}
 				else
 					m_headerFooter.addElement (element);
 				//
@@ -1212,6 +1339,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 
 			}	//	for every item
 		}	//	for every row
+		//update the page no
+		getZI_pageInfo(getPageNo());
 	}	//	layoutForm
 
 	
@@ -1225,6 +1354,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	{
 		newLine();
 		PrintElement element = null;
+		//initial
+		isShSet = false;
 		//
 		MPrintFormat format = MPrintFormat.get (getCtx(), item.getAD_PrintFormatChild_ID(), false);
 		format.setLanguage(m_format.getLanguage());
@@ -1281,6 +1412,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//
 		element = layoutTable (format, includedData, item.getXSpace());
 		//	handle multi page tables
+		
 		if (element.getPageCount() > 1)
 		{
 			Point2D.Double loc = m_position[m_area];
@@ -1288,7 +1420,41 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			for (int p = 1; p < element.getPageCount(); p++)	//	don't add last one
 			{
 				m_currPage.addElement (element);
+				//log.severe("start a new page because of the content in the table with "+p+" more page with ZI Page "+getZI_pageNo()+"/"+getZI_totalPage());
 				newPage(true, false);
+				if(p==1){//collect only the first round
+					//System.out.println("BEFORE----count table= "+countTable+" countElementSet="+countElementSet);
+					countElementSet = countTable;//temp
+					//System.out.println("AFTER-----count table= "+countTable+" countElementSet="+countElementSet);
+				}
+				/** @author Krc-20/11/17 
+				 *  When starting a new page from the content in a table
+				 *  add print elements on this current page from the elementList
+				 */
+				//log.severe("test ShSet= "+isShSet+" countElementSet="+countElementSet+"; isShSet="+isShSet);
+				if(isShSet==false){
+					for(int j=0;j<getElementList().size();j++){//secondaryList
+						//log.severe("j="+j+"******count"+countTable);
+						if(j>=countTable){
+							//log.severe("j="+j+"******count"+countTable);
+							m_currPage.addElement(getElementList().get(countTable));
+							//log.severe("element added with "+j+" AND count="+countTable+" ELEMENT LIST = "+elementList.size()+" on "+m_pageNo);
+							countTable++;
+						}
+					}
+					if(p==element.getPageCount()-1){//check the last round
+						isShSet = true; //Secondary Header is already set up
+					}
+					if(p==1&&element.getPageCount()>2){//check if more than 1 round with starting a new page from the content in the table more than once
+						//log.severe("count table= "+countTable+" countElementSet="+countElementSet);
+						countTable = countElementSet;
+						//log.severe("count table= "+countTable);
+					}
+				}
+				else{
+					//update the secondary header set up for the new page
+					isShSet = false;
+				}
 			}
 			m_position[m_area] = loc;
 			((TableElement)element).setHeightToLastPage();
@@ -1990,5 +2156,21 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			}
 		}
 		return colSuppressRepeats.toArray(new Boolean[0]);
+	}
+
+	public int getM_nextPage() {
+		return m_nextPage;
+	}
+
+	public void setM_nextPage(int m_nextPage) {
+		this.m_nextPage = m_nextPage;
+	}
+
+	public int getM_docSet() {
+		return m_docSet;
+	}
+
+	public void setM_docSet(int m_docSet) {
+		this.m_docSet = m_docSet;
 	}
 }	//	LayoutEngine
