@@ -10,6 +10,9 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MDepreciationEntry;
 import org.compiere.model.MDepreciationExp;
 import org.compiere.util.Env;
+//MPo, 25/11/18
+import org.compiere.model.MAsset;
+//
 
 
 /**
@@ -81,6 +84,20 @@ public class Doc_DepreciationEntry extends Doc
 			MAccount dr_acct = MAccount.get(getCtx(), depexp.getDR_Account_ID());
 			MAccount cr_acct = MAccount.get(getCtx(), depexp.getCR_Account_ID());
 			FactUtil.createSimpleOperation(fact, line, dr_acct, cr_acct, as.getC_Currency_ID(), expenseAmt, false);
+			//MPo, 25/11/2018 CCtr, PrCtr, FArea for depreciation posting
+			MAsset asset = MAsset.get(getCtx(), depexp.getA_Asset_ID(), null);
+			//System.out.println("Asset: " + asset.getA_Asset_ID());
+			FactLine[] lines = fact.getLines();
+			for (int i = lines.length-1; i > lines.length-3; i--) { // Get the last 2 fact lines
+				lines[i].setUser1_ID(asset.getUser1_ID()); //PrCtr
+				lines[i].setUser2_ID(asset.getUser2_ID()); //CCtr
+				lines[i].setC_Activity_ID(asset.getC_Activity_ID()); //FArea
+				//System.out.println("i: " + i);
+				//System.out.println("FactLine User1_ID: " + lines[i].getUser1_ID());
+				//System.out.println("FactLine User2_ID: " + lines[i].getUser2_ID());
+				//System.out.println("FactLine C_Activity_ID: " + lines[i].getC_Activity_ID());
+			}
+			//MPo
 		}
 		//
 		facts.add(fact);

@@ -53,6 +53,10 @@ public class BankTransfer extends SvrProcess
 	private Timestamp	p_DateAcct = null;  			// Date Account
 	private int         p_AD_Org_ID = 0;
 	private int         m_created = 0;
+	//MPo, 30/7/18 Add PrCtr From/To
+	private int p_From_User1_ID = 0;
+	private int p_To_User1_ID = 0;
+	//
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -87,6 +91,12 @@ public class BankTransfer extends SvrProcess
 				p_DateAcct = (Timestamp)para[i].getParameter();
 			else if (name.equals("AD_Org_ID"))
 				p_AD_Org_ID = para[i].getParameterAsInt();
+			//MPo, 30/7/18 Add PrCtr From/To
+			else if (name.equals("From_User1_ID"))
+				p_From_User1_ID = para[i].getParameterAsInt();
+			else if (name.equals("To_User1_ID"))
+				p_To_User1_ID = para[i].getParameterAsInt();
+			//
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
 		}
@@ -166,6 +176,9 @@ public class BankTransfer extends SvrProcess
 		paymentBankFrom.setOverUnderAmt(Env.ZERO);
 		paymentBankFrom.setC_DocType_ID(false);
 		paymentBankFrom.setC_Charge_ID(p_C_Charge_ID);
+		//MPo, 30/7/18 Add PrCtr From to AP Payment document
+		paymentBankFrom.setUser1_ID(p_From_User1_ID);
+		//
 		paymentBankFrom.saveEx();
 		if(!paymentBankFrom.processIt(MPayment.DOCACTION_Complete)) {
 			log.warning("Payment Process Failed: " + paymentBankFrom + " - " + paymentBankFrom.getProcessMsg());
@@ -194,6 +207,9 @@ public class BankTransfer extends SvrProcess
 		paymentBankTo.setOverUnderAmt(Env.ZERO);
 		paymentBankTo.setC_DocType_ID(true);
 		paymentBankTo.setC_Charge_ID(p_C_Charge_ID);
+		//MPo, 30/7/18 Add PrCtr to AR Receipt document
+		paymentBankTo.setUser1_ID(p_To_User1_ID);
+		//
 		paymentBankTo.saveEx();
 		if (!paymentBankTo.processIt(MPayment.DOCACTION_Complete)) {
 			log.warning("Payment Process Failed: " + paymentBankTo + " - " + paymentBankTo.getProcessMsg());

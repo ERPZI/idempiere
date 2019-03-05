@@ -63,6 +63,12 @@ public class MAging extends X_T_Aging
 			setDue61_Plus (Env.ZERO);
 			setDue8_30 (Env.ZERO);
 			setDue91_Plus (Env.ZERO);
+			//MPo, 18/3/2017
+			setZI_Due91_120 (Env.ZERO);
+			setZI_Due121_180 (Env.ZERO);
+			setZI_Due181_360 (Env.ZERO);
+			setZI_Due361_Plus (Env.ZERO);
+
 			//
 			setPastDueAmt (Env.ZERO);
 			setPastDue1_7 (Env.ZERO);
@@ -72,7 +78,13 @@ public class MAging extends X_T_Aging
 			setPastDue61_90 (Env.ZERO);
 			setPastDue61_Plus (Env.ZERO);
 			setPastDue8_30 (Env.ZERO);
+			
 			setPastDue91_Plus (Env.ZERO);
+			//MPo, 18/3/2017
+			setZI_PastDue91_120 (Env.ZERO);
+			setZI_PastDue121_180 (Env.ZERO);
+			setZI_PastDue181_360 (Env.ZERO);
+			setZI_PastDue361_Plus (Env.ZERO);
 			//
 			setOpenAmt(Env.ZERO);
 			setInvoicedAmt(Env.ZERO);
@@ -237,6 +249,19 @@ public class MAging extends X_T_Aging
 				
 			if (daysDue <= -91)
 				setDue91_Plus (getDue91_Plus().add(amt));
+			
+			//MPo, 18/3/17 Add aging buckets
+			if (daysDue <= -91 && daysDue >= -120)
+				setZI_Due91_120 (getZI_Due91_120().add(amt));
+			if (daysDue <= -121 && daysDue >= -180)
+				setZI_Due121_180 (getZI_Due121_180().add(amt));
+			if (daysDue <= -181 && daysDue >= -360)
+				setZI_Due181_360 (getZI_Due181_360().add(amt));
+			if (daysDue <= -361)
+				setZI_Due361_Plus (getZI_Due361_Plus().add(amt));
+			//
+			
+			
 		}
 		else	//	Due = positive (> 1)
 		{
@@ -261,9 +286,21 @@ public class MAging extends X_T_Aging
 				
 			if (daysDue >= 61)
 				setPastDue61_Plus (getPastDue61_Plus().add(amt));
-				
+							
 			if (daysDue >= 91)
 				setPastDue91_Plus (getPastDue91_Plus().add(amt));
+			
+			//MPo, 18/3/17 Add aging buckets
+			if (daysDue >= 91 && daysDue <= 120)
+				setZI_PastDue91_120 (getZI_PastDue91_120().add(amt));
+			if (daysDue >= 121 && daysDue <= 180)
+				setZI_PastDue121_180 (getZI_PastDue121_180().add(amt));
+			if (daysDue >= 181 && daysDue <= 360)
+				setZI_PastDue181_360 (getZI_PastDue181_360().add(amt));
+			if (daysDue >= 361)
+				setZI_PastDue361_Plus (getZI_PastDue361_Plus().add(amt));
+			//
+						
 		}
 	}	//	add
 

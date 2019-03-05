@@ -51,6 +51,8 @@ import org.compiere.model.MRMA;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
+import org.compiere.model.X_S_TimeExpense;
+import org.compiere.model.X_M_Requisition;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -942,7 +944,18 @@ public class DocumentEngine implements DocAction
 		else if (docStatus.equals(DocumentEngine.STATUS_Drafted)
 			|| docStatus.equals(DocumentEngine.STATUS_Invalid))
 		{
-			options[index++] = DocumentEngine.ACTION_Complete;
+		// ZI,MPo,12/5/2016: Disable Doc.Action COMPLETE for expense reports in status DR
+		// ZI,MPo,9/6/2016 : Disable Doc.Action COMPLETE for PR,PO,SO in status DR
+		// ZI,MPo,19/9/2016: Disable Doc.Action COMPLETE for MR/Shipment, Invoice Customer/Vendor
+			if (AD_Table_ID != X_S_TimeExpense.Table_ID &
+				AD_Table_ID != X_M_Requisition.Table_ID &
+				AD_Table_ID != MOrder.Table_ID &
+				AD_Table_ID != MInOut.Table_ID &
+				AD_Table_ID != MInvoice.Table_ID)
+			{
+				options[index++] = DocumentEngine.ACTION_Complete;
+			}
+		// ZI,MPo,8/4/2016	options[index++] = DocumentEngine.ACTION_Complete;
 		//	options[index++] = DocumentEngine.ACTION_Prepare;
 			options[index++] = DocumentEngine.ACTION_Void;
 		}
@@ -971,7 +984,46 @@ public class DocumentEngine implements DocAction
 			|| docStatus.equals(DocumentEngine.STATUS_Voided)
 			|| docStatus.equals(DocumentEngine.STATUS_Reversed))
 			return 0;
-		*/
+		/***
+		 * TimeExpense
+		 * ZI,MPo,7/4/2016
+		 */
+		if (AD_Table_ID == X_S_TimeExpense.Table_ID)
+		{
+			//			Draft                       ..  DR/IP/IN
+			if (docStatus.equals(DocumentEngine.STATUS_Drafted)
+		//			|| docStatus.equals(DocumentEngine.STATUS_InProgress)
+					|| docStatus.equals(DocumentEngine.STATUS_Invalid))
+				{
+					options[index++] = DocumentEngine.ACTION_Prepare;
+				}
+		 
+			//	Complete                    ..  CO
+			// else if (docStatus.equals(DocumentEngine.STATUS_Completed))
+			// {
+			//	options[index++] = DocumentEngine.ACTION_Void;
+			//}
+		}
+		/***
+		 * Requisition
+		 * ZI,MPo,9/6/2016
+		 */
+		if (AD_Table_ID == X_M_Requisition.Table_ID)
+		{
+			//			Draft                       ..  DR/IP/IN
+			if (docStatus.equals(DocumentEngine.STATUS_Drafted)
+		//			|| docStatus.equals(DocumentEngine.STATUS_InProgress)
+					|| docStatus.equals(DocumentEngine.STATUS_Invalid))
+				{
+					options[index++] = DocumentEngine.ACTION_Prepare;
+				}
+		 
+			//	Complete                    ..  CO
+			// else if (docStatus.equals(DocumentEngine.STATUS_Completed))
+			// {
+			//	options[index++] = DocumentEngine.ACTION_Void;
+			//}
+		}
 
 		/********************
 		 *  Order
@@ -1015,6 +1067,14 @@ public class DocumentEngine implements DocAction
 				}
 				options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
 			}
+			// ZI,MPo,19/9/2016: Add Doc.Action PREPARE to MR/Shipment
+			else if (docStatus.equals(DocumentEngine.STATUS_Drafted)
+			|| docStatus.equals(DocumentEngine.STATUS_Invalid))
+			{
+				options[index++] = DocumentEngine.ACTION_Prepare;
+			}
+			//
+						
 		}
 		/********************
 		 *  Invoice
@@ -1029,6 +1089,13 @@ public class DocumentEngine implements DocAction
 				}
 				options[index++] = DocumentEngine.ACTION_Reverse_Accrual;
 			}
+			// ZI,MPo,19/9/2016: Add Doc.Action PREPARE to Invoice Vendor/Customer
+			else if (docStatus.equals(DocumentEngine.STATUS_Drafted)
+			|| docStatus.equals(DocumentEngine.STATUS_Invalid))
+			{
+				options[index++] = DocumentEngine.ACTION_Prepare;
+			}
+			//
 		}
 		/********************
 		 *  Payment

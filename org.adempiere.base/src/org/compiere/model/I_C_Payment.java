@@ -208,12 +208,12 @@ public interface I_C_Payment
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -698,6 +698,19 @@ public interface I_C_Payment
 	  * Document sequence number of the document
 	  */
 	public String getDocumentNo();
+
+    /** Column name HasAllocations */
+    public static final String COLUMNNAME_HasAllocations = "HasAllocations";
+
+	/** Set HasAllocations.
+	  * Indicates if the payment has allocations
+	  */
+	public void setHasAllocations (boolean HasAllocations);
+
+	/** Get HasAllocations.
+	  * Indicates if the payment has allocations
+	  */
+	public boolean isHasAllocations();
 
     /** Column name IBAN */
     public static final String COLUMNNAME_IBAN = "IBAN";
@@ -1239,12 +1252,12 @@ public interface I_C_Payment
     /** Column name User1_ID */
     public static final String COLUMNNAME_User1_ID = "User1_ID";
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 	  * User defined list element #1
 	  */
 	public void setUser1_ID (int User1_ID);
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 	  * User defined list element #1
 	  */
 	public int getUser1_ID();
@@ -1254,12 +1267,12 @@ public interface I_C_Payment
     /** Column name User2_ID */
     public static final String COLUMNNAME_User2_ID = "User2_ID";
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 	  * User defined list element #2
 	  */
 	public void setUser2_ID (int User2_ID);
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 	  * User defined list element #2
 	  */
 	public int getUser2_ID();
@@ -1291,4 +1304,8 @@ public interface I_C_Payment
 	  * Amount to write-off
 	  */
 	public BigDecimal getWriteOffAmt();
+
+    /** Column name ZI_HedgeContract_ID */
+    public static final String COLUMNNAME_ZI_HedgeContract_ID = "ZI_HedgeContract_ID";
+	
 }

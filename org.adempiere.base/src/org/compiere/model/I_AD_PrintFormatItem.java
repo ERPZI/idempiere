@@ -541,6 +541,19 @@ public interface I_AD_PrintFormatItem
 	  */
 	public boolean isRunningTotal();
 
+    /** Column name IsSecondaryHeader */
+    public static final String COLUMNNAME_IsSecondaryHeader = "IsSecondaryHeader";
+
+	/** Set IsSecondaryHeader.
+	  * The column is printed on the next page as a header for its set
+	  */
+	public void setIsSecondaryHeader (boolean IsSecondaryHeader);
+
+	/** Get IsSecondaryHeader.
+	  * The column is printed on the next page as a header for its set
+	  */
+	public boolean isSecondaryHeader();
+
     /** Column name IsSetNLPosition */
     public static final String COLUMNNAME_IsSetNLPosition = "IsSetNLPosition";
 

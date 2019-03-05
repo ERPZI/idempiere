@@ -147,6 +147,19 @@ public interface I_I_FixedAsset
 	/** Get Asset Type Value	  */
 	public String getA_Asset_Type_Value();
 
+    /** Column name Activity_Value */
+    public static final String COLUMNNAME_Activity_Value = "Activity_Value";
+
+	/** Set Functional Area Key.
+	  * The key for the functional area
+	  */
+	public void setActivity_Value (String Activity_Value);
+
+	/** Get Functional Area Key.
+	  * The key for the functional area
+	  */
+	public String getActivity_Value();
+
     /** Column name A_Current_Period */
     public static final String COLUMNNAME_A_Current_Period = "A_Current_Period";
 
@@ -195,6 +208,15 @@ public interface I_I_FixedAsset
 	/** Get Asset Salvage Value	  */
 	public BigDecimal getA_Salvage_Value();
 
+    /** Column name AssetAmtEntered */
+    public static final String COLUMNNAME_AssetAmtEntered = "AssetAmtEntered";
+
+	/** Set Entered Amount	  */
+	public void setAssetAmtEntered (BigDecimal AssetAmtEntered);
+
+	/** Get Entered Amount	  */
+	public BigDecimal getAssetAmtEntered();
+
     /** Column name AssetDepreciationDate */
     public static final String COLUMNNAME_AssetDepreciationDate = "AssetDepreciationDate";
 
@@ -234,6 +256,15 @@ public interface I_I_FixedAsset
 	  */
 	public Timestamp getAssetServiceDate();
 
+    /** Column name AssetSourceAmt */
+    public static final String COLUMNNAME_AssetSourceAmt = "AssetSourceAmt";
+
+	/** Set Source Amount	  */
+	public void setAssetSourceAmt (BigDecimal AssetSourceAmt);
+
+	/** Get Source Amount	  */
+	public BigDecimal getAssetSourceAmt();
+
     /** Column name BPartner_Value */
     public static final String COLUMNNAME_BPartner_Value = "BPartner_Value";
 
@@ -246,6 +277,21 @@ public interface I_I_FixedAsset
 	  * The Key of the Business Partner
 	  */
 	public String getBPartner_Value();
+
+    /** Column name C_Activity_ID */
+    public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
+
+	/** Set Functional Area.
+	  * Business Activity
+	  */
+	public void setC_Activity_ID (int C_Activity_ID);
+
+	/** Get Functional Area.
+	  * Business Activity
+	  */
+	public int getC_Activity_ID();
+
+	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException;
 
     /** Column name C_BPartnerSR_ID */
     public static final String COLUMNNAME_C_BPartnerSR_ID = "C_BPartnerSR_ID";
@@ -286,6 +332,21 @@ public interface I_I_FixedAsset
 	/** Get City Value	  */
 	public String getC_City_Value();
 
+    /** Column name C_Currency_ID */
+    public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
+
+	/** Set Currency.
+	  * The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID);
+
+	/** Get Currency.
+	  * The Currency for this record
+	  */
+	public int getC_Currency_ID();
+
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -316,6 +377,19 @@ public interface I_I_FixedAsset
 	public int getC_UOM_ID();
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
+
+    /** Column name Currency_Value */
+    public static final String COLUMNNAME_Currency_Value = "Currency_Value";
+
+	/** Set Currency Key.
+	  * The key for the currency
+	  */
+	public void setCurrency_Value (String Currency_Value);
+
+	/** Get Currency Key.
+	  * The key for the currency
+	  */
+	public String getCurrency_Value();
 
     /** Column name DateAcct */
     public static final String COLUMNNAME_DateAcct = "DateAcct";
@@ -478,6 +552,19 @@ public interface I_I_FixedAsset
 	  */
 	public String getName();
 
+    /** Column name Org_Value */
+    public static final String COLUMNNAME_Org_Value = "Org_Value";
+
+	/** Set Organization Key.
+	  * The key for the organization
+	  */
+	public void setOrg_Value (String Org_Value);
+
+	/** Get Organization Key.
+	  * The key for the organization
+	  */
+	public String getOrg_Value();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -591,4 +678,60 @@ public interface I_I_FixedAsset
 
 	/** Get Use Life - Months (fiscal)	  */
 	public int getUseLifeMonths_F();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name User1_Value */
+    public static final String COLUMNNAME_User1_Value = "User1_Value";
+
+	/** Set Profit Center Key.
+	  * The key for the profit center
+	  */
+	public void setUser1_Value (String User1_Value);
+
+	/** Get Profit Center Key.
+	  * The key for the profit center
+	  */
+	public String getUser1_Value();
+
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set Cost Center.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get Cost Center.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name User2_Value */
+    public static final String COLUMNNAME_User2_Value = "User2_Value";
+
+	/** Set Cost Center Key.
+	  * The key for the cost center
+	  */
+	public void setUser2_Value (String User2_Value);
+
+	/** Get Cost Center Key.
+	  * The key for the cost center
+	  */
+	public String getUser2_Value();
 }

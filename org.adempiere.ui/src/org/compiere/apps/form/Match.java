@@ -66,7 +66,9 @@ public class Match
 	private static final int		I_QTY = 6;
 	private static final int		I_MATCHED = 7;
 	//private static final int        I_Org = 8; //JAVIER 
-	
+	//MPo, 22/7/2016 Add PrCtr
+	private static final int		I_PrCtr = 8;
+	//
 
 
 	private StringBuffer    m_sql = null;
@@ -102,7 +104,9 @@ public class Match
 	/**
 	 *  Search Button Pressed - Fill xMatched
 	 */
-	protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
+	//MPo, 21/7/2016 Add PrCtr
+	//protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
+	protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Integer PrCtr, Timestamp from, Timestamp to, boolean matched)
 	{
 		//  ** Create SQL **
 		//int display = matchFrom.getSelectedIndex();
@@ -128,6 +132,14 @@ public class Match
 			//Integer Vendor = (Integer)onlyVendor.getValue();
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(Vendor);
 		}
+		//MPo, 21/7/2016 Add PrCtr
+		if (PrCtr != null)
+		{
+			//Integer Vendor = (Integer)onlyVendor.getValue();
+			m_sql.append(" AND lin.User1_ID=").append(PrCtr);
+		}
+		//
+		
 		//  Date
 		//Timestamp from = (Timestamp)dateFrom.getValue();
 		//Timestamp to = (Timestamp)dateTo.getValue();
@@ -159,6 +171,9 @@ public class Match
 	//	KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_BPartner);
 		KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Line);
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
+		//MPo, 22/7/2016
+		//KeyNamePair PrCtr = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_PrCtr);
+		//
 
 		double totalQty = m_xMatched.doubleValue();
 
@@ -230,7 +245,9 @@ public class Match
 	/**
 	 *  Fill xMatchedTo
 	 */
-	protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
+	//MPo, 22/7/2016
+	//protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
+	protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean samePrCtr, boolean matched)
 	{
 		int row = xMatchedTable.getSelectedRow();
 		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row);
@@ -253,11 +270,18 @@ public class Match
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(row, I_Product);
 		if (log.isLoggable(Level.FINE)) log.fine("BPartner=" + BPartner + " - Product=" + Product);
 		//
+		//MPo, 22/7/2016 Add PrCtr
+		KeyNamePair PrCtr = (KeyNamePair)xMatchedTable.getValueAt(row, I_PrCtr);
+		//System.out.println(PrCtr.getKey());
+		//
 		if (sameBPartner)
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(BPartner.getKey());
 		if (sameProduct)
 			m_sql.append(" AND lin.M_Product_ID=").append(Product.getKey());
-
+		//MPo, 22/7/2016 Add PrCtr
+		if (samePrCtr)
+			m_sql.append(" AND lin.User1_ID=").append(PrCtr.getKey());
+		//
 		//  calculate qty
 		double docQty = ((Double)xMatchedTable.getValueAt(row, I_QTY)).doubleValue();
 		if (sameQty)
@@ -280,6 +304,7 @@ public class Match
 	 *  - If Not Matched - all not fully matched records are listed
 	 *  @param display (Invoice, Shipment, Order) see MATCH_*
 	 *  @param matchToType (Invoice, Shipment, Order) see MATCH_*
+	 *  @param 
 	 */
 	protected void tableInit (int display, int matchToType, boolean matched, KeyNamePair lineMatched)
 	{
@@ -300,12 +325,14 @@ public class Match
 			m_qtyColumn = "lin.QtyInvoiced";
 			m_sql.append("SELECT hdr.C_Invoice_ID,hdr.DocumentNo, hdr.DateInvoiced, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.QtyInvoiced,SUM(NVL(mi.Qty,0)), org.Name, hdr.AD_Org_ID "  //JAVIER
-				+ "FROM C_Invoice hdr"
+				+ " lin.QtyInvoiced,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
+				//+ " ,org.Name, hdr.AD_Org_ID"  //JAVIER
+				+ " FROM C_Invoice hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN C_InvoiceLine lin ON (hdr.C_Invoice_ID=lin.C_Invoice_ID)"
 				+ " INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)"
+				+ " INNER JOIN C_ElementValue ev ON (lin.User1_ID=ev.C_ElementValue_ID)" //MPo, 22/7/2016 Add PrCtr
 				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID=dt.C_DocType_ID AND dt.DocBaseType IN ('API','APC'))"
 				+ " FULL JOIN M_MatchInv mi ON (lin.C_InvoiceLine_ID=mi.C_InvoiceLine_ID) "
 				+ "WHERE hdr.DocStatus IN ('CO','CL')");
@@ -313,10 +340,15 @@ public class Match
 				m_sql.append(" AND mi.M_InOutLine_ID  = ").append(Line_ID);
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID,hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
+				//+ ",org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "lin.QtyInvoiced")
 				+ "<>SUM(NVL(mi.Qty,0))";
+				
+				//MPo, 22/7/2016
+				//System.out.println(m_sql);
+				//System.out.println(m_groupBy);
 		}
 		else if (display == MATCH_ORDER)
 		{
@@ -324,11 +356,13 @@ public class Match
 			m_qtyColumn = "lin.QtyOrdered";
 			m_sql.append("SELECT hdr.C_Order_ID,hdr.DocumentNo, hdr.DateOrdered, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_OrderLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.QtyOrdered,SUM(COALESCE(mo.Qty,0)), org.Name, hdr.AD_Org_ID " //JAVIER
-				+ "FROM C_Order hdr"
+				+ " lin.QtyOrdered,SUM(COALESCE(mo.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				//+ "org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " FROM C_Order hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN C_OrderLine lin ON (hdr.C_Order_ID=lin.C_Order_ID)"
+				+ " INNER JOIN C_ElementValue ev ON (lin.User1_ID=ev.C_ElementValue_ID)" //MPo, 22/7/2016 Add PrCtr
 				+ " INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)"
 				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID=dt.C_DocType_ID AND dt.DocBaseType='POO')"
 				+ " FULL JOIN M_MatchPO mo ON (lin.C_OrderLine_ID=mo.C_OrderLine_ID) "
@@ -350,7 +384,8 @@ public class Match
 			}
 			m_sql.append( " AND hdr.DocStatus IN ('CO','CL')" );
 			m_groupBy = " GROUP BY hdr.C_Order_ID,hdr.DocumentNo,hdr.DateOrdered,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				//+ ",org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "lin.QtyOrdered")
 				+ "<>SUM(COALESCE(mo.Qty,0))";
@@ -361,11 +396,13 @@ public class Match
 			m_qtyColumn = "lin.MovementQty";
 			m_sql.append("SELECT hdr.M_InOut_ID,hdr.DocumentNo, hdr.MovementDate, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.M_InOutLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.MovementQty,SUM(NVL(m.Qty,0)),org.Name, hdr.AD_Org_ID " //JAVIER
-				+ "FROM M_InOut hdr"
+				+ " lin.MovementQty,SUM(NVL(m.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				//+ "org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " FROM M_InOut hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)"
+				+ " INNER JOIN C_ElementValue ev ON (lin.User1_ID=ev.C_ElementValue_ID)" //MPo, 22/7/2016 Add PrCtr
 				+ " INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)"
 				+ " INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID AND (dt.DocBaseType='MMR' OR (dt.DocBaseType='MMS' AND hdr.isSOTrx ='N')))"
 				+ " FULL JOIN ")
@@ -378,7 +415,8 @@ public class Match
 				m_sql.append(" AND m.C_OrderLine_ID  = ").append(Line_ID);
 
 			m_groupBy = " GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				//+ org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "lin.MovementQty")
 				+ "<>SUM(NVL(m.Qty,0))";

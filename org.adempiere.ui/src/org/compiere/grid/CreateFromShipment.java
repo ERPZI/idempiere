@@ -88,12 +88,18 @@ public abstract class CreateFromShipment extends CreateFrom
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 */
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	//MPo, Add PrCtr for RMA selection
+	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) {
+	//	
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
 			+ "WHERE ISSOTRX='Y' AND r.DocStatus in ('CO', 'CL') " 
 			+ "AND r.C_BPartner_ID=? "
+			//MPo, 8/8/2016 Add PrCtr
+			+ "AND r.User1_ID=? "
+			//
 			+ "AND r.M_RMA_ID in (SELECT rl.M_RMA_ID FROM M_RMALine rl "
 			+ "WHERE rl.M_RMA_ID=r.M_RMA_ID AND rl.QtyDelivered < rl.Qty " 
 			+ "AND rl.M_InOutLine_ID IS NOT NULL)";
@@ -103,6 +109,9 @@ public abstract class CreateFromShipment extends CreateFrom
 		try {
 			pstmt = DB.prepareStatement(sqlStmt, null);
 			pstmt.setInt(1, C_BPartner_ID);
+			//MPo, 8/8/2016
+			pstmt.setInt(2, User1_ID);
+			//
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
@@ -122,8 +131,13 @@ public abstract class CreateFromShipment extends CreateFrom
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID)
+	//MPo, 18/7/2016
+	//-protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID)
+	protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID, int User1_ID)
 	{
+		//MPo, 18/7/2016 add PrCtr
+		//System.out.println("This is CreateFromShipment.java");
+		//
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 		
 		StringBuffer display = new StringBuffer("i.DocumentNo||' - '||")
@@ -134,6 +148,9 @@ public abstract class CreateFromShipment extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT i.C_Invoice_ID,").append(display)
 		.append(" FROM C_Invoice i "
 				+ "WHERE i.C_BPartner_ID=? AND i.IsSOTrx='N' AND i.DocStatus IN ('CL','CO')"
+				//MPo, 18/7/2016
+				+ " AND i.User1_ID=?"
+				//
 				+ " AND i.C_Invoice_ID IN "
 				+ "(SELECT il.C_Invoice_ID FROM C_InvoiceLine il"
 				+ " LEFT OUTER JOIN M_MatchInv mi ON (il.C_InvoiceLine_ID=mi.C_InvoiceLine_ID) "
@@ -150,7 +167,10 @@ public abstract class CreateFromShipment extends CreateFrom
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
-			pstmt.setInt(2, C_BPartner_ID);
+			//MPo, 18/72016
+			//-pstmt.setInt(2, C_BPartner_ID);
+			pstmt.setInt(2, User1_ID);
+			pstmt.setInt(3, C_BPartner_ID);
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -233,7 +253,7 @@ public abstract class CreateFromShipment extends CreateFrom
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>();
-				line.add(Boolean.FALSE);           //  0-Selection
+				line.add(Boolean.valueOf(false));           //  0-Selection
 				BigDecimal qtyOrdered = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyOrdered.multiply(multiplier);
@@ -341,7 +361,7 @@ public abstract class CreateFromShipment extends CreateFrom
 	        while (rs.next())
             {
 	            Vector<Object> line = new Vector<Object>(7);
-	            line.add(Boolean.FALSE);   // 0-Selection
+	            line.add(Boolean.valueOf(false));   // 0-Selection
 	            line.add(rs.getBigDecimal(3));  // 1-Qty
 	            KeyNamePair pp = new KeyNamePair(rs.getInt(6), rs.getString(7));
 	            line.add(pp); // 2-UOM
@@ -415,7 +435,7 @@ public abstract class CreateFromShipment extends CreateFrom
 			while (rs.next())
 			{
 				Vector<Object> line = new Vector<Object>(7);
-				line.add(Boolean.FALSE); // 0-Selection
+				line.add(Boolean.valueOf(false)); // 0-Selection
 				BigDecimal qtyInvoiced = rs.getBigDecimal(1);
 				BigDecimal multiplier = rs.getBigDecimal(2);
 				BigDecimal qtyEntered = qtyInvoiced.multiply(multiplier);

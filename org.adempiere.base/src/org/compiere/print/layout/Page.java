@@ -129,7 +129,7 @@ public class Page
 	}	//	addElement
 
 	/*************************************************************************/
-
+	
 	/**
 	 * 	Paint Page on Graphics in Bounds
 	 *
@@ -144,14 +144,16 @@ public class Page
 	//	log.finest( "PrintContext", CONTEXT_PAGE + "=" + m_pageInfo);
 		//
 		StringBuilder sb = new StringBuilder();
-		if (m_pageCount != 1)		//	set to "Page 1 of 2"
+		/*if (m_pageCount != 1)		//	set to "Page 1 of 2"
 			sb.append(Msg.getMsg(m_ctx, "Page")).append(" ")
 				.append(m_pageNo)
 				.append(" ").append(Msg.getMsg(m_ctx, "of")).append(" ")
 				.append(m_pageCount);
 		else
 			sb.append(" ");
-		m_ctx.put(CONTEXT_MULTIPAGE, sb.toString());
+		*/
+		/**Krc-07/11/17 get page info from LayoutEngine*/
+		m_ctx.put(CONTEXT_MULTIPAGE, getPageInfo());
 	//	log.finest( "PrintContext", CONTEXT_MULTIPAGE + "=" + sb.toString());
 		//
 		sb = new StringBuilder();

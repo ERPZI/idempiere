@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.logging.Level;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
@@ -36,6 +37,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+//MPo, 25/7/2016
+//import org.adempiere.webui.component.Checkbox;
+//import org.adempiere.webui.component.Label;
+//import org.adempiere.webui.editor.WSearchEditor;
+//
 import org.compiere.apps.StatusBar;
 import org.compiere.grid.ed.VDate;
 import org.compiere.grid.ed.VLookup;
@@ -43,6 +49,10 @@ import org.compiere.grid.ed.VNumber;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.MiniTable;
+//MPo, 25/7/2016
+//import org.compiere.model.MLookup;
+//import org.compiere.model.MLookupFactory;
+//
 import org.compiere.model.MMatchPO;
 import org.compiere.plaf.CompiereColor;
 import org.compiere.swing.CButton;
@@ -150,8 +160,14 @@ public class VMatch extends Match
 	private CComboBox<Object>matchMode = new CComboBox<Object>(m_matchMode);
 	private VLookup onlyVendor = null; 
 	private VLookup onlyProduct = null;
+	//MPo, 25/7/2016 Add PrCtr
+	private VLookup prCtrSearch = null;
+	//
 	private CLabel onlyVendorLabel = new CLabel();
 	private CLabel onlyProductLabel = new CLabel();
+	//MPo, 25/7/2016 Add PrCtr
+	private CLabel prCtrLabel = new CLabel();
+	//
 	private CLabel dateFromLabel = new CLabel();
 	private CLabel dateToLabel = new CLabel();
 	private VDate dateFrom = new VDate("DateFrom", false, false, true, DisplayType.Date, "DateFrom");
@@ -178,6 +194,9 @@ public class VMatch extends Match
 	private JCheckBox sameProduct = new JCheckBox();
 	private JCheckBox sameBPartner = new JCheckBox();
 	private JCheckBox sameQty = new JCheckBox();
+	//MPo, 22/7/2016 Add PrCtr 
+	private JCheckBox samePrCtr = new JCheckBox();
+	//
 	private FlowLayout xLayout = new FlowLayout(FlowLayout.CENTER, 10, 0);
 
 	/**
@@ -202,6 +221,9 @@ public class VMatch extends Match
 		matchModeLabel.setText(Msg.translate(Env.getCtx(), "MatchMode"));
 		onlyVendorLabel.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 		onlyProductLabel.setText(Msg.translate(Env.getCtx(), "M_Product_ID"));
+		//MPo, 25/7/2016 Add PrCtr
+		prCtrLabel.setText(Msg.translate(Env.getCtx(), "User1_ID"));
+		//
 		dateFromLabel.setText(Msg.translate(Env.getCtx(), "DateFrom"));
 		dateToLabel.setText(Msg.translate(Env.getCtx(), "DateTo"));
 		bSearch.setText(Msg.translate(Env.getCtx(), "Search"));
@@ -221,6 +243,11 @@ public class VMatch extends Match
 		sameBPartner.setText(Msg.translate(Env.getCtx(), "SameBPartner"));
 		sameQty.setSelected(false);
 		sameQty.setText(Msg.translate(Env.getCtx(), "SameQty"));
+		//MPo, 22/7/2016 Add PrCtr
+		samePrCtr.setSelected(true);
+		samePrCtr.setText(Msg.translate(Env.getCtx(), "SamePrCtr"));
+		samePrCtr.setEnabled(false);
+		//
 		xPanel.setLayout(xLayout);
 		panel.add(northPanel,  BorderLayout.NORTH);
 		northPanel.add(matchFromLabel,    new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0
@@ -235,14 +262,24 @@ public class VMatch extends Match
 			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 12, 5, 5), 0, 0));
 		northPanel.add(matchMode,     new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0
 			,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));
+		
 		northPanel.add(onlyVendor,     new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
 			,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 0), 0, 0));
 		northPanel.add(onlyProduct,       new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0
 			,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 0), 0, 0));
+		//MPo, 25/7/2016 Add PrCtr
+		northPanel.add(prCtrSearch,       new GridBagConstraints(5, 2, 1, 1, 0.0, 0.0
+				,GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 5, 0), 0, 0));
+		//
 		northPanel.add(onlyVendorLabel,     new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
 			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 12, 5, 5), 0, 0));
 		northPanel.add(onlyProductLabel,      new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
 			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		//MPo, 25/7/2016
+		northPanel.add(prCtrLabel,      new GridBagConstraints(4, 2, 1, 1, 0.0, 0.0
+				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		//
+		
 		northPanel.add(dateFromLabel,    new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0
 			,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 12, 5, 5), 0, 0));
 		northPanel.add(dateToLabel,      new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0
@@ -288,13 +325,16 @@ public class VMatch extends Match
 		ColumnInfo[] layout = new ColumnInfo[] {
 			new ColumnInfo(" ",                                         ".", IDColumn.class, false, false, ""),
 			new ColumnInfo(Msg.translate(Env.getCtx(), "DocumentNo"),   ".", String.class),             //  1
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Date"),         ".", Timestamp.class),
+			new ColumnInfo(Msg.translate(Env.getCtx(), "Date"),         ".", Timestamp.class),			//  2
 			new ColumnInfo(Msg.translate(Env.getCtx(), "C_BPartner_ID"),".", KeyNamePair.class, "."),   //  3
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),
+			new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),	//  4
 			new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".") //JAVIER
+			new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),				//	6
+			new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),				//  7
+			//MPo, 22/7/2016 Add PrCtr
+			new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),   //  8
+			//
+			new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")    //  9JAVIER
 		};
 
 		xMatchedTable.prepareTable(layout, "", "", false, "");
@@ -313,6 +353,10 @@ public class VMatch extends Match
 		sameBPartner.addActionListener(this);
 		sameProduct.addActionListener(this);
 		sameQty.addActionListener(this);
+		//Mpo, 25/7/2016 Add PrCtr
+		samePrCtr.addActionListener(this);
+		//
+		
 		//  Init
 		matchTo.setModel(new DefaultComboBoxModel<String>(cmd_matchFrom((String)matchFrom.getSelectedItem())));
 		//  Set Title
@@ -348,6 +392,10 @@ public class VMatch extends Match
 		Integer vendor = onlyVendor.getValue()!=null?(Integer)onlyVendor.getValue():null;
 		Timestamp from = dateFrom.getValue()!=null?(Timestamp)dateFrom.getValue():null;
 		Timestamp to = dateTo.getValue()!=null?(Timestamp)dateTo.getValue():null;
+		//MPo, 25/7/2016
+		Integer prctr = prCtrSearch.getValue()!=null?(Integer)prCtrSearch.getValue():null;
+		//
+		
 		if (e.getSource() == matchFrom) {
 			String selection = (String)matchFrom.getSelectedItem();
 			matchTo.setModel(new DefaultComboBoxModel<String>(cmd_matchFrom(selection)));
@@ -363,7 +411,9 @@ public class VMatch extends Match
 		else if (e.getSource() == matchTo)
 			cmd_matchTo();
 		else if (e.getSource() == bSearch) {
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			//MPo, 25/7/2016 Add PrCtr
+			//xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, prctr, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().toString()
@@ -373,7 +423,9 @@ public class VMatch extends Match
 		}
 		else if (e.getSource() == bProcess) {
 			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem(), m_xMatched);
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			//MPo, 25/7/2016 Add PrCtr
+			//xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, prctr, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().toString()
@@ -383,8 +435,11 @@ public class VMatch extends Match
 		}
 		else if (e.getSource() == sameBPartner
 			|| e.getSource() == sameProduct
-			|| e.getSource() == sameQty)
-			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			|| e.getSource() == sameQty
+			//MPo, 22/7/2016 Add PrCtr
+			|| e.getSource() == samePrCtr)
+			//xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (MiniTable) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem(), product, vendor, prctr, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
 		panel.setCursor(Cursor.getDefaultCursor());
 	}   //  actionPerformed
 
@@ -438,7 +493,9 @@ public class VMatch extends Match
 			double docQty = ((Double)xMatchedTable.getValueAt(row, I_QTY)).doubleValue();
 			double matchedQty = ((Double)xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
 			qty = docQty - matchedQty;
-			xMatchedToTable = (MiniTable)cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			//MPo, 25/7/2016 Add PrCtr
+			//xMatchedToTable = (MiniTable)cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedToTable = (MiniTable)cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), samePrCtr.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
 
 		}
 		//  Display To be Matched Qty

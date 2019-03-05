@@ -65,6 +65,9 @@ public class InvoiceGenerate extends SvrProcess
 	private int			p_AD_Org_ID = 0;
 	/** BPartner				*/
 	private int			p_C_BPartner_ID = 0;
+	//MPo, 4/8/2016 Add Document type
+	private int 		p_C_DocType_ID = 0;
+	//
 	/** Order					*/
 	private int			p_C_Order_ID = 0;
 	/** Consolidate				*/
@@ -116,6 +119,10 @@ public class InvoiceGenerate extends SvrProcess
 				p_docAction = (String)para[i].getParameter();
 			else if (name.equals("MinimumAmt"))
 				p_MinimumAmt = para[i].getParameterAsBigDecimal();
+			//MPo, 4/8/2016 Add Document Type
+			else if (name.equals("DocType"))
+				p_C_DocType_ID = para[i].getParameterAsInt();
+			//
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -376,7 +383,12 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			//MPo, 4/8/2016
+			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
+			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
+			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
+			//
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (o)");
 		}
@@ -408,7 +420,12 @@ public class InvoiceGenerate extends SvrProcess
 			} catch (SQLException e) {
 				throw new AdempiereException(e);
 			}
-			m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			//MPo, 4/8/2016
+			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
+			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
+			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
+			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
+			//
 			if (!m_invoice.save())
 				throw new IllegalStateException("Could not create Invoice (s)");
 		}
@@ -483,6 +500,10 @@ public class InvoiceGenerate extends SvrProcess
 			if (order != null) {
 				m_invoice.setPaymentRule(order.getPaymentRule());
 				m_invoice.setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
+				//MPo, 03/08/2016 Add Branch
+				//m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
+				//m_invoice.setZI_Branch_ID(1000000);
+				//
 				m_invoice.saveEx();
 				m_invoice.load(m_invoice.get_TrxName()); // refresh from DB
 				// copy payment schedule from order if invoice doesn't have a current payment schedule

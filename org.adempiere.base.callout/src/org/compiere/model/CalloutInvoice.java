@@ -554,27 +554,27 @@ public class CalloutInvoice extends CalloutEngine
 		}
 		//	Product Qty changed - recalc price
 		else if ((mField.getColumnName().equals("QtyInvoiced") 
-			|| mField.getColumnName().equals("QtyEntered")
-			|| mField.getColumnName().equals("C_UOM_ID")
-			|| mField.getColumnName().equals("M_Product_ID")) 
-			&& !"N".equals(Env.getContext(ctx, WindowNo, "DiscountSchema")))
-		{
-			int C_BPartner_ID = Env.getContextAsInt(ctx, WindowNo, "C_BPartner_ID");
-			if (mField.getColumnName().equals("QtyEntered"))
-				QtyInvoiced = MUOMConversion.convertProductFrom (ctx, M_Product_ID, 
-					C_UOM_To_ID, QtyEntered);
-			if (QtyInvoiced == null)
-				QtyInvoiced = QtyEntered;
-			boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
-			IProductPricing pp = Core.getProductPricing();
-			pp.setInitialValues(M_Product_ID, C_BPartner_ID, QtyInvoiced, IsSOTrx, null);
-			Timestamp date = (Timestamp)mTab.getValue("DateInvoiced");
-			pp.setPriceDate(date);
-			I_C_InvoiceLine invoiceLine = GridTabWrapper.create(mTab, I_C_InvoiceLine.class);
-			pp.setInvoiceLine(invoiceLine, null);
-			pp.setM_PriceList_ID(M_PriceList_ID);
-			int	M_PriceList_Version_ID = Env.getContextAsInt(ctx, WindowNo, "M_PriceList_Version_ID");
-			pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);
+				|| mField.getColumnName().equals("QtyEntered")
+				|| mField.getColumnName().equals("C_UOM_ID")
+				|| mField.getColumnName().equals("M_Product_ID")) 
+				&& !"N".equals(Env.getContext(ctx, WindowNo, "DiscountSchema")))
+			{
+				int C_BPartner_ID = Env.getContextAsInt(ctx, WindowNo, "C_BPartner_ID");
+				if (mField.getColumnName().equals("QtyEntered"))
+					QtyInvoiced = MUOMConversion.convertProductFrom (ctx, M_Product_ID, 
+						C_UOM_To_ID, QtyEntered);
+				if (QtyInvoiced == null)
+					QtyInvoiced = QtyEntered;
+				boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
+				IProductPricing pp = Core.getProductPricing();
+				pp.setInitialValues(M_Product_ID, C_BPartner_ID, QtyInvoiced, IsSOTrx, null);
+				Timestamp date = (Timestamp)mTab.getValue("DateInvoiced");
+				pp.setPriceDate(date);
+				I_C_InvoiceLine invoiceLine = GridTabWrapper.create(mTab, I_C_InvoiceLine.class);
+				pp.setInvoiceLine(invoiceLine, null);
+				pp.setM_PriceList_ID(M_PriceList_ID);
+				int	M_PriceList_Version_ID = Env.getContextAsInt(ctx, WindowNo, "M_PriceList_Version_ID");
+				pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);
 			//
 			PriceEntered = MUOMConversion.convertProductFrom (ctx, M_Product_ID, 
 				C_UOM_To_ID, pp.getPriceStd());
