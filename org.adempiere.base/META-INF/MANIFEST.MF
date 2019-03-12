@@ -21,7 +21,9 @@ Bundle-ClassPath: .,
  lib/httpcore.jar,
  lib/httpclient.jar,
  lib/bsh.jar,
- lib/commons-validator.jar
+ lib/commons-validator.jar,
+ lib/stax2-api.jar,
+ lib/woodstox-core.jar
 Export-Package: bsh,
  bsh.classpath,
  bsh.collection,
@@ -89,7 +91,6 @@ Export-Package: bsh,
  com.amazonaws.transform,
  com.amazonaws.util,
  com.amazonaws.util.json,
- com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -291,6 +292,7 @@ Import-Package: com.sun.mail.smtp;version="1.5",
  org.restlet,
  org.restlet.data,
  org.restlet.representation,
+ com.fasterxml.jackson.annotation,
  org.restlet.util
 Eclipse-BuddyPolicy: registered
 Eclipse-ExtensibleAPI: true
