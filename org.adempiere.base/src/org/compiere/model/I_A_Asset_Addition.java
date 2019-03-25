@@ -41,34 +41,7 @@ public interface I_A_Asset_Addition
 
     /** Load Meta Data */
 
-    /** Column name A_Accumulated_Depr */
-    public static final String COLUMNNAME_A_Accumulated_Depr = "A_Accumulated_Depr";
-
-	/** Set Accumulated Depreciation	  */
-	public void setA_Accumulated_Depr (BigDecimal A_Accumulated_Depr);
-
-	/** Get Accumulated Depreciation	  */
-	public BigDecimal getA_Accumulated_Depr();
-
-    /** Column name A_Accumulated_Depr_Adjust */
-    public static final String COLUMNNAME_A_Accumulated_Depr_Adjust = "A_Accumulated_Depr_Adjust";
-
-	/** Set Adjust Accumulated Depreciation	  */
-	public void setA_Accumulated_Depr_Adjust (boolean A_Accumulated_Depr_Adjust);
-
-	/** Get Adjust Accumulated Depreciation	  */
-	public boolean isA_Accumulated_Depr_Adjust();
-
-    /** Column name A_Accumulated_Depr_F */
-    public static final String COLUMNNAME_A_Accumulated_Depr_F = "A_Accumulated_Depr_F";
-
-	/** Set Accumulated Depreciation (fiscal)	  */
-	public void setA_Accumulated_Depr_F (BigDecimal A_Accumulated_Depr_F);
-
-	/** Get Accumulated Depreciation (fiscal)	  */
-	public BigDecimal getA_Accumulated_Depr_F();
-
-    /** Column name A_Asset_Addition_ID */
+      /** Column name A_Asset_Addition_ID */
     public static final String COLUMNNAME_A_Asset_Addition_ID = "A_Asset_Addition_ID";
 
 	/** Set Asset Addition	  */
@@ -158,14 +131,6 @@ public interface I_A_Asset_Addition
 	/** Get Life periods (min)	  */
 	public int getA_Life_Period_Min();
 
-    /** Column name A_Period_Start */
-    public static final String COLUMNNAME_A_Period_Start = "A_Period_Start";
-
-	/** Set A_Period_Start	  */
-	public void setA_Period_Start (int A_Period_Start);
-
-	/** Get A_Period_Start	  */
-	public int getA_Period_Start();
 
     /** Column name A_QTY_Current */
     public static final String COLUMNNAME_A_QTY_Current = "A_QTY_Current";
@@ -224,6 +189,21 @@ public interface I_A_Asset_Addition
 	  * Book Value of the asset
 	  */
 	public BigDecimal getAssetValueAmt();
+
+    /** Column name C_Activity_ID */
+    public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
+
+	/** Set Functional Area.
+	  * Business Activity
+	  */
+	public void setC_Activity_ID (int C_Activity_ID);
+
+	/** Get Functional Area.
+	  * Business Activity
+	  */
+	public int getC_Activity_ID();
+
+	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException;
 
     /** Column name C_Charge_ID */
     public static final String COLUMNNAME_C_Charge_ID = "C_Charge_ID";
@@ -385,28 +365,7 @@ public interface I_A_Asset_Addition
 	  */
 	public Timestamp getDateDoc();
 
-    /** Column name DeltaUseLifeYears */
-    public static final String COLUMNNAME_DeltaUseLifeYears = "DeltaUseLifeYears";
-
-	/** Set Delta Use Life Years	  */
-	public void setDeltaUseLifeYears (int DeltaUseLifeYears);
-
-	/** Get Delta Use Life Years	  */
-	public int getDeltaUseLifeYears();
-
-    /** Column name DeltaUseLifeYears_F */
-    public static final String COLUMNNAME_DeltaUseLifeYears_F = "DeltaUseLifeYears_F";
-
-	/** Set Delta Use Life Years (fiscal).
-	  * Delta Use Life Years (fiscal)
-	  */
-	public void setDeltaUseLifeYears_F (int DeltaUseLifeYears_F);
-
-	/** Get Delta Use Life Years (fiscal).
-	  * Delta Use Life Years (fiscal)
-	  */
-	public int getDeltaUseLifeYears_F();
-
+ 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -675,4 +634,34 @@ public interface I_A_Asset_Addition
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set Cost Center.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get Cost Center.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
 }

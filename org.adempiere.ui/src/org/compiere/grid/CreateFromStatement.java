@@ -140,7 +140,9 @@ public abstract class CreateFromStatement extends CreateFromBatch
 				MBankStatementLine bsl = new MBankStatementLine (bs);
 				bsl.setStatementLineDate(trxDate);
 				bsl.setPayment(new MPayment(Env.getCtx(), C_Payment_ID, trxName));
-				
+				//MPo, 9/7/2016 Copy Payment PrCtr to BSL PrCtr
+				bsl.setUser1_ID(new MPayment(Env.getCtx(), C_Payment_ID, trxName).getUser1_ID());
+				//MPo  9/7/2016
 				bsl.setTrxAmt(TrxAmt);
 				bsl.setStmtAmt(TrxAmt);
 				bsl.setC_Currency_ID(bs.getBankAccount().getC_Currency_ID()); 

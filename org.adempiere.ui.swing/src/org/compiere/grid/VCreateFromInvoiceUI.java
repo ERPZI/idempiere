@@ -238,7 +238,9 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		if (e.getPropertyName().equals("C_BPartner_ID"))
 		{
 			int C_BPartner_ID = ((Integer)e.getNewValue()).intValue();
-			initBPOrderDetails (C_BPartner_ID, true);
+			//MPo, 18/7/2016
+			//-initBPOrderDetails (C_BPartner_ID, true);
+			initBPOrderDetails (C_BPartner_ID, true, Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID"));
 		}
 		dialog.tableChanged(null);
 	}   //  vetoableChange
@@ -256,10 +258,15 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		bPartnerField = new VLookup ("C_BPartner_ID", true, false, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
+		//MPo, 18/7/2016 PrCtr selection
+		int User1_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID");
+		//
 		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
-		initBPOrderDetails(C_BPartner_ID, forInvoice);
+		//MPo, 18/7/2016 PrCtr selection
+		//-initBPOrderDetails(C_BPartner_ID, forInvoice);
+		initBPOrderDetails(C_BPartner_ID, forInvoice, User1_ID);
 	}   //  initBPartner
 
 	/**
@@ -267,7 +274,9 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	//MPo, 18/7/2016 Add PrCtr to loadOrderData
+	//-protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice, int User1_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID=" + C_BPartner_ID);
 		KeyNamePair pp = new KeyNamePair(0,"");
@@ -275,29 +284,42 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		orderField.removeActionListener(this);
 		orderField.removeAllItems();
 		orderField.addItem(pp);
-		
-		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false);
+		//MPo, 18/7/2016 Add PrCtr to loadOrderData
+		//-ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false);
+		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false, User1_ID);
 		for(KeyNamePair knp : list)
 			orderField.addItem(knp);
 		
 		orderField.setSelectedIndex(0);
 		orderField.addActionListener(this);
 		dialog.pack();
-
-		initBPDetails(C_BPartner_ID);
+		//MPo, 18/7/2016 Add PrCtr
+		//-initBPDetails(C_BPartner_ID);
+		initBPDetails(C_BPartner_ID, User1_ID);
+		//
 	}   //  initBPartnerOIS
 	
-	public void initBPDetails(int C_BPartner_ID) 
+	//MPo, 18/7/2016: include PrCtr
+	//public void initBPDetails(int C_BPartner_ID) 
+	//{
+	//	initBPShipmentDetails(C_BPartner_ID);
+	//	initBPRMADetails(C_BPartner_ID);
+	//}
+	public void initBPDetails(int C_BPartner_ID, int User1_ID) 
 	{
-		initBPShipmentDetails(C_BPartner_ID);
-		initBPRMADetails(C_BPartner_ID);
+		initBPShipmentDetails(C_BPartner_ID, User1_ID);
+		//MPo, 9/8/2016 Add PrCtr for RMA Selection
+		//initBPRMADetails(C_BPartner_ID);
+		initBPRMADetails(C_BPartner_ID, User1_ID);
+		//
 	}
-
 	/**
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	private void initBPShipmentDetails(int C_BPartner_ID)
+	//MPo, 18/7/2016
+	//-private void initBPShipmentDetails(int C_BPartner_ID)
+	private void initBPShipmentDetails(int C_BPartner_ID, int User1_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
 
@@ -307,8 +329,10 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		//	None
 		KeyNamePair pp = new KeyNamePair(0,"");
 		shipmentField.addItem(pp);
-		
-		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
+		//MPo, 18/7/2016
+		//-ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
+		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID, User1_ID);
+		//
 		for(KeyNamePair knp : list)
 			shipmentField.addItem(knp);
 		
@@ -320,15 +344,21 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 	 * Load RMA that are candidates for shipment
 	 * @param C_BPartner_ID BPartner
 	 */
-	private void initBPRMADetails(int C_BPartner_ID)
-	{
+	//MPo, 9/8/2016 Add PrCtr for RMA Selection
+	//private void initBPRMADetails(int C_BPartner_ID)
+	private void initBPRMADetails(int C_BPartner_ID, int User1_ID)
+	//
+		{
 	    rmaField.removeActionListener(this);
 	    rmaField.removeAllItems();
 	    //  None
 	    KeyNamePair pp = new KeyNamePair(0,"");
 	    rmaField.addItem(pp);
 	    
-	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    //MPo, 9/8/2016
+	    //  ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID, User1_ID);
+	    //
 		for(KeyNamePair knp : list)
 			rmaField.addItem(knp);
 		
@@ -388,3 +418,4 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		return dialog;
 	}
 }
+

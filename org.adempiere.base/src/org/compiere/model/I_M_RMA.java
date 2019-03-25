@@ -333,6 +333,21 @@ public interface I_M_RMA
 	/** Get M_RMA_UU	  */
 	public String getM_RMA_UU();
 
+    /** Column name M_Warehouse_ID */
+    public static final String COLUMNNAME_M_Warehouse_ID = "M_Warehouse_ID";
+
+	/** Set Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID);
+
+	/** Get Warehouse.
+	  * Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID();
+
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
+
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
 
@@ -409,4 +424,30 @@ public interface I_M_RMA
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name ZI_Branch_ID */
+    public static final String COLUMNNAME_ZI_Branch_ID = "ZI_Branch_ID";
+
+	/** Set Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID);
+
+	/** Get Branch	  */
+	public int getZI_Branch_ID();
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException;
 }

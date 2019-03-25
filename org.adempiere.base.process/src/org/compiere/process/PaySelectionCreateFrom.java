@@ -58,7 +58,18 @@ public class PaySelectionCreateFrom extends SvrProcess
 	private int			p_C_PaySelection_ID = 0;
 
 	private Timestamp p_DueDate = null;
-
+	
+	//MPo,31/10/2016 Add PrCtr to payment selection
+	//MPo,31/10/2016 Add WHT exclusion parameter (automatic payment currently does not support WHT deduction
+	private int p_User1_ID = 0;
+	private boolean p_IncludeWHT = false;
+	//
+	//MPo,15/11/17 Add Organization for selection
+	private int p_AD_Org_ID = 0;
+	//
+	//MPo, 18/11/17 Add Currency for selection
+	private int p_C_Currency_ID = 0;
+	//
 	/**
 	 *  Prepare - e.g., get Parameters.
 	 */
@@ -86,6 +97,19 @@ public class PaySelectionCreateFrom extends SvrProcess
 				p_C_BP_Group_ID = para[i].getParameterAsInt();
 			else if (name.equals("DueDate"))
 				p_DueDate = (Timestamp) para[i].getParameter();
+			//MPo, Add PrCtr and Include WHT
+			else if (name.equals("ZI_IncludeWHT"))
+				p_IncludeWHT = "Y".equals(para[i].getParameter());
+			else if (name.equals("User1_ID"))
+				p_User1_ID = para[i].getParameterAsInt();
+			//
+			//MPo, 18/11/17 Add Currency
+			else if (name.equals("C_Currency_ID"))
+				p_C_Currency_ID = para[i].getParameterAsInt();
+			else if (name.equals("AD_Org_ID"))
+				p_AD_Org_ID = para[i].getParameterAsInt();
+			//
+			
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -115,6 +139,10 @@ public class PaySelectionCreateFrom extends SvrProcess
 		if ( p_DueDate == null )
 			p_DueDate = psel.getPayDate();
 		
+		//MPo, 15/11/17
+		//p_AD_Org_ID = psel.getAD_Org_ID();
+		//
+		
 	//	psel.getPayDate();
 
 		StringBuilder sql = new StringBuilder("SELECT C_Invoice_ID,") // 1
@@ -127,6 +155,11 @@ public class PaySelectionCreateFrom extends SvrProcess
 			.append(" PaymentRule, IsSOTrx, ") // 4..5
 			.append(" currencyConvert(invoiceWriteOff(i.C_Invoice_ID) ")
 			    .append(",i.C_Currency_ID, ?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) AS WriteOffAmt ")	//	6 ##p6/p7 Currency_To,PayDate
+			//MPo,01/11/2016 Add PrCtr
+			.append(", User1_ID ") // 7
+			//MPo,17/10/18 Add Remit-To BP and Remit-To Location
+			.append(", ZI_Pay_BPartner_ID, ZI_Pay_Location_ID " ) // p8/p9 Remit-To BP, Remit-To Location
+			//
 			.append("FROM C_Invoice_v i WHERE ");
 		if (X_C_Order.PAYMENTRULE_DirectDebit.equals(p_PaymentRule))
 			sql.append("IsSOTrx='Y'");
@@ -192,7 +225,24 @@ public class PaySelectionCreateFrom extends SvrProcess
 				.append(" AND QtyInvoiced=(SELECT SUM(Qty) FROM M_MatchInv m ")
 					.append("WHERE il.C_InvoiceLine_ID=m.C_InvoiceLine_ID))");
 		}
-	
+		// MPo,31/10/2016 PrCtr and IncludeWHT
+		if (p_User1_ID != 0)
+			sql.append(" AND User1_ID=?");
+		if (!p_IncludeWHT)
+			sql.append(" AND i.c_invoice_id NOT IN "
+					+ "(SELECT c_invoice_id FROM LCO_InvoiceWithholding "
+					+ "WHERE c_invoice_id = i.c_invoice_id)");
+		
+		//
+		// MPo, 15/11/17 Only select invoices from payment selection header organization
+		//if (p_AD_Org_ID != 0)
+		//	sql.append(" AND AD_Org_ID=?");
+		//
+		// MPo, 18/11/17 Select invoices by Currency
+		if (p_C_Currency_ID != 0)
+			sql.append(" AND C_Currency_ID=?");
+		if (p_AD_Org_ID != 0)
+			sql.append(" AND AD_Org_ID=?");
 		//
 		int lines = 0;
 		int C_CurrencyTo_ID = psel.getC_Currency_ID();
@@ -223,6 +273,21 @@ public class PaySelectionCreateFrom extends SvrProcess
 				pstmt.setInt (index++, p_C_BPartner_ID);
 			else if (p_C_BP_Group_ID != 0)
 				pstmt.setInt (index++, p_C_BP_Group_ID);
+			//if (p_C_BP_Group_ID != 0)
+			//	pstmt.setInt (index++, p_C_BP_Group_ID);
+			//MPo,31/10/2016 Add PrCtr selection
+			if (p_User1_ID != 0)
+				pstmt.setInt (index++, p_User1_ID);
+			//
+			//MPo,15/11/17 Add Organization
+			//if (p_AD_Org_ID != 0)
+			//	pstmt.setInt(index++, p_AD_Org_ID);
+			//
+			//MPo,18/11/18 Add Currency and Organization
+			if (p_C_Currency_ID != 0)
+				pstmt.setInt(index++, p_C_Currency_ID);
+			if (p_AD_Org_ID != 0)
+				pstmt.setInt(index++, p_AD_Org_ID);
 			//
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
@@ -235,11 +300,25 @@ public class PaySelectionCreateFrom extends SvrProcess
 				BigDecimal WriteOffAmt = rs.getBigDecimal(6);
 				String PaymentRule  = rs.getString(4);
 				boolean isSOTrx = "Y".equals(rs.getString(5));
+				//MPo,01/11/2016 Add PrCtr
+				//int User1_ID = rs.getInt(6);
+				//MPo,10/1/17 Resolve merge conflict with BigDecimal WriteOffAmt = rs.getBigDecimal(6);
+				int User1_ID = rs.getInt(7);
 				//
+				//MPo,17/10/18 Add Remit-To BP and Remit-To Location
+				int ZI_Pay_BPartner_ID = rs.getInt(8);
+				int ZI_Pay_Location_ID = rs.getInt(9);
 				lines++;
 				MPaySelectionLine pselLine = new MPaySelectionLine (psel, lines*10, PaymentRule);
 				pselLine.setInvoice (C_Invoice_ID, isSOTrx,
 					PayAmt, PayAmt.subtract(DiscountAmt).subtract(WriteOffAmt), DiscountAmt, WriteOffAmt);
+					//MPo,01/11/2016 Add PrCtr
+					pselLine.setUser1_ID(User1_ID);
+					//
+					//MPo,17/10/18 Add Remit-To BP and Remit-To Location
+					pselLine.setZI_Pay_BPartner_ID(ZI_Pay_BPartner_ID);
+					pselLine.setZI_Pay_Location_ID(ZI_Pay_Location_ID);
+					//
 				if (!pselLine.save())
 				{
 					throw new IllegalStateException ("Cannot save MPaySelectionLine");

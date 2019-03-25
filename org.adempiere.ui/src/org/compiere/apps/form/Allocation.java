@@ -55,6 +55,9 @@ public class Allocation
 	public int         m_C_Charge_ID = 0;
 	public int         m_C_DocType_ID = 0;
 	public int         	m_C_BPartner_ID = 0;
+	//MPo, 19/7/2016 Add PrCr
+	public int 			m_User1_ID = 0;
+	//
 	private int         m_noInvoices = 0;
 	private int         m_noPayments = 0;
 	public BigDecimal	totalInv = Env.ZERO;
@@ -138,6 +141,10 @@ public class Allocation
 			sql.append(" AND p.C_Currency_ID=?");				//      #6
 		if (m_AD_Org_ID != 0 )
 			sql.append(" AND p.AD_Org_ID=" + m_AD_Org_ID);
+		//MPo, 19/7/2016 Add PrCtr
+		//if (m_User1_ID != 0) MPo, 17/7/2017
+			sql.append(" AND p.User1_ID=" + m_User1_ID);
+		//
 		sql.append(" ORDER BY p.DateTrx,p.DocumentNo");
 		
 		// role security
@@ -270,6 +277,10 @@ public class Allocation
 			sql.append(" AND i.C_Currency_ID=?");                                   //  #8
 		if (m_AD_Org_ID != 0 ) 
 			sql.append(" AND i.AD_Org_ID=" + m_AD_Org_ID);
+		//MPo, 19/7/2016
+		//if (m_User1_ID != 0 ) MPo, 17/7/17 
+			sql.append(" AND i.User1_ID=" + m_User1_ID);
+		//
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (log.isLoggable(Level.FINE)) log.fine("InvSQL=" + sql.toString());
 		

@@ -41,15 +41,22 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
       super (ctx, S_TimeExpenseLine_ID, trxName);
       /** if (S_TimeExpenseLine_ID == 0)
         {
+			setC_TaxCategory_ID (0);
 			setDateExpense (new Timestamp( System.currentTimeMillis() ));
 // @DateExpense@;@DateReport@
+			setDescription (null);
+			setExpenseAmt (Env.ZERO);
 			setIsInvoiced (false);
 			setIsTimeReport (false);
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM S_TimeExpenseLine WHERE S_TimeExpense_ID=@S_TimeExpense_ID@
+			setM_Product_ID (0);
+// @SQL=SELECT M_Product_ID AS DefaultValue FROM ZI_ExpenseCategory WHERE ZI_ExpenseCategory_ID = @ZI_ExpenseCategory_ID@
 			setProcessed (false);
 			setS_TimeExpense_ID (0);
 			setS_TimeExpenseLine_ID (0);
+			setUser1_ID (0);
+// @0|User1_ID@
         } */
     }
 
@@ -86,7 +93,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
 			.getPO(getC_Activity_ID(), get_TrxName());	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID 
 		Business Activity
 	  */
@@ -98,7 +105,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID () 
@@ -353,6 +360,34 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_TaxCategory getC_TaxCategory() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_TaxCategory)MTable.get(getCtx(), org.compiere.model.I_C_TaxCategory.Table_Name)
+			.getPO(getC_TaxCategory_ID(), get_TrxName());	}
+
+	/** Set Tax Category.
+		@param C_TaxCategory_ID 
+		Tax Category
+	  */
+	public void setC_TaxCategory_ID (int C_TaxCategory_ID)
+	{
+		if (C_TaxCategory_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_C_TaxCategory_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_C_TaxCategory_ID, Integer.valueOf(C_TaxCategory_ID));
+	}
+
+	/** Get Tax Category.
+		@return Tax Category
+	  */
+	public int getC_TaxCategory_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_TaxCategory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
     {
 		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
@@ -530,6 +565,25 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
+
+	/** Set Line Amount.
+		@param LineNetAmt 
+		Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	  */
+	public void setLineNetAmt (BigDecimal LineNetAmt)
+	{
+		throw new IllegalArgumentException ("LineNetAmt is virtual column");	}
+
+	/** Get Line Amount.
+		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	  */
+	public BigDecimal getLineNetAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineNetAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
     {
@@ -814,5 +868,133 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Tax ID.
+		@param TaxID 
+		Tax Identification
+	  */
+	public void setTaxID (String TaxID)
+	{
+		set_Value (COLUMNNAME_TaxID, TaxID);
+	}
+
+	/** Get Tax ID.
+		@return Tax Identification
+	  */
+	public String getTaxID () 
+	{
+		return (String)get_Value(COLUMNNAME_TaxID);
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param User1_ID 
+		User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_User1_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser2_ID(), get_TrxName());	}
+
+	/** Set Cost Center.
+		@param User2_ID 
+		User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1) 
+			set_Value (COLUMNNAME_User2_ID, null);
+		else 
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get Cost Center.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Receipt Yes/No.
+		@param ZI_ReceiptAvailable 
+		Receipt Yes/No
+	  */
+	public void setZI_ReceiptAvailable (boolean ZI_ReceiptAvailable)
+	{
+		set_Value (COLUMNNAME_ZI_ReceiptAvailable, Boolean.valueOf(ZI_ReceiptAvailable));
+	}
+
+	/** Get Receipt Yes/No.
+		@return Receipt Yes/No
+	  */
+	public boolean isZI_ReceiptAvailable () 
+	{
+		Object oo = get_Value(COLUMNNAME_ZI_ReceiptAvailable);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Receipt No..
+		@param ZI_ReceiptNo Receipt No.	  */
+	public void setZI_ReceiptNo (String ZI_ReceiptNo)
+	{
+		set_Value (COLUMNNAME_ZI_ReceiptNo, ZI_ReceiptNo);
+	}
+
+	/** Get Receipt No..
+		@return Receipt No.	  */
+	public String getZI_ReceiptNo () 
+	{
+		return (String)get_Value(COLUMNNAME_ZI_ReceiptNo);
+	}
+
+	/** Set Vendor Name.
+		@param ZI_VendorName 
+		Name and Address details of the vendor from whom goods or services were purchased and by whom the receipt was issued. 
+	  */
+	public void setZI_VendorName (String ZI_VendorName)
+	{
+		set_Value (COLUMNNAME_ZI_VendorName, ZI_VendorName);
+	}
+
+	/** Get Vendor Name.
+		@return Name and Address details of the vendor from whom goods or services were purchased and by whom the receipt was issued. 
+	  */
+	public String getZI_VendorName () 
+	{
+		return (String)get_Value(COLUMNNAME_ZI_VendorName);
 	}
 }

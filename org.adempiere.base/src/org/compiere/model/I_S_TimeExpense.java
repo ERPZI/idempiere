@@ -227,6 +227,19 @@ public interface I_S_TimeExpense
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException;
 
+    /** Column name PaymentRule */
+    public static final String COLUMNNAME_PaymentRule = "PaymentRule";
+
+	/** Set Payment Rule.
+	  * How you pay the invoice
+	  */
+	public void setPaymentRule (String PaymentRule);
+
+	/** Get Payment Rule.
+	  * How you pay the invoice
+	  */
+	public String getPaymentRule();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -286,4 +299,48 @@ public interface I_S_TimeExpense
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name ZI_ExpenseCategory_ID */
+    public static final String COLUMNNAME_ZI_ExpenseCategory_ID = "ZI_ExpenseCategory_ID";
+
+	/** Set Expense Category	  */
+	public void setZI_ExpenseCategory_ID (int ZI_ExpenseCategory_ID);
+
+	/** Get Expense Category	  */
+	public int getZI_ExpenseCategory_ID();
+
+	public I_ZI_ExpenseCategory getZI_ExpenseCategory() throws RuntimeException;
+
+    /** Column name ZI_OdometerFrom */
+    public static final String COLUMNNAME_ZI_OdometerFrom = "ZI_OdometerFrom";
+
+	/** Set Odometer From	  */
+	public void setZI_OdometerFrom (int ZI_OdometerFrom);
+
+	/** Get Odometer From	  */
+	public int getZI_OdometerFrom();
+
+    /** Column name ZI_OdometerTo */
+    public static final String COLUMNNAME_ZI_OdometerTo = "ZI_OdometerTo";
+
+	/** Set Odometer To	  */
+	public void setZI_OdometerTo (int ZI_OdometerTo);
+
+	/** Get Odometer To	  */
+	public int getZI_OdometerTo();
 }

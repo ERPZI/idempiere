@@ -93,12 +93,12 @@ public interface I_C_Invoice
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -525,6 +525,15 @@ public interface I_C_Invoice
 	  */
 	public String getGenerateTo();
 
+    /** Column name GenerateWithholding */
+    public static final String COLUMNNAME_GenerateWithholding = "GenerateWithholding";
+
+	/** Set Generate Withholding	  */
+	public void setGenerateWithholding (String GenerateWithholding);
+
+	/** Get Generate Withholding	  */
+	public String getGenerateWithholding();
+
     /** Column name GrandTotal */
     public static final String COLUMNNAME_GrandTotal = "GrandTotal";
 
@@ -891,12 +900,12 @@ public interface I_C_Invoice
     /** Column name User1_ID */
     public static final String COLUMNNAME_User1_ID = "User1_ID";
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 	  * User defined list element #1
 	  */
 	public void setUser1_ID (int User1_ID);
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 	  * User defined list element #1
 	  */
 	public int getUser1_ID();
@@ -906,15 +915,44 @@ public interface I_C_Invoice
     /** Column name User2_ID */
     public static final String COLUMNNAME_User2_ID = "User2_ID";
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 	  * User defined list element #2
 	  */
 	public void setUser2_ID (int User2_ID);
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 	  * User defined list element #2
 	  */
 	public int getUser2_ID();
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name WithholdingAmt */
+    public static final String COLUMNNAME_WithholdingAmt = "WithholdingAmt";
+
+	/** Set Withholding Amount	  */
+	public void setWithholdingAmt (BigDecimal WithholdingAmt);
+
+	/** Get Withholding Amount	  */
+	public BigDecimal getWithholdingAmt();
+
+    /** Column name ZI_Branch_ID */
+    public static final String COLUMNNAME_ZI_Branch_ID = "ZI_Branch_ID";
+
+	/** Set Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID);
+
+	/** Get Branch	  */
+	public int getZI_Branch_ID();
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException;
+
+    /** Column name ZI_HasLines */
+    public static final String COLUMNNAME_ZI_HasLines = "ZI_HasLines";
+
+	/** Set ZI_HasLines	  */
+	public void setZI_HasLines (boolean ZI_HasLines);
+
+	/** Get ZI_HasLines	  */
+	public boolean isZI_HasLines();
 }

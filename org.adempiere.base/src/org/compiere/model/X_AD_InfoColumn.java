@@ -30,6 +30,7 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 	/**
 	 *
 	 */
+
 	private static final long serialVersionUID = 20190106L;
 
     /** Standard Constructor */

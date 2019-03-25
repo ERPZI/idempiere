@@ -321,7 +321,10 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
         else if (e.getTarget().equals(sameWarehouseCb))
         {
         	int bpId = bPartnerField.getValue() == null?0:((Integer)bPartnerField.getValue()).intValue();
-        	initBPOrderDetails(bpId, false);
+        	// MPo, 26/5/18 add original change: 18/7/2016 add PrCtr.
+        	//initBPOrderDetails(bpId, false);
+        	initBPOrderDetails(bpId, false, Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID"));
+        	//
         }	
 		else if (e.getTarget().equals(upcField.getComponent()))
 		{
@@ -393,8 +396,9 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 			if (e.getNewValue() != null){
 				C_BPartner_ID = ((Integer)e.getNewValue()).intValue();
 			}
-			
-			initBPOrderDetails (C_BPartner_ID, false);
+			// MPo, 26/5/18 add original change: 18/7/2016
+			//initBPOrderDetails (C_BPartner_ID, false);
+			initBPOrderDetails (C_BPartner_ID, true, Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID"));
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
@@ -412,17 +416,25 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, false, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
+		//MPo, 28/5/18 add original change: 18/7/2016 PrCtr selection
+		int User1_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID");
+		//
 		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
-		initBPOrderDetails(C_BPartner_ID, forInvoice);
+		// MPo, 26/5/18 add original change: 18/7/2016 PrCtr selection
+		//initBPOrderDetails(C_BPartner_ID, forInvoice);
+		initBPOrderDetails(C_BPartner_ID, forInvoice, User1_ID);
 	}   //  initBPartner
 
 	/**
 	 * Init Details - load invoices not shipped
 	 * @param C_BPartner_ID BPartner
 	 */
-	private void initBPInvoiceDetails(int C_BPartner_ID)
+	// MPo, 26/5/18 add original change: 18/7/2016
+	//private void initBPInvoiceDetails(int C_BPartner_ID)
+	private void initBPInvoiceDetails(int C_BPartner_ID, int User1_ID)
+	//
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
 
@@ -433,7 +445,10 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 		KeyNamePair pp = new KeyNamePair(0,"");
 		invoiceField.addItem(pp);
 		
-		ArrayList<KeyNamePair> list = loadInvoiceData(C_BPartner_ID);
+		// MPo, 26/5/18 add original change: 18/7/2016
+		//ArrayList<KeyNamePair> list = loadInvoiceData(C_BPartner_ID);
+		ArrayList<KeyNamePair> list = loadInvoiceData(C_BPartner_ID, User1_ID);
+		//
 		for(KeyNamePair knp : list)
 			invoiceField.addItem(knp);
 		
@@ -447,7 +462,9 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	// MPo, 26/5/18 add original change: 18/7/2016 Add PrCtr to loadOrderData
+	//protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice, int User1_ID)
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID=" + C_BPartner_ID);
 		KeyNamePair pp = new KeyNamePair(0,"");
@@ -456,20 +473,35 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 		orderField.removeAllItems();
 		orderField.addItem(pp);
 		
-		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseCb.isSelected());
+		// MPo, 26/5/18 add original change: Add PrCtr to loadOrderData
+		//ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseCb.isSelected());
+		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseCb.isSelected(), User1_ID);
+		//
 		for(KeyNamePair knp : list)
 			orderField.addItem(knp);
 		
 		orderField.setSelectedIndex(0);
 		orderField.addActionListener(this);
 
-		initBPDetails(C_BPartner_ID);
+		//MPo, 26/5/18 add original change: 18/7/2016 Add PrCtr
+		//initBPDetails(C_BPartner_ID);
+		initBPDetails(C_BPartner_ID, User1_ID);
+		//
 	}   //  initBPOrderDetails
 	
-	public void initBPDetails(int C_BPartner_ID) 
+	//MPo, 26/5/18 add original change: 18/7/2016 Add PrCtr
+	//public void initBPDetails(int C_BPartner_ID) 
+	//{
+	//	initBPInvoiceDetails(C_BPartner_ID);
+	//	initBPRMADetails(C_BPartner_ID);
+	//}
+	//
+	public void initBPDetails(int C_BPartner_ID, int User1_ID) 
 	{
-		initBPInvoiceDetails(C_BPartner_ID);
-		initBPRMADetails(C_BPartner_ID);
+		initBPInvoiceDetails(C_BPartner_ID, User1_ID);
+		//MPo, 26/5/18 add original change: 8/8/2016 Add PrCtr for RMA selection
+		initBPRMADetails(C_BPartner_ID, User1_ID);
+		//
 	}
 
 	
@@ -477,7 +509,10 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 	 * Load RMA that are candidates for shipment
 	 * @param C_BPartner_ID BPartner
 	 */
-	private void initBPRMADetails(int C_BPartner_ID)
+	//MPo, 26/5/18 add original change: 8/8/2016 Add PrCtr for RMA selection 
+	//private void initBPRMADetails(int C_BPartner_ID)
+	private void initBPRMADetails(int C_BPartner_ID, int User1_ID)
+	//
 	{
 	    rmaField.removeActionListener(this);
 	    rmaField.removeAllItems();
@@ -485,7 +520,10 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 	    KeyNamePair pp = new KeyNamePair(0,"");
 	    rmaField.addItem(pp);
 	    
-	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    //MPo, 26/5/18 add original change: 8/8/2016 Add PrCtr for RMA selection
+	    //ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID, User1_ID);
+	    //
 		for(KeyNamePair knp : list)
 			rmaField.addItem(knp);
 		
