@@ -418,4 +418,3 @@ public class VCreateFromInvoiceUI extends CreateFromInvoice implements ActionLis
 		return dialog;
 	}
 }
-
