@@ -66,12 +66,6 @@ public class MReportTree
 			tree = new MReportTree (ctx, PA_Hierarchy_ID, ElementType);
 			s_trees.put(key, tree);
 		}
-		//MPo, 13/6/17 Additional Logging
-		CLogger static_log = CLogger.get();
-		static_log.log(Level.INFO, "MPo, Inside MReportTree=>get() Key: " + key);
-		static_log.log(Level.INFO, "MPo, Inside MReportTree=>get() Role: " + role.toString());
-		static_log.log(Level.INFO, "MPo, Inside MReportTree=>get() Tree: " + tree.toString());
-		//
 		return tree;	
 	}	//	get
 
@@ -295,16 +289,11 @@ public class MReportTree
 	 */	
 	public Integer[] getChildIDs (int ID)
 	{
-		//MPo, 9/6/17
-		//if (log.isLoggable(Level.FINE)) log.fine("(" + m_ElementType + ") ID=" + ID);
-		if (log.isLoggable(Level.INFO)) log.info("(" + m_ElementType + ") ID=" + ID);
-		//
+		if (log.isLoggable(Level.FINE)) log.fine("(" + m_ElementType + ") ID=" + ID);
 		ArrayList<Integer> list = new ArrayList<Integer>(); 
 		//
 		MTreeNode node = m_tree.getRoot().findNode(ID);
-		//MPo, 9/6/17
-		//if (log.isLoggable(Level.FINEST)) log.finest("Root=" + node);
-		if (log.isLoggable(Level.INFO)) log.info("Root=" + node);
+		if (log.isLoggable(Level.FINEST)) log.finest("Root=" + node);
 		//
 		if (node != null && node.isSummary())
 		{
@@ -315,16 +304,10 @@ public class MReportTree
 				if (!nn.isSummary())
 				{
 					list.add(Integer.valueOf(nn.getNode_ID()));
-					//MPo, 9/6/17
-					//if (log.isLoggable(Level.FINEST)) log.finest("- " + nn);
-					if (log.isLoggable(Level.INFO)) log.info("- " + nn);
-					//
+					if (log.isLoggable(Level.FINEST)) log.finest("- " + nn);
 				}
 				else
-					//MPo, 9/6/17
-					//if (log.isLoggable(Level.FINEST)) log.finest("- skipped parent (" + nn + ")");
-					if (log.isLoggable(Level.INFO)) log.info("- skipped parent (" + nn + ")");
-					//
+					if (log.isLoggable(Level.FINEST)) log.finest("- skipped parent (" + nn + ")");
 			}
 		}
 		else	//	not found or not summary 
