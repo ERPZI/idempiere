@@ -491,12 +491,8 @@ public class WCreateFromShipmentUI extends CreateFromShipment implements EventLi
 	
 	//MPo, 26/5/18 add original change: 18/7/2016 Add PrCtr
 	//public void initBPDetails(int C_BPartner_ID) 
-	//{
-	//	initBPInvoiceDetails(C_BPartner_ID);
-	//	initBPRMADetails(C_BPartner_ID);
-	//}
-	//
-	public void initBPDetails(int C_BPartner_ID, int User1_ID) 
+	public void initBPDetails(int C_BPartner_ID, int User1_ID)
+	// 
 	{
 		initBPInvoiceDetails(C_BPartner_ID, User1_ID);
 		//MPo, 26/5/18 add original change: 8/8/2016 Add PrCtr for RMA selection
