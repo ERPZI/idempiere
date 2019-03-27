@@ -453,7 +453,6 @@ public class WAllocation extends Allocation
 		MLookup lookupCur = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 		currencyPick = new WTableDirEditor("C_Currency_ID", true, false, true, lookupCur);
 		currencyPick.setValue(Integer.valueOf(m_C_Currency_ID));
-		//currencyPick.setValue(new Integer(m_C_Currency_ID)); // this line is an original.
 		currencyPick.addValueChangeListener(this);
 
 		// Organization filter selection
@@ -496,7 +495,6 @@ public class WAllocation extends Allocation
 		MLookup lookupCharge = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 		chargePick = new WTableDirEditor("C_Charge_ID", false, false, true, lookupCharge);
 		chargePick.setValue(Integer.valueOf(m_C_Charge_ID));
-		//chargePick.setValue(new Integer(m_C_Charge_ID)); // this line is an original.
 		chargePick.addValueChangeListener(this);
 		
 	//  Charge
@@ -504,7 +502,6 @@ public class WAllocation extends Allocation
 			MLookup lookupDocType = MLookupFactory.get (Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.TableDir);
 			DocTypePick = new WTableDirEditor("C_DocType_ID", false, false, true, lookupDocType);
 			DocTypePick.setValue(Integer.valueOf(m_C_DocType_ID));
-			//DocTypePick.setValue(new Integer(m_C_DocType_ID)); // this line is an original.
 			DocTypePick.addValueChangeListener(this);
 			
 	}   //  dynInit
