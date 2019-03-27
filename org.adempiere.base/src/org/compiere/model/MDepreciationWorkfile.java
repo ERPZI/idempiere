@@ -809,7 +809,4 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			return false;
 		return is_ValueChanged(index);
 	}
-	
-	
-
 }	//	MDepreciationWorkfile
