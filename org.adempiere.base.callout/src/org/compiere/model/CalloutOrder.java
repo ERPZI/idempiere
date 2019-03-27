@@ -187,7 +187,7 @@ public class CalloutOrder extends CalloutEngine
 					if (s != null && s.length() != 0)
 						mTab.setValue("PaymentRule", s);
 					//	Payment Term
-					Integer ii = Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+					Integer ii =Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
 					if (!rs.wasNull())
 						mTab.setValue("C_PaymentTerm_ID", ii);
 					//	InvoiceRule
@@ -798,7 +798,7 @@ public class CalloutOrder extends CalloutEngine
 		//	Integer wh = (Integer)mTab.getValue("M_Warehouse_ID");
 		//	if (wh.intValue() != M_Warehouse_ID)
 		//	{
-		//		mTab.setValue("M_Warehouse_ID", new Integer(M_Warehouse_ID));
+		//		mTab.setValue("M_Warehouse_ID", Integer.valueOf(M_Warehouse_ID));
 		//		ADialog.warn(,WindowNo, "WarehouseChanged");
 		//	}
 
@@ -1049,27 +1049,27 @@ public class CalloutOrder extends CalloutEngine
 		}
 		//	Product Qty changed - recalc price
 		else if ((mField.getColumnName().equals("QtyOrdered")
-				|| mField.getColumnName().equals("QtyEntered")
-				|| mField.getColumnName().equals("C_UOM_ID")
-				|| mField.getColumnName().equals("M_Product_ID"))
-				&& !"N".equals(Env.getContext(ctx, WindowNo, "DiscountSchema")))
-			{
-				int C_BPartner_ID = Env.getContextAsInt(ctx, WindowNo, "C_BPartner_ID");
-				if (mField.getColumnName().equals("QtyEntered"))
-					QtyOrdered = MUOMConversion.convertProductFrom (ctx, M_Product_ID,
-						C_UOM_To_ID, QtyEntered);
-				if (QtyOrdered == null)
-					QtyOrdered = QtyEntered;
-				boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
-				IProductPricing pp = Core.getProductPricing();
-				pp.setInitialValues(M_Product_ID, C_BPartner_ID, QtyOrdered, IsSOTrx, null);
-				Timestamp date = (Timestamp)mTab.getValue("DateOrdered");
-				pp.setPriceDate(date);
-				I_C_OrderLine orderLine = GridTabWrapper.create(mTab, I_C_OrderLine.class);
-				pp.setOrderLine(orderLine, null);
-				pp.setM_PriceList_ID(M_PriceList_ID);
-				int M_PriceList_Version_ID = Env.getContextAsInt(ctx, WindowNo, "M_PriceList_Version_ID");
-				pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);
+			|| mField.getColumnName().equals("QtyEntered")
+			|| mField.getColumnName().equals("C_UOM_ID")
+			|| mField.getColumnName().equals("M_Product_ID"))
+			&& !"N".equals(Env.getContext(ctx, WindowNo, "DiscountSchema")))
+		{
+			int C_BPartner_ID = Env.getContextAsInt(ctx, WindowNo, "C_BPartner_ID");
+			if (mField.getColumnName().equals("QtyEntered"))
+				QtyOrdered = MUOMConversion.convertProductFrom (ctx, M_Product_ID,
+					C_UOM_To_ID, QtyEntered);
+			if (QtyOrdered == null)
+				QtyOrdered = QtyEntered;
+			boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
+			IProductPricing pp = Core.getProductPricing();
+			pp.setInitialValues(M_Product_ID, C_BPartner_ID, QtyOrdered, IsSOTrx, null);
+			Timestamp date = (Timestamp)mTab.getValue("DateOrdered");
+			pp.setPriceDate(date);
+			I_C_OrderLine orderLine = GridTabWrapper.create(mTab, I_C_OrderLine.class);
+			pp.setOrderLine(orderLine, null);
+			pp.setM_PriceList_ID(M_PriceList_ID);
+			int M_PriceList_Version_ID = Env.getContextAsInt(ctx, WindowNo, "M_PriceList_Version_ID");
+			pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);
 			//
 			PriceEntered = MUOMConversion.convertProductFrom (ctx, M_Product_ID,
 				C_UOM_To_ID, pp.getPriceStd());
@@ -1167,7 +1167,6 @@ public class CalloutOrder extends CalloutEngine
 				Discount = BigDecimal.valueOf((PriceList.doubleValue () - PriceActual.doubleValue ()) / PriceList.doubleValue () * 100.0);
 				if (Discount.scale () > 2)
 					Discount = Discount.setScale (2, RoundingMode.HALF_UP);
-					//Discount = Discount.setScale (2, BigDecimal.ROUND_HALF_UP); // original code before changed.
 				mTab.setValue ("Discount", Discount);
 			}
 		}
@@ -1428,5 +1427,3 @@ public class CalloutOrder extends CalloutEngine
 	}
 
 }	//	CalloutOrder
-
-
