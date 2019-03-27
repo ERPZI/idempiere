@@ -332,18 +332,14 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		orderField.setSelectedIndex(0);
 		orderField.addActionListener(this);
 		//MPo, 18/7/2016 Add PrCtr
-		//-initBPDetails(C_BPartner_ID);
 		initBPDetails(C_BPartner_ID, User1_ID);
 		//
 
 	}   //  initBPartnerOIS
 	//MPo, 18/7/2016: include PrCtr
-	//public void initBPDetails(int C_BPartner_ID) 
-	//{
-	//	initBPShipmentDetails(C_BPartner_ID);
-	//	initBPRMADetails(C_BPartner_ID);
-	//}
-	public void initBPDetails(int C_BPartner_ID, int User1_ID) 
+	//public void initBPDetails(int C_BPartner_ID)
+	public void initBPDetails(int C_BPartner_ID, int User1_ID)
+	// 
 	{
 		initBPShipmentDetails(C_BPartner_ID, User1_ID);
 		//MPo, 9/8/2016 Add PrCtr for RMA Selection
