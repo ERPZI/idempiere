@@ -23,7 +23,8 @@ Bundle-ClassPath: .,
  lib/bsh.jar,
  lib/commons-validator.jar,
  lib/stax2-api.jar,
- lib/woodstox-core.jar
+ lib/woodstox-core.jar,
+ lib/avalon-framework-api.jar
 Export-Package: bsh,
  bsh.classpath,
  bsh.collection,
@@ -243,7 +244,10 @@ Export-Package: bsh,
  org.idempiere.model
 Comment: Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=1.11))"
-Import-Package: com.sun.mail.smtp;version="1.5",
+Import-Package: com.google.zxing,
+ com.google.zxing.qrcode.decoder,
+ com.google.zxing.qrcode.encoder,
+ com.sun.mail.smtp;version="1.5",
  javax.jms;version="1.1.0",
  javax.mail;version="1.5",
  javax.mail.internet;version="1.5",
