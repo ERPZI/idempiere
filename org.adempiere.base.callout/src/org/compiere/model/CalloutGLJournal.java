@@ -53,7 +53,6 @@ public class CalloutGLJournal extends CalloutEngine
 		if (value == null)
 			return "";
 
-		int AD_Client_ID = Env.getContextAsInt(ctx, WindowNo, "AD_Client_ID");
 		Timestamp DateAcct = null;
 		if (colName.equals("DateAcct"))
 			DateAcct = (Timestamp)value;
@@ -69,14 +68,13 @@ public class CalloutGLJournal extends CalloutEngine
 			mTab.setValue("DateAcct", value);
 		}
 
-		//  When DateAcct is changed, set C_Period_ID
-		else if (colName.equals("DateAcct"))
+		//  When DateAcct/Org is changed, set C_Period_ID
+		else if (colName.equals("DateAcct") || colName.equals("AD_Org_ID"))
 		{
 			String sql = "SELECT C_Period_ID "
 				+ "FROM C_Period "
 				+ "WHERE C_Year_ID IN "
-				+ "	(SELECT C_Year_ID FROM C_Year WHERE C_Calendar_ID ="
-				+ "  (SELECT C_Calendar_ID FROM AD_ClientInfo WHERE AD_Client_ID=?))"
+				+ "	(SELECT C_Year_ID FROM C_Year WHERE C_Calendar_ID=?)"
 				+ " AND ? BETWEEN StartDate AND EndDate"
 				// globalqss - cruiz - Bug [ 1577712 ] Financial Period Bug
 				+ " AND IsActive='Y'"
@@ -86,7 +84,9 @@ public class CalloutGLJournal extends CalloutEngine
 			try
 			{
 				pstmt = DB.prepareStatement(sql, null);
-				pstmt.setInt(1, AD_Client_ID);
+				int AD_Org_ID = mTab.getValue("AD_Org_ID") != null ? ((Number)mTab.getValue("AD_Org_ID")).intValue() : 0;
+				int C_Calendar_ID = MPeriod.getC_Calendar_ID(ctx, AD_Org_ID);
+				pstmt.setInt(1, C_Calendar_ID);
 				pstmt.setTimestamp(2, DateAcct);
 				rs = pstmt.executeQuery();
 				if (rs.next())
@@ -121,16 +121,12 @@ public class CalloutGLJournal extends CalloutEngine
 				rs = pstmt.executeQuery();
 				if (rs.next())
 				{
-					String PeriodType = rs.getString(1);
 					Timestamp StartDate = rs.getTimestamp(2);
 					Timestamp EndDate = rs.getTimestamp(3);
-					if (PeriodType.equals("S")) //  Standard Periods
-					{
-						//  out of range - set to last day
-						if (DateAcct == null
-							|| DateAcct.before(StartDate) || DateAcct.after(EndDate))
-							mTab.setValue("DateAcct", EndDate);
-					}
+					//  out of range - set to last day
+					if (DateAcct == null
+						|| DateAcct.before(StartDate) || DateAcct.after(EndDate))
+						mTab.setValue("DateAcct", EndDate);
 				}
 			}
 			catch (SQLException e)
