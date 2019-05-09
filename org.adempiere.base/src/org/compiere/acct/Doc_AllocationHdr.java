@@ -17,9 +17,11 @@
 package org.compiere.acct;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.MAccount;
@@ -290,6 +292,7 @@ public class Doc_AllocationHdr extends Doc
 							paymentSelectAmt= paymentSelectAmt.add(fl.getAmtAcctDr());
 							paymentSelectAmt= paymentSelectAmt.subtract(fl.getAmtAcctCr());
 						}
+
 					}
 					else if (line.getC_CashLine_ID() != 0)
 					{
@@ -501,6 +504,7 @@ public class Doc_AllocationHdr extends Doc
 					taxCorrectionAmt = taxCorrectionAmt.add(line.getWriteOffAmt());
 				//
 				if (taxCorrectionAmt.signum() != 0)
+
 				{
 					if (!createTaxCorrection(as, fact, line,
 						getAccount(invoice.isSOTrx() ? Doc.ACCTTYPE_DiscountExp : Doc.ACCTTYPE_DiscountRev, as),
@@ -821,6 +825,7 @@ public class Doc_AllocationHdr extends Doc
 			//
 			.append(" FROM Fact_Acct ")
 			.append("WHERE AD_Table_ID=318 AND Record_ID=?")	//	Invoice
+
 			.append(" AND C_AcctSchema_ID=?")
 			.append(" AND PostingType='A'");
 			//AND C_Currency_ID=102
@@ -908,7 +913,7 @@ public class Doc_AllocationHdr extends Doc
 			//	Round
 			int precision = as.getStdPrecision();
 			if (acctDifference.scale() > precision)
-				acctDifference = acctDifference.setScale(precision, BigDecimal.ROUND_HALF_UP);
+				acctDifference = acctDifference.setScale(precision, RoundingMode.HALF_UP);
 			StringBuilder d2 = new StringBuilder("(partial) = ").append(acctDifference).append(" - Multiplier=").append(multiplier);
 			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
 			description.append(" - ").append(d2);
@@ -1333,7 +1338,7 @@ public class Doc_AllocationHdr extends Doc
 					}				
 
 				}
-			}
+		}
 		}
 
 
@@ -1399,7 +1404,7 @@ public class Doc_AllocationHdr extends Doc
 						DB.close(rs, pstmt);
 						rs = null; pstmt = null;
 				}
-			}
+		}
 			double multiplier = allocInvoiceSource.doubleValue() / totalInvoiceSource.doubleValue();
 
 			//	Reduce Orig Invoice Accounted
@@ -1420,7 +1425,7 @@ public class Doc_AllocationHdr extends Doc
 			//	Round
 			int precision = as.getStdPrecision();
 			if (acctDifference.scale() > precision)
-				acctDifference = acctDifference.setScale(precision, BigDecimal.ROUND_HALF_UP);
+				acctDifference = acctDifference.setScale(precision, RoundingMode.HALF_UP);
 			StringBuilder d2 = new StringBuilder("(partial) = ").append(acctDifference).append(" - Multiplier=").append(multiplier);
 			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
 			description.append(" - ").append(d2);
@@ -1578,12 +1583,14 @@ class Doc_AllocationTax
 		for (int i = 0; i < m_facts.size(); i++)
 		{
 			MFactAcct factAcct = (MFactAcct)m_facts.get(i);
-			if (factAcct.getAmtSourceDr().compareTo(total) > 0)
+			if (   (factAcct.getAmtSourceDr().signum() > 0 && factAcct.getAmtSourceDr().compareTo(total) > 0)
+				|| (factAcct.getAmtSourceDr().signum() < 0 && factAcct.getAmtSourceDr().compareTo(total) < 0))
 			{
 				total = factAcct.getAmtSourceDr();
 				m_totalIndex = i;
 			}
-			if (factAcct.getAmtSourceCr().compareTo(total) > 0)
+			if (   (factAcct.getAmtSourceCr().signum() > 0 && factAcct.getAmtSourceCr().compareTo(total) > 0)
+				|| (factAcct.getAmtSourceCr().signum() < 0 && factAcct.getAmtSourceCr().compareTo(total) < 0))
 			{
 				total = factAcct.getAmtSourceCr();
 				m_totalIndex = i;
@@ -1725,10 +1732,10 @@ class Doc_AllocationTax
 			|| amt.signum() == 0)
 			return Env.ZERO;
 		//
-		BigDecimal multiplier = tax.divide(total, 10, BigDecimal.ROUND_HALF_UP);
+		BigDecimal multiplier = tax.divide(total, 10, RoundingMode.HALF_UP);
 		BigDecimal retValue = multiplier.multiply(amt);
 		if (retValue.scale() > precision)
-			retValue = retValue.setScale(precision, BigDecimal.ROUND_HALF_UP);
+			retValue = retValue.setScale(precision, RoundingMode.HALF_UP);
 		if (log.isLoggable(Level.FINE)) log.fine(retValue + " (Mult=" + multiplier + "(Prec=" + precision + ")");
 		return retValue;
 	}	//	calcAmount

@@ -355,7 +355,7 @@ public final class DisplayType
 	{
 		Language myLanguage = language;
 		if (myLanguage == null)
-			myLanguage = Language.getLoginLanguage();
+			myLanguage =  Env.getLocaleLanguage(Env.getCtx());
 		Locale locale = myLanguage.getLocale();
 		DecimalFormat format = null;
 		if (locale != null)
@@ -654,6 +654,9 @@ public final class DisplayType
 		
 		if (!DisplayType.isText(displayType))
 			s_log.severe("Unhandled Data Type = " + displayType);
+
+		if (columnName.endsWith("_ID"))
+			return "NUMBER(10)";
 
 		return "VARCHAR2(" + fieldLength + ")";
 	}	//	getSQLDataType

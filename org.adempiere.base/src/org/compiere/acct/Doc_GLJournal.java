@@ -97,6 +97,7 @@ public class Doc_GLJournal extends Doc
 			list.add(docLine);
 			
 			if (docLine.getC_Currency_ID() != getC_Currency_ID())
+
 				setIsMultiCurrency(true);
 		}
 		//	Return Array

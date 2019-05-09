@@ -50,8 +50,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8462972029898383163L;
-
+	private static final long serialVersionUID = -4100591609253985073L;
 	// http://jira.idempiere.com/browse/IDEMPIERE-147
 	public static String LOCATION_MAPS_URL_PREFIX     = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_URL_PREFIX);
 	public static String LOCATION_MAPS_ROUTE_PREFIX   = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_ROUTE_PREFIX);
@@ -71,7 +70,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>
 		if (C_Location_ID == 0)
 			return new MLocation(ctx, C_Location_ID, trxName);
 		//
-		Integer key = new Integer (C_Location_ID);
+		Integer key = Integer.valueOf(C_Location_ID);
 		MLocation retValue = null;
 		if (trxName == null)
 			retValue = (MLocation) s_cache.get (key);
@@ -676,7 +675,9 @@ public class MLocation extends X_C_Location implements Comparator<Object>
 		}
 		return true;
 	}	//	beforeSave
-	
+
+	public final static String updateBPLocName = "SELECT C_BPartner_Location_ID FROM C_BPartner_Location WHERE C_Location_ID = ? AND IsPreserveCustomName = 'N'";
+
 	/**
 	 * 	After Save
 	 *	@param newRecord new
@@ -701,7 +702,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>
 		
 		//Update BP_Location name IDEMPIERE 417
 		if (get_TrxName().startsWith(PO.LOCAL_TRX_PREFIX)) { // saved without trx
-			int bplID = DB.getSQLValueEx(get_TrxName(), "SELECT C_BPartner_Location_ID FROM C_BPartner_Location WHERE C_Location_ID = " + getC_Location_ID());
+			int bplID = DB.getSQLValueEx(get_TrxName(), updateBPLocName, getC_Location_ID());
 			if (bplID>0)
 			{
 				// just trigger BPLocation name change when the location change affects the name:

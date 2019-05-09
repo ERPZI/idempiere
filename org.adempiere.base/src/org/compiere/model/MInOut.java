@@ -18,6 +18,7 @@ package org.compiere.model;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -151,7 +152,7 @@ public class MInOut extends X_M_InOut implements DocAction
 				if (oLines[i].getQtyEntered().compareTo(oLines[i].getQtyOrdered()) != 0)
 					line.setQtyEntered(lineQty
 						.multiply(oLines[i].getQtyEntered())
-						.divide(oLines[i].getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
+						.divide(oLines[i].getQtyOrdered(), 12, RoundingMode.HALF_UP));
 				line.setC_Project_ID(oLines[i].getC_Project_ID());
 				line.saveEx(trxName);
 				//	Delivered everything ?
@@ -1771,7 +1772,7 @@ public class MInOut extends X_M_InOut implements DocAction
 		dropShipment.setDocAction(DocAction.ACTION_Complete);
 		// added AdempiereException by Zuhri
 		if (!dropShipment.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException("Failed when processing document - " + dropShipment.getProcessMsg());
+			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + dropShipment.getProcessMsg());
 		// end added
 		dropShipment.saveEx();
 
@@ -2041,7 +2042,7 @@ public class MInOut extends X_M_InOut implements DocAction
 				counter.setDocAction(counterDT.getDocAction());
 				// added AdempiereException by zuhri
 				if (!counter.processIt(counterDT.getDocAction()))
-					throw new AdempiereException("Failed when processing document - " + counter.getProcessMsg());
+					throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + counter.getProcessMsg());
 				// end added
 				counter.saveEx(get_TrxName());
 			}

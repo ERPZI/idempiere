@@ -316,7 +316,7 @@ public class VCreateFromShipmentUI extends CreateFromShipment implements ActionL
 		//MPo, 18/7/2016 PrCtr selection
 		int User1_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID");
 		//
-		bPartnerField.setValue(new Integer(C_BPartner_ID));
+		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
 		//MPo, 18/7/2016 PrCtr selection
@@ -456,7 +456,7 @@ public class VCreateFromShipmentUI extends CreateFromShipment implements ActionL
 	 *  Load Order/Invoice/Shipment data into Table
 	 *  @param data data
 	 */
-	protected void loadTableOIS (Vector<?> data)
+	protected void loadTableOIS (Vector<? extends Vector> data)
 	{
 		//  Remove previous listeners
 		dialog.getMiniTable().getModel().removeTableModelListener(dialog);

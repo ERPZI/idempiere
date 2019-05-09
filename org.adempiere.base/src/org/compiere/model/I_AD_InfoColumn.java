@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_InfoColumn
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 6.2
  */
 public interface I_AD_InfoColumn 
 {
@@ -257,6 +257,19 @@ public interface I_AD_InfoColumn
 	  */
 	public String getHelp();
 
+    /** Column name InputFieldValidation */
+    public static final String COLUMNNAME_InputFieldValidation = "InputFieldValidation";
+
+	/** Set Input field validation.
+	  * Input field validaton query
+	  */
+	public void setInputFieldValidation (String InputFieldValidation);
+
+	/** Get Input field validation.
+	  * Input field validaton query
+	  */
+	public String getInputFieldValidation();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -348,6 +361,19 @@ public interface I_AD_InfoColumn
 	  */
 	public boolean isQueryCriteria();
 
+    /** Column name IsReadOnly */
+    public static final String COLUMNNAME_IsReadOnly = "IsReadOnly";
+
+	/** Set Read Only.
+	  * Field is read only
+	  */
+	public void setIsReadOnly (boolean IsReadOnly);
+
+	/** Get Read Only.
+	  * Field is read only
+	  */
+	public boolean isReadOnly();
+
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
 
@@ -360,6 +386,15 @@ public interface I_AD_InfoColumn
 	  * Alphanumeric identifier of the entity
 	  */
 	public String getName();
+
+    /** Column name Placeholder */
+    public static final String COLUMNNAME_Placeholder = "Placeholder";
+
+	/** Set Placeholder	  */
+	public void setPlaceholder (String Placeholder);
+
+	/** Get Placeholder	  */
+	public String getPlaceholder();
 
     /** Column name QueryFunction */
     public static final String COLUMNNAME_QueryFunction = "QueryFunction";

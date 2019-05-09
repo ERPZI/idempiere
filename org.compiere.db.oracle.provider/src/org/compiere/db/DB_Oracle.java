@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -368,6 +369,9 @@ public class DB_Oracle implements AdempiereDatabase
     public String convertStatement (String oraStatement)
     {
     	Convert.logMigrationScript(oraStatement, null);
+		if ("true".equals(System.getProperty("org.idempiere.db.oracle.debug"))) {
+			log.warning("Oracle -> " + oraStatement);
+		}
         return oraStatement;
     }   //  convertStatement
 
@@ -410,7 +414,10 @@ public class DB_Oracle implements AdempiereDatabase
      */
     public String getSystemUser()
     {
-        return "system";
+    	String systemUser = System.getProperty("ADEMPIERE_DB_SYSTEM_USER");
+    	if (systemUser == null)
+    		systemUser = "system";
+        return systemUser;
     }   //  getSystemUser
 
     /**
@@ -514,7 +521,7 @@ public class DB_Oracle implements AdempiereDatabase
         {
             try
             {
-                result = number.setScale(scale, BigDecimal.ROUND_HALF_UP);
+                result = number.setScale(scale, RoundingMode.HALF_UP);
             }
             catch (Exception e)
             {
@@ -660,10 +667,10 @@ public class DB_Oracle implements AdempiereDatabase
 		int maxIdleTime = getIntProperty(poolProperties, "MaxIdleTime", 1200);
 		int unreturnedConnectionTimeout = getIntProperty(poolProperties, "UnreturnedConnectionTimeout", 0);
 		boolean testConnectionOnCheckin = getBooleanProperty(poolProperties, "TestConnectionOnCheckin", false);
-		boolean testConnectionOnCheckout = getBooleanProperty(poolProperties, "TestConnectionOnCheckout", false);
+		boolean testConnectionOnCheckout = getBooleanProperty(poolProperties, "TestConnectionOnCheckout", true);
 		String mlogClass = getStringProperty(poolProperties, "com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
 		int checkoutTimeout = getIntProperty(poolProperties, "CheckoutTimeout", 0);
-		int statementCacheNumDeferredCloseThreads = getIntProperty(poolProperties, "StatementCacheNumDeferredCloseThreads", 1);
+		int statementCacheNumDeferredCloseThreads = getIntProperty(poolProperties, "StatementCacheNumDeferredCloseThreads", 0);
         try
         {
         	System.setProperty("com.mchange.v2.log.MLog", mlogClass);
@@ -675,7 +682,7 @@ public class DB_Oracle implements AdempiereDatabase
             cpds.setJdbcUrl(getConnectionURL(connection));
             cpds.setUser(connection.getDbUid());
             cpds.setPassword(connection.getDbPwd());
-            cpds.setPreferredTestQuery(DEFAULT_CONN_TEST_SQL);
+            //cpds.setPreferredTestQuery(DEFAULT_CONN_TEST_SQL);
             cpds.setIdleConnectionTestPeriod(idleConnectionTestPeriod);
             cpds.setAcquireRetryAttempts(acquireRetryAttempts);
             cpds.setTestConnectionOnCheckin(testConnectionOnCheckin);
@@ -1241,8 +1248,12 @@ public class DB_Oracle implements AdempiereDatabase
         return m_convert;
     }
 
-	public int getNextID(String Name) {
-		int m_sequence_id = DB.getSQLValueEx(null, "SELECT "+Name.toUpperCase()+".nextval FROM DUAL");
+	public int getNextID(String name) {
+		return getNextID(name, null);
+	}
+
+	public int getNextID(String name, String trxName) {
+		int m_sequence_id = DB.getSQLValueEx(trxName, "SELECT "+name.toUpperCase()+".nextval FROM DUAL");
 		return m_sequence_id;
 	}
 

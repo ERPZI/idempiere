@@ -17,6 +17,7 @@
 package org.compiere.process;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -246,7 +247,7 @@ public class InOutGenerate extends SvrProcess
 							.append(" INNER JOIN M_InOut io ON (iol.M_InOut_ID=io.M_InOut_ID) ")
 								.append("WHERE iol.C_OrderLine_ID=C_OrderLine.C_OrderLine_ID AND io.DocStatus IN ('DR','IN','IP','WC'))");
 				//	Deadlock Prevention - Order by M_Product_ID
-				MOrderLine[] lines = order.getLines (where.toString(), "C_BPartner_Location_ID, M_Product_ID");
+				MOrderLine[] lines = order.getLines (where.toString(), "C_BPartner_Location_ID, M_Product_ID, Line");
 				for (int i = 0; i < lines.length; i++)
 				{
 					MOrderLine line = lines[i];
@@ -448,7 +449,7 @@ public class InOutGenerate extends SvrProcess
 			if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)
 				line.setQtyEntered(qty
 					.multiply(orderLine.getQtyEntered())
-					.divide(orderLine.getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
+					.divide(orderLine.getQtyOrdered(), 12, RoundingMode.HALF_UP));
 			line.setLine(m_line + orderLine.getLine());
 			if (!line.save())
 				throw new IllegalStateException("Could not create Shipment Line");
@@ -504,7 +505,7 @@ public class InOutGenerate extends SvrProcess
 				line.setQty(line.getMovementQty().add(deliver));
 			if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)
 				line.setQtyEntered(line.getMovementQty().multiply(orderLine.getQtyEntered())
-					.divide(orderLine.getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
+					.divide(orderLine.getQtyOrdered(), 12, RoundingMode.HALF_UP));
 			line.setLine(m_line + orderLine.getLine());
 			if (!line.save())
 				throw new IllegalStateException("Could not create Shipment Line");
@@ -530,7 +531,7 @@ public class InOutGenerate extends SvrProcess
 				 line.setQty(toDeliver);
 				 if (orderLine.getQtyEntered().compareTo(orderLine.getQtyOrdered()) != 0)
 					 line.setQtyEntered(line.getMovementQty().multiply(orderLine.getQtyEntered())
-						 .divide(orderLine.getQtyOrdered(), 12, BigDecimal.ROUND_HALF_UP));
+						 .divide(orderLine.getQtyOrdered(), 12, RoundingMode.HALF_UP));
 				 line.setLine(m_line + orderLine.getLine());
 			     if (!line.save())
 					 throw new IllegalStateException("Could not create Shipment Line");

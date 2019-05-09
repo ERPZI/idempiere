@@ -310,6 +310,8 @@ public class DataEngine
 				int AD_Column_ID = rs.getInt(1);
 				String ColumnName = rs.getString(2);
 				String ColumnSQL = rs.getString(24);
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQL="))
+					ColumnSQL = "NULL";
 				if (ColumnSQL != null && ColumnSQL.contains("@"))
 					ColumnSQL = Env.parseContext(Env.getCtx(), -1, ColumnSQL, false, true);
 				if (ColumnSQL == null)
@@ -828,7 +830,7 @@ public class DataEngine
 		ResultSet rs = null;
 		try
 		{
-			pstmt = DB.prepareStatement(pd.getSQL(), m_trxName);
+			pstmt = DB.prepareNormalReadReplicaStatement(pd.getSQL(), m_trxName);
 			rs = pstmt.executeQuery();
 			//	Row Loop
 			while (rs.next())
@@ -982,7 +984,7 @@ public class DataEngine
 								if (!rs.wasNull())
 								{
 									boolean b = s.equals("Y");
-									pde = new PrintDataElement(pdc.getColumnName(), new Boolean(b), pdc.getDisplayType(), pdc.getFormatPattern());
+									pde = new PrintDataElement(pdc.getColumnName(), Boolean.valueOf(b), pdc.getDisplayType(), pdc.getFormatPattern());
 								}
 							}
 							else if (pdc.getDisplayType() == DisplayType.TextLong)

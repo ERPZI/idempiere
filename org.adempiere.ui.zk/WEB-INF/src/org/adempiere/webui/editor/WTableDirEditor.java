@@ -27,6 +27,7 @@ import javax.swing.event.ListDataListener;
 
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.component.AutoComplete;
 import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.event.ContextMenuEvent;
 import org.adempiere.webui.event.ContextMenuListener;
@@ -38,6 +39,7 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.adempiere.webui.window.WLocationDialog;
 import org.compiere.model.GridField;
+import org.compiere.model.GridTable;
 import org.compiere.model.Lookup;
 import org.compiere.model.MBPartnerLocation;
 import org.compiere.model.MLocation;
@@ -53,6 +55,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
@@ -96,8 +99,13 @@ ContextMenuListener, IZoomableEditor
 
     public WTableDirEditor(GridField gridField)
     {
-        super(new EditorCombobox(), gridField);
-        ((EditorCombobox)getComponent()).editor = this;
+        this(gridField.isAutocomplete() ? new EditorAutoComplete() : new EditorCombobox(), gridField);
+    }
+    
+    private WTableDirEditor(Component comp, GridField gridField)
+    {
+        super(comp, gridField);
+        ((ITableDirEditor)getComponent()).setEditor(this);
         lookup = gridField.getLookup();
         init();
     }
@@ -114,8 +122,18 @@ ContextMenuListener, IZoomableEditor
 	 */   
     public WTableDirEditor(Lookup lookup, String label, String description, boolean mandatory, boolean readonly, boolean updateable)
 	{
-		super(new EditorCombobox(), label, description, mandatory, readonly, updateable);
-		((EditorCombobox)getComponent()).editor = this;
+    	this(lookup, label, description, mandatory, readonly, updateable, false);
+	}
+    
+    public WTableDirEditor(Lookup lookup, String label, String description, boolean mandatory, boolean readonly, boolean updateable, boolean autocomplete)
+    {
+    	this(autocomplete ? new EditorAutoComplete() : new EditorCombobox(), lookup, label, description, mandatory, readonly, updateable);
+    }
+    
+    private WTableDirEditor(Component comp, Lookup lookup, String label, String description, boolean mandatory, boolean readonly, boolean updateable)
+    {
+    	super(comp, label, description, mandatory, readonly, updateable);
+    	((ITableDirEditor)getComponent()).setEditor(this);
 		
 		if (lookup == null)
 		{
@@ -135,11 +153,20 @@ ContextMenuListener, IZoomableEditor
      * @param isUpdateable
      * @param lookup
      */
-    public WTableDirEditor(String columnName, boolean mandatory, boolean isReadOnly, boolean isUpdateable,
-    		Lookup lookup)
+    public WTableDirEditor(String columnName, boolean mandatory, boolean isReadOnly, boolean isUpdateable, Lookup lookup)
     {
-    	super(new EditorCombobox(), columnName, null, null, mandatory, isReadOnly, isUpdateable);
-    	((EditorCombobox)getComponent()).editor = this;
+    	this(columnName, mandatory, isReadOnly, isUpdateable, lookup, false);
+    }
+    
+    public WTableDirEditor(String columnName, boolean mandatory, boolean isReadOnly, boolean isUpdateable, Lookup lookup, boolean autocomplete)
+    {
+    	this(autocomplete ? new EditorAutoComplete() : new EditorCombobox(), columnName, mandatory, isReadOnly, isUpdateable, lookup);
+    }
+    
+    private WTableDirEditor(Component comp, String columnName, boolean mandatory, boolean isReadOnly, boolean isUpdateable, Lookup lookup)
+    {
+    	super(comp, columnName, null, null, mandatory, isReadOnly, isUpdateable);
+    	((ITableDirEditor)getComponent()).setEditor(this);
     	if (lookup == null)
 		{
 			throw new IllegalArgumentException("Lookup cannot be null");
@@ -153,10 +180,12 @@ ContextMenuListener, IZoomableEditor
     	ZKUpdateUtil.setWidth(getComponent(), "200px"); 
         getComponent().setAutocomplete(true);
         getComponent().setAutodrop(true);
-        getComponent().addEventListener(Events.ON_BLUR, this);
-        getComponent().addEventListener(Events.ON_CHANGING, this);
-        getComponent().addEventListener(Events.ON_OPEN, this);
-        getComponent().addEventListener("onPostSelect", this);
+    	getComponent().addEventListener(Events.ON_BLUR, this);
+        if (getComponent() instanceof EditorAutoComplete) {
+        	;
+        } else {
+        	getComponent().addEventListener(Events.ON_CHANGING, this);
+        }
 
         boolean zoom= false;
         if (lookup != null)
@@ -216,6 +245,8 @@ ContextMenuListener, IZoomableEditor
         	}
         	//	IDEMPIERE 90
         }
+        if (gridField != null)
+        	getComponent().setPlaceholder(gridField.getPlaceholder());
     }
 
 	private void createCacheListener() {
@@ -307,6 +338,9 @@ ContextMenuListener, IZoomableEditor
             getComponent().setValue(null);
             getComponent().setSelectedItem(null);
             oldValue = value;
+            
+            if (getComponent() instanceof EditorAutoComplete)
+            	updateStyle();
         }                                
     }
     
@@ -380,7 +414,16 @@ ContextMenuListener, IZoomableEditor
     	{
     		if (lookup != null)
 	        {
-    			NamePair pair = lookup.getDirect(oldValue, false, false);
+    			String trxName = null;
+    			if (   gridField != null
+   					&& gridField.getGridTab() != null
+   					&& gridField.getGridTab().getTableModel() != null) {
+    				GridTable gt = gridField.getGridTab().getTableModel();
+    				if (gt.isImporting()) {
+    					trxName = gt.get_TrxName();
+    				}
+    			}
+    			NamePair pair = lookup.getDirect(oldValue, false, false, trxName);
     			if (pair != null) {
     				if (pair instanceof KeyNamePair) {
     					int key = ((KeyNamePair)pair).getKey();
@@ -392,6 +435,26 @@ ContextMenuListener, IZoomableEditor
 	        	}
     		}
     	}
+
+    	if (getComponent() instanceof EditorAutoComplete) {
+    		EditorAutoComplete editor = (EditorAutoComplete) getComponent();
+    		editor.setDict(null);
+    		editor.setValues(null);
+    		editor.setDescription(null);
+        	
+    		String[] dict = new String[getComponent().getItemCount()];
+    		Object[] values = new Object[getComponent().getItemCount()];
+    		String[] description = new String[getComponent().getItemCount()];
+        	for (int i = 0; i < dict.length; i++) {
+        		Comboitem item = getComponent().getItemAtIndex(i);
+        		dict[i] = item.getLabel();
+        		values[i] = item.getValue();
+        	}
+        	editor.setDict(dict, false);
+        	editor.setDescription(description);
+        	editor.setValues(values);
+    	}
+    	
     	getComponent().setValue(oldValue);
     }
     
@@ -536,7 +599,8 @@ ContextMenuListener, IZoomableEditor
 		if(!getComponent().isEnabled())
 			return;
 
-		final WQuickEntry vqe = new WQuickEntry (lookup.getWindowNo(), lookup.getZoom());
+		int tabNo = gridField != null && gridField.getGridTab() != null ? gridField.getGridTab().getTabNo() : 0;
+		final WQuickEntry vqe = new WQuickEntry(lookup.getWindowNo(), tabNo, lookup.getZoom());
 		int Record_ID = 0;
 
 		Object value = getValue();
@@ -563,9 +627,9 @@ ContextMenuListener, IZoomableEditor
 					return;
 
 				//  Maybe new Record - put in cache
-				Object newValue = new Integer(result);
+				Object newValue = Integer.valueOf(result);
 				lookup.getDirect(newValue, false, true);
-				setValue(new Integer(result));
+				setValue(Integer.valueOf(result));
 		        ValueChangeEvent changeEvent = new ValueChangeEvent(this, getColumnName(), oldValue, newValue);
 		        fireValueChange(changeEvent);
 		        oldValue = newValue;
@@ -671,14 +735,26 @@ ContextMenuListener, IZoomableEditor
 		super.dynamicDisplay(ctx);
     }
 	
-	private static class EditorCombobox extends Combobox {
-		
+	private interface ITableDirEditor {
+		public void setEditor(WTableDirEditor editor);
+	}
+	
+	private static class EditorCombobox extends Combobox implements ITableDirEditor {
 		/**
 		 * generated serial id
 		 */
-		private static final long serialVersionUID = 4540856986889452983L;
-		protected WTableDirEditor editor;
+		private static final long serialVersionUID = 9087317631313577239L;
+		private WTableDirEditor editor;
 		private DesktopCleanup listener = null;
+
+		protected EditorCombobox() {
+			
+		}
+		
+		@Override
+		public void setPage(Page page) {
+			super.setPage(page);			
+		}
 
 		@Override
 		public void onPageAttached(Page newpage, Page oldpage) {
@@ -712,6 +788,78 @@ ContextMenuListener, IZoomableEditor
 			if (editor.tableCacheListener != null) {
 				CacheMgt.get().unregister(editor.tableCacheListener);
 				editor.tableCacheListener = null;
+			}
+		}
+
+		@Override
+		public void setEditor(WTableDirEditor editor) {
+			this.editor = editor;
+		}		
+	}
+	
+	private static class EditorAutoComplete extends AutoComplete implements ITableDirEditor {	
+		/**
+		 * generated serial id
+		 */
+		private static final long serialVersionUID = 8435677226644775152L;
+		protected WTableDirEditor editor;
+		private DesktopCleanup listener = null;
+
+		protected EditorAutoComplete() {
+			
+		}
+		
+		@Override
+		public void setPage(Page page) {
+			super.setPage(page);			
+		}
+
+		@Override
+		public void onPageAttached(Page newpage, Page oldpage) {
+			super.onPageAttached(newpage, oldpage);
+			if (editor.tableCacheListener == null) {
+				editor.createCacheListener();
+				if (listener == null) {
+					listener = new DesktopCleanup() {						
+						@Override
+						public void cleanup(Desktop desktop) throws Exception {
+							EditorAutoComplete.this.cleanup();
+						}
+					};
+					newpage.getDesktop().addListener(listener);
+				}
+			}
+		}
+
+		@Override
+		public void onPageDetached(Page page) {
+			super.onPageDetached(page);
+			if (listener != null && page.getDesktop() != null)
+				page.getDesktop().removeListener(listener);
+			cleanup();
+		}
+
+		/**
+		 * 
+		 */
+		protected void cleanup() {
+			if (editor.tableCacheListener != null) {
+				CacheMgt.get().unregister(editor.tableCacheListener);
+				editor.tableCacheListener = null;
+			}
+		}
+
+		@Override
+		public void setEditor(WTableDirEditor editor) {
+			this.editor = editor;
+		}
+		
+		@Override
+		public void setValue(String value) 
+		{
+			setText(value);
+			if (Util.isEmpty(value)) {
+				refresh("");
 			}
 		}
 	}

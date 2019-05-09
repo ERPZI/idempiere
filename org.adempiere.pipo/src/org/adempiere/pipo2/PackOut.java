@@ -141,7 +141,7 @@ public class PackOut
 
 				ElementHandler handler = handlerRegistry.getHandler(type);
 				if (handler != null)
-					handler.packOut(this,packoutHandler,docHandler,packoutItem.getRecordId());
+					handler.packOut(this,packoutHandler,docHandler,packoutItem.getRecordId(),packoutItem.getUUID());
 				else
 					throw new IllegalArgumentException("Packout handler not found for type " + type);
 
@@ -197,7 +197,7 @@ public class PackOut
 		SAXTransformerFactory packoutFactory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 		//indent-number attribute support is not guarantee
 		try {
-			packoutFactory.setAttribute("indent-number", new Integer(4));
+			packoutFactory.setAttribute("indent-number", Integer.valueOf(4));
 		} catch (Exception e) {}
 		TransformerHandler packoutHandler = packoutFactory.newTransformerHandler();
 		Transformer packoutTransformer = packoutHandler.getTransformer();
@@ -247,7 +247,7 @@ public class PackOut
 		SAXTransformerFactory transformerFactory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
 		//indent-number attribute support is not guarantee
 		try {
-			transformerFactory.setAttribute("indent-number", new Integer(4));
+			transformerFactory.setAttribute("indent-number", Integer.valueOf(4));
 		} catch (Exception e) {}
 		TransformerHandler docHandler = transformerFactory.newTransformerHandler();
 		Transformer transformer = docHandler.getTransformer();

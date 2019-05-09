@@ -100,11 +100,11 @@ import org.zkoss.zul.Vlayout;
 
 public abstract class AbstractProcessDialog extends Window implements IProcessUI, EventListener<Event>
 {
-
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8307953279095577359L;
+	private static final long serialVersionUID = 2821858988648268894L;
+
 	private static final String ON_COMPLETE = "onComplete";
 	private static final String ON_STATUS_UPDATE = "onStatusUpdate";
 	
@@ -132,6 +132,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	private Future<?> future;
 	private List<File> downloadFiles;
 	private boolean m_locked = false;
+	private String	m_AD_Process_UU = "";
 		
 	protected AbstractProcessDialog()
 	{
@@ -161,11 +162,11 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		log.config("");
 		//
 		boolean trl = !Env.isBaseLanguage(m_ctx, "AD_Process");
-		String sql = "SELECT Name, Description, Help, IsReport, ShowHelp "
+		String sql = "SELECT Name, Description, Help, IsReport, ShowHelp, AD_Process_UU "
 				+ "FROM AD_Process "
 				+ "WHERE AD_Process_ID=?";
 		if (trl)
-			sql = "SELECT t.Name, t.Description, t.Help, p.IsReport, p.ShowHelp "
+			sql = "SELECT t.Name, t.Description, t.Help, p.IsReport, p.ShowHelp, AD_Process_UU "
 				+ "FROM AD_Process p, AD_Process_Trl t "
 				+ "WHERE p.AD_Process_ID=t.AD_Process_ID"
 				+ " AND p.AD_Process_ID=? AND t.AD_Language=?";
@@ -196,6 +197,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 				s = rs.getString(3);			//	Help
 				if (!rs.wasNull())
 					buildMsg.append("<p>").append(s).append("</p>");
+				m_AD_Process_UU = rs.getString(6);
 			}
 			
 			initialMessage = buildMsg.toString();
@@ -221,6 +223,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		m_pi.setAD_User_ID (Env.getAD_User_ID(Env.getCtx()));
 		m_pi.setAD_Client_ID(Env.getAD_Client_ID(Env.getCtx()));
 		m_pi.setTitle(m_Name);
+		m_pi.setAD_Process_UU(m_AD_Process_UU);
 		
 		parameterPanel = new ProcessParameterPanel(m_WindowNo, m_pi);		
 		if ( !parameterPanel.init() ) {
@@ -375,6 +378,17 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			
 			row.appendChild(notificationTypeField.getComponent());
 			runAsJobField.setChecked(MSysConfig.getBooleanValue(MSysConfig.BACKGROUND_JOB_BY_DEFAULT, false));
+			
+			//Check force background
+			MProcess process = MProcess.get(Env.getCtx(), m_AD_Process_ID);
+			if (process.isForceBackground()) {
+				runAsJobField.setChecked(true);
+				runAsJobField.setEnabled(false);
+			} else if (process.isForceForeground()) {
+				runAsJobField.setChecked(false);
+				runAsJobField.setEnabled(false);
+				runAsJobField.setVisible(false);
+			}
 			notificationTypeField.getComponent().getParent().setVisible(runAsJobField.isChecked());
 			notificationTypeField.fillHorizontal();
 		}
@@ -766,6 +780,12 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	
 	protected void startProcess()
 	{
+		if (m_pi.isProcessRunning(parameterPanel.getParameters())) {
+			FDialog.error(getWindowNo(), "ProcessAlreadyRunning");
+			log.log(Level.WARNING, "Abort process " + m_AD_Process_ID + " because it is already running");
+			return;
+		}
+
 		if (!parameterPanel.validateParameters())
 			return;
 		

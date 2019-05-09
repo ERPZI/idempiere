@@ -131,7 +131,7 @@ public class PoFiller{
 
 		if (value!=null && value.trim().length() == 0)
 			value = null;
-		Integer i = value != null ? new Integer(value) : null;
+		Integer i = value != null ? Integer.valueOf(value) : null;
 
 		Object oldValue = po.get_Value(qName);
 		if (oldValue == null && i == null)
@@ -267,7 +267,7 @@ public class PoFiller{
 				//only import official id
 				if (qName.equalsIgnoreCase(po.get_TableName()+"_ID")) {
 					String value = e != null ? e.contents.toString() : null;
-					Integer i = !Util.isEmpty(value) ? new Integer(value) : null;
+					Integer i = !Util.isEmpty(value) ? Integer.valueOf(value) : null;
 					if (i != null && i.intValue() > 0 && i.intValue() <= MTable.MAX_OFFICIAL_ID) {
 						if (po.get_ID() != i.intValue()) {
 							//make sure id have not been used by other client
@@ -303,7 +303,7 @@ public class PoFiller{
 				} else if (info.getColumnClass(index) == Timestamp.class) {
 					setTimestamp(qName);
 				}else if(DisplayType.TextLong == info.getColumnDisplayType(index)) {// export column from system have type is normal string, but import to system have this column but type is textlong (mean blob)
-					if (getStringValue (qName) != null || !isBlobOnPackinFile(qName)) {
+					if (getStringValue (qName) != null && !isBlobOnPackinFile(qName)) {
 						setString(qName);
 					}else {
 						setBlob(qName);

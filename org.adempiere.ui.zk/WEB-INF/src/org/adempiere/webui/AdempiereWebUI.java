@@ -127,7 +127,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
     	m_URLParameters = new ConcurrentHashMap<String, String[]>(Executions.getCurrent().getParameterMap());
     }
 
-    public void onCreate()
+	public void onCreate()
     {
         this.getPage().setTitle(ThemeManager.getBrowserTitle());
         
@@ -350,7 +350,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			try
 			{
 				Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
-				appDesktop = (IDesktop) clazz.newInstance();
+				appDesktop = (IDesktop) clazz.getDeclaredConstructor().newInstance();
 			}
 			catch (Throwable t)
 			{
@@ -487,7 +487,6 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         loginDesktop.createPart(this.getPage());
         loginDesktop.changeRole(locale, properties);
         loginDesktop.getComponent().getRoot().addEventListener(Events.ON_CLIENT_INFO, this);
-		
 	}
 
 	/**

@@ -81,6 +81,9 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	private int m_colorColumnIndex = -1;
 	/** Color Column compare data.       */
 	private Object m_colorDataCompare = Env.ZERO;
+	
+	// F3P: support IDColumn for selection
+	private boolean allowIDColumnForReadWrite = false;
 
 	/**
 	 * Default constructor.
@@ -194,15 +197,29 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	public boolean isCellEditable(int row, int column)
 	{
 		//  if the first column holds a boolean and it is false, it is not editable
+		
+		Object val = getValueAt(row, 0); 
+		
+		//  if the first column holds a boolean and it is false, it is not editable
 		if (column != 0
-			&& (getValueAt(row, 0) instanceof Boolean)
-			&& !((Boolean)getValueAt(row, 0)).booleanValue())
+			&& (val instanceof Boolean)
+			&& !((Boolean)val).booleanValue())
+		{
+			return false;
+		}
+		
+		// F3P: If allowed, use idcolumn as a switch for read/write (Some logic as boolean)
+		
+		if(allowIDColumnForReadWrite 
+			&& column != 0
+			&& val instanceof IDColumn 
+			&& ((IDColumn)val).isSelected() == false)
 		{
 			return false;
 		}
 
 		//  is the column read/write?
-		if (m_readWriteColumn.contains(new Integer(column)))
+		if (m_readWriteColumn.contains(Integer.valueOf(column)))
 		{
 			return true;
 		}
@@ -285,7 +302,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 */
 	public void setColumnReadOnly (int index, boolean readOnly)
 	{
-		Integer indexObject = new Integer(index);
+		Integer indexObject = Integer.valueOf(index);
 
 		//  Column is ReadWrite
 		if (m_readWriteColumn.contains(indexObject))
@@ -594,7 +611,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					}
 					else if (columnClass == Boolean.class)
 					{
-						data = new Boolean(rs.getString(rsColIndex).equals("Y"));
+						data = Boolean.valueOf(rs.getString(rsColIndex).equals("Y"));
 					}
 					else if (columnClass == Timestamp.class)
 					{
@@ -606,11 +623,11 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					}
 					else if (columnClass == Double.class)
 					{
-						data = new Double(rs.getDouble(rsColIndex));
+						data = Double.valueOf(rs.getDouble(rsColIndex));
 					}
 					else if (columnClass == Integer.class)
 					{
-						data = new Integer(rs.getInt(rsColIndex));
+						data = Integer.valueOf(rs.getInt(rsColIndex));
 					}
 					else if (columnClass == KeyNamePair.class)
 					{
@@ -714,7 +731,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					}
 					else if (columnClass == Double.class)
 					{
-						data = new Double(((BigDecimal)data).doubleValue());
+						data = Double.valueOf(((BigDecimal)data).doubleValue());
 					}
 				}
 				//  store
@@ -1185,15 +1202,15 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					}
 					else if (c == Double.class)
 					{
-						Double subtotal = new Double(0);
+						Double subtotal = Double.valueOf(0);
 						if(total[col] != null)
 							subtotal = (Double)(total[col]);
 						
 						Double amt =  (Double) data;
 						if(subtotal == null)
-							subtotal = new Double(0);
+							subtotal = Double.valueOf(0);
 						if(amt == null )
-							amt = new Double(0);
+							amt = Double.valueOf(0);
 						total[col] = subtotal + amt;
 						
 					}		
@@ -1226,6 +1243,16 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 			}	
 			
 		}
+	}
+
+	public boolean isAllowIDColumnForReadWrite()
+	{
+		return allowIDColumnForReadWrite;
+	}
+
+	public void setAllowIDColumnForReadWrite(boolean allowIDColumnForReadWrite)
+	{
+		this.allowIDColumnForReadWrite = allowIDColumnForReadWrite;
 	}
 
 }

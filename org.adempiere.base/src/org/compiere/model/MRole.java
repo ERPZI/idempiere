@@ -44,6 +44,8 @@ import org.compiere.util.Ini;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trace;
+import org.compiere.util.Util;
+import org.compiere.wf.MWorkflow;
 
 /**
  *	Role Model.
@@ -61,7 +63,7 @@ public final class MRole extends X_AD_Role
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8952907008982481439L;
+	private static final long serialVersionUID = -4649095180532036099L;
 
 	/**
 	 * 	Get Default (Client) Role
@@ -902,7 +904,7 @@ public final class MRole extends X_AD_Role
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
-				Integer ii = new Integer(rs.getInt(1));
+				Integer ii = Integer.valueOf(rs.getInt(1));
 				m_tableAccessLevel.put(ii, rs.getString(2));
 				String tableName = rs.getString(3); 
 				m_tableName.put(tableName, ii);
@@ -1345,7 +1347,7 @@ public final class MRole extends X_AD_Role
 		//	AccessLevel
 		//		1 = Org - 2 = Client - 4 = System
 		//		3 = Org+Client - 6 = Client+System - 7 = All
-		String roleAccessLevel = (String)m_tableAccessLevel.get(new Integer(AD_Table_ID));
+		String roleAccessLevel = (String)m_tableAccessLevel.get(Integer.valueOf(AD_Table_ID));
 		if (roleAccessLevel == null)
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("NO - No AccessLevel - AD_Table_ID=" + AD_Table_ID);
@@ -1542,14 +1544,14 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer winId = new Integer(rs.getInt(1));
+					Integer winId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(3))) {
 						// inactive window on direct access
 						if (m_windowAccess.containsKey(winId)) {
 							m_windowAccess.remove(winId);
 						}
 					} else {
-						directAccess.put(winId, new Boolean("Y".equals(rs.getString(2))));
+						directAccess.put(winId, Boolean.valueOf("Y".equals(rs.getString(2))));
 					}
 				}
 			}
@@ -1627,14 +1629,14 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer procId = new Integer(rs.getInt(1));
+					Integer procId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(3))) {
 						// inactive process on direct access
 						if (m_processAccess.containsKey(procId)) {
 							m_processAccess.remove(procId);
 						}
 					} else {
-						directAccess.put(procId, new Boolean("Y".equals(rs.getString(2))));
+						directAccess.put(procId, Boolean.valueOf("Y".equals(rs.getString(2))));
 					}
 				}
 			}
@@ -1649,6 +1651,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_processAccess", mergeAccess(getAccessMap("m_processAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_processAccess.get(AD_Process_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MProcess process = MProcess.get(getCtx(), AD_Process_ID);
+			if (! isAccessLevelCompatible(process.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible process " + process.getName());
+				m_processAccess.remove(AD_Process_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getProcessAccess
 
@@ -1707,14 +1717,14 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer taskId = new Integer(rs.getInt(1));
+					Integer taskId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(3))) {
 						// inactive task on direct access
 						if (m_taskAccess.containsKey(taskId)) {
 							m_taskAccess.remove(taskId);
 						}
 					} else {
-						directAccess.put(taskId, new Boolean("Y".equals(rs.getString(2))));
+						directAccess.put(taskId, Boolean.valueOf("Y".equals(rs.getString(2))));
 					}
 				}
 			}
@@ -1729,6 +1739,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_taskAccess", mergeAccess(getAccessMap("m_taskAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_taskAccess.get(AD_Task_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MTask task = new MTask(getCtx(), AD_Task_ID, get_TrxName());
+			if (! isAccessLevelCompatible(task.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible task " + task.getName());
+				m_taskAccess.remove(AD_Task_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getTaskAccess
 
@@ -1787,14 +1805,14 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer formId = new Integer(rs.getInt(1));
+					Integer formId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(3))) {
 						// inactive form on direct access
 						if (m_formAccess.containsKey(formId)) {
 							m_formAccess.remove(formId);
 						}
 					} else {
-						directAccess.put(formId, new Boolean("Y".equals(rs.getString(2))));
+						directAccess.put(formId, Boolean.valueOf("Y".equals(rs.getString(2))));
 					}
 				}
 			}
@@ -1809,6 +1827,14 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_formAccess", mergeAccess(getAccessMap("m_formAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_formAccess.get(AD_Form_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MForm form = new MForm(getCtx(), AD_Form_ID, get_TrxName());
+			if (! isAccessLevelCompatible(form.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible form " + form.getName());
+				m_formAccess.remove(AD_Form_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
 	}	//	getFormAccess
 
@@ -1867,14 +1893,14 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer formId = new Integer(rs.getInt(1));
+					Integer formId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(3))) {
 						// inactive workflow on direct access
 						if (m_workflowAccess.containsKey(formId)) {
 							m_workflowAccess.remove(formId);
 						}
 					} else {
-						directAccess.put(formId, new Boolean("Y".equals(rs.getString(2))));
+						directAccess.put(formId, Boolean.valueOf("Y".equals(rs.getString(2))));
 					}
 				}
 			}
@@ -1889,8 +1915,16 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_workflowAccess", mergeAccess(getAccessMap("m_workflowAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_workflowAccess.get(AD_Workflow_ID);
+		if (retValue != null && retValue.booleanValue()) {
+			MWorkflow workflow = MWorkflow.get(getCtx(), AD_Workflow_ID);
+			if (! isAccessLevelCompatible(workflow.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible workflow " + workflow.getName());
+				m_workflowAccess.remove(AD_Workflow_ID);
+				retValue = null;
+			}
+		}
 		return retValue;
-	}	//	getTaskAccess
+	}	//	getWorkflowAccess
 
 	
 	/*************************************************************************
@@ -3137,7 +3171,7 @@ public final class MRole extends X_AD_Role
 				pstmt.setInt(1, getAD_Role_ID());
 				rs = pstmt.executeQuery();
 				while (rs.next()) {
-					Integer infoId = new Integer(rs.getInt(1));
+					Integer infoId = Integer.valueOf(rs.getInt(1));
 					if ("N".equals(rs.getString(2))) {
 						// inactive info on direct access
 						if (m_infoAccess.containsKey(infoId)) {
@@ -3159,6 +3193,16 @@ public final class MRole extends X_AD_Role
 			setAccessMap("m_infoAccess", mergeAccess(getAccessMap("m_infoAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_infoAccess.get(AD_InfoWindow_ID);
+		/* Info Window doesn't have AccessLevel
+		if (retValue != null && retValue.booleanValue()) {
+			MInfoWindow infoWindow = new MInfoWindow(getCtx(), AD_InfoWindow_ID, get_TrxName());
+			if (! isAccessLevelCompatible(infoWindow.getAccessLevel())) {
+				log.warning("Role " + getName() + " has assigned access incompatible info window " + infoWindow.getName());
+				m_infoAccess.remove(AD_InfoWindow_ID);
+				retValue = null;
+			}
+		}
+		*/
 		return retValue;
 	}
 
@@ -3177,7 +3221,7 @@ public final class MRole extends X_AD_Role
 					+ "       AND (iwa.AD_Role_ID = ? OR iwa.AD_Role_ID IN"
 					+ "       		(SELECT ri.Included_Role_ID FROM AD_Role_Included ri WHERE ri.IsActive='Y' AND ri.AD_Role_ID=?))";
 			int cnt = DB.getSQLValueEx(get_TrxName(), sql, I_M_Product.Table_ID, getAD_Role_ID(), getAD_Role_ID());
-			m_canAccess_Info_Product = new Boolean(cnt > 0);
+			m_canAccess_Info_Product = Boolean.valueOf(cnt > 0);
 
 			// Verify if is excluded in the specific role (it can be allowed in included role and inactive in specific role)
 			if (m_canAccess_Info_Product) {
@@ -3192,10 +3236,99 @@ public final class MRole extends X_AD_Role
 						+ "       AND iwa.AD_Role_ID = ?";
 				int cntInactive = DB.getSQLValueEx(get_TrxName(), sqlInactive, I_M_Product.Table_ID, getAD_Role_ID());
 				if (cntInactive > 0)
-					m_canAccess_Info_Product = new Boolean(false);
+					m_canAccess_Info_Product = Boolean.FALSE;
 			}
 		}
 		return m_canAccess_Info_Product.booleanValue();
+	}
+
+	/**
+	 * 	Get where clause for a role types list
+	 * 	@param roleType - comma separated list of role types, NULL can be used
+	 * 	@param tableName - if table needs to be qualified
+	 *	@return whereClause - return null if roleType is null or empty
+	 */
+	public static String getWhereRoleType(String roleType, String tableName) {
+		if (Util.isEmpty(roleType, true)) {
+			return null;
+		}
+		boolean includeNull = false;
+		String types[] = roleType.split(",");
+		StringBuilder whereClause = new StringBuilder("(");
+		boolean start = true;
+		for (String type : types) {
+			if ("null".equalsIgnoreCase(type)) {
+				includeNull = true;
+			} else {
+				if (start) {
+					if (! Util.isEmpty(tableName)) {
+						whereClause.append(tableName).append(".");
+					}
+					whereClause.append(COLUMNNAME_RoleType).append(" IN (");
+					start = false;
+				} else {
+					whereClause.append(",");
+				}
+				whereClause.append(DB.TO_STRING(type));
+			}
+		}
+		if (! start) {
+			whereClause.append(")");
+		}
+		if (includeNull) {
+			if (! start) {
+				whereClause.append(" OR ");
+			}
+			if (! Util.isEmpty(tableName)) {
+				whereClause.append(tableName).append(".");
+			}
+			whereClause.append(COLUMNNAME_RoleType).append(" IS NULL");
+		}
+		whereClause.append(")");
+		return whereClause.toString();
+	}
+
+	/*
+	 * Verify compatibility of AD_Role.UserLevel vs Access Level
+	 * @param accessLevel the access level of the dictionary object
+	 * @return true if access and user level are compatible
+	 */
+	private boolean isAccessLevelCompatible(String accessLevel) {
+		boolean access = false;
+		switch (getUserLevel()) {
+		case USERLEVEL_System:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_SystemOnly:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_Client:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_ClientOnly:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_Organization:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_Organization:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		case USERLEVEL_ClientPlusOrganization:
+			switch (accessLevel) {
+			case MProcess.ACCESSLEVEL_Organization:
+			case MProcess.ACCESSLEVEL_ClientOnly:
+			case MProcess.ACCESSLEVEL_ClientPlusOrganization:
+			case MProcess.ACCESSLEVEL_SystemPlusClient:
+			case MProcess.ACCESSLEVEL_All:
+				access = true;
+			}
+		}
+		return access;
 	}
 
 }	//	MRole

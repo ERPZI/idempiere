@@ -119,7 +119,6 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Column;
 import org.zkoss.zul.Columns;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Grid;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Window.Mode;
@@ -369,14 +368,14 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         toolbar.enableFind(true);
         adTabbox.evaluate(null);
 
+        toolbar.updateToolbarAccess(adWindowId);
+        updateToolbar();
+        
         if (detailQuery != null && zoomToDetailTab(detailQuery))
         {
         	return true;
         }
 
-        toolbar.updateToolbarAccess(adWindowId);
-        updateToolbar();
-        
         SessionManager.getAppDesktop().updateHelpContext(X_AD_CtxHelp.CTXTYPE_Tab, adTabbox.getSelectedGridTab().getAD_Tab_ID());
 
         return true;
@@ -1811,22 +1810,22 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
     public void onRefresh()
     {
     	GridTab gridTab = adTabbox.getSelectedGridTab();
-    	if (gridTab != null && gridTab.getTableModel() != null)
+    	/*if (gridTab != null && gridTab.getTableModel() != null)
     	{
     		gridTab.getTableModel().resetCacheSortState();
     	}
-    	Column sortColumn = findCurrentSortColumn();
+    	Column sortColumn = findCurrentSortColumn();*/
     	onRefresh(true, false);
-    	if (sortColumn != null)
+    	/*if (sortColumn != null)
     	{
     		sortColumn.setSortDirection("natural");
-    	}
+    	}*/
     	if (gridTab.isSortTab()) { // refresh is not refreshing sort tabs
     		IADTabpanel tabPanel = adTabbox.getSelectedTabpanel();
     		tabPanel.query(false, 0, 0);
     	}
     }
-
+/*
     private Column findCurrentSortColumn() {
 		IADTabpanel iadtabpanel = getADTab().getSelectedTabpanel();
 		if (iadtabpanel instanceof ADTabpanel) {
@@ -1849,7 +1848,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 		return null;
 	}
-
+*/
     /**
      * @see ToolbarListener#onHelp()
      */
@@ -2609,7 +2608,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 			{
 				if (link.endsWith("_ID"))
 					query.addRestriction(link, MQuery.EQUAL,
-						new Integer(Env.getContextAsInt(ctx, curWindowNo, link)));
+						Integer.valueOf(Env.getContextAsInt(ctx, curWindowNo, link)));
 				else
 					query.addRestriction(link, MQuery.EQUAL,
 						Env.getContext(ctx, curWindowNo, link));
@@ -2976,7 +2975,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		Clients.response(new AuScript(script.toString()));
 	}
 
-	private void executeButtonProcess(final IProcessButton wButton,
+	public void executeButtonProcess(final IProcessButton wButton,
 			final boolean startWOasking, final int table_ID, final int record_ID,
 			boolean isProcessMandatory) {
 		/**
@@ -3273,8 +3272,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		popup.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "processButtonPopup");
 		ADTabpanel adtab = (ADTabpanel) adTabbox.getSelectedTabpanel();
 		popup.render(adtab.getToolbarButtons());
-
-		LayoutUtils.openPopupWindow(toolbar.getButton("Process"), popup, "after_start");
+		if (popup.getChildren().size() > 0) {
+			popup.setPage(this.getComponent().getPage());
+			popup.open(getToolbar().getButton("Process"), "after_start");
+		}
 	}
 
 	@Override
