@@ -190,8 +190,10 @@ public class WAcctViewerData
 	{
 		if (Record_ID > 0 && AD_Table_ID == MJournal.Table_ID) {
 			MJournal journal = new MJournal(Env.getCtx(), Record_ID, null);
-			
-			if (journal != null) {
+			//MPo, 10/5/19 
+			//Resolve conflict with public repo so all Accounting Schemas are shown if "Post to multiple accounting schemes"=Y
+			if (journal != null && !journal.isZI_IsPostedToAllSchemas()) {
+			//	
 				ASchemas = new MAcctSchema[1];
 				ASchemas[0] = MAcctSchema.get(Env.getCtx(), journal.getC_AcctSchema_ID());
 				ASchema = ASchemas[0];
