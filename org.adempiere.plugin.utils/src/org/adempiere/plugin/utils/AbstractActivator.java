@@ -43,7 +43,7 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 	protected BundleContext context;
 	protected ServiceTracker<IDictionaryService, IDictionaryService> serviceTracker;
 	protected IDictionaryService service;
-	private   String trxName = "";
+	private String trxName = null;
 	private ProcessInfo m_processInfo = null;
 	private IProcessUI m_processUI = null;
 
@@ -54,7 +54,7 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 			service.merge(context, zipfile);
 			success = true;
 		} else {
-			logger.log(Level.SEVERE, "The file was previously installed: " + zipfile.getName());
+			logger.log(Level.WARNING, "The file was previously installed: " + zipfile.getName());
 		}
 
 		return success;
@@ -77,7 +77,7 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 				addLog(Level.SEVERE, "Could not find an IDictionaryService to process the zip files");
 			}
 		} else {
-			addLog(Level.SEVERE, "The file was previously installed: " + zipfile.getName());
+			addLog(Level.WARNING, "The file was previously installed: " + zipfile.getName());
 			success = true;
 		}
 
@@ -87,8 +87,17 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 	protected boolean installedPackage(String version) {
 		StringBuilder where = new StringBuilder("AD_Client_ID=? AND Name=? AND PK_Status='Completed successfully'");
 		List<Object> params = new ArrayList<Object>();
-		params.add(Env.getAD_Client_ID(Env.getCtx()));
-		params.add(getName());
+		String fileName = getName();
+		int clientId = Env.getAD_Client_ID(Env.getCtx());
+		if (version == null) {
+			String [] parts = fileName.split("_");
+			String clientValue = parts[1];
+			clientId = DB.getSQLValueEx(null, "SELECT AD_Client_ID FROM AD_Client WHERE Value=?", clientValue);
+			if (clientId < 0)
+				clientId = 0;
+		}
+		params.add(clientId);
+		params.add(fileName);
 		if (version != null) {
 			where.append(" AND PK_Version LIKE ?");
 			params.add(version +  "%");
@@ -107,15 +116,24 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 
 		while(maxAttempts > 0 && !lockAcquired) {
 			maxAttempts --;
-			if (getDBLock(timeout))
-				lockAcquired = true;
+			if (logger.isLoggable(Level.INFO)) logger.log(Level.INFO, "Acquiring lock with timeout " + timeout + " for " + getName() + " / remaining attempts " + maxAttempts);
+			try {
+				if (getDBLock(timeout))
+					lockAcquired = true;
+			} catch (Exception e) {
+				// Timeout throws DBException, ignore and try again
+				releaseLock();
+			}
 		}
 
 		return lockAcquired;
 	}
 
 	public void releaseLock() {
-		Trx.get(trxName, false).close();
+		if (trxName != null) {
+			Trx.get(trxName, false).close();
+			trxName = null;
+		}
 	}
 
 	private boolean getDBLock(int timeout) throws AdempiereSystemError {
@@ -139,6 +157,10 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 
 	public void setProcessInfo(ProcessInfo processInfo) {
 		m_processInfo  = processInfo;
+	}
+
+	public ProcessInfo getProcessInfo() {
+		return m_processInfo;
 	}
 
 	public void setProcessUI(IProcessUI processUI) {

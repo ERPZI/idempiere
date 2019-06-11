@@ -25,14 +25,15 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelectionLine
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181017L;
+
+	private static final long serialVersionUID = 20190106L;
 
     /** Standard Constructor */
     public X_C_PaySelectionLine (Properties ctx, int C_PaySelectionLine_ID, String trxName)

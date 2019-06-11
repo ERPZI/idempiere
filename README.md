@@ -11,4 +11,4 @@ COMMUNITY LEADER
 
 Redhuan D. Oon
 
-Ruud was here.
+Ruud was here .

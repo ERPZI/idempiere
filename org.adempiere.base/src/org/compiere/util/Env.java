@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -58,6 +59,7 @@ import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookupCache;
 import org.compiere.model.MQuery;
+import org.compiere.model.MRefList;
 import org.compiere.model.MRole;
 import org.compiere.model.MSession;
 import org.compiere.model.MSysConfig;
@@ -1144,6 +1146,45 @@ public final class Env
 		return Language.getLoginLanguage();
 	}	//	getLanguage
 
+	/**
+	 * @param ctx
+	 * @return Language
+	 */
+	public static Language getLocaleLanguage(Properties ctx) {
+		Locale locale = getLocale(ctx);
+		Language language = Env.getLanguage(ctx);
+		if (!language.getLocale().equals(locale)) {
+			Language tmp = Language.getLanguage(locale.toString());
+			String adLanguage = language.getAD_Language();
+			language = new Language(tmp.getName(), adLanguage, tmp.getLocale(), tmp.isDecimalPoint(),
+	    			tmp.getDateFormat().toPattern(), tmp.getMediaSize());
+		}
+		return language;
+	}
+
+	public static final String LOCALE = "#Locale";
+	/**
+	 * @param ctx
+	 * @return Locale
+	 */
+	public static Locale getLocale(Properties ctx) {
+		String value = Env.getContext(ctx, Env.LOCALE);
+        Locale locale = null;
+        if (value != null && value.length() > 0)
+        {
+	        String[] components = value.split("\\_");
+	        String language = components.length > 0 ? components[0] : "";
+	        String country = components.length > 1 ? components[1] : "";
+	        locale = new Locale(language, country);
+        }
+        else
+        {
+        	locale = Env.getLanguage(ctx).getLocale();
+        }
+
+        return locale;
+	}
+
 	public static ArrayList<String> getSupportedLanguages()
 	{
 		ArrayList<String> AD_Languages = new ArrayList<String>();
@@ -1646,6 +1687,12 @@ public final class Env
 										}
 									}
 								}
+							} else if (v instanceof String && !Util.isEmpty((String) v) && !Util.isEmpty(foreignTable) && foreignTable.equals(MRefList.Table_Name) && !Util.isEmpty(format)) {
+								int refID = colToken.getAD_Reference_Value_ID();
+								if (format.equals("Name"))
+									outStr.append(MRefList.getListName(getCtx(), refID, (String) v));
+								else if (format.equals("Description"))
+									outStr.append(MRefList.getListDescription(getCtx(), DB.getSQLValueStringEx(null, "SELECT Name FROM AD_Reference WHERE AD_Reference_ID = ?", refID), (String) v));
 							} else if (v instanceof Date) {
 								SimpleDateFormat df = new SimpleDateFormat(format);
 								outStr.append(df.format((Date)v));

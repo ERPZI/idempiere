@@ -1025,7 +1025,7 @@ public class GridTable extends AbstractTableModel
 			}
 		}
 		return null;
-	}	//	getKeyID
+	}	//	getUUID
 
 	/**
 	 *	Get Key ColumnName
@@ -1302,8 +1302,8 @@ public class GridTable extends AbstractTableModel
 
 		//  Save old value
 		m_oldValue = new Object[3];
-		m_oldValue[0] = new Integer(row);
-		m_oldValue[1] = new Integer(col);
+		m_oldValue[0] = Integer.valueOf(row);
+		m_oldValue[1] = Integer.valueOf(col);
 		m_oldValue[2] = oldValue;
 
 		//	Set Data item
@@ -1893,7 +1893,7 @@ public class GridTable extends AbstractTableModel
 								if (dd instanceof Integer)
 									iii = (Integer)dd;
 								else
-									iii = new Integer(dd.toString());
+									iii = Integer.valueOf(dd.toString());
 								if (encrypted)
 									iii = (Integer)encrypt(iii, getAD_Client_ID());
 								if (manualUpdate)
@@ -3241,7 +3241,7 @@ public class GridTable extends AbstractTableModel
 				//	Integer, ID, Lookup
 				if (displayType == DisplayType.Integer || (DisplayType.isID(displayType) && !(columnName.equals("EntityType") || columnName.equals("AD_Language"))))
 				{
-					rowData[j] = new Integer(rs.getInt(j+1));	//	Integer
+					rowData[j] = Integer.valueOf(rs.getInt(j+1));	//	Integer
 					if (rs.wasNull())
 						rowData[j] = null;
 				}
@@ -3260,7 +3260,7 @@ public class GridTable extends AbstractTableModel
 					String str = rs.getString(j+1);
 					if (field.isEncryptedColumn())
 						str = (String)decrypt(str, getAD_Client_ID(rs));
-					rowData[j] = new Boolean ("Y".equals(str));	//	Boolean
+					rowData[j] = Boolean.valueOf("Y".equals(str));	//	Boolean
 				}
 				//	LOB
 				else if (DisplayType.isLOB(displayType))
@@ -3627,12 +3627,12 @@ public class GridTable extends AbstractTableModel
 		}	//	run
 
 		private void doRun() {
-			openResultSet();
-			if (m_rs == null)
-				return;
-
 			try
 			{
+				openResultSet();
+				if (m_rs == null)
+					return;
+
 				while (m_rs.next())
 				{
 					if (Thread.interrupted())

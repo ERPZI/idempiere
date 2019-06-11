@@ -68,7 +68,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -9210893813732918522L;
+	private static final long serialVersionUID = -3191227310812025813L;
 
 	/**
 	 * 	Get Payments Of BPartner
@@ -247,7 +247,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 */
 	public static MInvoice get (Properties ctx, int C_Invoice_ID)
 	{
-		Integer key = new Integer (C_Invoice_ID);
+		Integer key = Integer.valueOf(C_Invoice_ID);
 		MInvoice retValue = (MInvoice) s_cache.get (key);
 		if (retValue != null)
 			return retValue;
@@ -729,7 +729,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		}
 		m_lines = null;
 	}	//	renumberLines
-
+	
 	/**
 	 * 	Copy Lines From other Invoice.
 	 *	@param otherInvoice invoice
@@ -737,7 +737,19 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 * 	@param setOrder set order links
 	 *	@return number of lines copied
 	 */
-	public int copyLinesFrom (MInvoice otherInvoice, boolean counter, boolean setOrder)
+	public int copyLinesFrom (MInvoice otherInvoice, boolean counter, boolean setOrder){
+		return copyLinesFrom (otherInvoice, counter, setOrder, true);
+	}
+
+	/**
+	 * 	Copy Lines From other Invoice.
+	 *	@param otherInvoice invoice
+	 * 	@param counter create counter links
+	 * 	@param setOrder set order links
+	 *  @param copyClientOrg copy also Client and Org
+	 *	@return number of lines copied
+	 */
+	public int copyLinesFrom (MInvoice otherInvoice, boolean counter, boolean setOrder, boolean copyClientOrg)
 	{
 		if (isProcessed() || isPosted() || otherInvoice == null)
 			return 0;
@@ -747,7 +759,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		{
 			MInvoiceLine line = new MInvoiceLine (getCtx(), 0, get_TrxName());
 			MInvoiceLine fromLine = fromLines[i];
-			if (counter)	//	header
+			if (counter || !copyClientOrg)	//	header
 				PO.copyValues (fromLine, line, getAD_Client_ID(), getAD_Org_ID());
 			else
 				PO.copyValues (fromLine, line, fromLine.getAD_Client_ID(), fromLine.getAD_Org_ID());
@@ -1871,7 +1883,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 							return DocAction.STATUS_Invalid;
 						}
 						matchPO++;
-						if (!po.isPosted() && po.getM_InOutLine_ID() > 0) // match po don't post if receipt is not assigned, and it doesn't create avg po record
+						if (!po.isPosted())
 							addDocsPostProcess(po);
 						
 						MMatchInv[] matchInvoices = MMatchInv.getInvoiceLine(getCtx(), line.getC_InvoiceLine_ID(), get_TrxName());
@@ -2248,7 +2260,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				counter.setDocAction(counterDT.getDocAction());
 				// added AdempiereException by zuhri
 				if (!counter.processIt(counterDT.getDocAction()))
-					throw new AdempiereException("Failed when processing document - " + counter.getProcessMsg());
+					throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + counter.getProcessMsg());
 				// end added
 				counter.saveEx(get_TrxName());
 			}
@@ -2561,7 +2573,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		rLine.saveEx();
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
 		// end added
 		alloc.saveEx();
 		

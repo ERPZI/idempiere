@@ -747,7 +747,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		// Calculate values
 		if (valCofinantare.signum() == 0 && valTert.signum() == 0)
 		{
-			// Values éˆ¥å¬§ï¿½åª“ave never been set, so put everything on their own financing
+			// Values Ã©Ë†Â¥Ã¥Â¬Â§Ã¯Â¿Â½Ã¥Âªâ€œave never been set, so put everything on their own financing
 			valCofinantare = assetCost;
 			valTert = Env.ZERO;
 		}
@@ -809,7 +809,4 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			return false;
 		return is_ValueChanged(index);
 	}
-	
-	
-
 }	//	MDepreciationWorkfile

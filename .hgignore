@@ -7,6 +7,9 @@ alpn-boot.jar
 .sonarlint
 org.adempiere.webstore/bin
 org.idempiere.hazelcast.service.config/bin
+*/target
+runtime-server.product
+org.idempiere.fitnesse.server/FitNesseRoot
 syntax: regexp
 ^adempiere$
 ^org\.adempiere\.install/lib$
@@ -69,8 +72,8 @@ syntax: regexp
 ^work/.*$
 ^hazelcast\.xml$
 
-swingclient.product.*
-server.product.*
+swingclient.product.*\.launch
+server.product.*\.launch
 
 ^org\.zkoss\.zk\.library/bin$
 \.class$

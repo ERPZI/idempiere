@@ -39,18 +39,18 @@ import org.compiere.util.DisplayType;
  */
 public class MSysConfig extends X_AD_SysConfig
 {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2617379167881737860L;
-	//private static final long serialVersionUID = 8623809160538454497L;
+	private static final long serialVersionUID = -3144528502974306817L;
 
 	public static final String ADDRESS_VALIDATION = "ADDRESS_VALIDATION";
     public static final String ALERT_SEND_ATTACHMENT_AS_XLS = "ALERT_SEND_ATTACHMENT_AS_XLS";
     public static final String ALLOCATION_DESCRIPTION = "ALLOCATION_DESCRIPTION";
     public static final String ALLOW_APPLY_PAYMENT_TO_CREDITMEMO = "ALLOW_APPLY_PAYMENT_TO_CREDITMEMO";
     public static final String ALLOW_OVER_APPLIED_PAYMENT = "ALLOW_OVER_APPLIED_PAYMENT";
-    public static final String ALogin_ShowOneRole = "ALogin_ShowOneRole";
+    public static final String ALogin_ShowDate = "ALogin_ShowDate";
+    public static final String ALogin_ShowOneRole = "ALogin_ShowOneRole"; // deprecated
     public static final String APPLICATION_DATABASE_VERSION = "APPLICATION_DATABASE_VERSION";
     public static final String APPLICATION_DATABASE_VERSION_SHOWN = "APPLICATION_DATABASE_VERSION_SHOWN";
     public static final String APPLICATION_HOST_SHOWN = "APPLICATION_HOST_SHOWN";   
@@ -60,7 +60,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String APPLICATION_MAIN_VERSION = "APPLICATION_MAIN_VERSION";
     public static final String APPLICATION_MAIN_VERSION_SHOWN = "APPLICATION_MAIN_VERSION_SHOWN";
     public static final String APPLICATION_OS_INFO_SHOWN = "APPLICATION_OS_INFO_SHOWN";
-	public static final String APPLICATION_URL = "APPLICATION_URL";
+    public static final String APPLICATION_URL = "APPLICATION_URL";
     public static final String ATTACH_EMBEDDED_2PACK = "ATTACH_EMBEDDED_2PACK";
     public static final String AUTO_ASSIGN_ROLE_TO_CREATOR_USER = "AUTO_ASSIGN_ROLE_TO_CREATOR_USER";
     public static final String AUTOMATIC_PACKIN_FOLDERS = "AUTOMATIC_PACKIN_FOLDERS";
@@ -73,6 +73,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String BACKGROUND_JOB_MAX_IN_SYSTEM = "BACKGROUND_JOB_MAX_IN_SYSTEM";
     public static final String BACKGROUND_JOB_MAX_PER_CLIENT = "BACKGROUND_JOB_MAX_PER_CLIENT";
     public static final String BACKGROUND_JOB_MAX_PER_USER = "BACKGROUND_JOB_MAX_PER_USER";
+	public static final String BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES = "BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES";
     public static final String CALENDAR_ALTERNATE_TIMEZONE = "CALENDAR_ALTERNATE_TIMEZONE";
     public static final String CASH_AS_PAYMENT = "CASH_AS_PAYMENT";
     public static final String CHANGE_PASSWORD_MUST_DIFFER = "CHANGE_PASSWORD_MUST_DIFFER";
@@ -81,6 +82,9 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String CLIENT_ACCOUNTING = "CLIENT_ACCOUNTING";
     public static final String DEFAULT_COA_PATH = "DEFAULT_COA_PATH";
     public static final String DEFAULT_ENTITYTYPE = "DEFAULT_ENTITYTYPE"; // used as default in entity type columns with get_sysconfig
+	public static final String DB_READ_REPLICA_NORMAL_MAX_ITERATIONS = "DB_READ_REPLICA_NORMAL_MAX_ITERATIONS";
+	public static final String DB_READ_REPLICA_NORMAL_TIMEOUT_IN_MILLISECONDS = "DB_READ_REPLICA_NORMAL_TIMEOUT_IN_MILLISECONDS";
+	public static final String DB_READ_REPLICA_URLS = "DB_READ_REPLICA_URLS";
     public static final String DICTIONARY_ID_COMMENTS = "DICTIONARY_ID_COMMENTS";
     public static final String DICTIONARY_ID_PASSWORD = "DICTIONARY_ID_PASSWORD";
     public static final String DICTIONARY_ID_USE_CENTRALIZED_ID = "DICTIONARY_ID_USE_CENTRALIZED_ID";
@@ -100,6 +104,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String Invoice_ReverseUseNewNumber = "Invoice_ReverseUseNewNumber";
     public static final String JASPER_SWAP_MAX_PAGES = "JASPER_SWAP_MAX_PAGES";
     public static final String LASTRUN_RECORD_COUNT = "LASTRUN_RECORD_COUNT";
+	public static final String LDAP_TYPE = "LDAP_TYPE";
     public static final String LOCATION_MAPS_DESTINATION_ADDRESS = "LOCATION_MAPS_DESTINATION_ADDRESS";
     public static final String LOCATION_MAPS_ROUTE_PREFIX = "LOCATION_MAPS_ROUTE_PREFIX";
     public static final String LOCATION_MAPS_SOURCE_ADDRESS = "LOCATION_MAPS_SOURCE_ADDRESS";
@@ -142,7 +147,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String SYSTEM_IN_MAINTENANCE_MODE = "SYSTEM_IN_MAINTENANCE_MODE";
     public static final String SYSTEM_INSERT_CHANGELOG = "SYSTEM_INSERT_CHANGELOG";
     public static final String SYSTEM_NATIVE_SEQUENCE = "SYSTEM_NATIVE_SEQUENCE";
-	public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
+    public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
     public static final String TRACE_ALL_TRX_CONNECTION_GET = "TRACE_ALL_TRX_CONNECTION_GET";
     public static final String TWOPACK_COMMIT_DDL = "2PACK_COMMIT_DDL";
     public static final String TWOPACK_HANDLE_TRANSLATIONS = "2PACK_HANDLE_TRANSLATIONS";
@@ -151,6 +156,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String USER_LOCKING_MAX_INACTIVE_PERIOD_DAY = "USER_LOCKING_MAX_INACTIVE_PERIOD_DAY";
     public static final String USER_LOCKING_MAX_LOGIN_ATTEMPT = "USER_LOCKING_MAX_LOGIN_ATTEMPT";
     public static final String USER_LOCKING_MAX_PASSWORD_AGE_DAY = "USER_LOCKING_MAX_PASSWORD_AGE_DAY";
+    public static final String USER_LOCKING_PASSWORD_NOTIFY_DAY = "USER_LOCKING_PASSWORD_NOTIFY_DAY";
     public static final String USER_PASSWORD_HASH = "USER_PASSWORD_HASH";
     public static final String VALIDATE_MATCHING_TO_ORDERED_QTY = "VALIDATE_MATCHING_TO_ORDERED_QTY";
     public static final String WEBUI_LOGOURL = "WEBUI_LOGOURL";
@@ -175,6 +181,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_LOGO_SMALL = "ZK_LOGO_SMALL";
     public static final String ZK_MAX_UPLOAD_SIZE = "ZK_MAX_UPLOAD_SIZE";
     public static final String ZK_MOBILE_PAGING_SIZE = "ZK_MOBILE_PAGING_SIZE";
+    public static final String ZK_PAGING_DETAIL_SIZE = "ZK_PAGING_DETAIL_SIZE";
     public static final String ZK_PAGING_SIZE = "ZK_PAGING_SIZE";
     public static final String ZK_REPORT_FORM_OUTPUT_TYPE = "ZK_REPORT_FORM_OUTPUT_TYPE";
     public static final String ZK_REPORT_JASPER_OUTPUT_TYPE = "ZK_REPORT_JASPER_OUTPUT_TYPE";
@@ -183,6 +190,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_ROOT_FOLDER_BROWSER = "ZK_ROOT_FOLDER_BROWSER";
     public static final String ZK_SEQ_DEFAULT_VALUE_PANEL = "ZK_SEQ_DEFAULT_VALUE_PANEL";
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
+    public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
     public static final String ZK_THEME = "ZK_THEME";
     public static final String ZOOM_ACROSS_QUERY_TIMEOUT = "ZOOM_ACROSS_QUERY_TIMEOUT";
 

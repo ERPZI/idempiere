@@ -17,6 +17,7 @@
 package org.compiere.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
@@ -59,7 +60,7 @@ public class MMatchPO extends X_M_MatchPO
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3669451656879485463L;
+	private static final long serialVersionUID = 487498668807522050L;
 
 	/**
 	 * 	Get PO Match with order/invoice
@@ -341,7 +342,7 @@ public class MMatchPO extends X_M_MatchPO
 		}
 	}
 	
-	private static MMatchPO create(Properties ctx, MInvoiceLine iLine,
+	protected static MMatchPO create(Properties ctx, MInvoiceLine iLine,
 			MInOutLine sLine, int C_OrderLine_ID, Timestamp dateTrx,
 			BigDecimal qty, String trxName) {
 		MMatchPO retValue = null;
@@ -631,13 +632,13 @@ public class MMatchPO extends X_M_MatchPO
 	}	//	create
 	
 
-	private MMatchInv m_matchInv;
+	protected MMatchInv m_matchInv;
 
 	/**
 	 * Register the match inv created for immediate accounting purposes
 	 * @param matchInv
 	 */
-	private void setMatchInvCreated(MMatchInv matchInv) {
+	protected void setMatchInvCreated(MMatchInv matchInv) {
 		m_matchInv = matchInv;
 	}
 
@@ -732,13 +733,13 @@ public class MMatchPO extends X_M_MatchPO
 	}	//	MMatchPO
 	
 	/** Invoice Changed			*/
-	private boolean m_isInvoiceLineChange = false;
+	protected boolean m_isInvoiceLineChange = false;
 	/** InOut Changed			*/
-	private boolean m_isInOutLineChange = false;
+	protected boolean m_isInOutLineChange = false;
 	/** Order Line				*/
-	private MOrderLine		m_oLine = null;
+	protected MOrderLine		m_oLine = null;
 	/** Invoice Line			*/
-	private MInvoiceLine	m_iLine = null;
+	protected MInvoiceLine	m_iLine = null;
 	
 	
 	/**
@@ -948,7 +949,7 @@ public class MMatchPO extends X_M_MatchPO
 					BigDecimal poAmt = poPrice.multiply(getQty());
 					BigDecimal maxTolerance = poAmt.multiply(mt);
 					maxTolerance = maxTolerance.abs()
-						.divide(Env.ONEHUNDRED, 2, BigDecimal.ROUND_HALF_UP);
+						.divide(Env.ONEHUNDRED, 2, RoundingMode.HALF_UP);
 					difference = difference.abs();
 					boolean ok = difference.compareTo(maxTolerance) <= 0;
 					if (log.isLoggable(Level.CONFIG)) log.config("Difference=" + getPriceMatchDifference() 
@@ -1288,7 +1289,7 @@ public class MMatchPO extends X_M_MatchPO
 			this.saveEx();
 
 			// auto create new matchpo if have invoice line
-			if ( reversal.getC_InvoiceLine_ID() > 0)
+			if ( reversal.getC_InvoiceLine_ID() > 0 && reversal.getM_InOutLine_ID() > 0 )
 			{
 				MMatchPO[] matchPOs = MMatchPO.getOrderLine(reversal.getCtx(), reversal.getC_OrderLine_ID(), reversal.get_TrxName());
 				BigDecimal matchQty = getQty();

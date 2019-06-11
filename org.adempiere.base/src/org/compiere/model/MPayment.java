@@ -1529,7 +1529,7 @@ public class MPayment extends X_C_Payment
 				pstmt.setInt(1, getC_Invoice_ID());
 				rs = pstmt.executeQuery();
 				if (rs.next())
-					documentSO = new Boolean ("Y".equals(rs.getString(1)));
+					documentSO = Boolean.valueOf("Y".equals(rs.getString(1)));
 			}
 			catch (Exception e)
 			{
@@ -1556,7 +1556,7 @@ public class MPayment extends X_C_Payment
 				pstmt.setInt(1, getC_Order_ID());
 				rs = pstmt.executeQuery();
 				if (rs.next())
-					documentSO = new Boolean ("Y".equals(rs.getString(1)));
+					documentSO = Boolean.valueOf("Y".equals(rs.getString(1)));
 			}
 			catch (Exception e)
 			{
@@ -1594,7 +1594,7 @@ public class MPayment extends X_C_Payment
 									return false;
 								}
 							} else {
-								documentSO = new Boolean ("Y".equals(rs.getString(1)));
+								documentSO = Boolean.valueOf("Y".equals(rs.getString(1)));
 							}
 						}
 					}
@@ -1625,7 +1625,7 @@ public class MPayment extends X_C_Payment
 			pstmt.setInt(1, getC_DocType_ID());
 			rs = pstmt.executeQuery();
 			if (rs.next())
-				paymentSO = new Boolean ("Y".equals(rs.getString(1)));
+				paymentSO = Boolean.valueOf("Y".equals(rs.getString(1)));
 		}
 		catch (Exception e)
 		{
@@ -1861,7 +1861,7 @@ public class MPayment extends X_C_Payment
 				order.set_TrxName(get_TrxName());
 				// added AdempiereException by zuhri 
 				if (!order.processIt (X_C_Order.DOCACTION_WaitComplete))
-					throw new AdempiereException("Failed when processing document - " + order.getProcessMsg());
+					throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + order.getProcessMsg());
 				// end added
 				m_processMsg = order.getProcessMsg();
 				order.saveEx(get_TrxName());
@@ -2302,7 +2302,7 @@ public class MPayment extends X_C_Payment
 		}
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
 		// end added
 		m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
 		return alloc.save(get_TrxName());
@@ -2337,7 +2337,7 @@ public class MPayment extends X_C_Payment
 		aLine.saveEx(get_TrxName());
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
 		// end added
 		alloc.saveEx(get_TrxName());
 		m_justCreatedAllocInv = alloc;
@@ -2436,7 +2436,7 @@ public class MPayment extends X_C_Payment
 			if(alloc.processIt(DocAction.ACTION_Complete))
 				ok = alloc.save(get_TrxName());
 			else
-				throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+				throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
 			// end added by zuhri
 			m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
 			allocList.add(alloc);
@@ -2724,7 +2724,7 @@ public class MPayment extends X_C_Payment
 		
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
-			throw new AdempiereException("Failed when processing document - " + alloc.getProcessMsg());
+			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
 		// end added
 		alloc.saveEx(get_TrxName());
 		//			

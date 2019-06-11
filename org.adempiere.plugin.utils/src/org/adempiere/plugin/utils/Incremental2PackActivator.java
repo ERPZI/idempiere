@@ -118,6 +118,8 @@ public class Incremental2PackActivator extends AbstractActivator {
 				
 		//2Pack_1.0.0.zip, 2Pack_1.0.1.zip, etc
 		Enumeration<URL> urls = context.getBundle().findEntries("/META-INF", "2Pack_*.zip", false);
+		if (urls == null)
+			return;
 		while(urls.hasMoreElements()) {
 			URL u = urls.nextElement();
 			String version = extractVersionString(u);
@@ -157,7 +159,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 							}
 						}
 						if (patch) {
-							System.out.println("Patch Meta Data for " + getName() + " " + entry.version + " ...");
+							logger.log(Level.WARNING, "Patch Meta Data for " + getName() + " " + entry.version + " ...");
 							
 							X_AD_Package_Imp pi = new X_AD_Package_Imp(Env.getCtx(), 0, trx.getTrxName());
 							pi.setName(getName());
@@ -175,7 +177,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 				trx.commit(true);
 			} catch (Exception e) {
 				trx.rollback();
-				logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				logger.log(Level.WARNING, e.getLocalizedMessage(), e);
 			} finally {
 				trx.close();
 			}
@@ -197,12 +199,13 @@ public class Incremental2PackActivator extends AbstractActivator {
 						}
 					}
 				}
-				releaseLock();
 			} else {
-				logger.log(Level.SEVERE, "Could not acquire the DB lock to install:" + getName());
+				logger.log(Level.WARNING, "Could not acquire the DB lock to install:" + getName());
 			}
 		} catch (AdempiereSystemError e) {
 			e.printStackTrace();
+		} finally {
+			releaseLock();
 		}
 	}
 
@@ -220,7 +223,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 			MSession.get(Env.getCtx(), true);
 			String path = packout.getPath();
 			String suffix = "_"+path.substring(path.lastIndexOf("2Pack_"));
-			System.out.println("Installing " + getName() + " " + path + " ...");
+			logger.log(Level.WARNING, "Installing " + getName() + " " + path + " ...");
 			FileOutputStream zipstream = null;
 			try {
 				// copy the resource to a temporary file to process it with 2pack
@@ -236,7 +239,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 				if (!merge(zipfile, extractVersionString(packout)))
 					return false;
 			} catch (Throwable e) {
-				logger.log(Level.SEVERE, "Pack in failed.", e);
+				logger.log(Level.WARNING, "Pack in failed.", e);
 				return false;
 			} finally{
 				if (zipstream != null) {
@@ -245,7 +248,7 @@ public class Incremental2PackActivator extends AbstractActivator {
 					} catch (Exception e2) {}
 				}
 			}
-			System.out.println(getName() + " " + packout.getPath() + " installed");
+			logger.log(Level.WARNING, getName() + " " + packout.getPath() + " installed");
 		} 
 		return true;
 	}

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for GL_Journal
  *  @author iDempiere (generated) 
- *  @version Release 5.1
+ *  @version Release 6.2
  */
 public interface I_GL_Journal 
 {
@@ -497,15 +497,28 @@ public interface I_GL_Journal
     /** Column name ZI_DocumentSplitting */
     public static final String COLUMNNAME_ZI_DocumentSplitting = "ZI_DocumentSplitting";
 
-	/** Set Create 0-Balance lines.
-	  * Create 0-Balance lines
+	/** Set Create zero-Balance lines.
+	  * Create zero-Balance lines
 	  */
 	public void setZI_DocumentSplitting (String ZI_DocumentSplitting);
 
-	/** Get Create 0-Balance lines.
-	  * Create 0-Balance lines
+	/** Get Create zero-Balance lines.
+	  * Create zero-Balance lines
 	  */
 	public String getZI_DocumentSplitting();
+
+    /** Column name ZI_isHardFail */
+    public static final String COLUMNNAME_ZI_isHardFail = "ZI_isHardFail";
+
+	/** Set Hard Fail.
+	  * Hard Fail
+	  */
+	public void setZI_isHardFail (boolean ZI_isHardFail);
+
+	/** Get Hard Fail.
+	  * Hard Fail
+	  */
+	public boolean isZI_isHardFail();
 
     /** Column name ZI_IsPostedToAllSchemas */
     public static final String COLUMNNAME_ZI_IsPostedToAllSchemas = "ZI_IsPostedToAllSchemas";

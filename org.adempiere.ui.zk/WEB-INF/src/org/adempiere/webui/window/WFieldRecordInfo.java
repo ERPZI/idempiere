@@ -292,9 +292,9 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 			else if (column.getAD_Reference_ID() == DisplayType.Integer)
 			{
 				if (OldValue != null)
-					showOldValue = m_intFormat.format (new Integer (OldValue));
+					showOldValue = m_intFormat.format (Integer.valueOf(OldValue));
 				if (NewValue != null)
-					showNewValue = m_intFormat.format (new Integer (NewValue));
+					showNewValue = m_intFormat.format (Integer.valueOf(NewValue));
 			}
 			else if (DisplayType.isNumeric (column.getAD_Reference_ID ()))
 			{
@@ -383,7 +383,10 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 	public static void addMenu(WEditorPopupMenu popupMenu) {
 		Menuitem changeLogItem = new Menuitem();
         changeLogItem.setLabel(Msg.getElement(Env.getCtx(), "AD_ChangeLog_ID"));
-        changeLogItem.setImage(ThemeManager.getThemeResource("images/ChangeLog16.png"));
+        if (ThemeManager.isUseFontIconForImage())
+        	changeLogItem.setIconSclass("z-icon-ChangeLog");
+        else
+        	changeLogItem.setImage(ThemeManager.getThemeResource("images/ChangeLog16.png"));
         changeLogItem.setAttribute(WEditorPopupMenu.EVENT_ATTRIBUTE, WEditorPopupMenu.CHANGE_LOG_EVENT);
         changeLogItem.addEventListener(Events.ON_CLICK, popupMenu);
         

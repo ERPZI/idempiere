@@ -26,14 +26,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for GL_Journal
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_GL_Journal extends PO implements I_GL_Journal, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190201L;
+	private static final long serialVersionUID = 20190510L;
 
     /** Standard Constructor */
     public X_GL_Journal (Properties ctx, int GL_Journal_ID, String trxName)
@@ -829,21 +829,44 @@ public class X_GL_Journal extends PO implements I_GL_Journal, I_Persistent
 		return bd;
 	}
 
-	/** Set Create 0-Balance lines.
+	/** Set Create zero-Balance lines.
 		@param ZI_DocumentSplitting 
-		Create 0-Balance lines
+		Create zero-Balance lines
 	  */
 	public void setZI_DocumentSplitting (String ZI_DocumentSplitting)
 	{
 		set_Value (COLUMNNAME_ZI_DocumentSplitting, ZI_DocumentSplitting);
 	}
 
-	/** Get Create 0-Balance lines.
-		@return Create 0-Balance lines
+	/** Get Create zero-Balance lines.
+		@return Create zero-Balance lines
 	  */
 	public String getZI_DocumentSplitting () 
 	{
 		return (String)get_Value(COLUMNNAME_ZI_DocumentSplitting);
+	}
+
+	/** Set Hard Fail.
+		@param ZI_isHardFail 
+		Hard Fail
+	  */
+	public void setZI_isHardFail (boolean ZI_isHardFail)
+	{
+		throw new IllegalArgumentException ("ZI_isHardFail is virtual column");	}
+
+	/** Get Hard Fail.
+		@return Hard Fail
+	  */
+	public boolean isZI_isHardFail () 
+	{
+		Object oo = get_Value(COLUMNNAME_ZI_isHardFail);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Post to multiple accounting schemes.

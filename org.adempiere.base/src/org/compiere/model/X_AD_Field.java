@@ -25,14 +25,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Field
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_AD_Field extends PO implements I_AD_Field, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171031L;
+	private static final long serialVersionUID = 20190106L;
 
     /** Standard Constructor */
     public X_AD_Field (Properties ctx, int AD_Field_ID, String trxName)
@@ -966,6 +966,20 @@ public class X_AD_Field extends PO implements I_AD_Field, I_Persistent
 	public String getObscureType () 
 	{
 		return (String)get_Value(COLUMNNAME_ObscureType);
+	}
+
+	/** Set Placeholder.
+		@param Placeholder Placeholder	  */
+	public void setPlaceholder (String Placeholder)
+	{
+		set_Value (COLUMNNAME_Placeholder, Placeholder);
+	}
+
+	/** Get Placeholder.
+		@return Placeholder	  */
+	public String getPlaceholder () 
+	{
+		return (String)get_Value(COLUMNNAME_Placeholder);
 	}
 
 	/** Set Read Only Logic.

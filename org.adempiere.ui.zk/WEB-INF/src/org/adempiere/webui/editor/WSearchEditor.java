@@ -53,6 +53,7 @@ import org.compiere.model.Lookup;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRole;
+import org.compiere.model.MTable;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -174,22 +175,35 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		if (columnName.equals("C_BPartner_ID"))
 		{
 			popupMenu = new WEditorPopupMenu(true, true, isShowPreference(), true, true, false, lookup);
-			imageUrl = ThemeManager.getThemeResource("images/BPartner16.png");
+			if (ThemeManager.isUseFontIconForImage())
+				imageUrl = "z-icon-BPartner";
+			else
+				imageUrl = ThemeManager.getThemeResource("images/BPartner16.png");
 		}
 		else if (columnName.equals("M_Product_ID"))
 		{
 			popupMenu = new WEditorPopupMenu(true, true, isShowPreference(), false, false, false, lookup);
-			imageUrl = ThemeManager.getThemeResource("images/Product16.png");
+			if (ThemeManager.isUseFontIconForImage())
+				imageUrl = "z-icon-Product";
+			else
+				imageUrl = ThemeManager.getThemeResource("images/Product16.png");
 		}
 		else
 		{
 			popupMenu = new WEditorPopupMenu(true, true, isShowPreference(), false, false, false, lookup);
-			imageUrl = ThemeManager.getThemeResource("images/PickOpen16.png");
+			if (ThemeManager.isUseFontIconForImage())
+				imageUrl = "z-icon-More";
+			else
+				imageUrl = ThemeManager.getThemeResource("images/PickOpen16.png");
 		}
-		getComponent().getButton().setImage(imageUrl);
+		if (ThemeManager.isUseFontIconForImage())
+			getComponent().getButton().setIconSclass(imageUrl);
+		else
+			getComponent().getButton().setImage(imageUrl);
 
 		addChangeLogMenu(popupMenu);
-
+		if (gridField != null)
+			getComponent().getTextbox().setPlaceholder(gridField.getPlaceholder());
 		return;
 	}
 
@@ -379,7 +393,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		if (log.isLoggable(Level.FINE))
 			log.fine(getColumnName() + " - Unique ID=" + id);
 
-		actionCombo(new Integer(id));          //  data binding
+		actionCombo(Integer.valueOf(id));          //  data binding
 		
 		Searchbox comp = getComponent();
 		Component parent = comp.getParent();
@@ -403,7 +417,10 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 	private void resetButtonState() {
 		getComponent().getButton().setEnabled(true);
-		getComponent().getButton().setImage(imageUrl);
+		if (ThemeManager.isUseFontIconForImage())
+			getComponent().getButton().setIconSclass(imageUrl);
+		else
+			getComponent().getButton().setImage(imageUrl);
 		getComponent().invalidate();
 	}
 
@@ -457,10 +474,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		if(!getComponent().isEnabled())
 			return;
 
-		int zoomWindowId = gridField != null ? lookup.getZoom(Env.isSOTrx(Env.getCtx(), gridField.getWindowNo())) : lookup.getZoom(Env.isSOTrx(Env.getCtx()));
-		final WQuickEntry vqe = new WQuickEntry (lookup.getWindowNo(), zoomWindowId);
-		if (vqe.getQuickFields()<=0)
-			return;
+		int zoomWindowId = -1;
+
 		int Record_ID = 0;
 
 		//  if update, get current value
@@ -472,6 +487,21 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 				Record_ID = Integer.parseInt(value.toString());
 		}
 
+    	if (lookup.getColumnName() != null) {
+    		String tableName = lookup.getColumnName().substring(0, lookup.getColumnName().indexOf("."));
+    		int zoomWinID = Env.getZoomWindowID(MTable.getTable_ID(tableName), Record_ID, lookup.getWindowNo());
+    		if (zoomWinID > 0)
+    			zoomWindowId = zoomWinID;
+    	}
+    	
+    	if (zoomWindowId < 0) {
+    		zoomWindowId = gridField != null ? lookup.getZoom(Env.isSOTrx(Env.getCtx(), gridField.getWindowNo())) : lookup.getZoom(Env.isSOTrx(Env.getCtx()));
+    	}
+
+    	int tabNo = gridField != null && gridField.getGridTab() != null ? gridField.getGridTab().getTabNo() : 0;
+    	final WQuickEntry vqe = new WQuickEntry(lookup.getWindowNo(), tabNo, zoomWindowId);
+		if (vqe.getQuickFields()<=0)
+			return;
 		vqe.loadRecord (Record_ID);
 
 		final int finalRecord_ID = Record_ID;
@@ -491,9 +521,9 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 					return;
 
 				//  Maybe new Record - put in cache
-				lookup.getDirect(new Integer(result), false, true);
-				setValue(new Integer(result));
-				actionCombo (new Integer(result));      //  data binding
+				lookup.getDirect(Integer.valueOf(result), false, true);
+				setValue(Integer.valueOf(result));
+				actionCombo (Integer.valueOf(result));      //  data binding
 				lookup.refresh();
 
 				//setValue(getValue());				
@@ -765,7 +795,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 
 		String query = "SELECT t.TableName, c.ColumnName "
 			+ "FROM AD_Column c "
-			+ " INNER JOIN AD_Table t ON (c.AD_Table_ID=t.AD_Table_ID AND t.IsView='N') "
+			+ " INNER JOIN AD_Table t ON (c.AD_Table_ID=t.AD_Table_ID) "
 			+ "WHERE (c.ColumnName IN ('DocumentNo', 'Value', 'Name') OR c.IsIdentifier='Y')"
 			+ " AND c.AD_Reference_ID IN (10,14)"
 			+ " AND EXISTS (SELECT * FROM AD_Column cc WHERE cc.AD_Table_ID=t.AD_Table_ID"
@@ -954,9 +984,15 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			super.onPageAttached(newpage, oldpage);
 			if (newpage != null) {
 				String w = "try{var btn=jq('#'+this.parent.uuid+' @button').zk.$();}catch(err){}";
-				getTextbox().setWidgetListener("onChange", "try{"+w+"btn.setImage(\""
+				if (ThemeManager.isUseFontIconForImage()) {
+					String sclass = "z-icon-spinner z-icon-spin";
+					getTextbox().setWidgetListener("onChange", "try{"+w+"btn.setIconSclass('" + sclass + "');"
+							+ "btn.setDisabled(true, {adbs: false, skip: false});}catch(err){}");
+				} else {
+					getTextbox().setWidgetListener("onChange", "try{"+w+"btn.setImage(\""
 						+ Executions.getCurrent().encodeURL(IN_PROGRESS_IMAGE)+"\");"
 						+ "btn.setDisabled(true, {adbs: false, skip: false});}catch(err){}");
+				}
 			}
 		}
 		

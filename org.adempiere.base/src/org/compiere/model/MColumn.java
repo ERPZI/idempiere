@@ -51,7 +51,7 @@ public class MColumn extends X_AD_Column
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6914331394933196295L;
+	private static final long serialVersionUID = 7215660422231054443L;
 
 	public static MColumn get (Properties ctx, int AD_Column_ID)
 	{
@@ -66,7 +66,7 @@ public class MColumn extends X_AD_Column
 	 */
 	public static MColumn get(Properties ctx, int AD_Column_ID, String trxName)
 	{
-		Integer key = new Integer (AD_Column_ID);
+		Integer key = Integer.valueOf(AD_Column_ID);
 		MColumn retValue = (MColumn) s_cache.get (key);
 		if (retValue != null) {
 			retValue.set_TrxName(trxName);
@@ -207,7 +207,27 @@ public class MColumn extends X_AD_Column
 		String s = getColumnSQL();
 		return s != null && s.length() > 0;
 	}	//	isVirtualColumn
-	
+
+	/**
+	 * 	Is Virtual DB Column
+	 *	@return true if virtual DB column
+	 */
+	public boolean isVirtualDBColumn()
+	{
+		String s = getColumnSQL();
+		return s != null && s.length() > 0 && !s.startsWith("@SQL=");
+	}	//	isVirtualDBColumn
+
+	/**
+	 * 	Is Virtual UI Column
+	 *	@return true if virtual UI column
+	 */
+	public boolean isVirtualUIColumn()
+	{
+		String s = getColumnSQL();
+		return s != null && s.length() > 0 && s.startsWith("@SQL=");
+	}	//	isVirtualUIColumn
+
 	/**
 	 * 	Is the Column Encrypted?
 	 *	@return true if encrypted
@@ -254,7 +274,29 @@ public class MColumn extends X_AD_Column
 				return false;
 			}
 		}
-		
+
+		/* IDEMPIERE-3509, IDEMPIERE-3902
+		 * removing this validation
+		 * it affects adversely PackIn process that can create the table later
+		if ( displayType == DisplayType.TableDir ||
+			(displayType == DisplayType.Search && getAD_Reference_Value_ID() <= 0))
+		{
+			// verify the foreign table exists
+			String foreignTableName = getReferenceTableName();
+			MTable foreignTable = MTable.get(getCtx(), foreignTableName);
+			if (foreignTable == null || foreignTable.getAD_Table_ID() <= 0) {
+				log.saveError("Error", Msg.getMsg(getCtx(), "NotReferenceTable", new Object[] {getColumnName()}));
+				return false;
+			}
+		}
+		*/
+
+		if (displayType == DisplayType.Table && getAD_Reference_Value_ID() <= 0)
+		{
+			log.saveError("FillMandatory", Msg.getElement(getCtx(), "AD_Reference_Value_ID"));
+			return false;
+		}
+
 		if (displayType != DisplayType.Button)
 		{
 			if (! ISTOOLBARBUTTON_Window.equals(getIsToolbarButton()))
@@ -305,6 +347,8 @@ public class MColumn extends X_AD_Column
 				setIsMandatory(false);
 			if (isUpdateable())
 				setIsUpdateable(false);
+			if (isVirtualUIColumn() && isIdentifier())
+				setIsIdentifier(false);
 		}
 		//	Updateable
 		if (isParent() || isKey())
@@ -371,6 +415,24 @@ public class MColumn extends X_AD_Column
 			} else {
 				setFormatPattern(null);
 			}
+		}
+
+		// IDEMPIERE-1615 Multiple key columns lead to data corruption or data loss
+		if ((is_ValueChanged(COLUMNNAME_IsKey) || is_ValueChanged(COLUMNNAME_IsActive)) && isKey() && isActive()) {
+			int cnt = DB.getSQLValueEx(get_TrxName(),
+					"SELECT COUNT(*) FROM AD_Column WHERE AD_Table_ID=? AND IsActive='Y' AND AD_Column_ID!=? AND IsKey='Y'",
+					getAD_Table_ID(), getAD_Column_ID());
+			if (cnt > 0) {
+				log.saveError("Error", Msg.getMsg(getCtx(), "KeyColumnAlreadyDefined"));
+				return false;
+			}
+		}
+
+		if (isSelectionColumn() && getSeqNoSelection() <= 0) {
+			int next = DB.getSQLValueEx(get_TrxName(),
+					"SELECT ROUND((COALESCE(MAX(SeqNoSelection),0)+10)/10,0)*10 FROM AD_Column WHERE AD_Table_ID=? AND IsSelectionColumn='Y' AND IsActive='Y'",
+					getAD_Table_ID());
+			setSeqNoSelection(next);
 		}
 
 		return true;
@@ -741,7 +803,7 @@ public class MColumn extends X_AD_Column
 			foreignTable = "M_AttributeSetInstance";
 		} else if (DisplayType.Assignment == refid) {
 			foreignTable = "S_ResourceAssignment";
-		} else if (DisplayType.Image == refid) {
+		} else if (DisplayType.Image == refid && !"BinaryData".equals(getColumnName())) {
 			foreignTable = "AD_Image";
 		} else if (DisplayType.Chart == refid) {
 			foreignTable = "AD_Chart";
@@ -1144,6 +1206,15 @@ public class MColumn extends X_AD_Column
 				+ "       AND ( t.IsAdvancedTab = 'Y' OR f.IsAdvancedField = 'Y' )";
 		int cnt = DB.getSQLValueEx(get_TrxName(), sql, getAD_Column_ID());
 		return cnt > 0;
+	}
+
+	public String getColumnSQL(boolean nullForUI) {
+		String query = getColumnSQL();
+		if (query != null && query.length() > 0) {
+			if (query.startsWith("@SQL=") && nullForUI)
+				query = "NULL";
+		}
+		return query;
 	}
 
 }	//	MColumn

@@ -55,13 +55,18 @@ public class WAccountEditor extends WEditor implements ContextMenuListener
 	public WAccountEditor(GridField gridField)
 	{
 		super(new Combinationbox(), gridField);
-		getComponent().setButtonImage(ThemeManager.getThemeResource("images/Account16.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			getComponent().getButton().setIconSclass("z-icon-Account");
+		else
+			getComponent().setButtonImage(ThemeManager.getThemeResource("images/Account16.png"));
 
 		m_mAccount = new MAccountLookup (gridField.getVO().ctx, gridField.getWindowNo());
 		
 		popupMenu = new WEditorPopupMenu(false, false, true);
 		popupMenu.addMenuListener(this);
 		addChangeLogMenu(popupMenu);
+		if (gridField != null)
+			getComponent().getTextbox().setPlaceholder(gridField.getPlaceholder());
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class WAccountEditor extends WEditor implements ContextMenuListener
 	{
 		if (m_mAccount.C_ValidCombination_ID == 0)
 			return null;
-		return new Integer (m_mAccount.C_ValidCombination_ID);
+		return Integer.valueOf(m_mAccount.C_ValidCombination_ID);
 	}
 
 	@Override
@@ -196,7 +201,7 @@ public class WAccountEditor extends WEditor implements ContextMenuListener
 		//	We have a Value
 		if (C_ValidCombination_ID > 0)
 		{
-			Integer newValue = new Integer(C_ValidCombination_ID);
+			Integer newValue = Integer.valueOf(C_ValidCombination_ID);
 			Object oldValue = m_value;
 			m_value = newValue;
 			ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), oldValue, newValue);

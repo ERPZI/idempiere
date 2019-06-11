@@ -23,15 +23,15 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_InfoColumn
  *  @author iDempiere (generated) 
- *  @version Release 5.1 - $Id$ */
+ *  @version Release 6.2 - $Id$ */
 public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171031L;
-	//private static final long serialVersionUID = 20180719L;
+
+	private static final long serialVersionUID = 20190106L;
 
     /** Standard Constructor */
     public X_AD_InfoColumn (Properties ctx, int AD_InfoColumn_ID, String trxName)
@@ -54,6 +54,8 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 			setIsMandatory (false);
 // N
 			setIsQueryCriteria (false);
+			setIsReadOnly (true);
+// Y
 			setName (null);
 			setSelectClause (null);
 			setSeqNo (0);
@@ -371,6 +373,23 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		return (String)get_Value(COLUMNNAME_Help);
 	}
 
+	/** Set Input field validation.
+		@param InputFieldValidation 
+		Input field validaton query
+	  */
+	public void setInputFieldValidation (String InputFieldValidation)
+	{
+		set_Value (COLUMNNAME_InputFieldValidation, InputFieldValidation);
+	}
+
+	/** Get Input field validation.
+		@return Input field validaton query
+	  */
+	public String getInputFieldValidation () 
+	{
+		return (String)get_Value(COLUMNNAME_InputFieldValidation);
+	}
+
 	/** Set Centrally maintained.
 		@param IsCentrallyMaintained 
 		Information maintained in System Element table
@@ -515,6 +534,30 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
 		return false;
 	}
 
+	/** Set Read Only.
+		@param IsReadOnly 
+		Field is read only
+	  */
+	public void setIsReadOnly (boolean IsReadOnly)
+	{
+		set_Value (COLUMNNAME_IsReadOnly, Boolean.valueOf(IsReadOnly));
+	}
+
+	/** Get Read Only.
+		@return Field is read only
+	  */
+	public boolean isReadOnly () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsReadOnly);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Name.
 		@param Name 
 		Alphanumeric identifier of the entity
@@ -539,6 +582,20 @@ public class X_AD_InfoColumn extends PO implements I_AD_InfoColumn, I_Persistent
     {
         return new KeyNamePair(get_ID(), getName());
     }
+
+	/** Set Placeholder.
+		@param Placeholder Placeholder	  */
+	public void setPlaceholder (String Placeholder)
+	{
+		set_Value (COLUMNNAME_Placeholder, Placeholder);
+	}
+
+	/** Get Placeholder.
+		@return Placeholder	  */
+	public String getPlaceholder () 
+	{
+		return (String)get_Value(COLUMNNAME_Placeholder);
+	}
 
 	/** Set Query Function.
 		@param QueryFunction 
