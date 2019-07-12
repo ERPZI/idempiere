@@ -595,7 +595,7 @@ public final class Fact
 			line.setDocumentInfo (m_doc, null);
 			line.setPostingType (m_postingType);
 			line.setAccount (m_acctSchema, m_acctSchema.getCurrencyBalancing_Acct());
-			
+						
 			//  Amount
 			line.setAmtSource(m_doc.getC_Currency_ID(), Env.ZERO, Env.ZERO);
 			line.convert();
@@ -622,6 +622,13 @@ public final class Fact
 					drAmt = difference.negate();
 			}
 			line.setAmtAcct(drAmt, crAmt);
+			//MPo, 9/11/17 balancing posting to CB to be posted with PrCtr, use largest BS if exists, or largest PL
+			if (line.getUser1_ID() < 1) {
+				System.out.println("MPo, BEFORE" + line.getAccount_ID() + " =" + line.getUser1_ID());
+				line.setUser1_ID((BSline != null && BSline.getUser1_ID() > 0) ? BSline.getUser1_ID() : PLline.getUser1_ID());
+				System.out.println("MPo, AFTER" + line.getAccount_ID() + " =" + line.getUser1_ID());
+			}
+			//
 			if (log.isLoggable(Level.FINE)) log.fine(line.toString());
 			m_lines.add(line);
 		}

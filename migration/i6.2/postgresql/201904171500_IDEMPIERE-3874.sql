@@ -24,4 +24,3 @@ UPDATE AD_Column SET AD_Val_Rule_ID=200134,Updated=TO_TIMESTAMP('2019-04-17 16:1
 
 SELECT register_migration_script('201904171500_IDEMPIERE-3874.sql') FROM dual
 ;
-

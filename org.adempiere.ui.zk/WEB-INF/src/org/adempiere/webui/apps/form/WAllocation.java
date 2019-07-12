@@ -73,6 +73,9 @@ import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
+//MPo, 26/5/18
+import org.compiere.model.MTable;
+//
 
 import static org.adempiere.webui.ClientInfo.*;
 
@@ -153,6 +156,10 @@ public class WAllocation extends Allocation
 	private Checkbox autoWriteOff = new Checkbox();
 	private Label organizationLabel = new Label();
 	private WTableDirEditor organizationPick;
+	//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr to Allocation selection
+	private Label prctrLabel = new Label();
+	private WSearchEditor prctrSearch;
+	//
 	private int noOfColumn;
 	
 	/**
@@ -203,6 +210,9 @@ public class WAllocation extends Allocation
 		allocCurrencyLabel.setText(".");
 		
 		organizationLabel.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
+		//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr for Allocation Selection
+		prctrLabel.setText(Msg.translate(Env.getCtx(), "User1_ID"));
+		//
 		
 		// parameters layout
 		North north = new North();
@@ -316,6 +326,12 @@ public class WAllocation extends Allocation
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
 		organizationPick.showMenu();		
+		//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr for Allocation Selection
+		row.appendCellChild(prctrLabel.rightAlign());
+		ZKUpdateUtil.setHflex(prctrSearch.getComponent(), "true");
+		row.appendCellChild(prctrSearch.getComponent(),1);
+		prctrSearch.showMenu();
+		//
 		
 		row = rows.newRow();
 		row.appendCellChild(currencyLabel.rightAlign(),1);
@@ -445,6 +461,13 @@ public class WAllocation extends Allocation
 		organizationPick = new WTableDirEditor("AD_Org_ID", true, false, true, lookupOrg);
 		organizationPick.setValue(Env.getAD_Org_ID(Env.getCtx()));
 		organizationPick.addValueChangeListener(this);
+		
+		//MPo, 26/5/18 add original change: 20/8/2016 This is to avoid issues when AD_Column_ID is different in DEV,PROTO,UAT and PROD
+		AD_Column_ID = MTable.get(Env.getCtx(), "ZI_WarehouseToPrCtr").getColumn("User1_ID").getAD_Column_ID();
+		MLookup lookupPrCtr = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
+		prctrSearch = new WSearchEditor("User1_ID", true, false, true, lookupPrCtr);
+		prctrSearch.addValueChangeListener(this);
+		//
 		
 		//  BPartner
 		AD_Column_ID = COLUMN_C_INVOICE_C_BPARTNER_ID;        //  C_Invoice.C_BPartner_ID
@@ -622,6 +645,14 @@ public class WAllocation extends Allocation
 			m_C_BPartner_ID = ((Integer)value).intValue();
 			loadBPartner();
 		}
+		// MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr
+		if (name.equals("User1_ID"))
+		{
+			m_User1_ID = ((Integer)value).intValue();
+			loadBPartner();
+		}
+		//
+		
 		//	Currency
 		else if (name.equals("C_Currency_ID"))
 		{

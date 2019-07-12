@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MConversionRate;
 import org.compiere.model.MJournal;
 import org.compiere.model.MJournalLine;
 import org.compiere.util.Env;
@@ -96,6 +97,7 @@ public class Doc_GLJournal extends Doc
 			list.add(docLine);
 			
 			if (docLine.getC_Currency_ID() != getC_Currency_ID())
+
 				setIsMultiCurrency(true);
 		}
 		//	Return Array
@@ -140,8 +142,10 @@ public class Doc_GLJournal extends Doc
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
 		//	Other Acct Schema
-		if (as.getC_AcctSchema_ID() != m_C_AcctSchema_ID)
-			return facts;
+		//MPo,28/1/19 Post to all schemas the organization is a member of
+		//if (as.getC_AcctSchema_ID() != m_C_AcctSchema_ID)
+		//	return facts;
+		//
 
 		//  create Fact Header
 		Fact fact = new Fact (this, as, m_PostingType);
@@ -161,6 +165,25 @@ public class Doc_GLJournal extends Doc
 									p_lines[i].getAmtSourceDr (),
 									p_lines[i].getAmtSourceCr ());
 				}
+				//MPo,28/1/19 Post to all schemas the organization is a member of
+				else {
+					if( ((MJournal)getPO()).isZI_IsPostedToAllSchemas() ) {
+					BigDecimal amtAcctDr = (MConversionRate.convert (getCtx(),
+					p_lines[i].getAmtSourceDr(), p_lines[i].getC_Currency_ID(), as.getC_Currency_ID(),
+					this.getDateAcct(), p_lines[i].getC_ConversionType_ID(), this.getAD_Client_ID(), this.getAD_Org_ID()));
+					BigDecimal amtAcctCr = (MConversionRate.convert (getCtx(),
+					p_lines[i].getAmtSourceCr(), p_lines[i].getC_Currency_ID(), as.getC_Currency_ID(),
+					this.getDateAcct(), p_lines[i].getC_ConversionType_ID(), this.getAD_Client_ID(), this.getAD_Org_ID()));
+					p_lines[i].setConvertedAmt (as.getC_AcctSchema_ID(), amtAcctDr, amtAcctCr);
+					@SuppressWarnings("unused")
+					FactLine line = fact.createLine (p_lines[i],
+							p_lines[i].getAccount (),
+							p_lines[i].getC_Currency_ID(),
+							p_lines[i].getAmtSourceDr (),
+							p_lines[i].getAmtSourceCr ());
+					}
+				}
+				//
 			}	//	for all lines
 		}
 		else

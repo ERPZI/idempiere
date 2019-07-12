@@ -52,6 +52,9 @@ public class InvoiceGenerateRMA extends SvrProcess
     private int         m_created = 0;
     /** Invoice Date            */
     private Timestamp   m_dateinvoiced = null;
+    //MPo, 8/8/2016 Add Document type
+  	private int 		p_C_DocType_ID = 0;
+  	//
 
     /**
      *  Prepare - e.g., get Parameters.
@@ -69,6 +72,10 @@ public class InvoiceGenerateRMA extends SvrProcess
                 p_Selection = "Y".equals(para[i].getParameter());
             else if (name.equals("DocAction"))
                 p_docAction = (String)para[i].getParameter();
+            //MPo, 8/8/2016 Add Document Type
+			else if (name.equals("DocType"))
+				p_C_DocType_ID = para[i].getParameterAsInt();
+			//
             else
                 log.log(Level.SEVERE, "Unknown Parameter: " + name);
         }
@@ -142,7 +149,11 @@ public class InvoiceGenerateRMA extends SvrProcess
         MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
         invoice.setRMA(rma);
         
-        invoice.setC_DocTypeTarget_ID(docTypeId);
+        //MPo, 8/8/2016 Overwrite document from selected DocType
+        //invoice.setC_DocTypeTarget_ID(docTypeId);
+        invoice.setC_DocTypeTarget_ID(p_C_DocType_ID);
+        invoice.setZI_Branch_ID(rma.getZI_Branch_ID());
+        //
         if (!invoice.save())
         {
             throw new IllegalStateException("Could not create invoice");
@@ -168,6 +179,9 @@ public class InvoiceGenerateRMA extends SvrProcess
             
             MInvoiceLine invLine = new MInvoiceLine(invoice);
             invLine.setRMALine(rmaLine);
+            //MPo, 11/5/17 Copy PrCtr from Invoice Header to Invoice Line
+            invLine.setUser1_ID(invoice.getUser1_ID());
+            //
             
             if (!invLine.save())
             {

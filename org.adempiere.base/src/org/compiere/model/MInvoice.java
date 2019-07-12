@@ -505,8 +505,12 @@ public class MInvoice extends X_C_Invoice implements DocAction
 		//
 		setPaymentRule(order.getPaymentRule());
 		setC_PaymentTerm_ID(order.getC_PaymentTerm_ID());
-		setPOReference(order.getPOReference());
-		setDescription(order.getDescription());
+		//MPo, 14/3/17 
+		//Only populate Order Reference and Description if not populated by user
+		//POReference in vendor invoice used for vendor invoice number
+		if (getPOReference() == null) setPOReference(order.getPOReference());
+		if (getDescription() == null) setDescription(order.getDescription());
+		//
 		setDateOrdered(order.getDateOrdered());
 		//
 		setAD_OrgTrx_ID(order.getAD_OrgTrx_ID());

@@ -334,8 +334,14 @@ public class MInventoryLine extends X_M_InventoryLine
 				return false;
 			}
 		} else if (MDocType.DOCSUBTYPEINV_CostAdjustment.equals(docSubTypeInv)) {
-			int M_ASI_ID = getM_AttributeSetInstance_ID();
 			MProduct product = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
+
+			if (getNewCostPrice().signum() == 0 && product.isStocked()) {
+				log.saveError("FillMandatory", Msg.getElement(getCtx(), COLUMNNAME_NewCostPrice));
+				return false;							
+			}
+			
+			int M_ASI_ID = getM_AttributeSetInstance_ID();
 			MClient client = MClient.get(getCtx());
 			MAcctSchema as = client.getAcctSchema();
 			String costingLevel = product.getCostingLevel(as);

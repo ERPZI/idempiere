@@ -80,12 +80,12 @@ public interface I_T_Aging
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -538,4 +538,126 @@ public interface I_T_Aging
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ZI_DateInvoiced */
+    public static final String COLUMNNAME_ZI_DateInvoiced = "ZI_DateInvoiced";
+
+	/** Set Date Invoiced.
+	  * Date printed on Invoice
+	  */
+	public void setZI_DateInvoiced (Timestamp ZI_DateInvoiced);
+
+	/** Get Date Invoiced.
+	  * Date printed on Invoice
+	  */
+	public Timestamp getZI_DateInvoiced();
+
+    /** Column name ZI_Due121_180 */
+    public static final String COLUMNNAME_ZI_Due121_180 = "ZI_Due121_180";
+
+	/** Set Due 121-180	  */
+	public void setZI_Due121_180 (BigDecimal ZI_Due121_180);
+
+	/** Get Due 121-180	  */
+	public BigDecimal getZI_Due121_180();
+
+    /** Column name ZI_Due181_360 */
+    public static final String COLUMNNAME_ZI_Due181_360 = "ZI_Due181_360";
+
+	/** Set Due 181-360	  */
+	public void setZI_Due181_360 (BigDecimal ZI_Due181_360);
+
+	/** Get Due 181-360	  */
+	public BigDecimal getZI_Due181_360();
+
+    /** Column name ZI_Due361_Plus */
+    public static final String COLUMNNAME_ZI_Due361_Plus = "ZI_Due361_Plus";
+
+	/** Set Due > 361	  */
+	public void setZI_Due361_Plus (BigDecimal ZI_Due361_Plus);
+
+	/** Get Due > 361	  */
+	public BigDecimal getZI_Due361_Plus();
+
+    /** Column name ZI_Due91_120 */
+    public static final String COLUMNNAME_ZI_Due91_120 = "ZI_Due91_120";
+
+	/** Set Due 91-120	  */
+	public void setZI_Due91_120 (BigDecimal ZI_Due91_120);
+
+	/** Get Due 91-120	  */
+	public BigDecimal getZI_Due91_120();
+
+    /** Column name ZI_DunningGrace */
+    public static final String COLUMNNAME_ZI_DunningGrace = "ZI_DunningGrace";
+
+	/** Set Dunning Grace Date	  */
+	public void setZI_DunningGrace (Timestamp ZI_DunningGrace);
+
+	/** Get Dunning Grace Date	  */
+	public Timestamp getZI_DunningGrace();
+
+    /** Column name ZI_PastDue121_180 */
+    public static final String COLUMNNAME_ZI_PastDue121_180 = "ZI_PastDue121_180";
+
+	/** Set Past Due 121-180	  */
+	public void setZI_PastDue121_180 (BigDecimal ZI_PastDue121_180);
+
+	/** Get Past Due 121-180	  */
+	public BigDecimal getZI_PastDue121_180();
+
+    /** Column name ZI_PastDue181_360 */
+    public static final String COLUMNNAME_ZI_PastDue181_360 = "ZI_PastDue181_360";
+
+	/** Set Past Due 181-360	  */
+	public void setZI_PastDue181_360 (BigDecimal ZI_PastDue181_360);
+
+	/** Get Past Due 181-360	  */
+	public BigDecimal getZI_PastDue181_360();
+
+    /** Column name ZI_PastDue361_Plus */
+    public static final String COLUMNNAME_ZI_PastDue361_Plus = "ZI_PastDue361_Plus";
+
+	/** Set Past Due > 361	  */
+	public void setZI_PastDue361_Plus (BigDecimal ZI_PastDue361_Plus);
+
+	/** Get Past Due > 361	  */
+	public BigDecimal getZI_PastDue361_Plus();
+
+    /** Column name ZI_PastDue91_120 */
+    public static final String COLUMNNAME_ZI_PastDue91_120 = "ZI_PastDue91_120";
+
+	/** Set Past Due 91-120	  */
+	public void setZI_PastDue91_120 (BigDecimal ZI_PastDue91_120);
+
+	/** Get Past Due 91-120	  */
+	public BigDecimal getZI_PastDue91_120();
+
+    /** Column name ZI_POReference */
+    public static final String COLUMNNAME_ZI_POReference = "ZI_POReference";
+
+	/** Set Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setZI_POReference (String ZI_POReference);
+
+	/** Get Order Reference.
+	  * Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getZI_POReference();
+
+    /** Column name ZI_User1_ID */
+    public static final String COLUMNNAME_ZI_User1_ID = "ZI_User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setZI_User1_ID (int ZI_User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getZI_User1_ID();
+
+	public org.compiere.model.I_C_ElementValue getZI_User1() throws RuntimeException;
 }

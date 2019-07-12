@@ -280,6 +280,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return (String)get_Value(COLUMNNAME_A_Asset_Type_Value);
 	}
 
+	/** Set Functional Area Key.
+		@param Activity_Value 
+		The key for the functional area
+	  */
+	public void setActivity_Value (String Activity_Value)
+	{
+		set_Value (COLUMNNAME_Activity_Value, Activity_Value);
+	}
+
+	/** Get Functional Area Key.
+		@return The key for the functional area
+	  */
+	public String getActivity_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Activity_Value);
+	}
+
 	/** Set Current Period.
 		@param A_Current_Period Current Period	  */
 	public void setA_Current_Period (int A_Current_Period)
@@ -326,6 +343,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	public BigDecimal getA_Salvage_Value () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_A_Salvage_Value);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Entered Amount.
+		@param AssetAmtEntered Entered Amount	  */
+	public void setAssetAmtEntered (BigDecimal AssetAmtEntered)
+	{
+		set_Value (COLUMNNAME_AssetAmtEntered, AssetAmtEntered);
+	}
+
+	/** Get Entered Amount.
+		@return Entered Amount	  */
+	public BigDecimal getAssetAmtEntered () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AssetAmtEntered);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
@@ -385,6 +419,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_AssetServiceDate);
 	}
 
+	/** Set Source Amount.
+		@param AssetSourceAmt Source Amount	  */
+	public void setAssetSourceAmt (BigDecimal AssetSourceAmt)
+	{
+		set_Value (COLUMNNAME_AssetSourceAmt, AssetSourceAmt);
+	}
+
+	/** Get Source Amount.
+		@return Source Amount	  */
+	public BigDecimal getAssetSourceAmt () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_AssetSourceAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Business Partner Key.
 		@param BPartner_Value 
 		The Key of the Business Partner
@@ -400,6 +451,34 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	public String getBPartner_Value () 
 	{
 		return (String)get_Value(COLUMNNAME_BPartner_Value);
+	}
+
+	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
+			.getPO(getC_Activity_ID(), get_TrxName());	}
+
+	/** Set Functional Area.
+		@param C_Activity_ID 
+		Business Activity
+	  */
+	public void setC_Activity_ID (int C_Activity_ID)
+	{
+		if (C_Activity_ID < 1) 
+			set_Value (COLUMNNAME_C_Activity_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
+	}
+
+	/** Get Functional Area.
+		@return Business Activity
+	  */
+	public int getC_Activity_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartnerSR() throws RuntimeException
@@ -472,6 +551,34 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return (String)get_Value(COLUMNNAME_C_City_Value);
 	}
 
+	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
+			.getPO(getC_Currency_ID(), get_TrxName());	}
+
+	/** Set Currency.
+		@param C_Currency_ID 
+		The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID)
+	{
+		if (C_Currency_ID < 1) 
+			set_Value (COLUMNNAME_C_Currency_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
+	}
+
+	/** Get Currency.
+		@return The Currency for this record
+	  */
+	public int getC_Currency_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
     {
 		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
@@ -498,6 +605,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Currency Key.
+		@param Currency_Value 
+		The key for the currency
+	  */
+	public void setCurrency_Value (String Currency_Value)
+	{
+		set_Value (COLUMNNAME_Currency_Value, Currency_Value);
+	}
+
+	/** Get Currency Key.
+		@return The key for the currency
+	  */
+	public String getCurrency_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Currency_Value);
 	}
 
 	/** Set Account Date.
@@ -761,6 +885,23 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Set Organization Key.
+		@param Org_Value 
+		The key for the organization
+	  */
+	public void setOrg_Value (String Org_Value)
+	{
+		set_Value (COLUMNNAME_Org_Value, Org_Value);
+	}
+
+	/** Get Organization Key.
+		@return The key for the organization
+	  */
+	public String getOrg_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_Org_Value);
+	}
+
 	/** Set Processed.
 		@param Processed 
 		The document has been processed
@@ -915,5 +1056,95 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param User1_ID 
+		User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1) 
+			set_Value (COLUMNNAME_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Profit Center Key.
+		@param User1_Value 
+		The key for the profit center
+	  */
+	public void setUser1_Value (String User1_Value)
+	{
+		set_Value (COLUMNNAME_User1_Value, User1_Value);
+	}
+
+	/** Get Profit Center Key.
+		@return The key for the profit center
+	  */
+	public String getUser1_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_User1_Value);
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser2_ID(), get_TrxName());	}
+
+	/** Set Cost Center.
+		@param User2_ID 
+		User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1) 
+			set_Value (COLUMNNAME_User2_ID, null);
+		else 
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get Cost Center.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Cost Center Key.
+		@param User2_Value 
+		The key for the cost center
+	  */
+	public void setUser2_Value (String User2_Value)
+	{
+		set_Value (COLUMNNAME_User2_Value, User2_Value);
+	}
+
+	/** Get Cost Center Key.
+		@return The key for the cost center
+	  */
+	public String getUser2_Value () 
+	{
+		return (String)get_Value(COLUMNNAME_User2_Value);
 	}
 }

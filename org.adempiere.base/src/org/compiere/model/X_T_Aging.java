@@ -70,6 +70,14 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 			setPastDue91_Plus (Env.ZERO);
 			setPastDueAmt (Env.ZERO);
 			setStatementDate (new Timestamp( System.currentTimeMillis() ));
+			setZI_Due121_180 (Env.ZERO);
+			setZI_Due181_360 (Env.ZERO);
+			setZI_Due361_Plus (Env.ZERO);
+			setZI_Due91_120 (Env.ZERO);
+			setZI_PastDue121_180 (Env.ZERO);
+			setZI_PastDue181_360 (Env.ZERO);
+			setZI_PastDue361_Plus (Env.ZERO);
+			setZI_PastDue91_120 (Env.ZERO);
         } */
     }
 
@@ -134,7 +142,7 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
 			.getPO(getC_Activity_ID(), get_TrxName());	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID 
 		Business Activity
 	  */
@@ -146,7 +154,7 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID () 
@@ -874,5 +882,217 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public String getT_Aging_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_T_Aging_UU);
+	}
+
+	/** Set Date Invoiced.
+		@param ZI_DateInvoiced 
+		Date printed on Invoice
+	  */
+	public void setZI_DateInvoiced (Timestamp ZI_DateInvoiced)
+	{
+		set_ValueNoCheck (COLUMNNAME_ZI_DateInvoiced, ZI_DateInvoiced);
+	}
+
+	/** Get Date Invoiced.
+		@return Date printed on Invoice
+	  */
+	public Timestamp getZI_DateInvoiced () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_ZI_DateInvoiced);
+	}
+
+	/** Set Due 121-180.
+		@param ZI_Due121_180 Due 121-180	  */
+	public void setZI_Due121_180 (BigDecimal ZI_Due121_180)
+	{
+		set_Value (COLUMNNAME_ZI_Due121_180, ZI_Due121_180);
+	}
+
+	/** Get Due 121-180.
+		@return Due 121-180	  */
+	public BigDecimal getZI_Due121_180 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_Due121_180);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Due 181-360.
+		@param ZI_Due181_360 Due 181-360	  */
+	public void setZI_Due181_360 (BigDecimal ZI_Due181_360)
+	{
+		set_Value (COLUMNNAME_ZI_Due181_360, ZI_Due181_360);
+	}
+
+	/** Get Due 181-360.
+		@return Due 181-360	  */
+	public BigDecimal getZI_Due181_360 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_Due181_360);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Due > 361.
+		@param ZI_Due361_Plus Due > 361	  */
+	public void setZI_Due361_Plus (BigDecimal ZI_Due361_Plus)
+	{
+		set_Value (COLUMNNAME_ZI_Due361_Plus, ZI_Due361_Plus);
+	}
+
+	/** Get Due > 361.
+		@return Due > 361	  */
+	public BigDecimal getZI_Due361_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_Due361_Plus);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Due 91-120.
+		@param ZI_Due91_120 Due 91-120	  */
+	public void setZI_Due91_120 (BigDecimal ZI_Due91_120)
+	{
+		set_Value (COLUMNNAME_ZI_Due91_120, ZI_Due91_120);
+	}
+
+	/** Get Due 91-120.
+		@return Due 91-120	  */
+	public BigDecimal getZI_Due91_120 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_Due91_120);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Dunning Grace Date.
+		@param ZI_DunningGrace Dunning Grace Date	  */
+	public void setZI_DunningGrace (Timestamp ZI_DunningGrace)
+	{
+		set_ValueNoCheck (COLUMNNAME_ZI_DunningGrace, ZI_DunningGrace);
+	}
+
+	/** Get Dunning Grace Date.
+		@return Dunning Grace Date	  */
+	public Timestamp getZI_DunningGrace () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_ZI_DunningGrace);
+	}
+
+	/** Set Past Due 121-180.
+		@param ZI_PastDue121_180 Past Due 121-180	  */
+	public void setZI_PastDue121_180 (BigDecimal ZI_PastDue121_180)
+	{
+		set_Value (COLUMNNAME_ZI_PastDue121_180, ZI_PastDue121_180);
+	}
+
+	/** Get Past Due 121-180.
+		@return Past Due 121-180	  */
+	public BigDecimal getZI_PastDue121_180 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PastDue121_180);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Past Due 181-360.
+		@param ZI_PastDue181_360 Past Due 181-360	  */
+	public void setZI_PastDue181_360 (BigDecimal ZI_PastDue181_360)
+	{
+		set_Value (COLUMNNAME_ZI_PastDue181_360, ZI_PastDue181_360);
+	}
+
+	/** Get Past Due 181-360.
+		@return Past Due 181-360	  */
+	public BigDecimal getZI_PastDue181_360 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PastDue181_360);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Past Due > 361.
+		@param ZI_PastDue361_Plus Past Due > 361	  */
+	public void setZI_PastDue361_Plus (BigDecimal ZI_PastDue361_Plus)
+	{
+		set_Value (COLUMNNAME_ZI_PastDue361_Plus, ZI_PastDue361_Plus);
+	}
+
+	/** Get Past Due > 361.
+		@return Past Due > 361	  */
+	public BigDecimal getZI_PastDue361_Plus () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PastDue361_Plus);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Past Due 91-120.
+		@param ZI_PastDue91_120 Past Due 91-120	  */
+	public void setZI_PastDue91_120 (BigDecimal ZI_PastDue91_120)
+	{
+		set_Value (COLUMNNAME_ZI_PastDue91_120, ZI_PastDue91_120);
+	}
+
+	/** Get Past Due 91-120.
+		@return Past Due 91-120	  */
+	public BigDecimal getZI_PastDue91_120 () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PastDue91_120);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Order Reference.
+		@param ZI_POReference 
+		Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public void setZI_POReference (String ZI_POReference)
+	{
+		set_ValueNoCheck (COLUMNNAME_ZI_POReference, ZI_POReference);
+	}
+
+	/** Get Order Reference.
+		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getZI_POReference () 
+	{
+		return (String)get_Value(COLUMNNAME_ZI_POReference);
+	}
+
+	public org.compiere.model.I_C_ElementValue getZI_User1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getZI_User1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param ZI_User1_ID 
+		User defined list element #1
+	  */
+	public void setZI_User1_ID (int ZI_User1_ID)
+	{
+		if (ZI_User1_ID < 1) 
+			set_Value (COLUMNNAME_ZI_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_ZI_User1_ID, Integer.valueOf(ZI_User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getZI_User1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

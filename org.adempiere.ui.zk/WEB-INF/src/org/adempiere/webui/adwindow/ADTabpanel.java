@@ -1926,31 +1926,7 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		}
 		super.onPageDetached(page);
 	}
-
-	void savePreference(String attribute, String value)
-	{
-		int windowId = getGridTab().getAD_Window_ID();
-		int adTabId = getGridTab().getAD_Tab_ID();
-		if (windowId > 0 && adTabId > 0) {
-			Query query = new Query(Env.getCtx(), MTable.get(Env.getCtx(), I_AD_Preference.Table_ID), "AD_Window_ID=? AND Attribute=? AND AD_User_ID=? AND AD_Process_ID IS NULL AND PreferenceFor = 'W'", null);
-			int userId = Env.getAD_User_ID(Env.getCtx());
-			MPreference preference = query.setOnlyActiveRecords(true)
-					.setApplyAccessFilter(true)
-					.setParameters(windowId, adTabId+"|"+attribute, userId)
-					.first();
-			if (preference == null || preference.getAD_Preference_ID() <= 0) {
-				preference = new MPreference(Env.getCtx(), 0, null);
-				preference.setAD_Window_ID(windowId);
-				preference.set_ValueOfColumn("AD_User_ID", userId); // required set_Value for System=0 user
-				preference.setAttribute(adTabId+"|"+attribute);
-			}
-			preference.setValue(value);
-			preference.saveEx();
-			//update current context
-			Env.getCtx().setProperty("P"+windowId+"|"+adTabId+"|"+attribute, value);
-		}
-	}
-
+	
 	protected void onClientInfo() {
 		if (!uiCreated || gridTab == null) return;
 		int numCols=gridTab.getNumColumns();
@@ -1982,4 +1958,29 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
 		
 	}
 
+	void savePreference(String attribute, String value)
+	{
+		int windowId = getGridTab().getAD_Window_ID();
+		int adTabId = getGridTab().getAD_Tab_ID();
+		if (windowId > 0 && adTabId > 0) {
+			Query query = new Query(Env.getCtx(), MTable.get(Env.getCtx(), I_AD_Preference.Table_ID), "AD_Window_ID=? AND Attribute=? AND AD_User_ID=? AND AD_Process_ID IS NULL AND PreferenceFor = 'W'", null);
+			int userId = Env.getAD_User_ID(Env.getCtx());
+			MPreference preference = query.setOnlyActiveRecords(true)
+					.setApplyAccessFilter(true)
+					.setParameters(windowId, adTabId+"|"+attribute, userId)
+					.first();
+			if (preference == null || preference.getAD_Preference_ID() <= 0) {
+				preference = new MPreference(Env.getCtx(), 0, null);
+				preference.setAD_Window_ID(windowId);
+				preference.set_ValueOfColumn("AD_User_ID", userId); // required set_Value for System=0 user
+				preference.setAttribute(adTabId+"|"+attribute);
+			}
+			preference.setValue(value);
+			preference.saveEx();
+			//update current context
+			Env.getCtx().setProperty("P"+windowId+"|"+adTabId+"|"+attribute, value);
+		}
+	}
+
+	
 }

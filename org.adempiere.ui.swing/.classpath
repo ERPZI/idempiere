@@ -14,3 +14,4 @@
 	<classpathentry exported="true" kind="lib" path="lib/swingx.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
+

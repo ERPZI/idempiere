@@ -87,7 +87,9 @@ public abstract class CreateFrom implements ICreateFrom
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
+	//MPo, 18/7/2016 Add PrCtr to loadOrderData
+	//-protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
+	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, int User1_ID)
 	{
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
@@ -111,7 +113,10 @@ public abstract class CreateFrom implements ICreateFrom
 			.append(colBP)
 			.append("=? AND o.IsSOTrx=? AND o.DocStatus IN ('CL','CO') AND o.C_Order_ID IN (SELECT ol.C_Order_ID FROM C_OrderLine ol WHERE ol.QtyOrdered-")
 			.append(column)
-			.append("!=0) ");
+			.append("!=0) ")
+			// Mpo, 18/7/2016
+			.append("AND o.User1_ID=? ");
+			//
 		if(sameWarehouseOnly)
 		{
 			sql = sql.append(" AND o.M_Warehouse_ID=? ");
@@ -125,10 +130,16 @@ public abstract class CreateFrom implements ICreateFrom
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
+			//MPo, 18/7/2016
+			pstmt.setInt(3, User1_ID);
+			//
 			if(sameWarehouseOnly)
 			{
 				//only active for material receipts
-				pstmt.setInt(3, getM_Warehouse_ID());
+				//MPo, 18/7/2016
+				//-pstmt.setInt(3, getM_Warehouse_ID());
+				pstmt.setInt(4, getM_Warehouse_ID());
+				//
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())

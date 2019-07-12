@@ -79,7 +79,7 @@
       <url-pattern>/server/*</url-pattern>
    </servlet-mapping> -->
 	<session-config>
-		<session-timeout>15</session-timeout>
+		<session-timeout>120</session-timeout>
 	</session-config>
 	<mime-mapping>
 		<extension>jar</extension>

@@ -36,17 +36,20 @@ import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
+import org.adempiere.webui.window.WTextEditorDialog;
 import org.compiere.apps.form.FactReconcile;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MTable;
 import org.compiere.model.X_C_ElementValue;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Borderlayout;
@@ -101,6 +104,13 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 	private Label labelBPartner = new Label();
 	private WSearchEditor fieldBPartner = null;
 	
+	//MPo, 14/7/18 add PrCtr and Matchcode to search
+	private Label labelMatchCode = new Label();
+	private Textbox fieldMatchCode = new Textbox();
+	private Label labelPrCtr = new Label();
+	private WSearchEditor fieldPrCtr = null;
+	//
+	
 	// data panel
 	private Label dataStatus = new Label();
 	private WListbox miniTable = ListboxFactory.newDataTable();
@@ -151,7 +161,11 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		labelDateAcct.setText(Msg.translate(Env.getCtx(), "DateAcct"));
 		labelDateAcct2.setText("-");
 		labelProduct.setText(Msg.translate(Env.getCtx(), "M_Product_ID"));
+		//MPo, 14/7/18 Add PrCtr and MatchCode
+		labelMatchCode.setText(Msg.translate(Env.getCtx(), "MatchCode"));
+		labelPrCtr.setText(Msg.translate(Env.getCtx(), "User1_ID"));
 		//
+		
 		labelOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		labelReconciled.setText(" ");
 		isReconciled.setText(Msg.translate(Env.getCtx(), "IsReconciled"));
@@ -209,6 +223,16 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		row.appendCellChild(labelDateAcct2.rightAlign());
 		ZKUpdateUtil.setHflex(fieldDateAcct2.getComponent(), "true");
 		row.appendCellChild(fieldDateAcct2.getComponent(), 2);
+		//MPo, 4/7/18 add PrCtr
+		row = rows.newRow();
+		row.appendCellChild(labelPrCtr.rightAlign());
+		ZKUpdateUtil.setHflex(fieldPrCtr.getComponent(), "true");
+		row.appendCellChild(fieldPrCtr.getComponent(), 2);
+		row.appendCellChild(labelMatchCode.rightAlign());
+		ZKUpdateUtil.setHflex(fieldMatchCode, "true");
+		row.appendCellChild(fieldMatchCode, 2);
+		//
+		
 		row = rows.newRow();
 		row.appendChild(bRefresh);
 		if (ClientInfo.maxWidth(ClientInfo.EXTRA_SMALL_WIDTH-1))
@@ -311,6 +335,12 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 				+ "WHERE ase.C_Element_ID=C_ElementValue.C_Element_ID AND ase.ElementType='AC' "
 				+ "AND ase.C_AcctSchema_ID=@C_AcctSchema_ID@ AND ase.AD_Client_ID=@AD_Client_ID@) ");
 		fieldAccount = new WTableDirEditor("C_ElementValue_ID", false, false, true, lookupAccount);
+		
+		//MPo, 14/7/18 Add PrCtr to selection screen
+		AD_Column_ID = MTable.get(Env.getCtx(), "ZI_WarehouseToPrCtr").getColumn("User1_ID").getAD_Column_ID();
+		MLookup lookupPrCtr = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
+		fieldPrCtr = new WSearchEditor("User1_ID", true, false, true, lookupPrCtr);
+		//
 	}
 	
 	public void loadData(){
@@ -351,6 +381,17 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 			m_DateAcct2 = (Timestamp)fieldDateAcct2.getValue();
 		else
 			m_DateAcct2 = null;
+		
+		//MPo, 14/7/18 add PrCtr & MatchCode to selection
+		if(fieldPrCtr.getValue()!=null)
+			m_PrCtr_ID = (Integer)fieldPrCtr.getValue();
+		else
+			throw new WrongValueException(fieldPrCtr.getComponent(), Msg.translate(Env.getCtx(), "FillMandatory"));
+		if(fieldMatchCode.getValue()!=null && !fieldMatchCode.getValue().isEmpty())
+			m_MatchCode = fieldMatchCode.getValue();
+		else
+			m_MatchCode = null;
+		//
 		//  Set Model
 		Vector<Vector<Object>> data = getData();
 		Vector<String> columnNames = getColumnNames();
