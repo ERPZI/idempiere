@@ -241,6 +241,7 @@ Export-Package: bsh,
  org.joda.time.tz.data.Europe,
  org.joda.time.tz.data.Indian,
  org.joda.time.tz.data.Pacific,
+ org.idempiere.fa.service.api,
  org.idempiere.model
 Comment: Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=1.11))"
