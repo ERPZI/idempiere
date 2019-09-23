@@ -84,9 +84,10 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	//MPo, 18/7/2016
-	//-protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
+	//MPo, 23/9/19
+	//protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID)
 	protected ArrayList<KeyNamePair> loadShipmentData (int C_BPartner_ID, int User1_ID)
+	//eof
 	{
 		String isSOTrxParam = isSOTrx ? "Y":"N";
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
@@ -98,9 +99,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT s.M_InOut_ID,").append(display)
 			.append(" FROM M_InOut s "
 			+ "WHERE s.C_BPartner_ID=? AND s.IsSOTrx=? AND s.DocStatus IN ('CL','CO')"
-			//MPo, 18/7/2016
+			//MPo, 23/9/2019
 			+ " AND s.User1_ID=?"
-			//
+			//eof
 			+ " AND s.M_InOut_ID IN "
 				+ "(SELECT sl.M_InOut_ID FROM M_InOutLine sl");
 			if(!isSOTrx)
@@ -124,12 +125,13 @@ public abstract class CreateFromInvoice extends CreateFrom
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
-			//MPo, 18/7/2016
-			//-pstmt.setInt(3, C_BPartner_ID);
-			//-pstmt.setString(4, isSOTrxParam);
+			//MPo, 23/9/2019
+			//pstmt.setInt(3, C_BPartner_ID);
+			//pstmt.setString(4, isSOTrxParam);
 			pstmt.setInt(3, User1_ID);
 			pstmt.setInt(4, C_BPartner_ID);
 			pstmt.setString(5, isSOTrxParam);
+			//eof
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{
@@ -154,17 +156,18 @@ public abstract class CreateFromInvoice extends CreateFrom
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 */
-	//MPo, 9/8/2016
-	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) 
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) { 
+	//MPo, 23/9/19
+	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) {
+	//eof
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
 				+ "WHERE ISSOTRX='N' AND r.DocStatus in ('CO', 'CL') "
 				+ "AND r.C_BPartner_ID=? "
-				//MPo, 9/8/2016 Add PrCtr to SQL restriction
+				//MPo, 23/9/19
 				+ "AND r.User1_ID=? "
-				//
+				//eof
 				+ "AND NOT EXISTS (SELECT * FROM C_Invoice inv "
 				+ "WHERE inv.M_RMA_ID=r.M_RMA_ID AND inv.DocStatus IN ('CO', 'CL'))";
 
@@ -173,9 +176,9 @@ public abstract class CreateFromInvoice extends CreateFrom
 		try {
 			pstmt = DB.prepareStatement(sqlStmt, null);
 			pstmt.setInt(1, C_BPartner_ID);
-			//MPo, 9/8/2016 Add PrCtr to selection
+			//MPo, 23/9/19 Add PrCtr to selection
 			pstmt.setInt(2, User1_ID);
-			//
+			//eof
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
@@ -382,7 +385,7 @@ public abstract class CreateFromInvoice extends CreateFrom
 	protected void configureMiniTable (IMiniTable miniTable)
 	{
 		miniTable.setColumnClass(0, Boolean.class, false);      //  0-Selection
-		miniTable.setColumnClass(1, BigDecimal.class, true);        //  1-Qty
+		miniTable.setColumnClass(1, BigDecimal.class, false);        //  1-Qty
 		miniTable.setColumnClass(2, String.class, true);        //  2-UOM
 		miniTable.setColumnClass(3, String.class, true);        //  3-Product
 		miniTable.setColumnClass(4, String.class, true);        //  4-VendorProductNo
