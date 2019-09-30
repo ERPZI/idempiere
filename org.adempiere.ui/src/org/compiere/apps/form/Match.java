@@ -325,8 +325,9 @@ public class Match
 			m_qtyColumn = "lin.QtyInvoiced";
 			m_sql.append("SELECT hdr.C_Invoice_ID,hdr.DocumentNo, hdr.DateInvoiced, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.QtyInvoiced,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
-				//+ " ,org.Name, hdr.AD_Org_ID"  //JAVIER
+				//+ " lin.QtyInvoiced,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				+ " CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 25/9/2019 Add PrCtr
+				//+ " CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END,SUM(NVL(mi.Qty,0)), org.Name, hdr.AD_Org_ID "  //JAVIER
 				+ " FROM C_Invoice hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
@@ -340,15 +341,13 @@ public class Match
 				m_sql.append(" AND mi.M_InOutLine_ID  = ").append(Line_ID);
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID,hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
-				//+ ",org.Name, hdr.AD_Org_ID " //JAVIER
+				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
+				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 25/9/2019 Add PrCtr 
 				+ "HAVING "
-				+ (matched ? "0" : "lin.QtyInvoiced")
+				+ (matched ? "0" : "CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END")
 				+ "<>SUM(NVL(mi.Qty,0))";
 				
-				//MPo, 22/7/2016
-				//System.out.println(m_sql);
-				//System.out.println(m_groupBy);
 		}
 		else if (display == MATCH_ORDER)
 		{
