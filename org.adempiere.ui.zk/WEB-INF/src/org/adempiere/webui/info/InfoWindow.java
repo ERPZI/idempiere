@@ -731,7 +731,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				//Xolali - add embeddedTbl to list, add m_sqlembedded to list
 				EmbedWinInfo ewinInfo = new EmbedWinInfo(embedInfo,embeddedTbl,m_sqlEmbedded,relatedInfo.getLinkColumnName(), relatedInfo.getLinkInfoColumn(), relatedInfo.getParentRelatedColumn_ID());
 				embeddedWinList.add(ewinInfo);
-				RelatedInfoWindow relatedInfoWindow = new RelatedInfoWindow(ewinInfo, this, embeddedPaging, s_sqlCount, s_layoutEmbedded);
+				RelatedInfoWindow relatedInfoWindow = new RelatedInfoWindow(ewinInfo, this, embeddedPaging, s_sqlCount, s_layoutEmbedded, editorMap);
 				relatedMap.put(embedInfo.getAD_InfoWindow_ID(), relatedInfoWindow);
 
 				MInfoWindow riw = (MInfoWindow) relatedInfo.getRelatedInfo();
@@ -1633,10 +1633,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         	dataSql = dataSql + " " + otherClause;
         }
         
-        if (indexOrderColumn > -1)
-        	dataSql = dataSql + getUserOrderClause();
-        else
-        	dataSql = dataSql + m_sqlOrder;
+        dataSql = dataSql + getUserOrderClause();
         
         if (end > start && isUseDatabasePaging() && DB.getDatabase().isPagingSupported())
         {
@@ -2630,24 +2627,44 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		public Object getValueAt(int row, int col)
 		{
 			Object val = null;
-			
+
+			int columnIndex = 1;
+			int colFound = 0;
+			for (int idx = 0; idx < getColumnCount(); idx++) {
+				if (isColumnPrinted(idx)) {
+					columnIndex++;
+					colFound++;
+					if (colFound >= col) {
+						break;
+					}
+					if (columnInfos[idx].isKeyPairCol()) {
+						columnIndex++;
+					}
+				}
+			}
+
 			try
 			{
-				val = m_rs.getObject(col + 1); // Col are zero-based, while resultset col are 1 based
+				val = m_rs.getObject(columnIndex);
+				if (columnInfos[col].isKeyPairCol()) {
+					m_rs.getObject(columnIndex+1);
+					if (m_rs.wasNull()) {
+						val = null;
+					}
+				}
 			}
 			catch(SQLException e)
 			{
 				throw new AdempiereException(e);
 			}
-			
+			/* not required - the info window splits the column in key name pairs
 			GridField gridField = columnInfos[col].getGridField();
-			
 			Lookup lookup = gridField.getLookup();
-
-			if (lookup != null)
+			if (val != null && lookup != null)
 			{
 				val = lookup.getDisplay(val);
 			}
+			*/
 			
 			return val; 
 		}

@@ -95,7 +95,7 @@ public class Doc_InOut extends Doc
 					if (orderLine.getLink_OrderLine_ID() > 0) {
 						//	Defer posting if found the linked MR is not posted
 						String sql = "SELECT COUNT(*) FROM M_InOutLine iol WHERE iol.C_OrderLine_ID=? AND EXISTS (SELECT * FROM M_InOut io WHERE io.M_InOut_ID=iol.M_InOut_ID AND io.IsSOTrx='N' AND io.Posted<>'Y')";
-						int count = DB.getSQLValue(getTrxName(), sql, orderLine.getLink_OrderLine_ID());
+						int count = DB.getSQLValueEx(getTrxName(), sql, orderLine.getLink_OrderLine_ID());
 						if (count > 0) {
 							m_deferPosting = true;
 							break;

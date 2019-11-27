@@ -63,6 +63,7 @@ import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.event.WTableModelListener;
 import org.adempiere.webui.factory.InfoManager;
+import org.adempiere.webui.info.InfoWindow;
 import org.adempiere.webui.part.ITabOnSelectHandler;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
@@ -374,6 +375,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	private String              m_sqlUserOrder;
 	/* sql column of infocolumn (can be alias) */
 	protected int              	  indexOrderColumn = -1;
+	protected String              sqlOrderColumn;
 	protected Boolean             isColumnSortAscending = null;
 	/**ValueChange listeners       */
     private ArrayList<ValueChangeListener> listeners = new ArrayList<ValueChangeListener>();
@@ -1041,10 +1043,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
         	int index = sql.lastIndexOf(" WHERE");
         	sql.delete(index, sql.length());
         }
-        if (indexOrderColumn > -1)
-        	sql.append(getUserOrderClause());
-        else
-        	sql.append(m_sqlOrder);
+        
+        sql.append(getUserOrderClause());
+        
         dataSql = Msg.parseTranslation(Env.getCtx(), sql.toString());    //  Variables
         dataSql = MRole.getDefault().addAccessSQL(dataSql, getTableName(),
             MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
@@ -1056,13 +1057,39 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	}
 
 	/**
+	 * column of grid isn't fix, it can change by display logic of column each time load data
+	 * {@link InfoWindow#prepareTable(ColumnInfo[], String, String, String)}
+	 * so need to validate it by compare sql of current sort column
+	 */
+	protected void validateOrderIndex() {
+		if (indexOrderColumn > 0 && (indexOrderColumn + 1 > p_layout.length || !p_layout[indexOrderColumn].getColSQL().trim().equals(sqlOrderColumn))) {
+			// try to find out new index of ordered column, in case has other column is hide or display
+			for (int testIndex = 0; testIndex < p_layout.length; testIndex++) {
+				if (p_layout[testIndex].getColSQL().trim().equals(sqlOrderColumn)) {
+					indexOrderColumn = testIndex;
+					break;
+				}
+			}
+			
+			// index still incorrect and can't find out new index (ordered column become hide column)
+			if (indexOrderColumn > 0 && (indexOrderColumn + 1 > p_layout.length || !p_layout[indexOrderColumn].getColSQL().trim().equals(sqlOrderColumn))) {
+				indexOrderColumn = -1;
+				sqlOrderColumn = null;
+				m_sqlUserOrder = null;
+			}
+		}
+			
+	}
+	/**
 	 * build order clause of current sort order, and save it to m_sqlUserOrder
 	 * @return
 	 */
 	protected String getUserOrderClause() {
+		validateOrderIndex();
 		if (indexOrderColumn < 0) {
-			return null;
+			return m_sqlOrder;
 		}
+		
 		if (m_sqlUserOrder == null) {
 			m_sqlUserOrder = getUserOrderClause (indexOrderColumn);
 		}
@@ -1946,6 +1973,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	    			// do nothing when parameter not change and at window mode, or at dialog mode but select non record    			
 	    			onOk();
 	    		}
+	        	else if (m_infoWindowID == 0 && event.getTarget() instanceof InfoGeneralPanel) {
+	        		onUserQuery();
+	        	}
         	}else if (event.getName().equals(Events.ON_CANCEL) || (event.getTarget().equals(this) && event.getName().equals(Events.ON_CLOSE))){
         		m_cancel = true;
         		dispose(false);
@@ -2044,6 +2074,49 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		MPInstance instance = new MPInstance(Env.getCtx(), processId, 0);
 		instance.saveEx();
 		final int pInstanceID = instance.getAD_PInstance_ID();
+		// devCoffee - enable use of special forms from process related with info windows
+		m_pi.setAD_PInstance_ID(pInstanceID);
+
+		int adFormID = m_process.getAD_Form_ID();
+	    if (adFormID != 0 )
+	    {
+	            String title = m_process.getName();
+	            if (title == null || title.length() == 0)
+	                title = m_process.getValue();
+
+	            // store in T_Selection table selected rows for Execute Process that retrieves from T_Selection in code.
+	            DB.createT_SelectionNew(pInstanceID, getSaveKeys(getInfoColumnIDFromProcess(processId)), null);
+
+	            ADForm form = ADForm.openForm(adFormID, null, m_pi);
+	            Mode mode = form.getWindowMode();
+	            form.setAttribute(Window.MODE_KEY, form.getWindowMode());
+	            form.setAttribute(Window.INSERT_POSITION_KEY, Window.INSERT_NEXT);
+
+	            if (mode == Mode.HIGHLIGHTED || mode == Mode.MODAL) {
+	                form.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
+	                    @Override
+	                    public void onEvent(Event event) throws Exception {
+	                        ;
+	                    }
+	                });
+	                form.doHighlighted();
+	                form.focus();
+	            }
+	            else {
+	                form.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
+	                    @Override
+	                    public void onEvent(Event event) throws Exception {
+	                        updateListSelected();
+	                        recordSelectedData.clear();
+	                        Clients.response(new AuEcho(InfoPanel.this, "onQueryCallback", null));
+	                        onUserQuery();
+	                    }
+	                });
+
+	                SessionManager.getAppDesktop().showWindow(form);
+	            }
+	            return;
+	    }
 		// Execute Process
 		m_pi.setAD_PInstance_ID(pInstanceID);		
 		m_pi.setAD_InfoWindow_ID(infoWindow.getAD_InfoWindow_ID());
@@ -2253,24 +2326,26 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		}		
 	}
 
+	protected void correctHeaderOrderIndicator() {
+		Listhead listHead = contentPanel.getListHead();
+		if (listHead != null) {
+			List<?> headers = listHead.getChildren();
+			for(Object obj : headers)
+			{
+				Listheader header = (Listheader) obj;
+				// idempiere use mix method. sometime call model method, sometime call component method
+				// so index can be difference on complicate case, just wait to fix
+				if (header.getColumnIndex() == indexOrderColumn)
+	              header.setSortDirection(isColumnSortAscending?"ascending":"descending");
+	            else
+	              header.setSortDirection("natural");
+			}
+		}
+	}
     public void onQueryCallback(Event event)
     {
     	try
     	{
-    		Listhead listHead = contentPanel.getListHead();
-    		if (listHead != null) {
-    			List<?> headers = listHead.getChildren();
-    			for(Object obj : headers)
-    			{
-    				Listheader header = (Listheader) obj;
-    				// idempiere use mix method. sometime call model method, sometime call component method
-    				// so index can be difference on complicate case, just wait to fix
-    				if (header.getColumnIndex() == indexOrderColumn)
-		              header.setSortDirection(isColumnSortAscending?"ascending":"descending");
-		            else
-		              header.setSortDirection("natural");
-    			}
-    		}
 //    		m_sqlUserOrder="";
     		// event == null mean direct call from reset button
     		if (event == null)
@@ -2278,7 +2353,10 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
     		else
     			executeQuery();
     		
-            renderItems();            
+            renderItems();
+
+            correctHeaderOrderIndicator();
+            
         	// IDEMPIERE-1334 after refresh, restore prev selected item start         	
         	// just evaluate display logic of process button when requery by use click requery button
         	if (isQueryByUser){
@@ -2411,6 +2489,7 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		int col = lsc.getColumnIndex();
 		indexOrderColumn = col;
 		isColumnSortAscending = ascending;
+		sqlOrderColumn = p_layout[col].getColSQL().trim();
 		m_sqlUserOrder = null; // clear cache value
 		
 		if (m_useDatabasePaging)

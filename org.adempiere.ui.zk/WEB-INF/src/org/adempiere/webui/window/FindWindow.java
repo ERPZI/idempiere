@@ -626,7 +626,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         div.appendChild(labelHistory);
         div.appendChild(historyCombo);
         historyCombo.setStyle("margin-left: 3px; margin-right: 3px; position: relative; vertical-align: middle;");
-
+        div.setClass("toolbar");
         winMain = new MultiTabPart();
         winMain.createPart(layout);
         winMain.getComponent().setStyle("position: relative; margin-left: auto; margin-right: auto; margin-top: 3px; margin-bottom: 3px;");
@@ -647,6 +647,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         initSimple();
         initAdvanced();
         /** START DEVCOFFEE **/
+        statusBar.setClass("statusbar");
         layout.appendChild(statusBar);
         /** START DEVCOFFEE **/
 
@@ -1698,7 +1699,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 if (!(parsedValue instanceof Integer)) {
                     continue;
                 }
-                m_query.addRestriction(getSubCategoryWhereClause(((Integer) parsedValue).intValue()), and, openBrackets);
+                m_query.addRestriction(getSubCategoryWhereClause(field, ((Integer) parsedValue).intValue()), and, openBrackets);
             }
             else
             	m_query.addRestriction(ColumnSQL, Operator, parsedValue,
@@ -1864,7 +1865,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                         m_query.addRestriction(ColumnSQL.toString(), MQuery.LIKE, value, ColumnName, wed.getDisplay());
                         appendCode(code, ColumnName, MQuery.LIKE, value.toString(), "", "AND", "", "");
                     } else if (isProductCategoryField && value instanceof Integer) {
-                        m_query.addRestriction(getSubCategoryWhereClause(((Integer) value).intValue()));
+                        m_query.addRestriction(getSubCategoryWhereClause(field, ((Integer) value).intValue()));
                         appendCode(code, ColumnName, MQuery.EQUAL, value.toString(), "", "AND", "", "");
                     } else {
                     	String oper = MQuery.EQUAL;
@@ -2318,13 +2319,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     /**
      * Returns a sql where string with the given category id and all of its subcategory ids.
      * It is used as restriction in MQuery.
+     * @param field
      * @param productCategoryId
      * @return
     **/
-    private String getSubCategoryWhereClause(int productCategoryId) {
+    private String getSubCategoryWhereClause(GridField field, int productCategoryId) {
         //if a node with this id is found later in the search we have a loop in the tree
         int subTreeRootParentId = 0;
-        StringBuilder retString = new StringBuilder(" M_Product_Category_ID IN (");
+        StringBuilder retString = new StringBuilder(field.getColumnSQL(false)).append(" IN (");
         String sql = "SELECT M_Product_Category_ID, M_Product_Category_Parent_ID FROM M_Product_Category WHERE AD_Client_ID=? AND IsActive='Y'";
         final Vector<SimpleTreeNode> categories = new Vector<SimpleTreeNode>(100);
         PreparedStatement pstmt = null;
