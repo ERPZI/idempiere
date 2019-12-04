@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.adempiere.base.IDictionaryService;
 import org.adempiere.util.ServerContext;
 import org.compiere.Adempiere;
 import org.compiere.model.MSession;
@@ -19,27 +18,17 @@ import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.framework.FrameworkEvent;
 
 public class AdempiereActivator extends AbstractActivator {
 
 	protected final static CLogger logger = CLogger.getCLogger(AdempiereActivator.class.getName());
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		if (logger.isLoggable(Level.INFO)) logger.info(getName() + " " + getVersion() + " starting...");
-		serviceTracker = new ServiceTracker<IDictionaryService, IDictionaryService>(context, IDictionaryService.class.getName(), this);
-		serviceTracker.open();
-		start();
-		if (logger.isLoggable(Level.INFO)) logger.info(getName() + " " + getVersion() + " ready.");
-	}
-
 	public String getName() {
 		return context.getBundle().getSymbolicName();
 	}
 
+	@Override
 	public String getVersion() {
 		return (String) context.getBundle().getHeaders().get("Bundle-Version");
 	}
@@ -141,51 +130,29 @@ public class AdempiereActivator extends AbstractActivator {
 	protected void setContext(BundleContext context) {
 		this.context = context;
 	}
-	
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		stop();
-		serviceTracker.close();
-		this.context = null;
-		if (logger.isLoggable(Level.INFO)) logger.info(context.getBundle().getSymbolicName() + " "
-				+ context.getBundle().getHeaders().get("Bundle-Version")
-				+ " stopped.");
-	}
 
 	protected void install() {
 	};
 
-	protected void start() {
+	protected void setupPackInContext() {
+		Properties serverContext = new Properties();
+		serverContext.setProperty("#AD_Client_ID", "0");
+		ServerContext.setCurrentInstance(serverContext);
 	};
-
-	protected void stop() {
+	
+	@Override
+	public void frameworkEvent(FrameworkEvent event) {
+		if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
+			frameworkStarted();
+		}		
 	}
 
-	@Override
-	public IDictionaryService addingService(
-			ServiceReference<IDictionaryService> reference) {
-		service = context.getService(reference);
-		if (Adempiere.getThreadPoolExecutor() != null) {
-			Adempiere.getThreadPoolExecutor().execute(new Runnable() {			
-				@Override
-				public void run() {
-					ClassLoader cl = Thread.currentThread().getContextClassLoader();
-					try {
-						Thread.currentThread().setContextClassLoader(AdempiereActivator.class.getClassLoader());
-						setupPackInContext();
-						installPackage();
-					} finally {
-						ServerContext.dispose();
-						service = null;
-						Thread.currentThread().setContextClassLoader(cl);
-					}
-				}
-			});
-		} else {
-			Adempiere.addServerStateChangeListener(new ServerStateChangeListener() {				
-				@Override
-				public void stateChange(ServerStateChangeEvent event) {
-					if (event.getEventType() == ServerStateChangeEvent.SERVER_START && service != null) {
+	protected void frameworkStarted() {
+		if (service != null) {
+			if (Adempiere.getThreadPoolExecutor() != null) {
+				Adempiere.getThreadPoolExecutor().execute(new Runnable() {			
+					@Override
+					public void run() {
 						ClassLoader cl = Thread.currentThread().getContextClassLoader();
 						try {
 							Thread.currentThread().setContextClassLoader(AdempiereActivator.class.getClassLoader());
@@ -196,26 +163,27 @@ public class AdempiereActivator extends AbstractActivator {
 							service = null;
 							Thread.currentThread().setContextClassLoader(cl);
 						}
-					}					
-				}
-			});
+					}
+				});
+			} else {
+				Adempiere.addServerStateChangeListener(new ServerStateChangeListener() {				
+					@Override
+					public void stateChange(ServerStateChangeEvent event) {
+						if (event.getEventType() == ServerStateChangeEvent.SERVER_START && service != null) {
+							ClassLoader cl = Thread.currentThread().getContextClassLoader();
+							try {
+								Thread.currentThread().setContextClassLoader(AdempiereActivator.class.getClassLoader());
+								setupPackInContext();
+								installPackage();
+							} finally {
+								ServerContext.dispose();
+								service = null;
+								Thread.currentThread().setContextClassLoader(cl);
+							}
+						}					
+					}
+				});
+			}
 		}
-		return null;
 	}
-
-	@Override
-	public void modifiedService(ServiceReference<IDictionaryService> reference,
-			IDictionaryService service) {
-	}
-
-	@Override
-	public void removedService(ServiceReference<IDictionaryService> reference,
-			IDictionaryService service) {
-	}
-
-	protected void setupPackInContext() {
-		Properties serverContext = new Properties();
-		serverContext.setProperty("#AD_Client_ID", "0");
-		ServerContext.setCurrentInstance(serverContext);
-	};
 }

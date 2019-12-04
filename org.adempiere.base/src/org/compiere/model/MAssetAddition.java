@@ -183,7 +183,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		asset.saveEx();
 		asset.dump();
 		
-		
 		// Copy UseLife values from asset group to workfile
 		//TODO
 		//MAssetGroupAcct assetgrpacct = MAssetGroupAcct.forA_Asset_Group_ID(asset.getCtx(), asset.getA_Asset_Group_ID(), assetAdd.getPostingType());
@@ -791,8 +790,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 		}
 		*/
-		
-		
 		
 		//
 		updateSourceDocument(false);

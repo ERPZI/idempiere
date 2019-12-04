@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for A_Depreciation_Workfile
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_A_Depreciation_Workfile 
 {
@@ -357,6 +357,21 @@ public interface I_A_Depreciation_Workfile
 	/** Get Third contribution	  */
 	public BigDecimal getA_Valoare_Tert();
 
+    /** Column name C_AcctSchema_ID */
+    public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
+
+	/** Set Accounting Schema.
+	  * Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
+
+	/** Get Accounting Schema.
+	  * Rules for accounting
+	  */
+	public int getC_AcctSchema_ID();
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -519,19 +534,4 @@ public interface I_A_Depreciation_Workfile
 
 	/** Get Use Life - Years (fiscal)	  */
 	public int getUseLifeYears_F();
-	
-	   /** Column name C_AcctSchema_ID */
-    public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
-
-	/** Set Accounting Schema.
-	  * Rules for accounting
-	  */
-	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
-
-	/** Get Accounting Schema.
-	  * Rules for accounting
-	  */
-	public int getC_AcctSchema_ID();
-
-	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
 }

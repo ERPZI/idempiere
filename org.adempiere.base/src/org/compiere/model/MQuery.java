@@ -49,7 +49,7 @@ public class MQuery implements Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 481623650333512326L;
+	private static final long serialVersionUID = -1495322773308601375L;
 
 	/**
 	 *	Get Query from Parameter
@@ -61,25 +61,23 @@ public class MQuery implements Serializable
 	static public MQuery get (Properties ctx, int AD_PInstance_ID, String TableName)
 	{
 		if (s_log.isLoggable(Level.INFO)) s_log.info("AD_PInstance_ID=" + AD_PInstance_ID + ", TableName=" + TableName);
-		MQuery query = new MQuery(TableName);
+		MQuery reportQuery = new MQuery(TableName);
 		//	Temporary Tables - add qualifier (not displayed)
-		boolean isTemporaryTable = false;
-		MTable table = null;
+		MTable table =  MTable.get(ctx, TableName);
 		if (TableName.startsWith("T_"))
 		{
-			query.addRestriction(TableName + ".AD_PInstance_ID=" + AD_PInstance_ID);
-			isTemporaryTable = true;
-			table = MTable.get(ctx, TableName);
+			reportQuery.addRestriction(TableName + ".AD_PInstance_ID=" + AD_PInstance_ID);
 		}
-		boolean isFinancialReport = ("T_Report".equals(TableName) || "T_ReportStatement".equals(TableName));
-		query.m_AD_PInstance_ID = AD_PInstance_ID;
+		//use separate query object for rendering of parameter at report
+		reportQuery.setReportProcessQuery(new MQuery(TableName));
+		reportQuery.m_AD_PInstance_ID = AD_PInstance_ID;
 
 		//	How many rows do we have?
 		String SQL = "SELECT COUNT(*) FROM AD_PInstance_Para WHERE AD_PInstance_ID=?";
 		int rows = DB.getSQLValue(null, SQL, AD_PInstance_ID);
 
 		if (rows < 1)
-			return query;
+			return reportQuery;
 
 		//	Msg.getMsg(Env.getCtx(), "Parameter")
 		boolean trl = !Env.isBaseLanguage(ctx, "AD_Process_Para");
@@ -87,7 +85,7 @@ public class MQuery implements Serializable
 			SQL = "SELECT ip.ParameterName,ip.P_String,ip.P_String_To,"			//	1..3
 				+ "ip.P_Number,ip.P_Number_To,"									//	4..5
 				+ "ip.P_Date,ip.P_Date_To, ip.Info,ip.Info_To, "				//	6..9
-				+ "pp.Name, pp.IsRange, pp.AD_Reference_ID "					//	10..12
+				+ "pp.Name, pp.IsRange, pp.AD_Reference_ID "	//	10..12
 				+ "FROM AD_PInstance_Para ip, AD_PInstance i, AD_Process_Para pp "
 				+ "WHERE i.AD_PInstance_ID=ip.AD_PInstance_ID"
 				+ " AND pp.AD_Process_ID=i.AD_Process_ID"
@@ -125,9 +123,11 @@ public class MQuery implements Serializable
 					s_log.log(Level.SEVERE, "(Parameter) - more rows than expected");
 					break;
 				}
+				MQuery query = reportQuery;
 				String ParameterName = rs.getString(1);
 				String P_String = rs.getString(2);
 				String P_String_To = rs.getString(3);
+				int restrictionCount = reportQuery.getRestrictionCount();
 				//
 				Double P_Number = null;
 				double d = rs.getDouble(4);
@@ -153,12 +153,10 @@ public class MQuery implements Serializable
 					+ ", N=" + P_Number + "-" + P_Number_To + ", D=" + P_Date + "-" + P_Date_To
 					+ "; Name=" + Name + ", Info=" + Info + "-" + Info_To + ", Range=" + isRange);
 				//
-				// Check if the parameter exists as column in our table.
-				// This condition applies only to temporary tables - teo_sarca [ 2860022 ]
-				if (isTemporaryTable && !isFinancialReport && table != null && table.getColumn(ParameterName) == null)
+				//custom query or column not exists - render as report parameters
+				if (table != null && table.getColumn(ParameterName) == null)
 				{
-					if (s_log.isLoggable(Level.INFO)) s_log.info("Skip parameter "+ParameterName+" because there is no column in table "+TableName);
-					continue;
+					query = reportQuery.getReportProcessQuery();
 				}
 
 				//-------------------------------------------------------------
@@ -166,12 +164,32 @@ public class MQuery implements Serializable
 				{
 					if (P_String_To == null)
 					{
-						if (P_String.indexOf('%') == -1)
-							query.addRestriction(ParameterName, MQuery.EQUAL, 
-								P_String, Name, Info);
+						if (Reference_ID == DisplayType.ChosenMultipleSelectionList)
+						{
+							String columnName = TableName + "." + ParameterName;		
+							int cnt = DB.getSQLValueEx(null, "SELECT Count(*) From AD_Column WHERE IsActive='Y' AND AD_Client_ID=0 AND Upper(ColumnName)=? AND AD_Reference_ID=?", ParameterName.toUpperCase(), DisplayType.ChosenMultipleSelectionList);
+							if (cnt > 0)
+								query.addRestriction(DB.intersectClauseForCSV(columnName, P_String), MQuery.EQUAL, Name, Info);
+							else
+								query.addRestriction(DB.inClauseForCSV(columnName, P_String), MQuery.EQUAL, Name, Info);
+						} 
+						else if (Reference_ID == DisplayType.ChosenMultipleSelectionTable || Reference_ID == DisplayType.ChosenMultipleSelectionSearch)
+						{
+							String columnName = TableName + "." + ParameterName;
+							if (columnName.endsWith("_ID"))
+								query.addRestriction(DB.inClauseForCSV(columnName, P_String), MQuery.EQUAL, Name, Info);
+							else
+								query.addRestriction(DB.intersectClauseForCSV(columnName, P_String), MQuery.EQUAL, Name, Info);
+						}
 						else
-							query.addRestriction(ParameterName, MQuery.LIKE, 
-								P_String, Name, Info);
+						{
+							if (P_String.indexOf('%') == -1)
+								query.addRestriction(ParameterName, MQuery.EQUAL, 
+									P_String, Name, Info);
+							else
+								query.addRestriction(ParameterName, MQuery.LIKE, 
+									P_String, Name, Info);
+						}
 					}
 					else
 						query.addRangeRestriction(ParameterName, 
@@ -220,6 +238,12 @@ public class MQuery implements Serializable
 							query.addRangeRestriction(paramName, P_Date, P_Date_To, Name, Info, Info_To);
 					}
 				}
+				//add to reportprocessquery if new restriction added to reportquery
+				if (query == reportQuery && reportQuery.getReportProcessQuery() != null 
+					&& reportQuery.getRestrictionCount() > restrictionCount) 
+				{
+					reportQuery.getReportProcessQuery().m_list.add(reportQuery.m_list.get(reportQuery.m_list.size()-1));
+				}
 			}
 		}
 		catch (SQLException e2)
@@ -231,10 +255,9 @@ public class MQuery implements Serializable
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-		if (s_log.isLoggable(Level.INFO)) s_log.info(query.toString());
-		return query;
+		if (s_log.isLoggable(Level.INFO)) s_log.info(reportQuery.toString());
+		return reportQuery;
 	}	//	get
-	
 	
 	/**
 	 * 	Get Zoom Column Name.
@@ -382,6 +405,21 @@ public class MQuery implements Serializable
 	private String m_zoomColumn;
 	
 	private Object m_zoomValue;
+
+	private int m_zoomWindow_ID;
+
+	private MQuery m_reportProcessQuery;
+
+
+	public int getZoomWindowID() {
+		return m_zoomWindow_ID;
+	}
+
+
+	public void setZoomWindowID(int m_zoomWindow_ID) {
+		this.m_zoomWindow_ID = m_zoomWindow_ID;
+	}
+
 
 	/**
 	 * 	Get Record Count
@@ -618,6 +656,20 @@ public class MQuery implements Serializable
 		m_list.add(r);
 		m_newRecord = whereClause.equals(NEWRECORD);
 	}	//	addRestriction
+
+	public void addRestriction (String whereClause, String Operator, String InfoName, String InfoDisplay)
+	{
+		if (whereClause == null || whereClause.trim().length() == 0)
+			return;
+		Restriction r = new Restriction (whereClause, true, 0);
+		r.Operator = Operator;
+		if (InfoName != null)
+			r.InfoName = InfoName;
+		if (InfoDisplay != null)
+			r.InfoDisplay = InfoDisplay.trim();
+		m_list.add(r);
+		m_newRecord = whereClause.equals(NEWRECORD);
+	}
 
 	/**
 	 * 	New Record Query
@@ -986,6 +1038,14 @@ public class MQuery implements Serializable
 	 */
 	public Object getZoomValue() {
 		return m_zoomValue;
+	}
+	
+	public void setReportProcessQuery(MQuery query) {
+		m_reportProcessQuery = query;
+	}
+	
+	public MQuery getReportProcessQuery() {
+		return m_reportProcessQuery;
 	}
 }	//	MQuery
 

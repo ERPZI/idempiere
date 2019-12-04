@@ -361,6 +361,7 @@ public class GridFieldVO implements Serializable
 			vo.Header = rs.getString("Name");
 			vo.Description = rs.getString("Description");
 			vo.Help = rs.getString("Help");
+			vo.SeqNo = rs.getInt("SeqNo");
 			vo.displayType = rs.getInt("AD_Reference_ID");
 			vo.IsMandatory = rs.getString("IsMandatory").equals("Y");
 			vo.FieldLength = rs.getInt("FieldLength");
@@ -386,6 +387,51 @@ public class GridFieldVO implements Serializable
 		{
 			CLogger.get().log(Level.SEVERE, "createParameter", e);
 		}
+		//devCoffee - #3858
+		if(vo.IsDisplayed) {
+			MUserDefProcParameter userDef = MUserDefProcParameter.get(ctx, vo.AD_Column_ID, vo.AD_Process_ID_Of_Panel);
+			if(userDef != null) {
+				if(userDef.getName() != null)
+					vo.Header = userDef.getName();
+				if(userDef.getDescription() != null)
+					vo.Description = userDef.getDescription();
+				if(userDef.getHelp() != null)
+					vo.Help = userDef.getHelp();
+				if(userDef.getReadOnlyLogic() != null)
+					vo.ReadOnlyLogic = userDef.getReadOnlyLogic();
+				if(userDef.getDefaultValue() != null)
+					vo.DefaultValue = userDef.getDefaultValue();
+				if(userDef.getDisplayLogic() != null)
+					vo.DisplayLogic = userDef.getDisplayLogic();
+				if(userDef.getMandatoryLogic() != null)
+					vo.MandatoryLogic = userDef.getMandatoryLogic();
+				if (userDef.getIsDisplayed()!= null)
+				    vo.IsDisplayed = "Y".equals(userDef.getIsDisplayed());
+				if (userDef.getPlaceholder()!= null)
+				    vo.Placeholder = userDef.getPlaceholder();
+				if (userDef.getPlaceholder2()!= null)
+				    vo.Placeholder2 = userDef.getPlaceholder2();
+				if (userDef.getSeqNo() > 0)
+				    vo.SeqNo = userDef.getSeqNo();
+				if (userDef.getAD_Reference_ID()>0)
+					vo.displayType = userDef.getAD_Reference_ID();
+				if (userDef.getAD_Reference_Value_ID()>0)
+					vo.AD_Reference_Value_ID = userDef.getAD_Reference_Value_ID();
+				if (userDef.getVFormat() != null)
+					vo.VFormat = userDef.getVFormat();
+				if (userDef.getAD_Val_Rule_ID() > 0)
+					vo.ValidationCode  = MValRule.get(ctx, userDef.getAD_Val_Rule_ID()).getCode();
+				if(userDef.getDefaultValue2() != null)
+					vo.DefaultValue2 = userDef.getDefaultValue2();
+				if(userDef.getValueMin() != null)
+					vo.ValueMin = userDef.getValueMin();
+				if(userDef.getValueMax() != null)
+					vo.ValueMax = userDef.getValueMax();
+				if (userDef.getIsMandatory()!= null)
+					vo.IsMandatory = "Y".equals(userDef.getIsMandatory());
+			}
+		}
+		//fim devCoffee - 3858
 		//
 		vo.initFinish();
 		if (vo.DefaultValue2 == null)
@@ -444,16 +490,16 @@ public class GridFieldVO implements Serializable
 
 	/**
 	 * Create parameter for infoWindow
-	 * @param ctx
-	 * @param WindowNo
-	 * @param AD_Column_ID
-	 * @param ColumnName
-	 * @param Name
-	 * @param AD_Reference_ID
-	 * @param AD_Reference_Value_ID
-	 * @param IsMandatory
-	 * @param IsEncrypted
-	 * @return
+	 * @param ctx ctx
+	 * @param WindowNo WindowNo
+	 * @param AD_Column_ID AD_Column_ID
+	 * @param ColumnName ColumnName
+	 * @param Name  Name
+	 * @param AD_Reference_ID AD_Reference_ID
+	 * @param AD_Reference_Value_ID AD_Reference_Value_ID
+	 * @param IsMandatory  IsMandatory
+	 * @param IsEncrypted IsEncrypted
+	 * @return GridFieldV0 v0
 	 */
 	public static GridFieldVO createParameter (Properties ctx, int WindowNo, int WindowIDOfPanel, int infoWindowID,
 			int AD_Column_ID, String ColumnName, String Name, int AD_Reference_ID, int AD_Reference_Value_ID, 

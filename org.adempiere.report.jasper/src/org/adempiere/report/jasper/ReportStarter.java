@@ -136,7 +136,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 {
 	private static final int DEFAULT_SWAP_MAX_PAGES = 100;
 	/** Logger */
-	private static CLogger log = CLogger.getCLogger(ReportStarter.class);
+	private static final CLogger log = CLogger.getCLogger(ReportStarter.class);
 	private static File REPORT_HOME = null;
     public static final JasperReportsContext jasperReportStartContext;
 	
@@ -460,7 +460,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
         	params.put("RESOURCE_DIR", resourcePath);
         }
 
-        if (jasperReport != null && pi.getTable_ID() > 0 && Record_ID <= 0 && pi.getRecord_IDs() != null && pi.getRecord_IDs().length > 0)
+        if (jasperReport != null && pi.getTable_ID() > 0 && Record_ID <= 0 && pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
         {
         	try
             {        		
