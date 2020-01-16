@@ -729,7 +729,7 @@ public class MPayment extends X_C_Payment
 			setIsPrepayment (getC_Charge_ID() == 0 
 				&& getC_BPartner_ID() != 0
 				&& (getC_Order_ID() != 0 
-					|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0)));
+					|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0 && getReversal_ID() == 0)));
 		if (isPrepayment())
 		{
 			if (newRecord 
