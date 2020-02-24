@@ -292,13 +292,13 @@ public class Doc_MatchInv extends Doc
 		// Rounding correction
 		if (m_receiptLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			p_Error = createRoundingCorrection(as, fact, getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as), m_receiptLine.getParent(), dr.getAmtSourceDr(), dr.getAmtAcctDr());
+			p_Error = createReceiptGainLoss(as, fact, getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as), m_receiptLine.getParent(), dr.getAmtSourceDr(), dr.getAmtAcctDr());
 			if (p_Error != null)
 				return null;
 		}
 		if (m_invoiceLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			p_Error = createRoundingCorrection(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceCr(), cr.getAmtAcctCr());
+			p_Error = createInvoiceGainLoss(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceCr(), cr.getAmtAcctCr());
 			if (p_Error != null)
 				return null;
 		}
@@ -849,7 +849,7 @@ public class Doc_MatchInv extends Doc
 		factLine.setQty(getQty());
 	}
 	
-	private String createRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
+	private String createInvoiceGainLoss(MAcctSchema as, Fact fact, MAccount acct, 
 			MInvoice invoice, BigDecimal matchInvSource, BigDecimal matchInvAccounted)
 	{
 		BigDecimal invoiceSource = null;
@@ -880,7 +880,7 @@ public class Doc_MatchInv extends Doc
 			return null;
 		//
 		
-		if (m_matchInv.getReversal_ID() == 0 || m_matchInv.get_ID() < m_matchInv.getReversal_ID())
+		if (m_matchInv.getReversal_ID() == 0)
 		{
 			String matchInvLineSql = "SELECT M_MatchInv_ID FROM M_MatchInv "
 					+ "WHERE C_InvoiceLine_ID IN (SELECT C_InvoiceLine_ID FROM C_InvoiceLine WHERE C_Invoice_ID=?) "
@@ -939,15 +939,28 @@ public class Doc_MatchInv extends Doc
 			if (totalAmtAcctCr == null)
 				totalAmtAcctCr = Env.ZERO;
 			
-			if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
+			if (m_matchInv.getReversal_ID() == 0)
 			{
-				matchInvSource = matchInvSource.add(totalAmtSourceCr);
-				matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-			}
-			else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
-			{
-				matchInvSource = matchInvSource.add(totalAmtSourceDr);
-				matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
+				if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceCr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
+				}
+				else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceDr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
+				}
+				else if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceDr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
+				}
+				else
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceCr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr).subtract(totalAmtAcctDr);
+				}
 			}
 			else
 			{
@@ -955,13 +968,13 @@ public class Doc_MatchInv extends Doc
 				{
 					matchInvSource = matchInvSource.add(totalAmtSourceDr);
 					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
-					acctDifference = totalAmtAcctCr.negate();
+					acctDifference = totalAmtAcctCr;
 				}
 				else
 				{
 					matchInvSource = matchInvSource.add(totalAmtSourceCr);
 					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-					acctDifference = totalAmtSourceDr.negate();
+					acctDifference = totalAmtAcctDr.negate();
 				}
 			}
 		}
@@ -1020,7 +1033,7 @@ public class Doc_MatchInv extends Doc
 		return null;
 	}	//	createRoundingCorrection
 	
-	private String createRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
+	private String createReceiptGainLoss(MAcctSchema as, Fact fact, MAccount acct, 
 			MInOut receipt, BigDecimal matchInvSource, BigDecimal matchInvAccounted)
 	{
 		BigDecimal receiptSource = null;
@@ -1050,7 +1063,7 @@ public class Doc_MatchInv extends Doc
 		if (receiptSource == null || receiptAccounted == null)
 			return null;
 		//
-		if (m_matchInv.getReversal_ID() == 0 || m_matchInv.get_ID() < m_matchInv.getReversal_ID())
+		if (m_matchInv.getReversal_ID() == 0)
 		{
 			String matchInvLineSql = "SELECT M_MatchInv_ID FROM M_MatchInv "
 					+ "WHERE M_InOutLine_ID IN (SELECT M_InOutLine_ID FROM M_InOutLine WHERE M_InOut_ID=?) "
@@ -1068,7 +1081,6 @@ public class Doc_MatchInv extends Doc
 				if (index != list.size()-1)
 					s.append(",");
 			}
-	
 			
 			sql = new StringBuilder()
 				.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
@@ -1110,45 +1122,42 @@ public class Doc_MatchInv extends Doc
 			if (totalAmtAcctCr == null)
 				totalAmtAcctCr = Env.ZERO;
 			
-			if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
+			if (m_matchInv.getReversal_ID() == 0)
 			{
-				matchInvSource = matchInvSource.add(totalAmtSourceCr);
-				matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-			}
-			else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
-			{
-				matchInvSource = matchInvSource.add(totalAmtSourceDr);
-				matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
-			}
-			else
-			{
-				if (m_matchInv.getReversal_ID() == 0 || m_matchInv.get_ID() < m_matchInv.getReversal_ID())
+				if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
 				{
-					if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceDr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
-					}
-					else
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceCr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr).subtract(totalAmtAcctDr);
-					}
+					matchInvSource = matchInvSource.add(totalAmtSourceCr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
+				}
+				else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceDr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
+				}
+				else if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceDr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
 				}
 				else
 				{
-					if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceDr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
-						acctDifference = totalAmtAcctCr.negate();
-					}
-					else
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceCr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-						acctDifference = totalAmtAcctDr.negate();
-					}					
+					matchInvSource = matchInvSource.add(totalAmtSourceCr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr).subtract(totalAmtAcctDr);
+				}
+			}
+			else
+			{
+				if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceDr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
+					acctDifference = totalAmtAcctCr.negate();;
+				}
+				else
+				{
+					matchInvSource = matchInvSource.add(totalAmtSourceCr);
+					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
+					acctDifference = totalAmtAcctDr;
 				}
 			}
 		}
