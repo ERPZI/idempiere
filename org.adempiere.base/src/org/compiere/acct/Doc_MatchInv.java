@@ -763,6 +763,21 @@ public class Doc_MatchInv extends Doc
 				cr.setQty(getQty().multiply(multiplier).negate());
 			}
 		}
+		
+		// Rounding correction
+		if (refInvLine != null && refInvLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
+		{
+			p_Error = createInvoiceGainLoss(as, fact, expense, refInvLine.getParent(), dr.getAmtSourceCr(), dr.getAmtAcctCr());
+			if (p_Error != null)
+				return null;
+		}
+		if (m_invoiceLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
+		{
+			p_Error = createInvoiceGainLoss(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceDr(), cr.getAmtAcctDr());
+			if (p_Error != null)
+				return null;
+		}
+		
 		if (m_matchInv.getReversal_ID() == 0) 
 		{
 			cr.setC_Activity_ID(m_invoiceLine.getC_Activity_ID());
@@ -1031,7 +1046,7 @@ public class Doc_MatchInv extends Doc
 			updateFactLine(fl);
 		}
 		return null;
-	}	//	createRoundingCorrection
+	}	//	createInvoiceGainLoss
 	
 	private String createReceiptGainLoss(MAcctSchema as, Fact fact, MAccount acct, 
 			MInOut receipt, BigDecimal matchInvSource, BigDecimal matchInvAccounted)
@@ -1081,6 +1096,7 @@ public class Doc_MatchInv extends Doc
 				if (index != list.size()-1)
 					s.append(",");
 			}
+	
 			
 			sql = new StringBuilder()
 				.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
@@ -1213,5 +1229,5 @@ public class Doc_MatchInv extends Doc
 			updateFactLine(fl);
 		}
 		return null;
-	}	//	createRoundingCorrection
+	}	//	createReceiptGainLoss
 }   //  Doc_MatchInv
