@@ -173,8 +173,6 @@ public class Doc_AllocationHdr extends Doc
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		Fact factForRGL = new Fact(this, as, Fact.POST_Actual); // dummy fact (not posted) to calculate Realized Gain & Loss
 		boolean isInterOrg = isInterOrg(as);
-		Hashtable<Integer, BigDecimal> htAllocPayAccounted = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htAllocPaySource = new Hashtable<Integer, BigDecimal>();
 		MAccount bpAcct = null;		//	Liability/Receivables
 
 		for (int i = 0; i < p_lines.length; i++)
@@ -209,12 +207,8 @@ public class Doc_AllocationHdr extends Doc
 			if (line.getC_Invoice_ID() != 0)
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
 			
-			BigDecimal allocPayAccounted = htAllocPayAccounted.get(line.getC_Payment_ID());
-			if (allocPayAccounted == null)
-				allocPayAccounted = Env.ZERO;
-			BigDecimal allocPaySource = htAllocPaySource.get(line.getC_Payment_ID());
-			if (allocPaySource == null)
-				allocPaySource = Env.ZERO;
+			BigDecimal allocPayAccounted = Env.ZERO;
+			BigDecimal allocPaySource = Env.ZERO;
 
 			//	No Invoice
 			if (invoice == null)
@@ -461,12 +455,6 @@ public class Doc_AllocationHdr extends Doc
 				if (p_Error != null)
 					return null;				
 			}			
-			
-			if (line.getC_Payment_ID() > 0)
-			{
-				htAllocPayAccounted.put(line.getC_Payment_ID(), allocPayAccounted);
-				htAllocPaySource.put(line.getC_Payment_ID(), allocPaySource);
-			}
 		}	//	for all lines
 		
 		//	rounding adjustment
