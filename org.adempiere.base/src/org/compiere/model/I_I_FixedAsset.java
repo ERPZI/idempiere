@@ -147,6 +147,19 @@ public interface I_I_FixedAsset
 	/** Get Asset Type Value	  */
 	public String getA_Asset_Type_Value();
 
+    /** Column name AcctSchemaName */
+    public static final String COLUMNNAME_AcctSchemaName = "AcctSchemaName";
+
+	/** Set Account Schema Name.
+	  * Name of the Accounting Schema
+	  */
+	public void setAcctSchemaName (String AcctSchemaName);
+
+	/** Get Account Schema Name.
+	  * Name of the Accounting Schema
+	  */
+	public String getAcctSchemaName();
+
     /** Column name Activity_Value */
     public static final String COLUMNNAME_Activity_Value = "Activity_Value";
 
@@ -277,6 +290,21 @@ public interface I_I_FixedAsset
 	  * The Key of the Business Partner
 	  */
 	public String getBPartner_Value();
+
+    /** Column name C_AcctSchema_ID */
+    public static final String COLUMNNAME_C_AcctSchema_ID = "C_AcctSchema_ID";
+
+	/** Set Accounting Schema.
+	  * Rules for accounting
+	  */
+	public void setC_AcctSchema_ID (int C_AcctSchema_ID);
+
+	/** Get Accounting Schema.
+	  * Rules for accounting
+	  */
+	public int getC_AcctSchema_ID();
+
+	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException;
 
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
@@ -495,6 +523,19 @@ public interface I_I_FixedAsset
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name ISO_Code */
+    public static final String COLUMNNAME_ISO_Code = "ISO_Code";
+
+	/** Set ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public void setISO_Code (String ISO_Code);
+
+	/** Get ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code();
 
     /** Column name LocatorValue */
     public static final String COLUMNNAME_LocatorValue = "LocatorValue";
