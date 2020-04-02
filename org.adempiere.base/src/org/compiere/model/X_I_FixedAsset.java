@@ -32,7 +32,7 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200308L;
+	private static final long serialVersionUID = 20200402L;
 
     /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName)
@@ -650,23 +650,6 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Currency Key.
-		@param Currency_Value 
-		The key for the currency
-	  */
-	public void setCurrency_Value (String Currency_Value)
-	{
-		set_Value (COLUMNNAME_Currency_Value, Currency_Value);
-	}
-
-	/** Get Currency Key.
-		@return The key for the currency
-	  */
-	public String getCurrency_Value () 
-	{
-		return (String)get_Value(COLUMNNAME_Currency_Value);
 	}
 
 	/** Set Account Date.
