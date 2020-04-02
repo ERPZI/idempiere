@@ -406,19 +406,6 @@ public interface I_I_FixedAsset
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException;
 
-    /** Column name Currency_Value */
-    public static final String COLUMNNAME_Currency_Value = "Currency_Value";
-
-	/** Set Currency Key.
-	  * The key for the currency
-	  */
-	public void setCurrency_Value (String Currency_Value);
-
-	/** Get Currency Key.
-	  * The key for the currency
-	  */
-	public String getCurrency_Value();
-
     /** Column name DateAcct */
     public static final String COLUMNNAME_DateAcct = "DateAcct";
 
