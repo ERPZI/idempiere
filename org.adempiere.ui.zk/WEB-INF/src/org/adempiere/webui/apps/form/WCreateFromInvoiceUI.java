@@ -282,9 +282,11 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		//  BPartner - load Order/Invoice/Shipment
 		if (e.getPropertyName().equals("C_BPartner_ID"))
 		{
-			Integer newBpValue = (Integer)e.getNewValue();
-			int C_BPartner_ID = newBpValue == null?0:newBpValue.intValue();
-			initBPOrderDetails (C_BPartner_ID, true);
+			int C_BPartner_ID = ((Integer)e.getNewValue()).intValue();
+			//MPo, 23/9/19
+			//initBPOrderDetails (C_BPartner_ID, true);
+			initBPOrderDetails (C_BPartner_ID, true, Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID"));
+			//eof
 		}
 		window.tableChanged(null);
 	}   //  vetoableChange
@@ -302,10 +304,16 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		bPartnerField = new WSearchEditor ("C_BPartner_ID", true, false, true, lookup);
 		//
 		int C_BPartner_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "C_BPartner_ID");
+		//MPo, 23/9/19
+		int User1_ID = Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID");
+		//eof
 		bPartnerField.setValue(Integer.valueOf(C_BPartner_ID));
 
 		//  initial loading
-		initBPOrderDetails(C_BPartner_ID, forInvoice);
+		//MPo, 23/9/19
+		//initBPOrderDetails(C_BPartner_ID, forInvoice);
+		initBPOrderDetails(C_BPartner_ID, forInvoice, User1_ID);
+		//eof
 	}   //  initBPartner
 
 	/**
@@ -313,7 +321,10 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	//MPo, 23/9/19
+	//protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice)
+	protected void initBPOrderDetails (int C_BPartner_ID, boolean forInvoice, int User1_ID)
+	//eof
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID=" + C_BPartner_ID);
 		KeyNamePair pp = new KeyNamePair(0,"");
@@ -321,28 +332,38 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		orderField.removeActionListener(this);
 		orderField.removeAllItems();
 		orderField.addItem(pp);
-		
-		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false, isCreditMemo);
+		//MPo, 23/9/19
+		//ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false, isCreditMemo);
+		ArrayList<KeyNamePair> list = loadOrderData(C_BPartner_ID, forInvoice, false, isCreditMemo, User1_ID);
+		//eof
 		for(KeyNamePair knp : list)
 			orderField.addItem(knp);
 		
 		orderField.setSelectedIndex(0);
 		orderField.addActionListener(this);
-
-		initBPDetails(C_BPartner_ID);
+		//MPo, 23/9/19
+		//initBPDetails(C_BPartner_ID);
+		initBPDetails(C_BPartner_ID, User1_ID);
 	}   //  initBPartnerOIS
 	
-	public void initBPDetails(int C_BPartner_ID) 
+	//MPo, 23/9/19
+	//public void initBPDetails(int C_BPartner_ID)
+	public void initBPDetails(int C_BPartner_ID, int User1_ID)
 	{
-		initBPShipmentDetails(C_BPartner_ID);
-		initBPRMADetails(C_BPartner_ID);
+		//initBPShipmentDetails(C_BPartner_ID);
+		initBPShipmentDetails(C_BPartner_ID, User1_ID);
+		//initBPRMADetails(C_BPartner_ID);
+		initBPRMADetails(C_BPartner_ID, User1_ID);
 	}
 
 	/**
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	private void initBPShipmentDetails(int C_BPartner_ID)
+	//MPo, 23/9/19
+	//private void initBPShipmentDetails(int C_BPartner_ID)
+	private void initBPShipmentDetails(int C_BPartner_ID, int User1_ID)
+	//eof
 	{
 		if (log.isLoggable(Level.CONFIG)) log.config("C_BPartner_ID" + C_BPartner_ID);
 
@@ -352,8 +373,10 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		//	None
 		KeyNamePair pp = new KeyNamePair(0,"");
 		shipmentField.addItem(pp);
-		
-		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
+		//MPo, 23/9/19
+		//ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID);
+		ArrayList<KeyNamePair> list = loadShipmentData(C_BPartner_ID, User1_ID);
+		//eof
 		for(KeyNamePair knp : list)
 			shipmentField.addItem(knp);
 		
@@ -365,15 +388,20 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 	 * Load RMA that are candidates for shipment
 	 * @param C_BPartner_ID BPartner
 	 */
-	private void initBPRMADetails(int C_BPartner_ID)
+	//MPo, 23/9/19
+	//private void initBPRMADetails(int C_BPartner_ID)
+	private void initBPRMADetails(int C_BPartner_ID, int User1_ID)
+	//eof
 	{
 	    rmaField.removeActionListener(this);
 	    rmaField.removeAllItems();
 	    //  None
 	    KeyNamePair pp = new KeyNamePair(0,"");
 	    rmaField.addItem(pp);
-	    
-	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    //MPo, 23/9/19
+	    //ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID);
+	    ArrayList<KeyNamePair> list = loadRMAData(C_BPartner_ID, User1_ID);
+	    //
 		for(KeyNamePair knp : list)
 			rmaField.addItem(knp);
 		

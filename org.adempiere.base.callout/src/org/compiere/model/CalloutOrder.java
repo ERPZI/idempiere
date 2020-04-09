@@ -401,7 +401,9 @@ public class CalloutOrder extends CalloutEngine
 						mTab.setValue("PaymentRule", s);
 					//	Payment Term
 					ii = Integer.valueOf(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
-					if (!rs.wasNull())
+					//MPo, 27/8/2016 If customer default=null, propagate to SO to force sales entry to select Payment term
+					//--if (!rs.wasNull())
+					//
 						mTab.setValue("C_PaymentTerm_ID", ii);
 					//	InvoiceRule
 					s = rs.getString("InvoiceRule");
@@ -1425,4 +1427,3 @@ public class CalloutOrder extends CalloutEngine
 	}
 
 }	//	CalloutOrder
-

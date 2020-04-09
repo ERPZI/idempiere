@@ -33,6 +33,7 @@ public class X_M_MatchPO extends PO implements I_M_MatchPO, I_Persistent
 	/**
 	 *
 	 */
+
 	private static final long serialVersionUID = 20191121L;
 
     /** Standard Constructor */

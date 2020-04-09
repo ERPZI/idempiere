@@ -304,6 +304,21 @@ public interface I_C_PaySelectionLine
 	  */
 	public int getUpdatedBy();
 
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
     /** Column name WriteOffAmt */
     public static final String COLUMNNAME_WriteOffAmt = "WriteOffAmt";
 
@@ -316,4 +331,34 @@ public interface I_C_PaySelectionLine
 	  * Amount to write-off
 	  */
 	public BigDecimal getWriteOffAmt();
+
+    /** Column name ZI_Pay_BPartner_ID */
+    public static final String COLUMNNAME_ZI_Pay_BPartner_ID = "ZI_Pay_BPartner_ID";
+
+	/** Set Payee Partner.
+	  * Business Partner responsible for the payment (Alternative payee)
+	  */
+	public void setZI_Pay_BPartner_ID (int ZI_Pay_BPartner_ID);
+
+	/** Get Payee Partner.
+	  * Business Partner responsible for the payment (Alternative payee)
+	  */
+	public int getZI_Pay_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getZI_Pay_BPartner() throws RuntimeException;
+
+    /** Column name ZI_Pay_Location_ID */
+    public static final String COLUMNNAME_ZI_Pay_Location_ID = "ZI_Pay_Location_ID";
+
+	/** Set Payee Location.
+	  * Business Partner Location for payment (Alternative Payee)
+	  */
+	public void setZI_Pay_Location_ID (int ZI_Pay_Location_ID);
+
+	/** Get Payee Location.
+	  * Business Partner Location for payment (Alternative Payee)
+	  */
+	public int getZI_Pay_Location_ID();
+
+	public org.compiere.model.I_C_BPartner_Location getZI_Pay_Location() throws RuntimeException;
 }

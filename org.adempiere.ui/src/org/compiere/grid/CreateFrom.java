@@ -36,7 +36,7 @@ import org.compiere.util.KeyNamePair;
 public abstract class CreateFrom implements ICreateFrom
 {
 	/**	Logger			*/
-	protected transient CLogger log = CLogger.getCLogger(getClass());
+	protected CLogger log = CLogger.getCLogger(getClass());
 
 	/** Loaded Order            */
 	protected MOrder p_order = null;
@@ -87,12 +87,17 @@ public abstract class CreateFrom implements ICreateFrom
 	 *  @param C_BPartner_ID BPartner
 	 *  @param forInvoice for invoice
 	 */
-	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
+	//MPo, 23/9/19
+	//protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly)
+	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, int User1_ID)
 	{
-		return loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseOnly, false);
+	//	return loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseOnly, false);
+		return loadOrderData(C_BPartner_ID, forInvoice, sameWarehouseOnly, false, User1_ID);
 	}
 	
-	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, boolean forCreditMemo)
+	//protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, boolean forCreditMemo)
+	protected ArrayList<KeyNamePair> loadOrderData (int C_BPartner_ID, boolean forInvoice, boolean sameWarehouseOnly, boolean forCreditMemo, int User1_ID)
+	//eof MPo, 23/9/19
 	{
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
@@ -116,9 +121,15 @@ public abstract class CreateFrom implements ICreateFrom
 			.append(colBP)
 			.append("=? AND o.IsSOTrx=? AND o.DocStatus IN ('CL','CO') AND o.C_Order_ID IN (SELECT ol.C_Order_ID FROM C_OrderLine ol WHERE ");
 		if (forCreditMemo)
-			sql.append(column).append(">0 AND (CASE WHEN ol.QtyDelivered>=ol.QtyOrdered THEN ol.QtyDelivered-ol.QtyInvoiced!=0 ELSE 1=1 END)) ");
+			sql.append(column).append(">0 AND (CASE WHEN ol.QtyDelivered>=ol.QtyOrdered THEN ol.QtyDelivered-ol.QtyInvoiced!=0 ELSE 1=1 END)) ")
+			//MPo, 23/9/19
+			.append("AND o.User1_ID=? ");
+			//eof MPo, 23/9/19 
 		else
-			sql.append("ol.QtyOrdered-").append(column).append("!=0) ");
+			sql.append("ol.QtyOrdered-").append(column).append("!=0) ")
+			//MPo, 23/9/19
+			.append("AND o.User1_ID=? ");
+			//eof MPo, 23/9/19 
 					
 		if(sameWarehouseOnly)
 		{
@@ -136,10 +147,17 @@ public abstract class CreateFrom implements ICreateFrom
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
 			pstmt.setString(2, isSOTrxParam);
+			//MPo, 23/9/19
+			pstmt.setInt(3, User1_ID);
+			//eof MPo, 23/9/19 
+				
 			if(sameWarehouseOnly)
 			{
 				//only active for material receipts
-				pstmt.setInt(3, getM_Warehouse_ID());
+				//MPo, 23/9/19
+				//pstmt.setInt(3, getM_Warehouse_ID());
+				pstmt.setInt(4, getM_Warehouse_ID());
+				//eof MPo, 23/9/19
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -284,3 +302,4 @@ public abstract class CreateFrom implements ICreateFrom
 		this.title = title;
 	}
 }
+

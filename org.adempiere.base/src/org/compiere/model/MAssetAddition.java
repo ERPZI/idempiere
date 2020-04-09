@@ -127,6 +127,11 @@ public class MAssetAddition extends X_A_Asset_Addition
 			assetAdd.setA_Asset_ID(match.getC_InvoiceLine().getA_Asset_ID());
 			assetAdd.setA_CreateAsset(false);
 		}
+		//MPo, 14/8/18 Transfer PrCtr, CCtr, FArea to AssetAddition
+		assetAdd.setUser1_ID(match.getC_InvoiceLine().getUser1_ID());
+		assetAdd.setUser2_ID(match.getC_InvoiceLine().getUser2_ID());
+		assetAdd.setC_Activity_ID(match.getC_InvoiceLine().getC_Activity_ID());
+		//MPo
 		assetAdd.saveEx();
 		return assetAdd;
 	}
@@ -146,6 +151,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 				&& ifa.getA_Asset_ID() == 0) { 
 		//end @win add condition to prevent asset creation when expense addition or second addition
 		MAsset asset = assetAdd.createAsset();
+				
 		asset.dump();	
 		}
 		assetAdd.saveEx();
@@ -177,9 +183,15 @@ public class MAssetAddition extends X_A_Asset_Addition
 		asset.saveEx();
 		asset.dump();
 		
+		// Copy UseLife values from asset group to workfile
+		//TODO
+		//MAssetGroupAcct assetgrpacct = MAssetGroupAcct.forA_Asset_Group_ID(asset.getCtx(), asset.getA_Asset_Group_ID(), assetAdd.getPostingType());
+	
 		assetAdd.setA_Asset(asset);
 		assetAdd.saveEx();
+		
 		//@win add
+			
 		
 		return assetAdd;
 	}
@@ -202,6 +214,15 @@ public class MAssetAddition extends X_A_Asset_Addition
 			else if (A_SOURCETYPE_Imported.equals(sourceType))
 			{
 				asset = new MAsset(getI_FixedAsset(false));
+				//MPo, 8/11/18 Add PrCtr, CCtr, FArea in Fixed Asset
+				asset.setUser1_ID(getUser1_ID());
+				asset.setUser2_ID(getUser2_ID());
+				asset.setC_Activity_ID(getC_Activity_ID());
+				//MPo, 1/12/18
+				asset.setUseLifeMonths(getI_FixedAsset(false).getUseLifeMonths());
+				asset.setUseLifeMonths_F(getI_FixedAsset(false).getUseLifeMonths());
+				//
+				//
 				asset.saveEx();
 				setA_Asset(asset);
 			}
@@ -311,6 +332,17 @@ public class MAssetAddition extends X_A_Asset_Addition
 			if (log.isLoggable(Level.FINE)) log.fine("DateAcct=" + dateAcct);
 			setDateAcct(dateAcct);
 		}
+		//MPo, 8/11/18 Add PrCtr, CCtr, FArea for imports
+		setUser1_ID(ifa.getUser1_ID());
+		setUser2_ID(ifa.getUser2_ID());
+		setC_Activity_ID(ifa.getC_Activity_ID());
+		//
+		//MPo, 19/11/18 Transfer AmtEntered,AmtSource,AssetCost and Currency to Asset Addition
+		setAssetAmtEntered(ifa.getAssetAmtEntered());
+		setAssetSourceAmt(ifa.getAssetSourceAmt());
+		setC_Currency_ID(ifa.getC_Currency_ID());
+		//setAssetValueAmt(ifa.getA_Asset_Cost());
+		//MPo
 		setI_FixedAsset(ifa);
 	}
 	
@@ -758,7 +790,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 		}
 		*/
-		
 		
 		//
 		updateSourceDocument(false);

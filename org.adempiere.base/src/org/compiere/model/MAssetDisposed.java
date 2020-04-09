@@ -454,6 +454,6 @@ implements DocAction
 		for (MDepreciationExp ex : list)
 		{
 			ex.deleteEx(false);
-		}	
+		}
 	}
 }

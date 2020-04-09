@@ -44,6 +44,11 @@ public class ExpenseAPInvoice extends SvrProcess
 	private int			m_C_BPartner_ID = 0;
 	private Timestamp	m_DateFrom = null;
 	private Timestamp	m_DateTo = null;
+	//MPo, 16/7/18 Additional selection parameters
+	private int 		m_AD_Org_ID = 0;
+	private int			m_M_Warehouse_ID = 0;
+	private int			m_S_TimeExpense_ID = 0;
+	//
 	private int			m_noInvoices = 0;
 
 	/**
@@ -64,6 +69,14 @@ public class ExpenseAPInvoice extends SvrProcess
 				m_DateFrom = (Timestamp)para[i].getParameter();
 				m_DateTo = (Timestamp)para[i].getParameter_To();
 			}
+			//MPo, 15/7/18 Additional selection parameters
+			else if (name.equals("AD_Org_ID"))
+				m_AD_Org_ID = para[i].getParameterAsInt();
+			else if (name.equals("M_Warehouse_ID"))
+				m_M_Warehouse_ID = para[i].getParameterAsInt();
+			else if (name.equals("S_TimeExpense_ID"))
+				m_S_TimeExpense_ID = para[i].getParameterAsInt();
+			//
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -87,13 +100,23 @@ public class ExpenseAPInvoice extends SvrProcess
 			sql.append(" AND e.DateReport >= ?");	//	#3
 		if (m_DateTo != null)
 			sql.append(" AND e.DateReport <= ?");	//	#4
+		//MPo, 16/7/18 Additional selection parameters
+		if (m_AD_Org_ID != 0)
+			sql.append(" AND e.AD_Org_ID=?");		//	#5
+		if (m_M_Warehouse_ID != 0)
+			sql.append(" AND e.M_Warehouse_ID=?");	//	#6
+		if (m_S_TimeExpense_ID != 0)
+			sql.append(" AND e.S_TimeExpense_ID=?");//	#7
+		//
 		sql.append(" AND EXISTS (SELECT * FROM S_TimeExpenseLine el ")
 			.append("WHERE e.S_TimeExpense_ID=el.S_TimeExpense_ID")
 			.append(" AND el.C_InvoiceLine_ID IS NULL")
 			.append(" AND el.ConvertedAmt<>0) ")
 			.append("ORDER BY e.C_BPartner_ID, e.S_TimeExpense_ID");
 		//
-		int old_BPartner_ID = -1;
+		//MPo, 17/7/18 1 invoice per expense report
+		//int old_BPartner_ID = -1;
+		int old_TimeExpense_ID = -1;
 		MInvoice invoice = null;
 		//
 		PreparedStatement pstmt = null;
@@ -109,13 +132,24 @@ public class ExpenseAPInvoice extends SvrProcess
 				pstmt.setTimestamp (par++, m_DateFrom);
 			if (m_DateTo != null)
 				pstmt.setTimestamp (par++, m_DateTo);
+			//MPo, 16/7/18 Additional selection parameters
+			if (m_AD_Org_ID != 0)
+				pstmt.setInt (par++, m_AD_Org_ID);
+			if (m_M_Warehouse_ID != 0)
+				pstmt.setInt (par++, m_M_Warehouse_ID);
+			if (m_S_TimeExpense_ID != 0)
+				pstmt.setInt (par++, m_S_TimeExpense_ID);
+			//
 			rs = pstmt.executeQuery ();
 			while (rs.next())				//	********* Expense Line Loop
 			{
 				MTimeExpense te = new MTimeExpense (getCtx(), rs, get_TrxName());
 
+				//MPo, 17/7/18 New DocumentNo - New Order, 1 invoice per exp.report to avoid cross-PrCtr, cross-documentNo etc. 
 				//	New BPartner - New Order
-				if (te.getC_BPartner_ID() != old_BPartner_ID)
+				//if (te.getC_BPartner_ID() != old_BPartner_ID)
+				if (te.getS_TimeExpense_ID() != old_TimeExpense_ID)
+				//	
 				{
 					completeInvoice (invoice);
 					MBPartner bp = new MBPartner (getCtx(), te.getC_BPartner_ID(), get_TrxName());
@@ -136,6 +170,12 @@ public class ExpenseAPInvoice extends SvrProcess
 						invoice = null;
 						break;
 					}
+					// ZI,MPo, 13/5/2016 
+					invoice.setUser1_ID(te.getUser1_ID()); // UEL1 Profit Center
+  					// 
+					//ZI,MPo, 28/7/2016 copy payment rule from expense report to expense invoice
+					invoice.setPaymentRule(te.getPaymentRule()); // 
+					//
 					invoice.setM_PriceList_ID(te.getM_PriceList_ID());
 					
 					MPriceList pl = MPriceList.get(getCtx(), te.getM_PriceList_ID(), get_TrxName());
@@ -148,7 +188,10 @@ public class ExpenseAPInvoice extends SvrProcess
 					invoice.setDescription(descr.toString());
 					if (!invoice.save())
 						throw new IllegalStateException("Cannot save Invoice");
-					old_BPartner_ID = bp.getC_BPartner_ID();
+						//MPo,17/7/18 
+						//old_BPartner_ID = bp.getC_BPartner_ID();
+						old_TimeExpense_ID = te.getS_TimeExpense_ID();
+						//
 				}
 				MTimeExpenseLine[] tel = te.getLines(false);
 				for (int i = 0; i < tel.length; i++)
@@ -162,12 +205,14 @@ public class ExpenseAPInvoice extends SvrProcess
 						continue;
 
 					//	Update Header info
+					/* ZI,MPo, 13/5/2016 => don't require expense line-level reference details in invoice header
 					if (line.getC_Activity_ID() != 0 && line.getC_Activity_ID() != invoice.getC_Activity_ID())
 						invoice.setC_Activity_ID(line.getC_Activity_ID());
 					if (line.getC_Campaign_ID() != 0 && line.getC_Campaign_ID() != invoice.getC_Campaign_ID())
 						invoice.setC_Campaign_ID(line.getC_Campaign_ID());
 					if (line.getC_Project_ID() != 0 && line.getC_Project_ID() != invoice.getC_Project_ID())
 						invoice.setC_Project_ID(line.getC_Project_ID());
+					End ZI,MPo, 13/5/2016 */
 					if (!invoice.save())
 						throw new IllegalStateException("Cannot save Invoice");
 					
@@ -184,7 +229,10 @@ public class ExpenseAPInvoice extends SvrProcess
 					il.setC_ProjectTask_ID(line.getC_ProjectTask_ID());
 					il.setC_Activity_ID(line.getC_Activity_ID());
 					il.setC_Campaign_ID(line.getC_Campaign_ID());
-					//
+					// ZI,MPo, 13/5/2016 
+					il.setUser1_ID(line.getUser1_ID()); // UEL1 Profit Center
+  					il.setUser2_ID(line.getUser2_ID()); // UEL2 Cost Center
+  					//
 				//	il.setPrice();	//	not really a list/limit price for reimbursements
 					il.setPrice(line.getPriceReimbursed());	//
 					

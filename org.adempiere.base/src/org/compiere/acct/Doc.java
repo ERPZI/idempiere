@@ -745,6 +745,7 @@ public abstract class Doc
 			if (fact == null)
 				return STATUS_Error;
 			m_fact.add(fact);
+			
 			//
 			p_Status = STATUS_PostPrepared;
 

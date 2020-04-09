@@ -166,6 +166,7 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 			return;
 		}
 		
+		
 		//
 		MDepreciationWorkfile assetwk = MDepreciationWorkfile.get(getCtx(), getA_Asset_ID(), getPostingType(),get_TrxName(), getC_AcctSchema_ID());
 		if (assetwk == null)
@@ -203,6 +204,7 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 		//
 		
 	}
+	
 	
 	
 	protected boolean beforeDelete()

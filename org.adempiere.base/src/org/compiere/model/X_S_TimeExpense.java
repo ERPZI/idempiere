@@ -42,18 +42,26 @@ public class X_S_TimeExpense extends PO implements I_S_TimeExpense, I_Persistent
       /** if (S_TimeExpense_ID == 0)
         {
 			setC_BPartner_ID (0);
+// @SQL=SELECT c_bpartner_id AS defaultvalue FROM AD_User WHERE ad_user_id = @#AD_User_ID@ 
 			setDateReport (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
+			setDescription (null);
 			setDocAction (null);
-// CO
+// PR
 			setDocStatus (null);
 // DR
 			setDocumentNo (null);
 			setIsApproved (false);
 			setM_PriceList_ID (0);
+// @SQL=SELECT po_pricelist_id AS defaultvalue FROM c_bpartner WHERE c_bpartner_id = @C_BPartner_ID@
 			setM_Warehouse_ID (0);
+			setPaymentRule (null);
+// 'T'
 			setProcessed (false);
 			setS_TimeExpense_ID (0);
+			setUser1_ID (0);
+			setZI_ExpenseCategory_ID (0);
+// 1000001
         } */
     }
 
@@ -348,9 +356,9 @@ public class X_S_TimeExpense extends PO implements I_S_TimeExpense, I_Persistent
 	public void setM_Warehouse_ID (int M_Warehouse_ID)
 	{
 		if (M_Warehouse_ID < 1) 
-			set_Value (COLUMNNAME_M_Warehouse_ID, null);
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, null);
 		else 
-			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
 	/** Get Warehouse.
@@ -362,6 +370,40 @@ public class X_S_TimeExpense extends PO implements I_S_TimeExpense, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** PaymentRule AD_Reference_ID=195 */
+	public static final int PAYMENTRULE_AD_Reference_ID=195;
+	/** Cash = B */
+	public static final String PAYMENTRULE_Cash = "B";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
+	/** Direct Deposit = T */
+	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** Direct Debit = D */
+	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Mixed POS Payment = M */
+	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** Set Payment Rule.
+		@param PaymentRule 
+		How you pay the invoice
+	  */
+	public void setPaymentRule (String PaymentRule)
+	{
+
+		set_Value (COLUMNNAME_PaymentRule, PaymentRule);
+	}
+
+	/** Get Payment Rule.
+		@return How you pay the invoice
+	  */
+	public String getPaymentRule () 
+	{
+		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
 	/** Set Processed.
@@ -444,5 +486,92 @@ public class X_S_TimeExpense extends PO implements I_S_TimeExpense, I_Persistent
 	public String getS_TimeExpense_UU () 
 	{
 		return (String)get_Value(COLUMNNAME_S_TimeExpense_UU);
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param User1_ID 
+		User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_User1_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_ZI_ExpenseCategory getZI_ExpenseCategory() throws RuntimeException
+    {
+		return (I_ZI_ExpenseCategory)MTable.get(getCtx(), I_ZI_ExpenseCategory.Table_Name)
+			.getPO(getZI_ExpenseCategory_ID(), get_TrxName());	}
+ 
+	/** Set Expense Category.
+		@param ZI_ExpenseCategory_ID Expense Category	  */
+	public void setZI_ExpenseCategory_ID (int ZI_ExpenseCategory_ID)
+	{
+		if (ZI_ExpenseCategory_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_ZI_ExpenseCategory_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_ZI_ExpenseCategory_ID, Integer.valueOf(ZI_ExpenseCategory_ID));
+	}
+
+	/** Get Expense Category.
+		@return Expense Category	  */
+	public int getZI_ExpenseCategory_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_ExpenseCategory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Odometer From.
+		@param ZI_OdometerFrom Odometer From	  */
+	public void setZI_OdometerFrom (int ZI_OdometerFrom)
+	{
+		set_Value (COLUMNNAME_ZI_OdometerFrom, Integer.valueOf(ZI_OdometerFrom));
+	}
+
+	/** Get Odometer From.
+		@return Odometer From	  */
+	public int getZI_OdometerFrom () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_OdometerFrom);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Odometer To.
+		@param ZI_OdometerTo Odometer To	  */
+	public void setZI_OdometerTo (int ZI_OdometerTo)
+	{
+		set_Value (COLUMNNAME_ZI_OdometerTo, Integer.valueOf(ZI_OdometerTo));
+	}
+
+	/** Get Odometer To.
+		@return Odometer To	  */
+	public int getZI_OdometerTo () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_OdometerTo);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

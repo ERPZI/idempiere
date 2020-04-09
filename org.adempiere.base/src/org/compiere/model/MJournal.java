@@ -148,6 +148,9 @@ public class MJournal extends X_GL_Journal implements DocAction
 	//	setDateDoc(original.getDateDoc());
 	//	setDateAcct(original.getDateAcct());
 	//	setC_Period_ID(original.getC_Period_ID());
+		//MPo, 1/2/19 Copy AcctgSchema posting flag
+		setZI_IsPostedToAllSchemas(original.isZI_IsPostedToAllSchemas());
+		//
 	}	//	MJournal
 	
 	

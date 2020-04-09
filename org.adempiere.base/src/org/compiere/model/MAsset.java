@@ -14,6 +14,7 @@ import org.compiere.util.DB;
 import org.compiere.util.EMail;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.TimeUtil;
 
 /**
  * Asset Model
@@ -125,6 +126,11 @@ public class MAsset extends X_A_Asset
 		setValue(name);
 		setName(name);
 		setDescription(invoiceLine.getDescription());
+		//MPo, 14/8/18 Transfer PrCtr,CCtr and FArea from invoice line to asset master
+		setC_Activity_ID(invoiceLine.getC_Activity_ID()); //FArea
+		setUser1_ID(invoiceLine.getUser1_ID()); //PrCtr
+		setUser2_ID(invoiceLine.getUser2_ID()); //CCtr
+		//MPo
 	}
 
 	/**
@@ -411,25 +417,34 @@ public class MAsset extends X_A_Asset
 			// for each asset group acounting create an asset accounting and a workfile too
 			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID()))
 			{			
-				if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
-				{
-					// Asset Accounting
-					MAssetAcct assetacct = new MAssetAcct(this, assetgrpacct);
-					assetacct.setAD_Org_ID(getAD_Org_ID()); //added by @win
-					assetacct.saveEx();
-					
-					// Asset Depreciation Workfile
-					MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
-					assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
+			if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
+			{
+				// Asset Accounting
+				MAssetAcct assetacct = new MAssetAcct(this, assetgrpacct);
+				assetacct.setAD_Org_ID(getAD_Org_ID()); //added by @win
+				assetacct.saveEx();
+				
+				// Asset Depreciation Workfile
+				MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
+				assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
+				//MPo, 1/12/18
+				if (this.getUseLifeMonths() > 0) {
+					assetwk.setUseLifeYears(Integer.valueOf(this.getUseLifeMonths()/12));
+					assetwk.setUseLifeMonths(this.getUseLifeMonths());
+					assetwk.setUseLifeYears_F(Integer.valueOf(this.getUseLifeMonths()/12));
+					assetwk.setUseLifeMonths_F(this.getUseLifeMonths_F());
+				} else {
+				//
 					assetwk.setUseLifeYears(assetgrpacct.getUseLifeYears());
 					assetwk.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
 					assetwk.setUseLifeYears_F(assetgrpacct.getUseLifeYears_F());
 					assetwk.setUseLifeMonths_F(assetgrpacct.getUseLifeMonths_F());
-					assetwk.saveEx();
-					
-					// Change Log
-					MAssetChange.createAndSave(getCtx(), "CRT", new PO[]{this, assetwk, assetacct}, null);
 				}
+				assetwk.saveEx();
+				
+				// Change Log
+				MAssetChange.createAndSave(getCtx(), "CRT", new PO[]{this, assetwk, assetacct}, null);
+			}
 			}
 			
 		}

@@ -90,6 +90,8 @@ public class AttachmentDBSystem implements IAttachmentStore
 
 	@Override
 	public boolean save(MAttachment attach, MStorageProvider prov) {
+		log.log(Level.SEVERE, "saveDB");
+		
 		if (attach.m_items == null || attach.m_items.size() == 0)
 		{
 			attach.setBinaryData(null);

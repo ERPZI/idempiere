@@ -53,14 +53,24 @@ import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.form.Match;
+//MPo, 28/5/18
+import org.compiere.model.MLookup;
+import org.compiere.model.MLookupFactory;
+//
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.MMatchPO;
+//MPo, 28/5/18 
+import org.compiere.model.MTable;
+//
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+//MPo, 28/5/18
+import org.zkoss.zk.ui.WrongValueException;
+//
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -103,6 +113,11 @@ public class WMatch extends Match
 			//	UI
 			onlyVendor = WSearchEditor.createBPartner(m_WindowNo); 
 			onlyProduct = WSearchEditor.createProduct(m_WindowNo);
+			///MPo, 26/5/18 add original change: 20/8/2016 This is to avoid issues when AD_Column_ID is different in DEV,PROTO,UAT and PROD
+			int AD_Column_ID = MTable.get(Env.getCtx(), "ZI_WarehouseToPrCtr").getColumn("User1_ID").getAD_Column_ID();
+			MLookup lookupPrCtr = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
+			prCtrSearch = new WSearchEditor("User1_ID", true, false, true, lookupPrCtr);
+			//
 			zkInit();
 			dynInit();
 
@@ -128,7 +143,7 @@ public class WMatch extends Match
 	/**	Window No			*/
 	private int         	m_WindowNo = 0;
 	/**	Logger			*/
-	private static final CLogger log = CLogger.getCLogger(WMatch.class);
+	private static CLogger log = CLogger.getCLogger(WMatch.class);
 
 	private int     m_AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 	private int     m_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
@@ -169,8 +184,14 @@ public class WMatch extends Match
 	private Listbox matchMode = ListboxFactory.newDropdownListbox(m_matchMode);
 	private WSearchEditor onlyVendor = null; 
 	private WSearchEditor onlyProduct = null;
+	//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+	private WSearchEditor prCtrSearch = null;
+	//
 	private Label onlyVendorLabel = new Label();
 	private Label onlyProductLabel = new Label();
+	//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+	private Label prCtrLabel = new Label();
+	//
 	private Label dateFromLabel = new Label();
 	private Label dateToLabel = new Label();
 	private WDateEditor dateFrom = new WDateEditor("DateFrom", false, false, true, "DateFrom");
@@ -195,6 +216,9 @@ public class WMatch extends Match
 	private Checkbox sameProduct = new Checkbox();
 	private Checkbox sameBPartner = new Checkbox();
 	private Checkbox sameQty = new Checkbox();
+	//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr 
+	private Checkbox samePrCtr = new Checkbox();
+	//
 	private int noOfColumn;
 	
 	/**
@@ -224,6 +248,9 @@ public class WMatch extends Match
 		matchModeLabel.setText(Msg.translate(Env.getCtx(), "MatchMode"));
 		onlyVendorLabel.setText(Msg.translate(Env.getCtx(), "C_BPartner_ID"));
 		onlyProductLabel.setText(Msg.translate(Env.getCtx(), "M_Product_ID"));
+		//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+		prCtrLabel.setText(Msg.translate(Env.getCtx(), "User1_ID"));
+		//
 		dateFromLabel.setText(Msg.translate(Env.getCtx(), "DateFrom"));
 		dateToLabel.setText(Msg.translate(Env.getCtx(), "DateTo"));
 		bSearch.setLabel(Msg.translate(Env.getCtx(), "Search"));
@@ -239,6 +266,11 @@ public class WMatch extends Match
 		sameBPartner.setText(Msg.translate(Env.getCtx(), "SameBPartner"));
 		sameQty.setSelected(false);
 		sameQty.setText(Msg.translate(Env.getCtx(), "SameQty"));
+		//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
+		samePrCtr.setSelected(true);
+		samePrCtr.setText(Msg.translate(Env.getCtx(), "SamePrCtr"));
+		samePrCtr.setEnabled(false);
+		//
 		
 		// north - parameters
 		North north = new North();
@@ -285,6 +317,10 @@ public class WMatch extends Match
 		xPanel.appendChild(sameProduct);
 		xPanel.appendChild(new Space());
 		xPanel.appendChild(sameQty);
+		//MPo, 31/5/18 add original change: 22/7/2016 Add samePrCtr
+		xPanel.appendChild(new Space());
+		xPanel.appendChild(samePrCtr);
+		//
 		ZKUpdateUtil.setVflex(xPanel, "min");
 		xPanel.appendChild(new Separator());
 		vlayout.appendChild(xPanel);
@@ -309,7 +345,10 @@ public class WMatch extends Match
 		row = rows.newRow();
 		row.appendCellChild(matchModeLabel.rightAlign(), 1);
 		row.appendCellChild(matchMode, 1);
-		
+		//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+		row.appendChild(prCtrLabel.rightAlign());
+		row.appendChild(prCtrSearch.getComponent());
+		//
 		row = rows.newRow();
 		row.appendChild(onlyVendorLabel.rightAlign());
 		row.appendChild(onlyVendor.getComponent());
@@ -400,7 +439,12 @@ public class WMatch extends Match
 			new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),
 			new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
 			new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class)
+			//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
+			//new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class)
+			new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
+			new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),    //  8
+			new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")   	//  9
+			//
 		};
 
 		xMatchedTable.prepareTable(layout, "", "", false, "");
@@ -417,6 +461,9 @@ public class WMatch extends Match
 		sameBPartner.addActionListener(this);
 		sameProduct.addActionListener(this);
 		sameQty.addActionListener(this);
+		//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
+		samePrCtr.addActionListener(this);
+		//
 		
 		//  Init Yvonne
 		String selection = (String)matchFrom.getSelectedItem().getValue();
@@ -484,6 +531,13 @@ public class WMatch extends Match
 		Integer vendor = onlyVendor.getValue()!=null?(Integer)onlyVendor.getValue():null;
 		Timestamp from = dateFrom.getValue()!=null?(Timestamp)dateFrom.getValue():null;
 		Timestamp to = dateTo.getValue()!=null?(Timestamp)dateTo.getValue():null;
+		//MPo, 26/5/18 add original change: 21/7/2016
+		Integer prctr = prCtrSearch.getValue()!=null?(Integer)prCtrSearch.getValue():null;
+		if (prctr == null || prctr <= 0)
+		{
+					throw new WrongValueException(prCtrSearch.getComponent(), Msg.translate(Env.getCtx(), "FillMandatory"));
+		}
+		//
 		
 		if (e.getTarget() == matchFrom) {
 			//cmd_matchFrom((String)matchFrom.getSelectedItem().getLabel());
@@ -505,8 +559,10 @@ public class WMatch extends Match
 		else if (e.getTarget() == bSearch)
 		{
 			//cmd_search();
-			xMatchedTable = (WListbox)cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
-
+			//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+			//xMatchedTable = (WListbox)cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (WListbox)cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, prctr, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			//
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
@@ -519,7 +575,10 @@ public class WMatch extends Match
 		{
 			//cmd_process();
 			cmd_process(xMatchedTable, xMatchedToTable, matchMode.getSelectedIndex(), matchFrom.getSelectedIndex(), matchTo.getSelectedItem().getLabel(), m_xMatched);
-			xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			//MPo, 26/5/18 add original change: 21/7/2016 Add PrCtr
+			//xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedTable = (WListbox) cmd_search(xMatchedTable, matchFrom.getSelectedIndex(), (String)matchTo.getSelectedItem().getLabel(), product, vendor, prctr, from, to, matchMode.getSelectedIndex() == MODE_MATCHED);
+			//
 			xMatched.setValue(Env.ZERO);
 			//  Status Info
 			statusBar.setStatusLine(matchFrom.getSelectedItem().getLabel()
@@ -530,7 +589,11 @@ public class WMatch extends Match
 		}
 		else if (e.getTarget() == sameBPartner
 			|| e.getTarget() == sameProduct
-			|| e.getTarget() == sameQty)
+			//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
+			//|| e.getTarget() == sameQty)
+			|| e.getTarget() == sameQty
+			|| e.getTarget() == samePrCtr)
+			//
 			cmd_searchTo();
 		else if (AEnv.contains(xMatchedTable, e.getTarget()))
 			cmd_searchTo();
@@ -572,7 +635,10 @@ public class WMatch extends Match
 			double docQty = ((Double)xMatchedTable.getValueAt(row, I_QTY)).doubleValue();
 			double matchedQty = ((Double)xMatchedTable.getValueAt(row, I_MATCHED)).doubleValue();
 			qty = docQty - matchedQty;
-			xMatchedToTable = (WListbox) cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
+			//xMatchedToTable = (WListbox) cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			xMatchedToTable = (WListbox) cmd_searchTo(xMatchedTable, xMatchedToTable, displayString, matchToType, sameBPartner.isSelected(), sameProduct.isSelected(), sameQty.isSelected(), samePrCtr.isSelected(), matchMode.getSelectedIndex() == MODE_MATCHED);
+			//
 		}
 		//  Display To be Matched Qty
 		m_xMatched = BigDecimal.valueOf(qty);
@@ -643,5 +709,4 @@ public class WMatch extends Match
 	public ADForm getForm() {
 		return form;
 	}
-	
 }

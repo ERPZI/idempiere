@@ -88,12 +88,18 @@ public abstract class CreateFromShipment extends CreateFrom
 	 *  Load PBartner dependent Order/Invoice/Shipment Field.
 	 *  @param C_BPartner_ID BPartner
 	 */
-	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	//MPo, 23/9/19
+	//protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID) {
+	protected ArrayList<KeyNamePair> loadRMAData(int C_BPartner_ID, int User1_ID) {
+	//eof	
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 
 		String sqlStmt = "SELECT r.M_RMA_ID, r.DocumentNo || '-' || r.Amt from M_RMA r "
 			+ "WHERE ISSOTRX='Y' AND r.DocStatus in ('CO', 'CL') " 
 			+ "AND r.C_BPartner_ID=? "
+			//MPo, 23/9/19 Add PrCtr
+			+ "AND r.User1_ID=? "
+			//eof
 			+ "AND r.M_RMA_ID in (SELECT rl.M_RMA_ID FROM M_RMALine rl "
 			+ "WHERE rl.M_RMA_ID=r.M_RMA_ID AND rl.QtyDelivered < rl.Qty " 
 			+ "AND rl.M_InOutLine_ID IS NOT NULL)";
@@ -103,6 +109,9 @@ public abstract class CreateFromShipment extends CreateFrom
 		try {
 			pstmt = DB.prepareStatement(sqlStmt, null);
 			pstmt.setInt(1, C_BPartner_ID);
+			//MPo, 23/9/19
+			pstmt.setInt(2, User1_ID);
+			//eof
 			rs = pstmt.executeQuery();
 			while (rs.next()) {
 				list.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
@@ -122,7 +131,10 @@ public abstract class CreateFromShipment extends CreateFrom
 	 * Load PBartner dependent Order/Invoice/Shipment Field.
 	 * @param C_BPartner_ID
 	 */
-	protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID)
+	//MPo, 23/9/19
+	//protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID)
+	protected ArrayList<KeyNamePair> loadInvoiceData (int C_BPartner_ID, int User1_ID)
+	//eof
 	{
 		ArrayList<KeyNamePair> list = new ArrayList<KeyNamePair>();
 		
@@ -134,6 +146,9 @@ public abstract class CreateFromShipment extends CreateFrom
 		StringBuffer sql = new StringBuffer("SELECT i.C_Invoice_ID,").append(display)
 		.append(" FROM C_Invoice i "
 				+ "WHERE i.C_BPartner_ID=? AND i.IsSOTrx='N' AND i.DocStatus IN ('CL','CO')"
+				//MPo, 23/9/19
+				+ " AND i.User1_ID=?"
+				//eof
 				+ " AND i.C_Invoice_ID IN "
 				+ "(SELECT il.C_Invoice_ID FROM C_InvoiceLine il"
 				+ " LEFT OUTER JOIN M_MatchInv mi ON (il.C_InvoiceLine_ID=mi.C_InvoiceLine_ID) "
@@ -150,7 +165,11 @@ public abstract class CreateFromShipment extends CreateFrom
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			pstmt.setInt(1, C_BPartner_ID);
-			pstmt.setInt(2, C_BPartner_ID);
+			//MPo, 23/9/19
+			//pstmt.setInt(2, C_BPartner_ID);
+			pstmt.setInt(2, User1_ID);
+			pstmt.setInt(3, C_BPartner_ID);
+			//eof
 			rs = pstmt.executeQuery();
 			while (rs.next())
 			{

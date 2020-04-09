@@ -828,4 +828,68 @@ public class X_GL_Journal extends PO implements I_GL_Journal, I_Persistent
 			 return Env.ZERO;
 		return bd;
 	}
+
+	/** Set Create zero-Balance lines.
+		@param ZI_DocumentSplitting 
+		Create zero-Balance lines
+	  */
+	public void setZI_DocumentSplitting (String ZI_DocumentSplitting)
+	{
+		set_Value (COLUMNNAME_ZI_DocumentSplitting, ZI_DocumentSplitting);
+	}
+
+	/** Get Create zero-Balance lines.
+		@return Create zero-Balance lines
+	  */
+	public String getZI_DocumentSplitting () 
+	{
+		return (String)get_Value(COLUMNNAME_ZI_DocumentSplitting);
+	}
+
+	/** Set Hard Fail.
+		@param ZI_isHardFail 
+		Hard Fail
+	  */
+	public void setZI_isHardFail (boolean ZI_isHardFail)
+	{
+		throw new IllegalArgumentException ("ZI_isHardFail is virtual column");	}
+
+	/** Get Hard Fail.
+		@return Hard Fail
+	  */
+	public boolean isZI_isHardFail () 
+	{
+		Object oo = get_Value(COLUMNNAME_ZI_isHardFail);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Post to multiple accounting schemes.
+		@param ZI_IsPostedToAllSchemas 
+		If marked the GL Journal is posted to all accounting schemes the organization is a member of.
+	  */
+	public void setZI_IsPostedToAllSchemas (boolean ZI_IsPostedToAllSchemas)
+	{
+		set_Value (COLUMNNAME_ZI_IsPostedToAllSchemas, Boolean.valueOf(ZI_IsPostedToAllSchemas));
+	}
+
+	/** Get Post to multiple accounting schemes.
+		@return If marked the GL Journal is posted to all accounting schemes the organization is a member of.
+	  */
+	public boolean isZI_IsPostedToAllSchemas () 
+	{
+		Object oo = get_Value(COLUMNNAME_ZI_IsPostedToAllSchemas);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
 }

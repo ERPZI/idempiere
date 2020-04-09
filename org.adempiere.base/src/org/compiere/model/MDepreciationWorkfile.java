@@ -222,7 +222,11 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 			//if A_Asset_Cost is 0 have a voided addition, in this case asset is not full depreciated 
 			if (getA_Asset_Cost().signum() == 0)
 			{
-			 return false;	
+				//if A_Asset_Cost is 0 have a voided addition, in this case asset is not full depreciated 
+				if (getA_Asset_Cost().signum() == 0)
+				{
+					return false;	
+				}
 			}
 		}
 			else
@@ -230,6 +234,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 				return false;
 			}
 		}
+
 		
 		return true;
 	}
@@ -782,7 +787,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		// Calculate values
 		if (valCofinantare.signum() == 0 && valTert.signum() == 0)
 		{
-			// Values ​​have never been set, so put everything on their own financing
+			// Values Ã©Ë†Â¥Ã¥Â¬Â§Ã¯Â¿Â½Ã¥Âªâ€œave never been set, so put everything on their own financing
 			valCofinantare = assetCost;
 			valTert = Env.ZERO;
 		}

@@ -39,8 +39,6 @@ public class PaySelectionCreateCheck extends SvrProcess
 	private String		p_PaymentRule = null;
 	/**	Payment Selection			*/
 	private int			p_C_PaySelection_ID = 0;
-	/** one payment per invoice */
-	private boolean							p_onepaymentPerInvoice	= false;
 	/** The checks					*/
 	private ArrayList<MPaySelectionCheck>	m_list = new ArrayList<MPaySelectionCheck>();
 	
@@ -57,8 +55,6 @@ public class PaySelectionCreateCheck extends SvrProcess
 				;
 			else if (name.equals("PaymentRule"))
 				p_PaymentRule = (String)para[i].getParameter();
-			else if (name.equalsIgnoreCase(MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice))
-				p_onepaymentPerInvoice = para[i].getParameterAsBoolean();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -106,24 +102,28 @@ public class PaySelectionCreateCheck extends SvrProcess
 	 */
 	private void createCheck (MPaySelectionLine line) throws Exception
 	{
-		if (!p_onepaymentPerInvoice)
+		//	Try to find one
+		for (int i = 0; i < m_list.size(); i++)
 		{
-			// Try to find one
-			for (int i = 0; i < m_list.size(); i++)
+			MPaySelectionCheck check = (MPaySelectionCheck)m_list.get(i);
+			//	Add to existing
+			if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID()
+			//MPo, 01/11/2016 Add PrCtr
+				&& check.getUser1_ID() == line.getUser1_ID()
+			//
+		    //MPo, 17/10/18
+				&& check.getZI_Pay_BPartner_ID() == line.getZI_Pay_BPartner_ID()
+				&& check.getZI_Pay_Location_ID() == line.getZI_Pay_Location_ID())
+			//	
 			{
-				MPaySelectionCheck check = (MPaySelectionCheck) m_list.get(i);
-				// Add to existing
-				if (check.getC_BPartner_ID() == line.getInvoice().getC_BPartner_ID())
-				{
-					check.addLine(line);
-					if (!check.save())
-						throw new IllegalStateException("Cannot save MPaySelectionCheck");
-					line.setC_PaySelectionCheck_ID(check.getC_PaySelectionCheck_ID());
-					line.setProcessed(true);
-					if (!line.save())
-						throw new IllegalStateException("Cannot save MPaySelectionLine");
-					return;
-				}
+				check.addLine(line);
+				if (!check.save())
+					throw new IllegalStateException("Cannot save MPaySelectionCheck");
+				line.setC_PaySelectionCheck_ID(check.getC_PaySelectionCheck_ID());
+				line.setProcessed(true);
+				if (!line.save())
+					throw new IllegalStateException("Cannot save MPaySelectionLine");
+				return;
 			}
 		}
 		//	Create new
@@ -151,3 +151,4 @@ public class PaySelectionCreateCheck extends SvrProcess
 	}	//	createCheck
 	
 }	//	PaySelectionCreateCheck
+

@@ -9,4 +9,3 @@ UPDATE AD_Column SET Callout='org.compiere.model.CalloutGLJournal.period',Update
 
 SELECT register_migration_script('201904181424_IDEMPIERE-3874.sql') FROM dual
 ;
-

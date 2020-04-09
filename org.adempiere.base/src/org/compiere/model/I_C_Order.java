@@ -156,12 +156,12 @@ public interface I_C_Order
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -1170,12 +1170,12 @@ public interface I_C_Order
     /** Column name User1_ID */
     public static final String COLUMNNAME_User1_ID = "User1_ID";
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 	  * User defined list element #1
 	  */
 	public void setUser1_ID (int User1_ID);
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 	  * User defined list element #1
 	  */
 	public int getUser1_ID();
@@ -1185,12 +1185,12 @@ public interface I_C_Order
     /** Column name User2_ID */
     public static final String COLUMNNAME_User2_ID = "User2_ID";
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 	  * User defined list element #2
 	  */
 	public void setUser2_ID (int User2_ID);
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 	  * User defined list element #2
 	  */
 	public int getUser2_ID();
@@ -1222,4 +1222,52 @@ public interface I_C_Order
 	  * Weight of a product
 	  */
 	public BigDecimal getWeight();
+
+    /** Column name ZI_Branch_ID */
+    public static final String COLUMNNAME_ZI_Branch_ID = "ZI_Branch_ID";
+
+	/** Set Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID);
+
+	/** Get Branch	  */
+	public int getZI_Branch_ID();
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException;
+
+    /** Column name ZI_GP */
+    public static final String COLUMNNAME_ZI_GP = "ZI_GP";
+
+	/** Set Gross Profit Margin.
+	  * Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP (BigDecimal ZI_GP);
+
+	/** Get Gross Profit Margin.
+	  * Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP();
+
+    /** Column name ZI_GP_Percent */
+    public static final String COLUMNNAME_ZI_GP_Percent = "ZI_GP_Percent";
+
+	/** Set Gross Profit Margin %.
+	  * Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP_Percent (BigDecimal ZI_GP_Percent);
+
+	/** Get Gross Profit Margin %.
+	  * Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP_Percent();
+
+    /** Column name ZI_Incoterm_ID */
+    public static final String COLUMNNAME_ZI_Incoterm_ID = "ZI_Incoterm_ID";
+
+	/** Set Incoterm	  */
+	public void setZI_Incoterm_ID (int ZI_Incoterm_ID);
+
+	/** Get Incoterm	  */
+	public int getZI_Incoterm_ID();
+
+	public I_ZI_Incoterm getZI_Incoterm() throws RuntimeException;
 }

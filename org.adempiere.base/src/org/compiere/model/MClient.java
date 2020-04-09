@@ -947,13 +947,21 @@ public class MClient extends X_AD_Client
 			return null;
 		}
 		//
-		EMail email = new EMail (this,
-				   from.getEMail(),
-				   to,
-				   subject,
-				   message, html);
+		//Ruud: change to always use the user configured in the client table instead of the user sending the request.
+		EMail email = new EMail (this, getRequestEMail(), to, subject, message, html);
 		if (isSmtpAuthorization())
-			email.createAuthenticator (from.getEMailUser(), from.getEMailUserPW());
+		{
+			email.createAuthenticator (getRequestUser(), getRequestUserPW());
+		}
+		
+		//EMail email = new EMail (this,
+		//		   from.getEMail(),
+		//		   to,
+		//		   subject,
+		//		   message, html);
+		//if (isSmtpAuthorization())
+		//	email.createAuthenticator (from.getEMailUser(), from.getEMailUserPW());
+		
 		if (from.getEMail() != null && ! from.getEMail().equalsIgnoreCase(from.getEMailUser())) {
 			email.setReplyTo(from.getEMail());
 		}

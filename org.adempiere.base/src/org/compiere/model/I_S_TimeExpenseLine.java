@@ -65,12 +65,12 @@ public interface I_S_TimeExpenseLine
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -226,6 +226,21 @@ public interface I_S_TimeExpenseLine
 	  */
 	public int getCreatedBy();
 
+    /** Column name C_TaxCategory_ID */
+    public static final String COLUMNNAME_C_TaxCategory_ID = "C_TaxCategory_ID";
+
+	/** Set Tax Category.
+	  * Tax Category
+	  */
+	public void setC_TaxCategory_ID (int C_TaxCategory_ID);
+
+	/** Get Tax Category.
+	  * Tax Category
+	  */
+	public int getC_TaxCategory_ID();
+
+	public org.compiere.model.I_C_TaxCategory getC_TaxCategory() throws RuntimeException;
+
     /** Column name C_UOM_ID */
     public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
 
@@ -344,6 +359,19 @@ public interface I_S_TimeExpenseLine
 	  * Unique line for this document
 	  */
 	public int getLine();
+
+    /** Column name LineNetAmt */
+    public static final String COLUMNNAME_LineNetAmt = "LineNetAmt";
+
+	/** Set Line Amount.
+	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	  */
+	public void setLineNetAmt (BigDecimal LineNetAmt);
+
+	/** Get Line Amount.
+	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	  */
+	public BigDecimal getLineNetAmt();
 
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
@@ -516,6 +544,19 @@ public interface I_S_TimeExpenseLine
 
 	public org.compiere.model.I_S_TimeType getS_TimeType() throws RuntimeException;
 
+    /** Column name TaxID */
+    public static final String COLUMNNAME_TaxID = "TaxID";
+
+	/** Set Tax ID.
+	  * Tax Identification
+	  */
+	public void setTaxID (String TaxID);
+
+	/** Get Tax ID.
+	  * Tax Identification
+	  */
+	public String getTaxID();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 
@@ -531,4 +572,69 @@ public interface I_S_TimeExpenseLine
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set Cost Center.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get Cost Center.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
+    /** Column name ZI_ReceiptAvailable */
+    public static final String COLUMNNAME_ZI_ReceiptAvailable = "ZI_ReceiptAvailable";
+
+	/** Set Receipt Yes/No.
+	  * Receipt Yes/No
+	  */
+	public void setZI_ReceiptAvailable (boolean ZI_ReceiptAvailable);
+
+	/** Get Receipt Yes/No.
+	  * Receipt Yes/No
+	  */
+	public boolean isZI_ReceiptAvailable();
+
+    /** Column name ZI_ReceiptNo */
+    public static final String COLUMNNAME_ZI_ReceiptNo = "ZI_ReceiptNo";
+
+	/** Set Receipt No.	  */
+	public void setZI_ReceiptNo (String ZI_ReceiptNo);
+
+	/** Get Receipt No.	  */
+	public String getZI_ReceiptNo();
+
+    /** Column name ZI_VendorName */
+    public static final String COLUMNNAME_ZI_VendorName = "ZI_VendorName";
+
+	/** Set Vendor Name.
+	  * Name and Address details of the vendor from whom goods or services were purchased and by whom the receipt was issued. 
+	  */
+	public void setZI_VendorName (String ZI_VendorName);
+
+	/** Get Vendor Name.
+	  * Name and Address details of the vendor from whom goods or services were purchased and by whom the receipt was issued. 
+	  */
+	public String getZI_VendorName();
 }

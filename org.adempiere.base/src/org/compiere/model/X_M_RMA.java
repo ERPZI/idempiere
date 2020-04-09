@@ -52,9 +52,11 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 // @IsSOTrx@
 			setM_RMA_ID (0);
 			setM_RMAType_ID (0);
+			setM_Warehouse_ID (0);
 			setName (null);
 			setProcessed (false);
 			setSalesRep_ID (0);
+			setUser1_ID (0);
         } */
     }
 
@@ -544,6 +546,34 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 		return (String)get_Value(COLUMNNAME_M_RMA_UU);
 	}
 
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
+			.getPO(getM_Warehouse_ID(), get_TrxName());	}
+
+	/** Set Warehouse.
+		@param M_Warehouse_ID 
+		Storage Warehouse and Service Point
+	  */
+	public void setM_Warehouse_ID (int M_Warehouse_ID)
+	{
+		if (M_Warehouse_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+	}
+
+	/** Get Warehouse.
+		@return Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Name.
 		@param Name 
 		Alphanumeric identifier of the entity
@@ -654,6 +684,59 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public int getSalesRep_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
+			.getPO(getUser1_ID(), get_TrxName());	}
+
+	/** Set Profit Center.
+		@param User1_ID 
+		User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1) 
+			set_Value (COLUMNNAME_User1_ID, null);
+		else 
+			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException
+    {
+		return (I_ZI_Branch)MTable.get(getCtx(), I_ZI_Branch.Table_Name)
+			.getPO(getZI_Branch_ID(), get_TrxName());	}
+
+	/** Set Branch.
+		@param ZI_Branch_ID Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID)
+	{
+		if (ZI_Branch_ID < 1) 
+			set_Value (COLUMNNAME_ZI_Branch_ID, null);
+		else 
+			set_Value (COLUMNNAME_ZI_Branch_ID, Integer.valueOf(ZI_Branch_ID));
+	}
+
+	/** Get Branch.
+		@return Branch	  */
+	public int getZI_Branch_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Branch_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

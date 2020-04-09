@@ -178,6 +178,8 @@ public class MPayment extends X_C_Payment
 	/** Reversal Indicator			*/
 	public static String	REVERSE_INDICATOR = "^";
 	
+	/** List for MAllocationHdr */
+	private List<MAllocationHdr> allocList;
 	/**
 	 *  Reset Payment to new status
 	 */
@@ -1982,6 +1984,7 @@ public class MPayment extends X_C_Payment
 			approveIt();
 		if (log.isLoggable(Level.INFO)) log.info(toString());
 
+		allocList = new ArrayList<MAllocationHdr>();
 		//	Charge Handling
 		boolean createdAllocationRecords = false;
 		if (getC_Charge_ID() != 0)
@@ -2110,6 +2113,14 @@ public class MPayment extends X_C_Payment
 
 		//
 		setProcessed(true);
+		if (allocList != null && allocList.size() > 0 )
+		{
+			for (MAllocationHdr alloc : allocList)
+			{
+				alloc.setProcessedOn("Processed", true, false);
+				alloc.saveEx();
+			}
+		}
 		setDocAction(DOCACTION_Close);
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
@@ -2278,6 +2289,8 @@ public class MPayment extends X_C_Payment
 			log.severe("P.Allocations not created");
 			return false;
 		}
+		
+		allocList.add(alloc);
 		//	Lines
 		for (int i = 0; i < pAllocs.length; i++)
 		{
@@ -2348,7 +2361,8 @@ public class MPayment extends X_C_Payment
 		alloc.saveEx(get_TrxName());
 		m_justCreatedAllocInv = alloc;
 		m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
-			
+		allocList.add(alloc);
+		
 		//	Get Project from Invoice
 		int C_Project_ID = DB.getSQLValue(get_TrxName(), 
 			"SELECT MAX(C_Project_ID) FROM C_Invoice WHERE C_Invoice_ID=?", getC_Invoice_ID());
@@ -2446,6 +2460,7 @@ public class MPayment extends X_C_Payment
 			}
 			// end added by zuhri
 			m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
+			allocList.add(alloc);
 		}
 		return ok;
 	}	//	allocatePaySelection

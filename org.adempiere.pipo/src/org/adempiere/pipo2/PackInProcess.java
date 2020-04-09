@@ -110,7 +110,7 @@ public class PackInProcess extends SvrProcess {
 		}
 				
 		// Unzip package
-		File zipFilepath = entry.getFile();
+		File zipFilepath = entry.getFile(entry.getName().substring(entry.getName().lastIndexOf('/') + 1));
 		if (log.isLoggable(Level.INFO)) log.info("zipFilepath->" + zipFilepath);
 		String parentDir = Zipper.getParentDir(zipFilepath);
 		Zipper.unpackFile(zipFilepath, targetDir);

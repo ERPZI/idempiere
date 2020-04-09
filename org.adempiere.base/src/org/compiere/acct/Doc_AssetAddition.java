@@ -53,6 +53,7 @@ public class Doc_AssetAddition extends Doc
 		MAssetAddition assetAdd = getAssetAddition();
 		ArrayList<Fact> facts = new ArrayList<Fact>();
 		Fact fact = new Fact(this, as, assetAdd.getPostingType());
+
 		facts.add(fact);
 		//
 		if (MAssetAddition.A_SOURCETYPE_Imported.equals(assetAdd.getA_SourceType()) 

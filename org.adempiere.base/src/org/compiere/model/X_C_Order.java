@@ -61,7 +61,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 			setDeliveryViaRule (null);
 // P
 			setDocAction (null);
-// CO
+// PR
 			setDocStatus (null);
 // DR
 			setDocumentNo (null);
@@ -102,6 +102,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 			setSalesRep_ID (0);
 			setSendEMail (false);
 			setTotalLines (Env.ZERO);
+			setUser1_ID (0);
         } */
     }
 
@@ -307,7 +308,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
 			.getPO(getC_Activity_ID(), get_TrxName());	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID 
 		Business Activity
 	  */
@@ -319,7 +320,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID () 
@@ -1734,9 +1735,9 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 	public void setM_Warehouse_ID (int M_Warehouse_ID)
 	{
 		if (M_Warehouse_ID < 1) 
-			set_Value (COLUMNNAME_M_Warehouse_ID, null);
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, null);
 		else 
-			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+			set_ValueNoCheck (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
 	/** Get Warehouse.
@@ -2130,19 +2131,19 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser1_ID(), get_TrxName());	}
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 		@param User1_ID 
 		User defined list element #1
 	  */
 	public void setUser1_ID (int User1_ID)
 	{
 		if (User1_ID < 1) 
-			set_Value (COLUMNNAME_User1_ID, null);
+			set_ValueNoCheck (COLUMNNAME_User1_ID, null);
 		else 
-			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+			set_ValueNoCheck (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 		@return User defined list element #1
 	  */
 	public int getUser1_ID () 
@@ -2158,7 +2159,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser2_ID(), get_TrxName());	}
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 		@param User2_ID 
 		User defined list element #2
 	  */
@@ -2170,7 +2171,7 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 		@return User defined list element #2
 	  */
 	public int getUser2_ID () 
@@ -2219,5 +2220,93 @@ public class X_C_Order extends PO implements I_C_Order, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException
+    {
+		return (I_ZI_Branch)MTable.get(getCtx(), I_ZI_Branch.Table_Name)
+			.getPO(getZI_Branch_ID(), get_TrxName());	}
+
+	/** Set Branch.
+		@param ZI_Branch_ID Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID)
+	{
+		if (ZI_Branch_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_ZI_Branch_ID, null);
+		else 
+			set_ValueNoCheck (COLUMNNAME_ZI_Branch_ID, Integer.valueOf(ZI_Branch_ID));
+	}
+
+	/** Get Branch.
+		@return Branch	  */
+	public int getZI_Branch_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Branch_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Gross Profit Margin.
+		@param ZI_GP 
+		Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP (BigDecimal ZI_GP)
+	{
+		throw new IllegalArgumentException ("ZI_GP is virtual column");	}
+
+	/** Get Gross Profit Margin.
+		@return Gross Profit Margin as a result of LineNetAmt – (PriceLimit x QtyOrdered). PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_GP);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Gross Profit Margin %.
+		@param ZI_GP_Percent 
+		Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public void setZI_GP_Percent (BigDecimal ZI_GP_Percent)
+	{
+		throw new IllegalArgumentException ("ZI_GP_Percent is virtual column");	}
+
+	/** Get Gross Profit Margin %.
+		@return Gross Profit Margin % as a result of (PriceActual-PriceLimit) / PriceActual x 100. PriceLimit represents the product landed costs.
+	  */
+	public BigDecimal getZI_GP_Percent () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_GP_Percent);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public I_ZI_Incoterm getZI_Incoterm() throws RuntimeException
+    {
+		return (I_ZI_Incoterm)MTable.get(getCtx(), I_ZI_Incoterm.Table_Name)
+			.getPO(getZI_Incoterm_ID(), get_TrxName());	}
+
+	/** Set Incoterm.
+		@param ZI_Incoterm_ID Incoterm	  */
+	public void setZI_Incoterm_ID (int ZI_Incoterm_ID)
+	{
+		if (ZI_Incoterm_ID < 1) 
+			set_Value (COLUMNNAME_ZI_Incoterm_ID, null);
+		else 
+			set_Value (COLUMNNAME_ZI_Incoterm_ID, Integer.valueOf(ZI_Incoterm_ID));
+	}
+
+	/** Get Incoterm.
+		@return Incoterm	  */
+	public int getZI_Incoterm_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Incoterm_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

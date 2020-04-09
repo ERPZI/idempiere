@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MAsset;
 import org.compiere.model.MAssetAcct;
 import org.compiere.model.MAssetChange;
 import org.compiere.model.MAssetDisposed;
@@ -52,15 +53,40 @@ public class Doc_AssetDisposed extends Doc
 		facts.add(fact);
 		MAssetChange ac = MAssetChange.get(getCtx(), assetDisp.getA_Asset_ID(), MAssetChange.CHANGETYPE_Disposal,getTrxName(), as.getC_AcctSchema_ID());
 		//
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct, as)
+		//MPo, 28/11/18
+		FactLine factLine;
+		MAsset asset = MAsset.get(getCtx(), assetDisp.getA_Asset_ID(), null);
+		factLine = fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct, as)
+		//fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Asset_Acct, as)
+		//		
 				, ac.getC_AcctSchema().getC_Currency_ID()
 				, Env.ZERO, ac.getAssetValueAmt());
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct, as)
+		//MPo, 18/11/18
+		factLine.setUser1_ID(asset.getUser1_ID());
+		factLine.setUser2_ID(asset.getUser2_ID());
+		factLine.setC_Activity_ID(asset.getC_Activity_ID());
+		//
+		//MPo, 28/11/18
+		factLine = fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct, as)
+		//fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Accumdepreciation_Acct, as)
+		//		
 				, ac.getC_AcctSchema().getC_Currency_ID()
 				, ac.getAssetAccumDepreciationAmt(), Env.ZERO);
-		fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct, as)
+		//MPo, 18/11/18
+		factLine.setUser1_ID(asset.getUser1_ID());
+		factLine.setUser2_ID(asset.getUser2_ID());
+		factLine.setC_Activity_ID(asset.getC_Activity_ID());
+		//
+		//MPo, 28/11/18
+		factLine = fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct, as)
+		//fact.createLine(null, getAccount(MAssetAcct.COLUMNNAME_A_Disposal_Loss_Acct, as)
+		//		
 				, ac.getC_AcctSchema().getC_Currency_ID()
 				, ac.getAssetBookValueAmt(), Env.ZERO);
+		//MPo, 18/11/18
+		factLine.setUser1_ID(asset.getUser1_ID());
+		factLine.setUser2_ID(asset.getUser2_ID());
+		factLine.setC_Activity_ID(asset.getC_Activity_ID());
 		//
 		return facts;
 	}
