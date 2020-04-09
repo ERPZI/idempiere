@@ -51,6 +51,7 @@ import org.compiere.model.MTab;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_Tab_Customization;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
@@ -103,7 +104,7 @@ public class CustomizeGridViewPanel extends Panel
 	}	//	
 
 	/**	Logger			*/
-	static CLogger log = CLogger.getCLogger(CustomizeGridViewPanel.class);
+	protected static final CLogger log = CLogger.getCLogger(CustomizeGridViewPanel.class);
 	private int			m_WindowNo;
 	private int			m_AD_Tab_ID;
 	private int 		m_AD_User_ID;
@@ -131,7 +132,7 @@ public class CustomizeGridViewPanel extends Panel
 
 	private boolean uiCreated;
 	private boolean m_saved = false;
-	private ConfirmPanel confirmPanel = new ConfirmPanel(true);
+	private ConfirmPanel confirmPanel = new ConfirmPanel(true, false, true, false, false, false);
 	
 /**
 	 * Static Layout
@@ -290,6 +291,9 @@ public class CustomizeGridViewPanel extends Panel
 				} else if (event.getTarget().equals(
 						confirmPanel.getButton(ConfirmPanel.A_CANCEL))) {
 					getParent().detach();
+				} else if (event.getTarget().equals(confirmPanel.getButton(ConfirmPanel.A_RESET))) {
+					tableSeqs.clear();
+					loadData();
 				}
 			}
 

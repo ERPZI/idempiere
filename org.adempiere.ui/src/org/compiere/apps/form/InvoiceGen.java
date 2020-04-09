@@ -378,4 +378,5 @@ public class InvoiceGen extends GenForm
 		
 		return info;
 	}	//	generateInvoices
+
 }

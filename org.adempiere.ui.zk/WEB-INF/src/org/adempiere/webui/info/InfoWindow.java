@@ -71,7 +71,6 @@ import org.compiere.model.AccessSqlParser.TableInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.GridWindow;
-import org.compiere.model.Lookup;
 import org.compiere.model.MInfoColumn;
 import org.compiere.model.MInfoWindow;
 import org.compiere.model.MLookupFactory;
@@ -604,6 +603,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				vo.Description = desc != null ? desc : "";
 				String help = infoColumn.get_Translation("Help");
 				vo.Help = help != null ? help : "";
+				vo.AD_FieldStyle_ID = infoColumn.getAD_FieldStyle_ID();
 				GridField gridField = new GridField(vo);
 				gridFields.add(gridField);
 			}
@@ -629,14 +629,15 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					}
 				}
 				
-				if(hasEditable)
-				{
+			}
+
 					infoWindowListItemRenderer = new WInfoWindowListItemRenderer(this);
 					contentPanel.setItemRenderer(infoWindowListItemRenderer);
+			if(hasEditable)
+			{
 					contentPanel.setAllowIDColumnForReadWrite(true);
 					infoWindowListItemRenderer.addTableValueChangeListener(contentPanel); // Replicated from WListbox constructor
 				}					
-			}			
 			
 			StringBuilder builder = new StringBuilder(p_whereClause != null ? p_whereClause.trim() : "");
 			String infoWhereClause = infoWindow.getWhereClause();
@@ -731,7 +732,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				//Xolali - add embeddedTbl to list, add m_sqlembedded to list
 				EmbedWinInfo ewinInfo = new EmbedWinInfo(embedInfo,embeddedTbl,m_sqlEmbedded,relatedInfo.getLinkColumnName(), relatedInfo.getLinkInfoColumn(), relatedInfo.getParentRelatedColumn_ID());
 				embeddedWinList.add(ewinInfo);
-				RelatedInfoWindow relatedInfoWindow = new RelatedInfoWindow(ewinInfo, this, embeddedPaging, s_sqlCount, s_layoutEmbedded);
+				RelatedInfoWindow relatedInfoWindow = new RelatedInfoWindow(ewinInfo, this, embeddedPaging, s_sqlCount, s_layoutEmbedded, editorMap);
 				relatedMap.put(embedInfo.getAD_InfoWindow_ID(), relatedInfoWindow);
 
 				MInfoWindow riw = (MInfoWindow) relatedInfo.getRelatedInfo();
@@ -874,7 +875,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (! colSQL.toUpperCase().contains(" AS "))
 			colSQL += " AS " + infoColumn.getColumnName();
         editorMap.put(colSQL, editor);
-		ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, KeyNamePair.class, (String)null, infoColumn.isReadOnly() || haveNotProcess);
+        Class<?> colClass = columnName.endsWith("_ID") ? KeyNamePair.class : String.class;
+		ColumnInfo columnInfo = new ColumnInfo(infoColumn.get_Translation("Name"), colSQL, colClass, (String)null, infoColumn.isReadOnly() || haveNotProcess);
 		return columnInfo;
 	}
 
@@ -946,33 +948,60 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				} else {
 					builder.append(checkAND.isChecked() ? " AND " : " OR ");
 				}
-				
-				String columnClause = null;
-				if (mInfoColumn.getQueryFunction() != null && mInfoColumn.getQueryFunction().trim().length() > 0) {
-					String function = mInfoColumn.getQueryFunction();
-					if (function.indexOf("@") >= 0) {
-						String s = Env.parseContext(infoContext, p_WindowNo, function, true, false);
-						if (s.length() == 0) {
-							log.log(Level.SEVERE, "Failed to parse query function. " + function);
-						} else {
-							function = s;
-						}
+								
+				if (mInfoColumn.getAD_Reference_ID() == DisplayType.ChosenMultipleSelectionList)
+				{
+					String pString = editor.getValue().toString();
+					String column = columnName;
+					if (column.indexOf(".") > 0)
+						column = column.substring(column.indexOf(".")+1);
+					int cnt = DB.getSQLValueEx(null, "SELECT Count(*) From AD_Column WHERE IsActive='Y' AND AD_Client_ID=0 AND Upper(ColumnName)=? AND AD_Reference_ID=?", column.toUpperCase(), DisplayType.ChosenMultipleSelectionList);
+					if (cnt > 0)
+						builder.append(DB.intersectClauseForCSV(columnName, pString));
+					else
+						builder.append(DB.inClauseForCSV(columnName, pString));
+				} 
+				else if (mInfoColumn.getAD_Reference_ID() == DisplayType.ChosenMultipleSelectionTable || mInfoColumn.getAD_Reference_ID() == DisplayType.ChosenMultipleSelectionSearch)
+				{
+					String pString = editor.getValue().toString();
+					if (columnName.endsWith("_ID"))
+					{						
+						builder.append(DB.inClauseForCSV(columnName, pString));
 					}
-					if (function.indexOf("?") >= 0) {
-						columnClause = function.replaceFirst("[?]", columnName);
-					} else {
-						columnClause = function+"("+columnName+")";
+					else
+					{
+						builder.append(DB.intersectClauseForCSV(columnName, pString));
 					}
-				} else {
-					columnClause = columnName;
 				}
-				builder.append(columnClause)
-					   .append(" ")
-					   .append(mInfoColumn.getQueryOperator());
-				if (columnClause.toUpperCase().startsWith("UPPER(")) {
-					builder.append(" UPPER(?)");
-				} else {
-					builder.append(" ?");
+				else
+				{
+					String columnClause = null;
+					if (mInfoColumn.getQueryFunction() != null && mInfoColumn.getQueryFunction().trim().length() > 0) {
+						String function = mInfoColumn.getQueryFunction();
+						if (function.indexOf("@") >= 0) {
+							String s = Env.parseContext(infoContext, p_WindowNo, function, true, false);
+							if (s.length() == 0) {
+								log.log(Level.SEVERE, "Failed to parse query function. " + function);
+							} else {
+								function = s;
+							}
+						}
+						if (function.indexOf("?") >= 0) {
+							columnClause = function.replaceFirst("[?]", columnName);
+						} else {
+							columnClause = function+"("+columnName+")";
+						}
+					} else {
+						columnClause = columnName;
+					}
+					builder.append(columnClause)
+						   .append(" ")
+						   .append(mInfoColumn.getQueryOperator());
+					if (columnClause.toUpperCase().startsWith("UPPER(")) {
+						builder.append(" UPPER(?)");
+					} else {
+						builder.append(" ?");
+					}
 				}
 			}
 		}	
@@ -1068,6 +1097,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			if (editor.getGridField() != null && editor.getValue() != null && editor.getValue().toString().trim().length() > 0) {
 				MInfoColumn mInfoColumn = findInfoColumn(editor.getGridField());
 				if (mInfoColumn == null || mInfoColumn.getSelectClause().equals("0")) {
+					continue;
+				}
+				if (mInfoColumn.getAD_Reference_ID()==DisplayType.ChosenMultipleSelectionList || mInfoColumn.getAD_Reference_ID()==DisplayType.ChosenMultipleSelectionSearch
+					|| mInfoColumn.getAD_Reference_ID()==DisplayType.ChosenMultipleSelectionTable) {
 					continue;
 				}
 				Object value = editor.getValue();
@@ -1633,10 +1666,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         	dataSql = dataSql + " " + otherClause;
         }
         
-        if (indexOrderColumn > -1)
-        	dataSql = dataSql + getUserOrderClause();
-        else
-        	dataSql = dataSql + m_sqlOrder;
+        dataSql = dataSql + getUserOrderClause();
         
         if (end > start && isUseDatabasePaging() && DB.getDatabase().isPagingSupported())
         {
@@ -2039,6 +2069,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		vo.Description = desc != null ? desc : "";
 		String help = infoColumn.get_Translation("Help");
 		vo.Help = help != null ? help : "";
+		vo.AD_FieldStyle_ID = infoColumn.getAD_FieldStyle_ID();
 		GridField gridField = new GridField(vo);
 
 		return gridField;
@@ -2630,24 +2661,44 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		public Object getValueAt(int row, int col)
 		{
 			Object val = null;
-			
+
+			int columnIndex = 1;
+			int colFound = 0;
+			for (int idx = 0; idx < getColumnCount(); idx++) {
+				if (isColumnPrinted(idx)) {
+					columnIndex++;
+					colFound++;
+					if (colFound >= col) {
+						break;
+					}
+					if (columnInfos[idx].isKeyPairCol()) {
+						columnIndex++;
+					}
+				}
+			}
+
 			try
 			{
-				val = m_rs.getObject(col + 1); // Col are zero-based, while resultset col are 1 based
+				val = m_rs.getObject(columnIndex);
+				if (columnInfos[col].isKeyPairCol()) {
+					m_rs.getObject(columnIndex+1);
+					if (m_rs.wasNull()) {
+						val = null;
+					}
+				}
 			}
 			catch(SQLException e)
 			{
 				throw new AdempiereException(e);
 			}
-			
+			/* not required - the info window splits the column in key name pairs
 			GridField gridField = columnInfos[col].getGridField();
-			
 			Lookup lookup = gridField.getLookup();
-
-			if (lookup != null)
+			if (val != null && lookup != null)
 			{
 				val = lookup.getDisplay(val);
 			}
+			*/
 			
 			return val; 
 		}

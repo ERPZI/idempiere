@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.idempiere</groupId>
 		<artifactId>org.idempiere.parent</artifactId>
-		<version>6.2.0-SNAPSHOT</version>
+		<version>7.1.0-SNAPSHOT</version>
 		<relativePath>../../org.idempiere.parent/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -19,7 +19,6 @@
 		<org.apache.taglibs.version>1.2.5</org.apache.taglibs.version>
 		<groovy.version>2.5.3</groovy.version>
 		<org.bouncycastle.version>1.60</org.bouncycastle.version>
-		<jetty.conscrypt.openjdk.uber.version>1.4.2</jetty.conscrypt.openjdk.uber.version>
         <jackson.version>2.9.8</jackson.version> <!--it up to version of jasperreport engine-->
         <stax2.api.version>3.1.4</stax2.api.version> <!--it up to version of jasperreport engine-->
         <validation.api.version>1.1.0.Final</validation.api.version> <!--it up to version of jasperreport engine-->
@@ -28,8 +27,8 @@
         <slf4j.version>1.7.25</slf4j.version>
 		<xml.ws.version>2.3.2</xml.ws.version>
 		<xml.ws.export.version>2.4</xml.ws.export.version>
-		<apache.cxf.version>3.2.6</apache.cxf.version>
-		<apache.cxf.databinding.version>3.1.17</apache.cxf.databinding.version>
+		<apache.cxf.version>3.3.1</apache.cxf.version>
+		<apache.cxf.databinding.version>3.1.18</apache.cxf.databinding.version>
 		<activation.version>1.2.1</activation.version>
 		<annotation.version>1.3.3</annotation.version>
 		<asm.version>7.0</asm.version>
@@ -89,6 +88,11 @@
 									<license>GPL v2.1</license>
 									<generateSourceFeature>true</generateSourceFeature>
 									<artifacts>
+										<artifact>
+											<id>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:jar:2.9.1_5</id>
+											<source>true</source>
+											<transitive>false</transitive>
+										</artifact>
 										<artifact>
 											<id>org.passay:passay:jar:1.3.1</id>
 											<source>true</source>
@@ -386,24 +390,9 @@
 											<transitive>false</transitive>
 										</artifact>
 										<artifact>
-											<id>org.eclipse.jetty:jetty-alpn-conscrypt-server:jar:${jetty.version}</id>
-											<source>true</source>
-											<transitive>false</transitive>
-										</artifact>
-										<artifact>
 											<id>org.eclipse.jetty:jetty-alpn-openjdk8-server:jar:${jetty.version}</id>
 											<source>true</source>
 											<transitive>false</transitive>
-										</artifact>
-										<artifact>
-											<id>org.conscrypt:conscrypt-openjdk-uber:jar:${jetty.conscrypt.openjdk.uber.version}</id>
-											<source>true</source>
-											<transitive>false</transitive>
-											<instructions>
-        										<Export-Package>org.conscrypt;version="${jetty.conscrypt.openjdk.uber.version}"</Export-Package>
-        										<Bundle-Name>org.idempiere.org.conscrypt.openjdk-uber</Bundle-Name>
-        										<Bundle-SymbolicName>org.idempiere.org.conscrypt.openjdk-uber</Bundle-SymbolicName>
-    										</instructions>
 										</artifact>
 										<artifact>
 											<id>org.slf4j:slf4j-api:jar:${slf4j.version}</id>
@@ -553,6 +542,11 @@
 											<transitive>false</transitive>
 										</artifact>
 										<artifact>
+											<id>org.apache.cxf:cxf-rt-security:jar:${apache.cxf.version}</id>
+											<source>true</source>
+											<transitive>false</transitive>
+										</artifact>
+										<artifact>
 											<id>org.apache.cxf:cxf-rt-rs-extension-providers:jar:${apache.cxf.databinding.version}</id>
 											<!-- the latest is ${apache.cxf.version} (3.2.6) but hasn't XMLBeansElementProvider so use ${apache.cxf.databinding.version} 3.1.17
 											maybe it's on transite progress-->
@@ -595,11 +589,6 @@
 											<transitive>false</transitive>
 										</artifact>
 										<artifact>
-											<id>javax.ws.rs:jsr311-api:jar:1.1.1</id>
-											<source>true</source>
-											<transitive>false</transitive>
-										</artifact>
-										<artifact>
 											<id>jakarta.ws.rs:jakarta.ws.rs-api:jar:2.1.5</id>
 											<source>true</source>
 											<transitive>false</transitive>
@@ -607,11 +596,6 @@
 										<artifact>
 											<!--https://github.com/eclipse-ee4j/jws-api-->
 											<id>jakarta.jws:jakarta.jws-api:jar:1.1.1</id>
-											<source>true</source>
-											<transitive>false</transitive>
-										</artifact>
-										<artifact>
-											<id>javax.xml.soap:javax.xml.soap-api:jar:1.4.0</id>
 											<source>true</source>
 											<transitive>false</transitive>
 										</artifact>
@@ -1399,11 +1383,6 @@
 
 									<artifacts>
 										<artifact>
-											<id>org.eclipse.jetty:jetty-alpn-conscrypt-server:jar:${jetty.version}</id>
-											<source>true</source>
-											<transitive>false</transitive>
-										</artifact>
-										<artifact>
 											<id>org.eclipse.jetty:jetty-alpn-openjdk8-server:jar:${jetty.version}</id>
 											<source>true</source>
 											<transitive>false</transitive>
@@ -1780,26 +1759,6 @@
 							<url>${url.file.srv}/extra.jar/com.diffplug.osgi.extension.sun.misc_0.0.0.jar</url>
 							<unpack>false</unpack>
 							<outputFileName>com.diffplug.osgi.extension.sun.misc_0.0.0.jar</outputFileName>
-							<outputDirectory>${project.build.directory}/repository/plugins</outputDirectory>
-							<retries>5</retries>
-							<overwrite>true</overwrite>
-							<skipCache>true</skipCache>
-						</configuration>
-					</execution>
-					<execution>
-						<!--axis dependency to bundle javax.xml.soap and javax.xml.rpc
-						that library move to https://github.com/eclipse-ee4j and newer version use by other library
-						so to avoid conflict, update dependency to newer version
-						-->
-						<id>download-axis</id>
-						<phase>package</phase>
-						<goals>
-							<goal>wget</goal>
-						</goals>
-						<configuration>
-							<url>${url.file.srv}/extra.jar/org.apache.axis_1.4.0.v201903052030.jar</url>
-							<unpack>false</unpack>
-							<outputFileName>org.apache.axis_1.4.0.v201903052030.jar</outputFileName>
 							<outputDirectory>${project.build.directory}/repository/plugins</outputDirectory>
 							<retries>5</retries>
 							<overwrite>true</overwrite>

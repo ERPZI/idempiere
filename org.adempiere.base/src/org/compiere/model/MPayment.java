@@ -84,8 +84,10 @@ import org.compiere.util.ValueNamePair;
 public class MPayment extends X_C_Payment 
 	implements DocAction, ProcessCall, PaymentInterface
 {
-
-	private static final long serialVersionUID = -7179638016937305380L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6268462097642919346L;
 
 	/**
 	 * 	Get Payments Of BPartner
@@ -2133,6 +2135,16 @@ public class MPayment extends X_C_Payment
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 
+	/* Save array of documents to process AFTER completing this one */
+	ArrayList<PO> docsPostProcess = new ArrayList<PO>();
+
+	protected void addDocsPostProcess(PO doc) {
+		docsPostProcess.add(doc);
+	}
+
+	public ArrayList<PO> getDocsPostProcess() {
+		return docsPostProcess;
+	}
 
 	/**
 	 * 	Set the definite document number after completed
@@ -2293,12 +2305,17 @@ public class MPayment extends X_C_Payment
 		for (int i = 0; i < pAllocs.length; i++)
 		{
 			MPaymentAllocate pa = pAllocs[i];
+
+			BigDecimal allocationAmt = pa.getAmount();			//	underpayment
+			if (pa.getOverUnderAmt().signum() < 0 && pa.getAmount().signum() > 0)
+				allocationAmt = allocationAmt.add(pa.getOverUnderAmt());	//	overpayment (negative)
+
 			MAllocationLine aLine = null;
 			if (isReceipt())
-				aLine = new MAllocationLine (alloc, pa.getAmount(), 
+				aLine = new MAllocationLine (alloc, allocationAmt,
 					pa.getDiscountAmt(), pa.getWriteOffAmt(), pa.getOverUnderAmt());
 			else
-				aLine = new MAllocationLine (alloc, pa.getAmount().negate(), 
+				aLine = new MAllocationLine (alloc, allocationAmt.negate(),
 					pa.getDiscountAmt().negate(), pa.getWriteOffAmt().negate(), pa.getOverUnderAmt().negate());
 			aLine.setDocInfo(pa.getC_BPartner_ID(), 0, pa.getC_Invoice_ID());
 			aLine.setPaymentInfo(getC_Payment_ID(), 0);
@@ -2313,6 +2330,7 @@ public class MPayment extends X_C_Payment
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
 			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
+		addDocsPostProcess(alloc);
 		// end added
 		m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
 		return alloc.save(get_TrxName());
@@ -2348,6 +2366,7 @@ public class MPayment extends X_C_Payment
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
 			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
+		addDocsPostProcess(alloc);
 		// end added
 		alloc.saveEx(get_TrxName());
 		m_justCreatedAllocInv = alloc;
@@ -2443,10 +2462,12 @@ public class MPayment extends X_C_Payment
 		else
 		{
 			// added Adempiere Exception by zuhri
-			if(alloc.processIt(DocAction.ACTION_Complete))
+			if (alloc.processIt(DocAction.ACTION_Complete)) {
+				addDocsPostProcess(alloc);
 				ok = alloc.save(get_TrxName());
-			else
+			} else {
 				throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
+			}
 			// end added by zuhri
 			m_processMsg = "@C_AllocationHdr_ID@: " + alloc.getDocumentNo();
 			allocList.add(alloc);
@@ -2735,6 +2756,7 @@ public class MPayment extends X_C_Payment
 		// added AdempiereException by zuhri
 		if (!alloc.processIt(DocAction.ACTION_Complete))
 			throw new AdempiereException(Msg.getMsg(getCtx(), "FailedProcessingDocument") + " - " + alloc.getProcessMsg());
+		addDocsPostProcess(alloc);
 		// end added
 		alloc.saveEx(get_TrxName());
 		//			

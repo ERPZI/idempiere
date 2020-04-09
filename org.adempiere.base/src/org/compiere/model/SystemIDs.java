@@ -96,6 +96,9 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_ASSIGNMENT = 33;
 	public final static int REFERENCE_DATATYPE_BINARY = 23;
 	public final static int REFERENCE_DATATYPE_BUTTON = 28;
+	public final static int REFERENCE_DATATYPE_CHOSEN_MULTIPLE_SELECTION_LIST = 200161;
+	public final static int REFERENCE_DATATYPE_CHOSEN_MULTIPLE_SELECTION_TABLE = 200162;
+	public final static int REFERENCE_DATATYPE_CHOSEN_MULTIPLE_SELECTION_SEARCH = 200163;
 	public final static int REFERENCE_DATATYPE_COLOR = 27;
 	public final static int REFERENCE_DATATYPE_COSTPRICE = 37;
 	public final static int REFERENCE_DATATYPE_DATE = 15;
@@ -131,6 +134,7 @@ public class SystemIDs
 
 	public final static int REFERENCE_AD_USER = 110;
 	public final static int REFERENCE_DOCUMENTACTION = 135;
+	public final static int REFERENCE_DOCUMENTSTATUS = 131;
 	public final static int REFERENCE_PAYMENTRULE = 195;
 	public final static int REFERENCE_POSTING_TYPE = 125;
 	public final static int REFERENCE_POSTED = 234;

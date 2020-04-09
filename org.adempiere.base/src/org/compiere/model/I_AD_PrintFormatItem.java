@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_PrintFormatItem
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_AD_PrintFormatItem 
 {
@@ -228,6 +228,19 @@ public interface I_AD_PrintFormatItem
 	  * User who created this records
 	  */
 	public int getCreatedBy();
+
+    /** Column name DisplayLogic */
+    public static final String COLUMNNAME_DisplayLogic = "DisplayLogic";
+
+	/** Set Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public void setDisplayLogic (String DisplayLogic);
+
+	/** Get Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public String getDisplayLogic();
 
     /** Column name FieldAlignmentType */
     public static final String COLUMNNAME_FieldAlignmentType = "FieldAlignmentType";

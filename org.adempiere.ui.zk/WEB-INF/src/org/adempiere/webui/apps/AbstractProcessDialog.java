@@ -15,6 +15,7 @@
 package org.adempiere.webui.apps;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,10 +49,13 @@ import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.factory.ButtonFactory;
+import org.adempiere.webui.info.InfoWindow;
 import org.adempiere.webui.process.WProcessInfo;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.FDialog;
 import org.adempiere.webui.window.MultiFileDownloadDialog;
+import org.adempiere.webui.window.SimplePDFViewer;
 import org.compiere.Adempiere;
 import org.compiere.model.Lookup;
 import org.compiere.model.MAttachment;
@@ -66,9 +70,9 @@ import org.compiere.model.MPInstancePara;
 import org.compiere.model.MProcess;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
-import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.Query;
+import org.compiere.model.SystemIDs;
 import org.compiere.model.X_AD_ReportView;
 import org.compiere.print.MPrintFormat;
 import org.compiere.process.ProcessInfo;
@@ -103,12 +107,12 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2821858988648268894L;
+	private static final long serialVersionUID = 8232462327114180974L;
 
 	private static final String ON_COMPLETE = "onComplete";
 	private static final String ON_STATUS_UPDATE = "onStatusUpdate";
 	
-	private static CLogger log = CLogger.getCLogger(AbstractProcessDialog.class);
+	private static final CLogger log = CLogger.getCLogger(AbstractProcessDialog.class);
 
 	protected int m_WindowNo;
 	private Properties m_ctx;
@@ -258,9 +262,9 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	protected HtmlBasedComponent topParameterLayout;
 	protected HtmlBasedComponent bottomParameterLayout;
 	protected HtmlBasedComponent mainParameterLayout;
-	private WTableDirEditor fPrintFormat;
+	protected WTableDirEditor fPrintFormat;
 	private WEditor fLanguageType;
-	private Listbox freportType;
+	protected Listbox freportType;
 	private Checkbox chbIsSummary;
 	protected Button bOK;
 	protected Button bCancel;
@@ -410,29 +414,37 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	}
 	
 	protected void reportOptionLayout(HtmlBasedComponent bottomParameterLayout) {
-		if (!isReport())
+		if (!isReport() && !isJasperReport())
 			return;//if not a report not need show this pannel
-		
+
 		// option control
 		Hlayout reportOptionLayout = new Hlayout();
 		reportOptionLayout.setSclass("report-option-container");
 		reportOptionLayout.setValign("middle");
 		bottomParameterLayout.appendChild(reportOptionLayout);
-		
+
+		Label lreportType = new Label(Msg.translate(Env.getCtx(), "view.report"));
+		lreportType.setSclass("option-input-parameter view-report-label");
 		freportType = new Listbox();
 		freportType.setSclass("option-input-parameter view-report-list");
+		reportOptionLayout.appendChild(lreportType);
+		reportOptionLayout.appendChild(freportType);	
+
+		if (isJasperReport())
+			listReportTypeJasper();
+		
+		if (!isReport())
+			return;
 		chbIsSummary = new Checkbox();
 		chbIsSummary.setSclass("option-input-parameter");
 		Label lPrintFormat = new Label(Msg.translate(Env.getCtx(), "AD_PrintFormat_ID"));
 		lPrintFormat.setSclass("option-input-parameter print-format-label");
-		Label lreportType = new Label(Msg.translate(Env.getCtx(), "view.report"));
-		lreportType.setSclass("option-input-parameter view-report-label");
 		Label lIsSummary = new Label(Msg.translate(Env.getCtx(), "Summary"));
 		lIsSummary.setSclass("option-input-parameter");
-		
+
 		MClient client = MClient.get(m_ctx);
 		listPrintFormat(client);
-		
+
 		reportOptionLayout.appendChild(lPrintFormat);
 		reportOptionLayout.appendChild(fPrintFormat.getComponent());
 		if (client.isMultiLingualDocument()){
@@ -443,8 +455,6 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		}
 		fPrintFormat.getComponent().setSclass("option-input-parameter print-format-list");
 		fPrintFormat.getComponent().setPlaceholder(lPrintFormat.getValue());
-		reportOptionLayout.appendChild(lreportType);
-		reportOptionLayout.appendChild(freportType);	
 		reportOptionLayout.appendChild(lIsSummary);
 		reportOptionLayout.appendChild(chbIsSummary);
 	}
@@ -452,7 +462,11 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	protected boolean isReport () {
 		MProcess pr = new MProcess(m_ctx, m_AD_Process_ID, null);
 		return pr.isReport() && pr.getJasperReport() == null;
-		
+	}
+	
+	protected boolean isJasperReport () {
+		MProcess pr = new MProcess(m_ctx, m_AD_Process_ID, null);
+		return pr.isReport() && pr.getJasperReport() != null;
 	}
 	
 	protected void savePrameterLayout(HtmlBasedComponent bottomParameterLayout) {
@@ -565,29 +579,48 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		{
 			log.log(Level.SEVERE, e.getLocalizedMessage());
 		}
+
+		fillReportType(m_isCanExport);
 		
+		setReportTypeAndPrintFormat(getLastRun());
+	}
+	
+	private void listReportTypeJasper()
+	{
+		boolean m_isCanExport = MRole.getDefault().isCanExport();
+		fillReportType(m_isCanExport);
+
+		setReportTypeAndPrintFormat(getLastRun());
+	}
+	
+	private MPInstance getLastRun() {
+		final String where = "AD_Process_ID = ? AND AD_User_ID = ? AND Name IS NULL ";
+		return new Query(Env.getCtx(), MPInstance.Table_Name, where, null)
+				.setOnlyActiveRecords(true).setClient_ID()
+				.setParameters(m_AD_Process_ID, Env.getContextAsInt(Env.getCtx(), "#AD_User_ID"))
+				.setOrderBy("Created DESC")
+				.first();
+	}
+
+	private void fillReportType(boolean m_isCanExport) {
 		freportType.removeAllItems();
 		freportType.setMold("select");
+		freportType.appendItem("", "");
+		freportType.appendItem("PDF", "PDF");
 		freportType.appendItem("HTML", "HTML");
 		
 		if (m_isCanExport)
 		{
-			freportType.appendItem("PDF", "PDF");
 			freportType.appendItem("Excel", "XLS");
+			freportType.appendItem("CSV", "CSV");
 		}
-		freportType.setSelectedIndex(0);
-		
-		String where = "AD_Process_ID = ? AND AD_User_ID = ? AND Name IS NULL ";
-		
-		MPInstance lastrun = MTable.get(Env.getCtx(), MPInstance.Table_Name).createQuery(where, null).setOnlyActiveRecords(true).setClient_ID()
-			.setParameters(m_AD_Process_ID, Env.getContextAsInt(Env.getCtx(), "#AD_User_ID")).setOrderBy("Created DESC").first();
-		
-		setReportTypeAndPrintFormat(lastrun);
+		freportType.setSelectedIndex(-1);
 	}
-	
+
 	private void setReportTypeAndPrintFormat(MPInstance instance)
 	{
-		if (fPrintFormat != null && instance != null) {
+		if (fPrintFormat != null && instance != null
+			&& instance.getAD_Process_ID() != SystemIDs.PROCESS_RPT_FINREPORT) {
 			fPrintFormat.setValue((Integer) instance.getAD_PrintFormat_ID());
 		}
 		
@@ -597,7 +630,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		
 		if (freportType != null && instance != null) {
 			if (instance.getReportType() == null)
-				freportType.setValue("HTML");
+				freportType.setSelectedIndex(-1);
 			else 
 				freportType.setValue(instance.getReportType());
 		}
@@ -607,11 +640,14 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	}
 	
 	protected void saveReportOption (){
-		if (!isReport()){
+		if (!isReport() && !isJasperReport()){
 			return;
 		}
 		if(freportType.getSelectedItem() != null) {
 			getProcessInfo().setReportType(freportType.getSelectedItem().getValue().toString());
+		}
+		if (!isReport()){
+			return;
 		}
 		if(fPrintFormat != null && fPrintFormat.getValue() != null) {
 			MPrintFormat format = new MPrintFormat(m_ctx, (Integer) fPrintFormat.getValue(), null);
@@ -709,9 +745,14 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	}
 	
 	protected void saveReportOptionToInstance (MPInstance instance){
+		if (!isReport() && !isJasperReport())
+			return;
+
+		if (freportType.getSelectedItem() != null)
+			instance.setReportType(freportType.getSelectedItem().getValue().toString());
+
 		if (!isReport())
 			return;
-		
 		Object value = fPrintFormat.getValue();
 		if (value == null){
 			instance.setAD_PrintFormat_ID(0);
@@ -728,7 +769,6 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			}
 		}
 		
-		instance.setReportType(freportType.getSelectedItem().getValue().toString());
 		instance.setIsSummary(chbIsSummary.isSelected());
 	}
 	
@@ -874,6 +914,12 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			instance.setIsRunAsJob(true);
 			instance.setIsProcessing(true);
 			instance.setNotificationType(getNotificationType());
+			instance.setReportType(m_pi.getReportType());
+			instance.setIsSummary(m_pi.isSummary());
+			instance.setAD_Language_ID(m_pi.getLanguageID());
+			if (m_pi.getSerializableObject() != null && m_pi.getSerializableObject() instanceof MPrintFormat) {
+				instance.setAD_PrintFormat_ID(((MPrintFormat)m_pi.getSerializableObject()).getAD_PrintFormat_ID());
+			}
 			instance.saveEx();
 			
 			m_pi.setAD_PInstance_ID(instance.getAD_PInstance_ID());
@@ -1154,15 +1200,27 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			int AD_User_ID = Env.getAD_User_ID(m_ctx);
 			
 			try {
-				m_pi.setSummary(""); // reset summary
-				
 				MProcess process = new MProcess(m_ctx, m_pi.getAD_Process_ID(), null);	
+				if (process.isReport() && process.getJasperReport() != null) {
+					if (!Util.isEmpty(process.getJasperReport())) 
+					{
+						m_pi.setExport(true);
+						if ("HTML".equals(m_pi.getReportType())) 
+							m_pi.setExportFileExtension("html");
+						else if ("CSV".equals(m_pi.getReportType()))
+							m_pi.setExportFileExtension("csv");
+						else if ("XLS".equals(m_pi.getReportType()))
+							m_pi.setExportFileExtension("xls");
+						else
+							m_pi.setExportFileExtension("pdf");
+					}
+				}
 				ServerProcessCtl.process(m_pi, null);
 				ProcessInfoUtil.setLogFromDB(m_pi);
 				if (!m_pi.isError())
 				{					
 					boolean isReport = (process.isReport() || process.getAD_ReportView_ID() > 0 || process.getJasperReport() != null || process.getAD_PrintFormat_ID() > 0);
-					if (isReport)
+					if (isReport && m_pi.getPDFReport() != null)
 					{
 						download(m_pi.getPDFReport());
 					}
@@ -1221,4 +1279,63 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		}, new Event("onAskForInput"));
 	}
 
+	@Override
+	public void askForInput(final String message, MLookup lookup, int editorType, final Callback<Object> callback) {
+		FDialog.askForInput(message, lookup, editorType, callback, getDesktop(), m_WindowNo);
+	}
+
+	@Override
+	public void showReports(List<File> pdfList) {
+
+		if (pdfList == null || pdfList.isEmpty())
+			return;
+
+		AEnv.executeAsyncDesktopTask(new Runnable() {
+			@Override
+			public void run() {
+				if (pdfList.size() > 1) {
+					try {
+						File outFile = File.createTempFile(m_Name, ".pdf");
+						AEnv.mergePdf(pdfList, outFile);
+						Window win = new SimplePDFViewer(m_Name, new FileInputStream(outFile));
+						win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
+						SessionManager.getAppDesktop().showWindow(win, "center");
+					} catch (Exception e) {
+						log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+					}
+				} else if (pdfList.size() > 0) {
+					try {
+						Window win = new SimplePDFViewer(m_Name, new FileInputStream(pdfList.get(0)));
+						win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
+						SessionManager.getAppDesktop().showWindow(win, "center");
+					} catch (Exception e) {
+						log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+					}
+				}
+			}
+		});
+	}
+
+	@Override
+	public void showInfoWindow(int WindowNo, String tableName, String keyColumn, String queryValue,
+			boolean multipleSelection, String whereClause, Integer AD_InfoWindow_ID, boolean lookup) {
+
+		if (AD_InfoWindow_ID <= 0)
+			return;
+
+		AEnv.executeAsyncDesktopTask(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Window win = new InfoWindow(WindowNo, tableName, keyColumn, queryValue, multipleSelection,
+							whereClause, AD_InfoWindow_ID, lookup);
+
+					SessionManager.getAppDesktop().showWindow(win, "center");
+				} catch (Exception e) {
+					log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				}
+
+			}
+		});
+	}
 }

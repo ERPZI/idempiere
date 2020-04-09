@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.DBException;
+import org.compiere.db.Database;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -254,6 +255,20 @@ public class MColumn extends X_AD_Column
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
+		String error = Database.isValidIdentifier(getColumnName());
+		if (!Util.isEmpty(error)) {
+			log.saveError("Error", Msg.getMsg(getCtx(), error) + " [ColumnName]");
+			return false;
+		}
+
+		if (! Util.isEmpty(getFKConstraintName())) {
+			error = Database.isValidIdentifier(getFKConstraintName());
+			if (!Util.isEmpty(error)) {
+				log.saveError("Error", Msg.getMsg(getCtx(), error) + " [FKConstraintName]");
+				return false;
+			}
+		}
+
 		int displayType = getAD_Reference_ID();
 		if (DisplayType.isLOB(displayType))	//	LOBs are 0
 		{
@@ -782,11 +797,11 @@ public class MColumn extends X_AD_Column
 		if (DisplayType.TableDir == refid || (DisplayType.Search == refid && getAD_Reference_Value_ID() == 0)) {
 			foreignTable = getColumnName().substring(0, getColumnName().length()-3);
 		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid) {
-			X_AD_Reference ref = new X_AD_Reference(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
-			if (X_AD_Reference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
+			MReference ref = MReference.get(getCtx(), getAD_Reference_Value_ID());
+			if (MReference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
 				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
 				if (cnt == 1) {
-					MRefTable rt = new MRefTable(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
+					MRefTable rt = MRefTable.get(getCtx(), getAD_Reference_Value_ID());
 					if (rt != null)
 						foreignTable = rt.getAD_Table().getTableName();
 				}
@@ -807,6 +822,16 @@ public class MColumn extends X_AD_Column
 			foreignTable = "AD_Image";
 		} else if (DisplayType.Chart == refid) {
 			foreignTable = "AD_Chart";
+		}
+
+		if (foreignTable != null) {
+			if (foreignTable.equals("AD_AllClients_V")) {
+				foreignTable = "AD_Client";
+			} else if (foreignTable.equals("AD_AllUsers_V")) {
+				foreignTable = "AD_User";
+			} else if (foreignTable.equals("AD_AllRoles_V")) {
+				foreignTable = "AD_Role";
+			}
 		}
 
 		return foreignTable;

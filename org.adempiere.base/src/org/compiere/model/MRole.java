@@ -496,7 +496,9 @@ public final class MRole extends X_AD_Role
 				+ " FROM AD_InfoWindow i LEFT JOIN AD_InfoWindow_Access ia ON "
 				+ "(ia.AD_Role_ID=" + getAD_Role_ID()
 				+ " AND i.AD_InfoWindow_ID = ia.AD_InfoWindow_ID) "
-				+ "WHERE i.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND ia.AD_InfoWindow_ID IS NULL";
+				+ " INNER JOIN AD_Table tt ON (i.AD_Table_ID=tt.AD_Table_ID) "
+				+ "WHERE i.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND ia.AD_InfoWindow_ID IS NULL"
+				+ " AND tt.AccessLevel IN ";
 
 		/**
 		 *	Fill AD_xx_Access
@@ -537,7 +539,7 @@ public final class MRole extends X_AD_Role
 		int form = DB.executeUpdateEx(sqlForm + roleAccessLevel, get_TrxName());
 		int wf = DB.executeUpdateEx(sqlWorkflow + roleAccessLevel, get_TrxName());
 		int docact = DB.executeUpdateEx(sqlDocAction, get_TrxName());
-		int info = DB.executeUpdateEx(sqlInfo, get_TrxName());
+		int info = DB.executeUpdateEx(sqlInfo + roleAccessLevel, get_TrxName());
 
 		loadAccess(true);
 		return "@AD_Window_ID@ #" + win 
@@ -594,8 +596,8 @@ public final class MRole extends X_AD_Role
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(Msg.translate(ctx, "AD_Role_ID")).append("=").append(getName())
-			.append(" - ").append(Msg.translate(ctx, "IsCanExport")).append("=").append(isCanExport())
-			.append(" - ").append(Msg.translate(ctx, "IsCanReport")).append("=").append(isCanReport())
+			.append(" - ").append(Msg.translate(ctx, "IsCanExport")).append("=").append(Msg.translate(ctx,String.valueOf(isCanExport())))
+			.append(" - ").append(Msg.translate(ctx, "IsCanReport")).append("=").append(Msg.translate(ctx,String.valueOf(isCanReport()))) 
 			.append(Env.NL).append(Env.NL);
 		//
 		for (int i = 0; i < m_orgAccess.length; i++)

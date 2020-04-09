@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.idempiere</groupId>
 		<artifactId>org.idempiere.parent</artifactId>
-		<version>6.2.0-SNAPSHOT</version>
+		<version>7.1.0-SNAPSHOT</version>
 		<relativePath>org.idempiere.parent/pom.xml</relativePath>
 	</parent>
 	<modules>
@@ -69,6 +69,7 @@
 		<module>org.idempiere.zk-feature</module>
 		<module>org.idempiere.webservices.client-feature</module>
 		<module>org.idempiere.p2</module>
+		<module>org.idempiere.javadoc</module>
 		<module>${idempiere.target}</module>
 	</modules>
 

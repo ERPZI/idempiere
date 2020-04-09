@@ -43,4 +43,7 @@ UPDATE AD_Field SET SeqNo=65, AD_Reference_Value_ID=NULL, AD_Val_Rule_ID=NULL, S
 ;
 
 SELECT register_migration_script('201909241620_IDEMPIERE-4006.sql') FROM dual
+<<<<<<< working copy
 ;
+=======
+;>>>>>>> merge rev
