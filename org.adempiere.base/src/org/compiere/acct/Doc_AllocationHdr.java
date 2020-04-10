@@ -331,6 +331,10 @@ public class Doc_AllocationHdr extends Doc
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setUser1_ID(payment.getUser1_ID());
 					}
+					//
+					// MPo, 10/4/20
+					if (fl != null && payment == null) fl.setUser1_ID(invoice.getUser1_ID());
+					//
 				}
 
 				//	AR Invoice Amount	CR
@@ -447,6 +451,9 @@ public class Doc_AllocationHdr extends Doc
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 						fl.setUser1_ID(payment.getUser1_ID());
 					}
+					//
+					// MPo, 10/4/20
+					if (fl != null && payment == null) fl.setUser1_ID(invoice.getUser1_ID());
 					//
 				}
 				//	Payment/Cash	CR
