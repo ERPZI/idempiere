@@ -23,14 +23,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_InfoProcess
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_AD_InfoProcess extends PO implements I_AD_InfoProcess, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20191121L;
 
     /** Standard Constructor */
     public X_AD_InfoProcess (Properties ctx, int AD_InfoProcess_ID, String trxName)
@@ -41,6 +41,8 @@ public class X_AD_InfoProcess extends PO implements I_AD_InfoProcess, I_Persiste
 			setAD_InfoProcess_ID (0);
 			setAD_InfoProcess_UU (null);
 			setAD_Process_ID (0);
+			setEntityType (null);
+// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
 			setLayoutType (null);
 // B
 			setSeqNo (0);
@@ -217,6 +219,26 @@ public class X_AD_InfoProcess extends PO implements I_AD_InfoProcess, I_Persiste
 	public String getDisplayLogic () 
 	{
 		return (String)get_Value(COLUMNNAME_DisplayLogic);
+	}
+
+	/** EntityType AD_Reference_ID=389 */
+	public static final int ENTITYTYPE_AD_Reference_ID=389;
+	/** Set Entity Type.
+		@param EntityType 
+		Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType)
+	{
+
+		set_Value (COLUMNNAME_EntityType, EntityType);
+	}
+
+	/** Get Entity Type.
+		@return Dictionary Entity Type; Determines ownership and synchronization
+	  */
+	public String getEntityType () 
+	{
+		return (String)get_Value(COLUMNNAME_EntityType);
 	}
 
 	/** Set Image URL.

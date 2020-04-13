@@ -302,3 +302,4 @@ public abstract class CreateFrom implements ICreateFrom
 		this.title = title;
 	}
 }
+

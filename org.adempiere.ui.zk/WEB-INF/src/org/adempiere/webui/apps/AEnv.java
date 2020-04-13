@@ -206,6 +206,15 @@ public final class AEnv
 	public static void logout()
 	{
 		String sessionID = Env.getContext(Env.getCtx(), "#AD_Session_ID");
+		synchronized (windowCache)
+		{
+			CCache<Integer,GridWindowVO> cache = windowCache.get(sessionID);
+			if (cache != null)
+			{
+				cache.clear();
+				CacheMgt.get().unregister(cache);
+			}
+		}
 		windowCache.remove(sessionID);
 		//	End Session
 		MSession session = MSession.get(Env.getCtx(), false);	//	finish
@@ -242,7 +251,7 @@ public final class AEnv
 	/** Workflow Window		*/
 	private static int		s_workflow_Window_ID = 0;
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(AEnv.class);
+	private static final CLogger log = CLogger.getCLogger(AEnv.class);
 
 	/**	Window Cache		*/
 	private static Map<String, CCache<Integer,GridWindowVO>> windowCache = new HashMap<String, CCache<Integer,GridWindowVO>>();
@@ -291,7 +300,7 @@ public final class AEnv
 					CCache<Integer,GridWindowVO> cache = windowCache.get(sessionID);
 					if (cache == null)
 					{
-						cache = new CCache<Integer, GridWindowVO>(I_AD_Window.Table_Name, 10);
+						cache = new CCache<Integer, GridWindowVO>(I_AD_Window.Table_Name, I_AD_Window.Table_Name+"|GridWindowVO|Session|"+sessionID, 10);
 						windowCache.put(sessionID, cache);
 					}
 					cache.put(AD_Window_ID, mWindowVO);
@@ -462,7 +471,11 @@ public final class AEnv
 		if (query == null || query.getTableName() == null || query.getTableName().length() == 0)
 			return;
 		
-		int AD_Window_ID = Env.getZoomWindowID(query);
+		int AD_Window_ID = query.getZoomWindowID();
+
+		if (AD_Window_ID <= 0)
+			AD_Window_ID = Env.getZoomWindowID(query);
+
 		//  Nothing to Zoom to
 		if (AD_Window_ID == 0)
 			return;

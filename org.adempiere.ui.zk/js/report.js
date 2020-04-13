@@ -5,6 +5,13 @@ function zoom(cmpid, column, value){
 	zAu.send(event);
 }
 
+function zoomWindow(cmpid, column, value, windowuu){
+	zAu.cmd0.showBusy(null);
+	var widget = zk.Widget.$(cmpid);
+	var event = new zk.Event(widget, 'onZoom', {data: [column, value, 'AD_Window_UU', windowuu]}, {toServer: true});
+	zAu.send(event);
+}
+
 function drillAcross(cmpid, column, value){
 	zAu.cmd0.showBusy(null);
 	var widget = zk.Widget.$(cmpid);

@@ -34,6 +34,7 @@ import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.CalloutDialog;
 import org.adempiere.webui.component.Borderlayout;
 import org.adempiere.webui.component.Column;
 import org.adempiere.webui.component.Columns;
@@ -334,6 +335,8 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         this.windowNo = windowNo;
         this.gridWindow = gridWindow;
         this.gridTab = gridTab;
+        // callout dialog ask for input - devCoffee #3390
+        gridTab.setCalloutUI(new CalloutDialog(Executions.getCurrent().getDesktop(), windowNo));
         this.windowPanel = winPanel;
         gridTab.addDataStatusListener(this);
         this.dataBinder = new GridTabDataBinder(gridTab);
@@ -1418,6 +1421,21 @@ DataStatusListener, IADTabpanel, IdSpace, IFieldEditorContainer
         			if (isTreeDrivenByValue())
         				treePanel.prepareForRefresh();
 				}
+        		
+        		if ("Saved".equals(e.getAD_Message()) && model.find(null, gridTab.getRecord_ID()) != null && !isTreeDrivenByValue())
+        		{
+        			DefaultTreeNode<Object> treeNode = model.find(null, gridTab.getRecord_ID());
+        			if (treeNode != null) { // 
+        				MTreeNode data = (MTreeNode) treeNode.getData();
+
+        				String label = (isValueDisplayed() ? (gridTab.getValue("Value").toString() + " - ") : "") + gridTab.get_ValueAsString("Name");
+        				if (!data.getName().equals(label)) {
+        					data.setName(label);
+        					treeNode.setData(data);
+        				}
+        			}
+				}
+
         		if (refresh)
         		{
         			int AD_Tree_ID = Env.getContextAsInt (Env.getCtx(), getWindowNo(), "AD_Tree_ID", true);

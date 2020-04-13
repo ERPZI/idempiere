@@ -19,6 +19,7 @@ package org.adempiere.webui.adwindow;
 
 import static org.compiere.model.SystemIDs.PROCESS_AD_CHANGELOG_REDO;
 import static org.compiere.model.SystemIDs.PROCESS_AD_CHANGELOG_UNDO;
+import static org.compiere.model.MSysConfig.ZK_GRID_AFTER_FIND;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -93,6 +94,8 @@ import org.compiere.model.MProjectIssue;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRecentItem;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
+import org.compiere.model.MUserPreference;
 import org.compiere.model.MWindow;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_CtxHelp;
@@ -757,7 +760,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	private void setupEmbeddedFindwindow() {
 		findWindow.setTitle(null);
 		findWindow.setBorder("none");	
-		findWindow.setStyle("position: absolute; border-bottom: 2px solid #484848; padding: 2px; background-color: #fff;");
+		findWindow.setStyle("position: absolute;background-color: #fff;");
 		ZKUpdateUtil.setWidth(findWindow, "100%");
 		if (ClientInfo.maxHeight(ClientInfo.MEDIUM_HEIGHT-1))
 			ZKUpdateUtil.setHeight(findWindow, "100%");
@@ -1339,7 +1342,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		toolbar.getButton("Attachment").setPressed(adTabbox.getSelectedGridTab().hasAttachment());
 		toolbar.getButton("PostIt").setPressed(adTabbox.getSelectedGridTab().hasPostIt());
 		toolbar.getButton("Chat").setPressed(adTabbox.getSelectedGridTab().hasChat());
-		toolbar.getButton("Find").setPressed(adTabbox.getSelectedGridTab().isQueryActive());
 
 		if (toolbar.isPersonalLock)
 		{
@@ -1358,6 +1360,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
             toolbar.enableProcessButton(!isNewRow && adtab != null && adtab.getToolbarButtons().size() > 0);
             toolbar.enableCustomize(adtab.isGridView());
         }
+        
+		toolbar.getButton("Find").setPressed(adTabbox.getSelectedGridTab().isQueryActive() || 
+				(!isNewRow && (m_onlyCurrentRows || m_onlyCurrentDays > 0)));
 
 	}
 
@@ -1390,7 +1395,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	        if (logger.isLoggable(Level.INFO)) logger.info(dbInfo);
 	        if (adTabbox.getSelectedGridTab() != null && adTabbox.getSelectedGridTab().isQueryActive())
 	            dbInfo = "[ " + dbInfo + " ]";
-	        breadCrumb.setStatusDB(dbInfo, e);
+	        breadCrumb.setStatusDB(dbInfo, e, adTabbox.getSelectedGridTab());
 
 	        String adInfo = e.getAD_Message();
 	        if (   adInfo == null
@@ -1704,8 +1709,6 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         	toolbar.enablePostIt(false);
         }
 
-        toolbar.getButton("Find").setPressed(adTabbox.getSelectedGridTab().isQueryActive());
-
         // Elaine 2008/12/05
         //  Lock Indicator
         if (toolbar.isPersonalLock)
@@ -1724,7 +1727,9 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         toolbar.enableZoomAcross(!isNewRow);
         toolbar.enableActiveWorkflows(!isNewRow);
         toolbar.enableRequests(!isNewRow);
-        
+		toolbar.getButton("Find").setPressed(adTabbox.getSelectedGridTab().isQueryActive() || 
+				(!isNewRow && (m_onlyCurrentRows || m_onlyCurrentDays > 0)));
+
         toolbar.enablePrint(adTabbox.getSelectedGridTab().isPrinted() && !isNewRow);
         toolbar.enableReport(!isNewRow);
         toolbar.enableExport(!isNewRow && !adTabbox.getSelectedGridTab().isSortTab());
@@ -2060,8 +2065,28 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 				        if (findWindow.isCreateNew())
 				        	onNew();
-				        else
+				        else {
 				        	adTabbox.getSelectedGridTab().dataRefresh(false); // Elaine 2008/07/25
+
+				        	if (!adTabbox.getSelectedTabpanel().isGridView()) { // See if we should force the grid view
+
+				        		boolean forceGridView = false;
+				        		String up = Env.getContext(Env.getCtx(), MUserPreference.COLUMNNAME_ViewFindResult);
+
+				        		if (up.equals(MUserPreference.VIEWFINDRESULT_Default)) {
+				        			forceGridView = MSysConfig.getBooleanValue(ZK_GRID_AFTER_FIND, false, Env.getAD_Client_ID(Env.getCtx()));
+				        		}
+				        		else if (up.equals(MUserPreference.VIEWFINDRESULT_AlwaysInGridView)) {
+				        			forceGridView = true;
+				        		}
+				        		else if (up.equals(MUserPreference.VIEWFINDRESULT_AccordingToThreshold)) {
+				        			forceGridView = adTabbox.getSelectedTabpanel().getGridTab().getRowCount() >= Env.getContextAsInt(Env.getCtx(), MUserPreference.COLUMNNAME_GridAfterFindThreshold);
+				        		}
+
+				        		if (forceGridView)
+				        			adTabbox.getSelectedTabpanel().switchRowPresentation();
+				        	}
+				        }
 			        }
 					else
 					{
@@ -2170,7 +2195,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		});
     }
 
-    private void onSave(final boolean onSaveEvent, final boolean onNavigationEvent, final Callback<Boolean> callback) {
+    public void onSave(final boolean onSaveEvent, final boolean onNavigationEvent, final Callback<Boolean> callback) {
     	final Callback<Boolean> postCallback = new Callback<Boolean>() {
 			@Override
 			public void onCallback(Boolean result) {
@@ -3054,7 +3079,28 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 		else
 		{
-			ProcessModalDialog dialog = new ProcessModalDialog(this, curWindowNo, wButton.getProcess_ID(), table_ID, record_ID, startWOasking);
+			final IADTabpanel adtabPanel = findADTabpanel(wButton);
+
+			ProcessInfo pi = new ProcessInfo("", wButton.getProcess_ID(), table_ID, record_ID);
+			if (adtabPanel != null && adtabPanel.isGridView() && adtabPanel.getGridTab() != null)
+			{
+				int[] indices = adtabPanel.getGridTab().getSelection();
+				if (indices.length > 0)
+				{
+					List<Integer> records = new ArrayList<Integer>();
+					for (int i = 0; i < indices.length; i++)
+					{
+						int keyID = adtabPanel.getGridTab().getKeyID(indices[i]);
+						if (keyID > 0)
+							records.add(keyID);
+					}
+
+					// IDEMPIERE-3998 Set multiple selected grid records into process info
+					pi.setRecord_IDs(records);
+				}
+			}
+
+			ProcessModalDialog dialog = new ProcessModalDialog(this, curWindowNo, pi, startWOasking);
 
 			if (dialog.isValid())
 			{

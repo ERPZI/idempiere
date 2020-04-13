@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_InfoWindow
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_AD_InfoWindow 
 {
@@ -322,6 +322,15 @@ public interface I_AD_InfoWindow
 	  * Other SQL Clause
 	  */
 	public String getOtherClause();
+
+    /** Column name PagingSize */
+    public static final String COLUMNNAME_PagingSize = "PagingSize";
+
+	/** Set Paging Size	  */
+	public void setPagingSize (int PagingSize);
+
+	/** Get Paging Size	  */
+	public int getPagingSize();
 
     /** Column name Processing */
     public static final String COLUMNNAME_Processing = "Processing";

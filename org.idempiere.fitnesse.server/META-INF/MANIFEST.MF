@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iDempiere Fitnesse Server
 Bundle-SymbolicName: org.idempiere.fitnesse.server
-Bundle-Version: 6.2.0.qualifier
+Bundle-Version: 7.1.0.qualifier
 Bundle-Activator: org.idempiere.fitnesse.server.Activator
 Bundle-ActivationPolicy: lazy
-Comment: Bundle-RequiredExecutionEnvironment: JavaSE-11
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=1.11))"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=11))"
 Import-Package: javax.servlet;version="3.0.0",
  javax.servlet.http;version="3.0.0",
  org.adempiere.base,
@@ -251,7 +251,6 @@ Export-Package: fit,
  org.openqa.grid.internal.utils,
  org.openqa.grid.selenium,
  org.openqa.grid.selenium.proxy,
- org.openqa.grid.selenium.utils,
  org.openqa.grid.web,
  org.openqa.grid.web.servlet,
  org.openqa.grid.web.servlet.beta,
@@ -278,22 +277,17 @@ Export-Package: fit,
  org.openqa.jetty.util.jmx,
  org.openqa.jetty.xml,
  org.openqa.selenium,
- org.openqa.selenium.android,
- org.openqa.selenium.browserlaunchers,
  org.openqa.selenium.browserlaunchers.locators,
  org.openqa.selenium.chrome,
  org.openqa.selenium.firefox,
  org.openqa.selenium.firefox.internal,
  org.openqa.selenium.html5,
- org.openqa.selenium.htmlunit,
  org.openqa.selenium.ie,
  org.openqa.selenium.interactions,
  org.openqa.selenium.interactions.internal,
  org.openqa.selenium.interactions.touch,
  org.openqa.selenium.internal,
- org.openqa.selenium.internal.seleniumemulation,
  org.openqa.selenium.io,
- org.openqa.selenium.iphone,
  org.openqa.selenium.lift,
  org.openqa.selenium.lift.find,
  org.openqa.selenium.lift.match,
@@ -311,8 +305,6 @@ Export-Package: fit,
  org.openqa.selenium.remote.server.handler.interactions,
  org.openqa.selenium.remote.server.handler.interactions.touch,
  org.openqa.selenium.remote.server.handler.internal,
- org.openqa.selenium.remote.server.renderer,
- org.openqa.selenium.remote.server.resource,
  org.openqa.selenium.remote.server.rest,
  org.openqa.selenium.remote.server.xdrpc,
  org.openqa.selenium.remote.service,
@@ -320,7 +312,6 @@ Export-Package: fit,
  org.openqa.selenium.security,
  org.openqa.selenium.server,
  org.openqa.selenium.server.browserlaunchers,
- org.openqa.selenium.server.cli,
  org.openqa.selenium.server.commands,
  org.openqa.selenium.server.htmlrunner,
  org.openqa.selenium.support,

@@ -26,14 +26,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelection
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_C_PaySelection extends PO implements I_C_PaySelection, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20191121L;
 
     /** Standard Constructor */
     public X_C_PaySelection (Properties ctx, int C_PaySelection_ID, String trxName)
@@ -196,6 +196,27 @@ public class X_C_PaySelection extends PO implements I_C_PaySelection, I_Persiste
 	public boolean isApproved () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set One Payment Per Invoice.
+		@param IsOnePaymentPerInvoice One Payment Per Invoice	  */
+	public void setIsOnePaymentPerInvoice (boolean IsOnePaymentPerInvoice)
+	{
+		set_Value (COLUMNNAME_IsOnePaymentPerInvoice, Boolean.valueOf(IsOnePaymentPerInvoice));
+	}
+
+	/** Get One Payment Per Invoice.
+		@return One Payment Per Invoice	  */
+	public boolean isOnePaymentPerInvoice () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsOnePaymentPerInvoice);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 
