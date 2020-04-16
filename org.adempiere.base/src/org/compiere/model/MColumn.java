@@ -52,7 +52,7 @@ public class MColumn extends X_AD_Column
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7215660422231054443L;
+	private static final long serialVersionUID = -6905852892037761285L;
 
 	public static MColumn get (Properties ctx, int AD_Column_ID)
 	{
@@ -228,6 +228,16 @@ public class MColumn extends X_AD_Column
 		String s = getColumnSQL();
 		return s != null && s.length() > 0 && s.startsWith("@SQL=");
 	}	//	isVirtualUIColumn
+	
+	/**
+	 * 	Is Virtual Search Column
+	 *	@return true if virtual search column
+	 */
+	public boolean isVirtualSearchColumn()
+	{
+		String s = getColumnSQL();
+		return s != null && s.length() > 0 && s.startsWith("@SQLFIND=");
+	}	//	isVirtualSearchColumn
 
 	/**
 	 * 	Is the Column Encrypted?
@@ -362,7 +372,7 @@ public class MColumn extends X_AD_Column
 				setIsMandatory(false);
 			if (isUpdateable())
 				setIsUpdateable(false);
-			if (isVirtualUIColumn() && isIdentifier())
+			if ((isVirtualUIColumn() || isVirtualSearchColumn()) && isIdentifier())
 				setIsIdentifier(false);
 		}
 		//	Updateable
@@ -796,7 +806,7 @@ public class MColumn extends X_AD_Column
 		int refid = getAD_Reference_ID();
 		if (DisplayType.TableDir == refid || (DisplayType.Search == refid && getAD_Reference_Value_ID() == 0)) {
 			foreignTable = getColumnName().substring(0, getColumnName().length()-3);
-		} else 	if (DisplayType.Table == refid || DisplayType.Search == refid) {
+		} else if (DisplayType.Table == refid || DisplayType.Search == refid) {
 			MReference ref = MReference.get(getCtx(), getAD_Reference_Value_ID());
 			if (MReference.VALIDATIONTYPE_TableValidation.equals(ref.getValidationType())) {
 				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
@@ -806,7 +816,13 @@ public class MColumn extends X_AD_Column
 						foreignTable = rt.getAD_Table().getTableName();
 				}
 			}
-		} else 	if (DisplayType.List == refid || DisplayType.Payment == refid) {
+		} else if (DisplayType.Button == refid) {
+			// C_BPartner.AD_OrgBP_ID and C_Project.C_ProjectType_ID are defined as buttons
+			if ("AD_OrgBP_ID".equalsIgnoreCase(getColumnName()))
+				foreignTable = "AD_Org";
+			else if ("C_ProjectType_ID".equalsIgnoreCase(getColumnName()))
+				foreignTable = "C_ProjectType";
+		} else if (DisplayType.List == refid || DisplayType.Payment == refid) {
 			foreignTable = "AD_Ref_List";
 		} else if (DisplayType.Location == refid) {
 			foreignTable = "C_Location";
@@ -1234,10 +1250,18 @@ public class MColumn extends X_AD_Column
 	}
 
 	public String getColumnSQL(boolean nullForUI) {
+		return getColumnSQL(nullForUI, true);
+	}
+	
+	public String getColumnSQL(boolean nullForUI, boolean nullForSearch) {
 		String query = getColumnSQL();
 		if (query != null && query.length() > 0) {
 			if (query.startsWith("@SQL=") && nullForUI)
 				query = "NULL";
+			else if (query.startsWith("@SQLFIND=") && nullForSearch)
+				query = "NULL";
+			else if (query.startsWith("@SQLFIND=") && !nullForSearch)
+				query = query.substring(9);
 		}
 		return query;
 	}

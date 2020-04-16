@@ -367,10 +367,13 @@ public class MInOut extends X_M_InOut implements DocAction
 		//
 		setM_Warehouse_ID (order.getM_Warehouse_ID());
 		setIsSOTrx (order.isSOTrx());
-		if (C_DocTypeShipment_ID == 0)
-			C_DocTypeShipment_ID = DB.getSQLValue(null,
-				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?",
-				order.getC_DocType_ID());
+		if (C_DocTypeShipment_ID == 0) {
+			MDocType dto = MDocType.get(getCtx(), order.getC_DocType_ID());
+			C_DocTypeShipment_ID = dto.getC_DocTypeShipment_ID();
+			if (C_DocTypeShipment_ID <= 0) 
+				throw new AdempiereException("@NotFound@ @C_DocTypeShipment_ID@ - @C_DocType_ID@:"
+					 +dto.get_Translation(MDocType.COLUMNNAME_Name));
+		}
 		setC_DocType_ID (C_DocTypeShipment_ID);
 
 		// patch suggested by Armen
@@ -1613,10 +1616,10 @@ public class MInOut extends X_M_InOut implements DocAction
 							}
 							if (!po.isPosted())
 								addDocsPostProcess(po);
-							MMatchInv matchInvCreated = po.getMatchInvCreated();
-							if (matchInvCreated != null) {
+							
+							MMatchInv[] matchInvList = MMatchInv.getInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+							for (MMatchInv matchInvCreated : matchInvList)
 								addDocsPostProcess(matchInvCreated);
-							}
 						}
 						//	Update PO with ASI
 						if (   oLine != null && oLine.getM_AttributeSetInstance_ID() == 0
