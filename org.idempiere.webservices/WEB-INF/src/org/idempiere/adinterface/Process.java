@@ -345,8 +345,10 @@ public class Process {
 			try
 			{
 				processOK = process.processIt(pi, trx, false);
-				if (trxName == null)
-					trx.commit();				
+				if (trxName == null && processOK)
+					trx.commit();	
+				else if (trxName == null && !processOK)
+					trx.rollback();
 			}
 			catch (Throwable t)
 			{
@@ -413,7 +415,7 @@ public class Process {
 						{
 							CharArrayWriter wr = new CharArrayWriter();
 							ok = ReportEngineEx.createEXCEL_HTML_wr( re, m_cs.getCtx(), wr, false, re.getPrintFormat().getLanguage() );
-							file_type ="xls";
+							file_type ="html";
 							String data = wr.toString();
 							if (data!=null)
 								r.setData(data.getBytes());
