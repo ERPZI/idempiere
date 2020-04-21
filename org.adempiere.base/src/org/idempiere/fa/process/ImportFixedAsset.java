@@ -89,6 +89,7 @@ public class ImportFixedAsset extends SvrProcess
 		if (p_DeleteOldImported)
 		{
 			sql = new StringBuilder ("DELETE FROM "+X_I_FixedAsset.Table_Name
+
 				  + " WHERE I_IsImported='Y'").append (sqlCheck);
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Imported =" + no);
@@ -447,6 +448,7 @@ public class ImportFixedAsset extends SvrProcess
 		int noUpdate = 0;
 		
 		String whereClause = "COALESCE(I_IsImported,'N')='N'"+sqlCheck;
+
 		POResultSet<X_I_FixedAsset> rs = new Query(getCtx(), X_I_FixedAsset.Table_Name, whereClause, get_TrxName())
 				.setOrderBy(X_I_FixedAsset.COLUMNNAME_I_FixedAsset_ID)
 				.scroll();

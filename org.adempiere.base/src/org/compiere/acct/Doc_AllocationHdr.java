@@ -2046,3 +2046,4 @@ class Doc_AllocationTax
 	}	//	calcAmount
 
 }	//	Doc_AllocationTax
+
