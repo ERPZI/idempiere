@@ -45,7 +45,11 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 // 0
 			setA_Remaining_Period (0);
 // 0
+			setAssetAmtEntered (Env.ZERO);
+// 0
 			setAssetPeriodDepreciationAmt (Env.ZERO);
+// 0
+			setAssetSourceAmt (Env.ZERO);
 // 0
 			setDocAction (null);
 // 'CO'
