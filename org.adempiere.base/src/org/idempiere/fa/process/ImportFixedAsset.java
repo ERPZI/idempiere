@@ -88,8 +88,7 @@ public class ImportFixedAsset extends SvrProcess
 		//	Delete Old Imported
 		if (p_DeleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE FROM "+X_I_FixedAsset.Table_Name
-
+			sql = new StringBuilder ("DELETE "+X_I_FixedAsset.Table_Name
 				  + " WHERE I_IsImported='Y'").append (sqlCheck);
 			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Imported =" + no);
@@ -211,11 +210,12 @@ public class ImportFixedAsset extends SvrProcess
 			//+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Product t"
 				+ "SET M_Locator_ID=(SELECT MAX(M_Locator_ID) FROM M_Locator t"
 			//
-				+ " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
-				+ "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
-				+ " AND I_IsImported<>'Y'").append (sqlCheck);
+			  + " WHERE ifa.LocatorValue=t.Value AND ifa.AD_Client_ID=t.AD_Client_ID) "
+			  + "WHERE M_Locator_ID IS NULL AND LocatorValue IS NOT NULL"
+			  + " AND I_IsImported<>'Y'").append (sqlCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Locator from Value=" + no);
+		
 		//MPo, 3/12/18 Organization From Value
 		sql = new StringBuilder ("UPDATE "+MIFixedAsset.Table_Name+" ifa "
 				 + "SET AD_Org_ID=(SELECT MAX(AD_Org_ID) FROM AD_Org t"
@@ -447,8 +447,7 @@ public class ImportFixedAsset extends SvrProcess
 		int noInsert = 0;
 		int noUpdate = 0;
 		
-		String whereClause = "COALESCE(I_IsImported,'N')='N'"+sqlCheck;
-
+		String whereClause = "NVL(I_IsImported,'N')='N'"+sqlCheck;
 		POResultSet<X_I_FixedAsset> rs = new Query(getCtx(), X_I_FixedAsset.Table_Name, whereClause, get_TrxName())
 				.setOrderBy(X_I_FixedAsset.COLUMNNAME_I_FixedAsset_ID)
 				.scroll();

@@ -237,8 +237,8 @@ public class Doc_AllocationHdr extends Doc
 					//MPo, 29/6/2016	
 					//	fl.setAD_Org_ID(payment.getAD_Org_ID());
 					{	
-						fl.setAD_Org_ID(payment.getAD_Org_ID());
-						fl.setUser1_ID(payment.getUser1_ID());
+							fl.setAD_Org_ID(payment.getAD_Org_ID());
+							fl.setUser1_ID(payment.getUser1_ID());
 					}
 					//					
 					allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance());
@@ -281,12 +281,11 @@ public class Doc_AllocationHdr extends Doc
 					{
 						fl = fact.createLine (line, getPaymentAcct(as, line.getC_Payment_ID()),
 							getC_Currency_ID(), line.getAmtSource(), null);
+						//MPo, 24/3/20
+						//if (fl != null && payment != null)
 						// MPo, 29/6/2016
-						//fl.setAD_Org_ID(payment.getAD_Org_ID());
-						{
-							fl.setAD_Org_ID(payment.getAD_Org_ID());
-							fl.setUser1_ID(payment.getUser1_ID());
-						}
+						fl.setAD_Org_ID(payment.getAD_Org_ID());
+						fl.setUser1_ID(payment.getUser1_ID());
 						//
 						if (payment.getReversal_ID() > 0 )
 							allocPayAccounted = allocPayAccounted.add(fl.getAcctBalance().negate());
@@ -783,6 +782,27 @@ public class Doc_AllocationHdr extends Doc
 
 
 	/**************************************************************************
+	 * 	Create Realized Gain & Loss.
+	 * 	Compares the Accounted Amount of the Invoice to the
+	 * 	Accounted Amount of the Allocation
+	 *	@param as accounting schema
+	 *	@param fact fact
+	 *	@param acct account
+	 *	@param invoice invoice
+	 *	@param allocationSource source amt
+	 *	@param allocationAccounted acct amt
+	 *	@return Error Message or null if OK
+	 *
+	 */
+	private String createRealizedGainLoss (DocLine line, MAcctSchema as, Fact fact, MAccount acct,
+		MInvoice invoice, BigDecimal allocationSource, BigDecimal allocationAccounted)
+	{
+		return createInvoiceGainLoss(line, as, fact, acct, invoice, allocationSource, allocationAccounted);
+	}	//	createRealizedGainLoss
+
+
+	
+	/**************************************************************************
 	 * 	Create Tax Correction.
 	 * 	Requirement: Adjust the tax amount, if you did not receive the full
 	 * 	amount of the invoice (payment discount, write-off).
@@ -1227,7 +1247,7 @@ public class Doc_AllocationHdr extends Doc
 					{
 						if (!invGainLossFactLines.contains(factLine))
 							continue;
-											
+						
 						BigDecimal totalAmtSourceDr = htTotalAmtSourceDr.get(allocationLine.getC_Invoice_ID());
 						if (totalAmtSourceDr == null)
 							totalAmtSourceDr = Env.ZERO;
@@ -1565,6 +1585,7 @@ public class Doc_AllocationHdr extends Doc
 					{
 						if (!payGainLossFactLines.contains(factLine))
 							continue;
+						
 						BigDecimal totalAmtSourceDr = htTotalAmtSourceDr.get(allocationLine.getC_Payment_ID());
 						if (totalAmtSourceDr == null)
 							totalAmtSourceDr = Env.ZERO;
@@ -2046,4 +2067,3 @@ class Doc_AllocationTax
 	}	//	calcAmount
 
 }	//	Doc_AllocationTax
-
