@@ -143,7 +143,7 @@ public class WMatch extends Match
 	/**	Window No			*/
 	private int         	m_WindowNo = 0;
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WMatch.class);
+	private static final CLogger log = CLogger.getCLogger(WMatch.class);
 
 	private int     m_AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 	private int     m_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());
@@ -709,4 +709,5 @@ public class WMatch extends Match
 	public ADForm getForm() {
 		return form;
 	}
+	
 }

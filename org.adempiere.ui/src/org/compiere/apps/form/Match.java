@@ -45,7 +45,7 @@ public class Match
 {
 
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(Match.class);
+	private static final CLogger log = CLogger.getCLogger(Match.class);
 
 	/** Match Options           */
 	private String[] m_matchOptions = new String[] {
@@ -304,7 +304,6 @@ public class Match
 	 *  - If Not Matched - all not fully matched records are listed
 	 *  @param display (Invoice, Shipment, Order) see MATCH_*
 	 *  @param matchToType (Invoice, Shipment, Order) see MATCH_*
-	 *  @param 
 	 */
 	protected void tableInit (int display, int matchToType, boolean matched, KeyNamePair lineMatched)
 	{
@@ -357,7 +356,7 @@ public class Match
 				+ " lin.Line,lin.C_OrderLine_ID, p.Name,lin.M_Product_ID,"
 				+ " lin.QtyOrdered,SUM(COALESCE(mo.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
 				//+ "org.Name, hdr.AD_Org_ID " //JAVIER
-				+ " FROM C_Order hdr"
+				+ "FROM C_Order hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN C_OrderLine lin ON (hdr.C_Order_ID=lin.C_Order_ID)"

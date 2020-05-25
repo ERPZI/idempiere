@@ -955,7 +955,7 @@ public class DocumentEngine implements DocAction
 				AD_Table_ID != MInOut.Table_ID &
 				AD_Table_ID != MInvoice.Table_ID)
 			{
-				options[index++] = DocumentEngine.ACTION_Complete;
+			options[index++] = DocumentEngine.ACTION_Complete;
 			}
 		// ZI,MPo,8/4/2016	options[index++] = DocumentEngine.ACTION_Complete;
 		//	options[index++] = DocumentEngine.ACTION_Prepare;
@@ -1007,9 +1007,9 @@ public class DocumentEngine implements DocAction
 			//}
 		}
 		/***
-		 * Requisition
-		 * ZI,MPo,9/6/2016
-		 */
+		* Requisition
+		* ZI,MPo,9/6/2016
+		*/
 		if (AD_Table_ID == X_M_Requisition.Table_ID)
 		{
 			//			Draft                       ..  DR/IP/IN
@@ -1482,4 +1482,3 @@ public class DocumentEngine implements DocAction
 		}
 	}
 }	//	DocumentEnine
-

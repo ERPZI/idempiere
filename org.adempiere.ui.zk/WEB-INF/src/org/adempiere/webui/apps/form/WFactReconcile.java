@@ -180,7 +180,6 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		labelMatchCode.setText(Msg.translate(Env.getCtx(), "MatchCode"));
 		labelPrCtr.setText(Msg.translate(Env.getCtx(), "User1_ID"));
 		//
-		
 		labelOrg.setText(Msg.translate(Env.getCtx(), "AD_Org_ID"));
 		labelReconciled.setText(" ");
 		isReconciled.setText(Msg.translate(Env.getCtx(), "IsReconciled"));
@@ -643,4 +642,3 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		calculateSelection();
 	}
 }
-
