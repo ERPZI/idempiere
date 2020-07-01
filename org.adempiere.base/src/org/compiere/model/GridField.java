@@ -83,7 +83,7 @@ public class GridField
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1871840570764036802L;
+	private static final long serialVersionUID = 496387784464611123L;
 
 	/**
 	 *  Field Constructor.
@@ -110,6 +110,7 @@ public class GridField
 	 * GridTab.processDependentFields will check this flag to avoid clearing of lookup field value that just have been set.
 	 **/ 
 	private boolean m_lookupEditorSettingValue = false;
+	private boolean m_lockedRecord = false;
 	
 	/**
 	 *  Dispose
@@ -444,6 +445,8 @@ public class GridField
 	{
 		if (isVirtualColumn())
 			return false;
+		if (m_lockedRecord)
+			return false;
 		//  Fields always enabled (are usually not updateable)
 		if (m_vo.ColumnName.equals("Posted")
 			|| (m_vo.ColumnName.equals("Record_ID") && m_vo.displayType == DisplayType.Button))	//  Zoom
@@ -772,8 +775,9 @@ public class GridField
 				PreparedStatement stmt = null;
 				ResultSet rs = null;
 				try
-				{
-					stmt = DB.prepareStatement(sql, null);
+				{					
+					String trxName = m_gridTab != null ? m_gridTab.getTableModel().get_TrxName() : null;
+					stmt = DB.prepareStatement(sql, trxName);
 					rs = stmt.executeQuery();
 					if (rs.next())
 						defStr = rs.getString(1);
@@ -1319,7 +1323,7 @@ public class GridField
 		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0)
 		{
 			String query;
-			if (m_vo.ColumnSQL.startsWith("@SQL="))
+			if (m_vo.ColumnSQL.startsWith("@SQL=") || m_vo.ColumnSQL.startsWith("@SQLFIND="))
 				query = "NULL";
 			else
 				query = m_vo.ColumnSQL;
@@ -1330,6 +1334,26 @@ public class GridField
 		}
 		return m_vo.ColumnName;
 	}	//	getColumnSQL
+	
+	/**
+	 *  Get Column Name or SQL for search queries
+	 *  @return column name
+	 */
+	public String getSearchColumnSQL()
+	{
+		if (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0)
+		{
+			String query;
+			if (m_vo.ColumnSQL.startsWith("@SQL="))
+				query = "NULL";
+			else if (m_vo.ColumnSQL.startsWith("@SQLFIND="))
+				query = m_vo.ColumnSQL.substring(9);
+			else
+				query = m_vo.ColumnSQL;
+			return query;
+		}
+		return m_vo.ColumnName;
+	}	//	getSearchColumnSQL
 
 	/**
 	 *  Is Virtual Column
@@ -1357,6 +1381,15 @@ public class GridField
 	{
 		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQL="));
 	}	//	isVirtualUIColumn
+	
+	/**
+	 *  Is Virtual search Column
+	 *  @return column is virtual search
+	 */
+	public boolean isVirtualSearchColumn()
+	{
+		return (m_vo.ColumnSQL != null && m_vo.ColumnSQL.length() > 0 && m_vo.ColumnSQL.startsWith("@SQLFIND="));
+	}	//	isVirtualDBColumn
 	
 	/**
 	 * 	Get Header
@@ -2505,6 +2538,14 @@ public class GridField
 	public boolean isToolbarOnlyButton()
 	{
 		return m_vo.displayType == DisplayType.Button && MColumn.ISTOOLBARBUTTON_Toolbar.equals(m_vo.IsToolbarButton);
+	}
+
+	public boolean isLockedRecord() {
+		return m_lockedRecord;
+	}
+
+	public void setLockedRecord(boolean lockedRecord) {
+		this.m_lockedRecord = lockedRecord;
 	}
 
 	public int getPA_DashboardContent_ID()

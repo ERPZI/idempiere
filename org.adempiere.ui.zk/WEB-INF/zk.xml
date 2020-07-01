@@ -61,9 +61,9 @@
  		<device-type>ajax</device-type>
       	<server-push-class>fi.jawsy.jawwa.zk.atmosphere.AtmosphereServerPush</server-push-class>
 	</device-config>
-	<!-- device-config>
+	<!--   device-config>
  		<device-type>ajax</device-type>
-      	<server-push-class>org.idempiere.ui.zk.websocket.WebSocketServerPush</server-push-class>
+      		<server-push-class>org.idempiere.ui.zk.websocket.WebSocketServerPush</server-push-class>
 	</device-config -->
 
 	<!-- true for better performance and lower resource usage -->

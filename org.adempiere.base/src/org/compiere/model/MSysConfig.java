@@ -39,10 +39,10 @@ import org.compiere.util.DisplayType;
  */
 public class MSysConfig extends X_AD_SysConfig
 {
-    /**
+	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3144528502974306817L;
+	private static final long serialVersionUID = -9208749663408576569L;
 
 	public static final String ADDRESS_VALIDATION = "ADDRESS_VALIDATION";
     public static final String ALERT_SEND_ATTACHMENT_AS_XLS = "ALERT_SEND_ATTACHMENT_AS_XLS";
@@ -99,6 +99,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String HTML_REPORT_THEME = "HTML_REPORT_THEME";
     public static final String IBAN_VALIDATION = "IBAN_VALIDATION";
     public static final String IDENTIFIER_SEPARATOR = "IDENTIFIER_SEPARATOR";
+    public static final String IMAGE_DB_STORAGE_SAVE_AS_ZIP = "IMAGE_DB_STORAGE_SAVE_AS_ZIP";
     public static final String INFO_DEFAULTSELECTED = "INFO_DEFAULTSELECTED";
     public static final String INFO_DOUBLECLICKTOGGLESSELECTION = "INFO_DOUBLECLICKTOGGLESSELECTION";
     public static final String Invoice_ReverseUseNewNumber = "Invoice_ReverseUseNewNumber";
@@ -171,6 +172,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_DESKTOP_CLASS = "ZK_DESKTOP_CLASS";
     public static final String ZK_FOOTER_SERVER_DATETIME_FORMAT = "ZK_FOOTER_SERVER_DATETIME_FORMAT";
     public static final String ZK_FOOTER_SERVER_MSG = "ZK_FOOTER_SERVER_MSG";
+    public static final String ZK_GRID_AFTER_FIND = "ZK_GRID_AFTER_FIND";
     public static final String ZK_GRID_EDIT_MODELESS = "ZK_GRID_EDIT_MODELESS";
     public static final String ZK_GRID_MOBILE_EDIT_MODELESS = "ZK_GRID_MOBILE_EDIT_MODELESS";
     public static final String ZK_GRID_MOBILE_MAX_COLUMNS = "ZK_GRID_MOBILE_MAX_COLUMNS";
@@ -420,12 +422,15 @@ public class MSysConfig extends X_AD_SysConfig
 	public static String getValue(String Name, String defaultValue, int AD_Client_ID, int AD_Org_ID)
 	{
 		String key = ""+AD_Client_ID+"_"+AD_Org_ID+"_"+Name;
-		String str = s_cache.get(key);
-		if (str != null)
-			return str;
-		if (str == null && s_cache.containsKey(key)) // found null key
-			return defaultValue;
-		
+		String str = null;
+		if (! Name.endsWith("_NOCACHE")) {
+			str = s_cache.get(key);
+			if (str != null)
+				return str;
+			if (str == null && s_cache.containsKey(key)) // found null key
+				return defaultValue;
+		}
+
 		//
 		String sql = "SELECT Value FROM AD_SysConfig"
 						+ " WHERE Name=? AND AD_Client_ID IN (0, ?) AND AD_Org_ID IN (0, ?) AND IsActive='Y'"
@@ -452,13 +457,15 @@ public class MSysConfig extends X_AD_SysConfig
 			rs = null; pstmt = null;
 		}
 		//
+
 		if (str != null) {
-			s_cache.put(key, str);
+			if (! Name.endsWith("_NOCACHE"))
+				s_cache.put(key, str);
 			return str;
-		}
-		else {
+		} else {
 			// anyways, put the not found key as null
-			s_cache.put(key, null);
+			if (! Name.endsWith("_NOCACHE"))
+				s_cache.put(key, null);
 			return defaultValue;
 		}
 	}

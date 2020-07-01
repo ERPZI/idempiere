@@ -26,14 +26,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Asset_Addition
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20191121L;
 
     /** Standard Constructor */
     public X_A_Asset_Addition (Properties ctx, int A_Asset_Addition_ID, String trxName)
@@ -41,20 +41,12 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
       super (ctx, A_Asset_Addition_ID, trxName);
       /** if (A_Asset_Addition_ID == 0)
         {
-			setA_Accumulated_Depr (Env.ZERO);
-// 0
-			setA_Accumulated_Depr_Adjust (false);
-// N
-			setA_Accumulated_Depr_F (Env.ZERO);
-// 0
 			setA_Asset_Addition_ID (0);
 			setA_Asset_ID (0);
 			setA_CapvsExp (null);
 // 'Cap'
 			setA_CreateAsset (false);
 // 'N'
-			setA_Period_Start (0);
-// 0
 			setA_QTY_Current (Env.ZERO);
 // 0
 			setA_SourceType (null);
@@ -66,10 +58,6 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 			setC_Currency_ID (0);
 			setDateDoc (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
-			setDeltaUseLifeYears (0);
-// 0
-			setDeltaUseLifeYears_F (0);
-// 0
 			setDocStatus (null);
 // 'DR'
 			setIsApproved (false);
@@ -246,7 +234,6 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 			 return 0;
 		return ii.intValue();
 	}
-
 
 	/** Set Current Qty.
 		@param A_QTY_Current Current Qty	  */
@@ -641,7 +628,6 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 		return (Timestamp)get_Value(COLUMNNAME_DateDoc);
 	}
 
-	
 	/** Set Description.
 		@param Description 
 		Optional short description of the record

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for A_Asset_Addition
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_A_Asset_Addition 
 {
@@ -41,7 +41,7 @@ public interface I_A_Asset_Addition
 
     /** Load Meta Data */
 
-      /** Column name A_Asset_Addition_ID */
+    /** Column name A_Asset_Addition_ID */
     public static final String COLUMNNAME_A_Asset_Addition_ID = "A_Asset_Addition_ID";
 
 	/** Set Asset Addition	  */
@@ -130,7 +130,6 @@ public interface I_A_Asset_Addition
 
 	/** Get Life periods (min)	  */
 	public int getA_Life_Period_Min();
-
 
     /** Column name A_QTY_Current */
     public static final String COLUMNNAME_A_QTY_Current = "A_QTY_Current";
@@ -365,7 +364,6 @@ public interface I_A_Asset_Addition
 	  */
 	public Timestamp getDateDoc();
 
- 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 

@@ -1860,8 +1860,9 @@ public class MInvoice extends X_C_Invoice implements DocAction
 					|| line.getM_Product_ID() == 0)
 				{
 					ol = new MOrderLine (getCtx(), line.getC_OrderLine_ID(), get_TrxName());
-					if (line.getQtyInvoiced() != null)
-						ol.setQtyInvoiced(ol.getQtyInvoiced().add(line.getQtyInvoiced()));
+					if (line.getQtyInvoiced() != null) {
+						ol.setQtyInvoiced(ol.getQtyInvoiced().add(isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced()));
+					}
 					if (!ol.save(get_TrxName()))
 					{
 						m_processMsg = "Could not update Order Line";
@@ -2208,7 +2209,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			return null;
 		//	Business Partner needs to be linked to Org
 		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), null);
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID();
 		if (counterAD_Org_ID == 0)
 			return null;
 

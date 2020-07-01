@@ -28,8 +28,10 @@ import org.adempiere.webui.session.SessionManager;
 import org.compiere.apps.AbstractProcessCtl;
 import org.compiere.apps.IProcessParameter;
 import org.compiere.model.MPInstance;
+import org.compiere.model.MPInstancePara;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
@@ -46,7 +48,7 @@ import org.zkoss.zk.ui.event.EventListener;
 public class WProcessCtl extends AbstractProcessCtl {
 	
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WProcessCtl.class);
+	private static final CLogger log = CLogger.getCLogger(WProcessCtl.class);
 	
 	public static void process (int WindowNo, ProcessInfo pi, Trx trx)
 	{
@@ -151,10 +153,10 @@ public class WProcessCtl extends AbstractProcessCtl {
 	 */
 	public static void process(IProcessUI aProcessUI, int WindowNo, IProcessParameter parameter, ProcessInfo pi, Trx trx)
 	{
-		if (log.isLoggable(Level.FINE)) log.fine("WindowNo=" + WindowNo + " - " + pi);
+	  if (log.isLoggable(Level.FINE)) log.fine("WindowNo=" + WindowNo + " - " + pi);
 
+	  MPInstance instance = null;
 	  if (pi.getAD_PInstance_ID() < 1) { //red1 bypass if PInstance exists
-		MPInstance instance = null;
 		try
 		{
 			instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getRecord_ID());
@@ -192,6 +194,13 @@ public class WProcessCtl extends AbstractProcessCtl {
 			}
 		}
 
+		if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
+		{
+			DB.createT_Selection(pi.getAD_PInstance_ID(), pi.getRecord_IDs(), null);
+			MPInstancePara ip = instance.createParameter(-1, "*RecordIDs*", pi.getRecord_IDs().toString());
+			ip.saveEx();
+		}
+		
 		//	execute
 		WProcessCtl worker = new WProcessCtl(aProcessUI, WindowNo, pi, trx);
 		worker.run();

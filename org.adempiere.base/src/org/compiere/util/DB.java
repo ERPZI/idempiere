@@ -402,6 +402,18 @@ public final class DB
 	}	//	getConnectionRO
 
 	/**
+	 *	Return a replica connection if possible, otherwise read committed, read/only from pool.
+	 *  @return Connection (r/o)
+	 */
+	public static Connection getReportingConnectionRO ()
+	{
+		Connection conn = DBReadReplica.getConnectionRO();
+		if (conn == null)
+			conn = getConnectionRO();
+        return conn;
+	}	//	getReportingConnectionRO
+
+	/**
 	 *	Create new Connection.
 	 *  The connection must be closed explicitly by the application
 	 *
@@ -2578,4 +2590,57 @@ public final class DB
 		return ProxyFactory.newCPreparedStatement(resultSetType, resultSetConcurrency, sql, trxName);
 	}
 
+	/**
+	 * @param columnName
+	 * @param csv comma separated value
+	 * @return IN clause
+	 */
+	public static String inClauseForCSV(String columnName, String csv) 
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(columnName).append(" IN (");
+		String[] values = csv.split("[,]");
+		for(int i = 0; i < values.length; i++)
+		{
+			if (i > 0)
+				builder.append(",");
+			String key = values[i];
+			if (columnName.endsWith("_ID")) 
+			{
+				builder.append(key);
+			}
+			else
+			{
+				if (key.startsWith("\"") && key.endsWith("\"")) 
+				{
+					key = key.substring(1, key.length()-1);
+				}
+				builder.append(TO_STRING(key));
+			}
+		}
+		builder.append(")");
+		return builder.toString();
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param csv
+	 * @return subset sql clause
+	 */
+	public static String subsetClauseForCSV(String columnName, String csv)
+	{
+		return getDatabase().subsetClauseForCSV(columnName, csv);
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param csv
+	 * @return intersect sql clause
+	 */
+	public static String intersectClauseForCSV(String columnName, String csv)
+	{
+		return getDatabase().intersectClauseForCSV(columnName, csv);
+	}
 }	//	DB

@@ -115,11 +115,6 @@ public class MDepreciationExp extends X_A_Depreciation_Exp
 		setA_Asset_Remaining_F(wk.getA_Asset_Remaining_F());
 	}
 	
-	private MDepreciationWorkfile getA_Depreciation_Workfile()
-	{
-		return MDepreciationWorkfile.get(getCtx(), getA_Asset_ID(), getPostingType(), get_TrxName());
-	}
-
 	/**	Create Depreciation Entries
 	 *	Produce record:
 	 *	<pre>

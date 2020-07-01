@@ -151,7 +151,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 				&& ifa.getA_Asset_ID() == 0) { 
 		//end @win add condition to prevent asset creation when expense addition or second addition
 		MAsset asset = assetAdd.createAsset();
-				
 		asset.dump();	
 		}
 		assetAdd.saveEx();
@@ -183,16 +182,9 @@ public class MAssetAddition extends X_A_Asset_Addition
 		asset.saveEx();
 		asset.dump();
 		
-		
-		// Copy UseLife values from asset group to workfile
-		//TODO
-		//MAssetGroupAcct assetgrpacct = MAssetGroupAcct.forA_Asset_Group_ID(asset.getCtx(), asset.getA_Asset_Group_ID(), assetAdd.getPostingType());
-	
 		assetAdd.setA_Asset(asset);
 		assetAdd.saveEx();
-		
 		//@win add
-			
 		
 		return assetAdd;
 	}
@@ -339,15 +331,13 @@ public class MAssetAddition extends X_A_Asset_Addition
 		setUser2_ID(ifa.getUser2_ID());
 		setC_Activity_ID(ifa.getC_Activity_ID());
 		//
-				
 		if (ifa.getA_Asset_ID() > 0)
 			setA_Asset_ID(ifa.getA_Asset_ID());
 		if (ifa.getC_Currency_ID() > 0)
 			setC_Currency_ID(ifa.getC_Currency_ID());
-			setAssetAmtEntered(ifa.getAssetAmtEntered());
-			setAssetSourceAmt(ifa.getAssetSourceAmt());
-		//
-	
+		setAssetAmtEntered(ifa.getAssetAmtEntered());
+		setAssetSourceAmt(ifa.getAssetSourceAmt());
+		
 		setI_FixedAsset(ifa);
 	}
 	
@@ -707,7 +697,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		MDepreciationWorkfile assetwk = MDepreciationWorkfile.get(getCtx(), getA_Asset_ID(), getPostingType(), get_TrxName());
 		if (assetwk == null)
 		{
-		
 			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), asset.getA_Asset_Group_ID(), getPostingType()))
 			{
 				if (A_SOURCETYPE_Imported.equals(getA_SourceType()) && assetgrpacct.getC_AcctSchema_ID() != getI_FixedAsset().getC_AcctSchema_ID())
@@ -813,7 +802,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 		}
 		*/
-		
 		
 		
 		//

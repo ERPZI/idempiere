@@ -19,13 +19,15 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
+
 
 public class MRefTable extends X_AD_Ref_Table
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 380648726485603193L;
+	private static final long serialVersionUID = -3595900192339578282L;
 
 	/**
 	 * 	Standard Constructor
@@ -62,5 +64,34 @@ public class MRefTable extends X_AD_Ref_Table
 		MTable table = MTable.get(getCtx(), getAD_Table_ID(), get_TrxName());
 		return table;
 	}
-	
+
+	/**	Ref Table Cache				*/
+	private static CCache<Integer,MRefTable>	s_cache = new CCache<Integer,MRefTable>(Table_Name, 20);
+
+	public static MRefTable get (Properties ctx, int AD_Reference_ID)
+	{
+		return get (ctx, AD_Reference_ID, null);
+	}
+
+	/**
+	 * 	Get from Cache
+	 *	@param ctx context
+	 *	@param AD_Reference_ID id
+	 *  @param trxName trx
+	 *	@return category
+	 */
+	public static MRefTable get (Properties ctx, int AD_Reference_ID, String trxName)
+	{
+		Integer ii = Integer.valueOf(AD_Reference_ID);
+		MRefTable retValue = (MRefTable)s_cache.get(ii);
+		if (retValue != null) {
+			retValue.set_TrxName(trxName);
+			return retValue;
+		}
+		retValue = new MRefTable (ctx, AD_Reference_ID, trxName);
+		if (retValue.get_ID () != 0)
+			s_cache.put (AD_Reference_ID, retValue);
+		return retValue;
+	}	//	get
+
 }	//	MRefTable

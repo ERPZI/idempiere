@@ -167,7 +167,7 @@ public class MAsset extends X_A_Asset
 		setDateAcct(ifa.getDateAcct());
 		setName(ifa.getName());
 		setDescription(ifa.getDescription());
-		
+
 		setI_FixedAsset(ifa);
 	}
 
@@ -419,27 +419,27 @@ public class MAsset extends X_A_Asset
 			// for each asset group acounting create an asset accounting and a workfile too
 			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID()))
 			{			
-			if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
-			{
-				if (getI_FixedAsset() != null && assetgrpacct.getC_AcctSchema_ID() != getI_FixedAsset().getC_AcctSchema_ID())
-				continue;
-								
-				// Asset Accounting
-				MAssetAcct assetacct = new MAssetAcct(this, assetgrpacct);
-				assetacct.setAD_Org_ID(getAD_Org_ID()); //added by @win
-				assetacct.saveEx();
-				
-				// Asset Depreciation Workfile
-				MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
-				assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
-				//MPo, 1/12/18
-				if (this.getUseLifeMonths() > 0) {
-					assetwk.setUseLifeYears(Integer.valueOf(this.getUseLifeMonths()/12));
-					assetwk.setUseLifeMonths(this.getUseLifeMonths());
-					assetwk.setUseLifeYears_F(Integer.valueOf(this.getUseLifeMonths()/12));
-					assetwk.setUseLifeMonths_F(this.getUseLifeMonths_F());
-				} else {
-				//
+				if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
+				{
+					if (getI_FixedAsset() != null && assetgrpacct.getC_AcctSchema_ID() != getI_FixedAsset().getC_AcctSchema_ID())
+						continue;
+					
+					// Asset Accounting
+					MAssetAcct assetacct = new MAssetAcct(this, assetgrpacct);
+					assetacct.setAD_Org_ID(getAD_Org_ID()); //added by @win
+					assetacct.saveEx();
+					
+					// Asset Depreciation Workfile
+					MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
+					assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
+					//MPo, 1/12/18
+					if (this.getUseLifeMonths() > 0) {
+						assetwk.setUseLifeYears(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeMonths(this.getUseLifeMonths());
+						assetwk.setUseLifeYears_F(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeMonths_F(this.getUseLifeMonths_F());
+					} else {
+					//
 					assetwk.setUseLifeYears(assetgrpacct.getUseLifeYears());
 					assetwk.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
 					assetwk.setUseLifeYears_F(assetgrpacct.getUseLifeYears_F());
@@ -596,11 +596,11 @@ public class MAsset extends X_A_Asset
 	public void setA_Accumulated_Depr(BigDecimal A_Accumulated_Depr)		{	m_A_Accumulated_Depr = A_Accumulated_Depr; }
 	public BigDecimal getA_Accumulated_Depr_F()								{	return m_A_Accumulated_Depr_F;	}
 	public void setA_Accumulated_Depr_F(BigDecimal A_Accumulated_Depr_F)	{	m_A_Accumulated_Depr_F = A_Accumulated_Depr_F; }
-
+	
 	private MIFixedAsset m_I_FixedAsset = null;
-	public MIFixedAsset getI_FixedAsset()									{	return m_I_FixedAsset;	}
+	public MIFixedAsset getI_FixedAsset()										{	return m_I_FixedAsset;	}
 	public void setI_FixedAsset(MIFixedAsset I_FixedAsset)					{	m_I_FixedAsset = I_FixedAsset; }
-		
+
 	public MAssetDelivery confirmDelivery(EMail email, int ad_User_ID) {
 		// TODO Auto-generated method stub
 		return null;

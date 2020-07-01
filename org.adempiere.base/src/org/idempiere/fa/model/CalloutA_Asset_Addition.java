@@ -60,10 +60,7 @@ public class CalloutA_Asset_Addition extends CalloutEngine
 	{
 		if (isCalloutActive())
 			return "";
-		//
-		String columnName = mField.getColumnName();
-	
-		
+		//		
 		BigDecimal amtEntered = (BigDecimal) mTab.getValue(MAssetAddition.COLUMNNAME_AssetAmtEntered);
 		mTab.setValue(MAssetAddition.COLUMNNAME_AssetSourceAmt, amtEntered);
 		MConversionRateUtil.convertBase(SetGetUtil.wrap(mTab),
@@ -102,8 +99,6 @@ public class CalloutA_Asset_Addition extends CalloutEngine
 		{
 			return "";
 		}
-		
-		
 		
 		
 		return "";

@@ -25,7 +25,7 @@ import org.compiere.util.Env;
 
 /** Generated Model for I_FixedAsset
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent 
 {
 
@@ -33,6 +33,7 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 	 *
 	 */
 	private static final long serialVersionUID = 20200402L;
+
 
     /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName)
@@ -44,7 +45,11 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 // 0
 			setA_Remaining_Period (0);
 // 0
+			setAssetAmtEntered (Env.ZERO);
+// 0
 			setAssetPeriodDepreciationAmt (Env.ZERO);
+// 0
+			setAssetSourceAmt (Env.ZERO);
 // 0
 			setDocAction (null);
 // 'CO'

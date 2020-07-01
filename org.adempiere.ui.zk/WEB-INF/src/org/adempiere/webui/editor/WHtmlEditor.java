@@ -63,7 +63,7 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
 	private boolean readwrite;
 
     /**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WHtmlEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WHtmlEditor.class);
 
     public WHtmlEditor(GridField gridField)
     {
@@ -194,7 +194,7 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
 					adwindowContent.hideBusyMask();
 				}
 				if (!dialog.isCancelled()) {
-					box.setContent(dialog.getText());
+					box.setContent(WTextEditorDialog.sanitize(dialog.getText()));
 					String newText = box.getContent();
 			        ValueChangeEvent changeEvent = new ValueChangeEvent(WHtmlEditor.this, WHtmlEditor.this.getColumnName(), oldValue, newText);
 			        WHtmlEditor.super.fireValueChange(changeEvent);

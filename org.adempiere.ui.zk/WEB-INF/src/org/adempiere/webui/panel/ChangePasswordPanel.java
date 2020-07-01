@@ -66,7 +66,7 @@ public class ChangePasswordPanel extends Window implements EventListener<Event>
 	 */
 	private static final long serialVersionUID = -4117126419866788951L;
 
-	private static CLogger logger = CLogger.getCLogger(ChangePasswordPanel.class);
+	private static final CLogger logger = CLogger.getCLogger(ChangePasswordPanel.class);
 
     protected LoginWindow wndLogin;
 
@@ -277,7 +277,7 @@ public class ChangePasswordPanel extends Window implements EventListener<Event>
         else if (event.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
         {
         	SessionManager.logoutSession();
-            wndLogin.loginCancelled();
+            //wndLogin.loginCancelled();
         }
         else if (event.getTarget() == txtNewPassword) {
         	MPasswordRule pwdrule = MPasswordRule.getRules(Env.getCtx(), null);

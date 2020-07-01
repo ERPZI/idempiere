@@ -104,7 +104,7 @@ public class ModelInterfaceGenerator
 		+" *****************************************************************************/\n";
 
 	/** Logger */
-	private static CLogger log = CLogger.getCLogger(ModelInterfaceGenerator.class);
+	private static final CLogger log = CLogger.getCLogger(ModelInterfaceGenerator.class);
 
 	public ModelInterfaceGenerator(int AD_Table_ID, String directory, String packageName) {
 		this.packageName = packageName;
@@ -533,6 +533,10 @@ public class ModelInterfaceGenerator
 			//
 			return getClass(columnName, displayType, AD_Reference_ID); // recursive call with new parameters
 		}
+		else if (displayType == DisplayType.Button && columnName.endsWith("_ID"))
+		{
+			return Integer.class;
+		}
 		else
 		{
 			return DisplayType.getClass(displayType, true);
@@ -813,18 +817,23 @@ public class ModelInterfaceGenerator
 			file.mkdirs();
 
 		//	complete sql
+		String filterViews = null;
+		if (tableLike.toString().contains("%")) {
+			filterViews = "AND (TableName IN ('RV_WarehousePrice','RV_BPartner') OR IsView='N')"; 	//	special views
+		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT AD_Table_ID ")
 			.append("FROM AD_Table ")
-			.append("WHERE (TableName IN ('RV_WarehousePrice','RV_BPartner')")	//	special views
-			.append(" OR IsView='N')")
-			.append(" AND IsActive = 'Y' AND TableName NOT LIKE '%_Trl' ");
+			.append("WHERE IsActive = 'Y' AND TableName NOT LIKE '%_Trl' ");
 		// Autodetect if we need to use IN or LIKE clause - teo_sarca [ 3020640 ]
 		if (tableLike.indexOf(",") == -1)
 			sql.append(" AND TableName LIKE ").append(tableLike);
 		else
 			sql.append(" AND TableName IN (").append(tableLike).append(")"); // only specific tables
 		sql.append(" AND ").append(entityTypeFilter.toString());
+		if (filterViews != null) {
+			sql.append(filterViews);
+		}
 		sql.append(" ORDER BY TableName");
 
 		//

@@ -88,7 +88,7 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 	private int p_WindowNo;
 
 	/**	Logger			*/
-	private CLogger log = CLogger.getCLogger(getClass());
+	private static final CLogger log = CLogger.getCLogger(WCreateFromInvoiceUI.class);
 		
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;
@@ -282,7 +282,8 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 		//  BPartner - load Order/Invoice/Shipment
 		if (e.getPropertyName().equals("C_BPartner_ID"))
 		{
-			int C_BPartner_ID = ((Integer)e.getNewValue()).intValue();
+			Integer newBpValue = (Integer)e.getNewValue();
+			int C_BPartner_ID = newBpValue == null?0:newBpValue.intValue();
 			//MPo, 23/9/19
 			//initBPOrderDetails (C_BPartner_ID, true);
 			initBPOrderDetails (C_BPartner_ID, true, Env.getContextAsInt(Env.getCtx(), p_WindowNo, "User1_ID"));

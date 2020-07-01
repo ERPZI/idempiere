@@ -90,14 +90,14 @@ public final class Prop implements Serializable {
 	public static final String	SOC_7				=	"Social7";
 	
 	/**Defaults*/
-	private static final String CREDITS				=	"Welcome to the iDempiere (OSGi+ADempiere) 6.2 Page!";
+	private static final String CREDITS				=	"Welcome to the iDempiere (OSGi+ADempiere) 7.1 Page!";
 	private static String LOGO_URL 					= 	null;
 	
 	
 	/**	Container for Properties    */
 	private volatile static Properties 		s_prop = new Properties();
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(Prop.class);
+	private static final CLogger log = CLogger.getCLogger(Prop.class);
 	
 	
 	private static String IMAGE_PATH(){

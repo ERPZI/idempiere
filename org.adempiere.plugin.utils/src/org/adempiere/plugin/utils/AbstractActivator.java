@@ -34,10 +34,13 @@ import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public abstract class AbstractActivator implements BundleActivator, ServiceTrackerCustomizer<IDictionaryService, IDictionaryService> {
+public abstract class AbstractActivator implements BundleActivator, ServiceTrackerCustomizer<IDictionaryService, IDictionaryService>, FrameworkListener{
 
 	protected final static CLogger logger = CLogger.getCLogger(AbstractActivator.class.getName());
 	protected BundleContext context;
@@ -46,7 +49,33 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 	private String trxName = null;
 	private ProcessInfo m_processInfo = null;
 	private IProcessUI m_processUI = null;
+	private final static Object mutex = new Object();
+	private static boolean isFrameworkStarted = false;
+	
 
+	@Override
+	public void start(BundleContext context) throws Exception {
+		this.context = context;
+		if (logger.isLoggable(Level.INFO)) logger.info(getName() + " " + getVersion() + " starting...");
+		serviceTracker = new ServiceTracker<IDictionaryService, IDictionaryService>(context, IDictionaryService.class.getName(), this);
+		serviceTracker.open();
+		if (!isFrameworkStarted())
+			context.addFrameworkListener(this);
+		start();
+		if (logger.isLoggable(Level.INFO)) logger.info(getName() + " " + getVersion() + " ready.");
+	}
+	
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		stop();
+		serviceTracker.close();
+		context.removeFrameworkListener(this);
+		this.context = null;
+		if (logger.isLoggable(Level.INFO)) logger.info(context.getBundle().getSymbolicName() + " "
+				+ context.getBundle().getHeaders().get("Bundle-Version")
+				+ " stopped.");
+	}
+	
 	protected boolean merge(File zipfile, String version) throws Exception {
 		boolean success = false;
 
@@ -184,5 +213,57 @@ public abstract class AbstractActivator implements BundleActivator, ServiceTrack
 		if (m_processInfo != null)
 			m_processInfo.setSummary(msg);
 	}
+	
+	@Override
+	public void frameworkEvent(FrameworkEvent event) {
+		if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
+			synchronized(mutex) {
+				isFrameworkStarted = true;
+				frameworkStarted();
+			}
+		}
+	}
+	
+	public static Boolean isFrameworkStarted() {
+		synchronized(mutex) {
+	        return isFrameworkStarted;
+	    }
+	}
+	
+	protected abstract void frameworkStarted();
 
+	/**
+	 * call when bundle have been started ( after this.context have been set )
+	 */
+	protected void start() {
+	};
+
+	/**
+	 * call when bundle is stop ( before this.context is set to null )
+	 */
+	protected void stop() {
+	}
+	
+	public String getVersion() {
+		return "";
+	}
+	
+	@Override
+	public IDictionaryService addingService(
+			ServiceReference<IDictionaryService> reference) {
+		service = context.getService(reference);
+		if (isFrameworkStarted())
+			frameworkStarted ();
+		return null;
+	}
+
+	@Override
+	public void modifiedService(ServiceReference<IDictionaryService> reference,
+			IDictionaryService service) {
+	}
+
+	@Override
+	public void removedService(ServiceReference<IDictionaryService> reference,
+			IDictionaryService service) {
+	}
 }

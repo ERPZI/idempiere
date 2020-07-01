@@ -60,6 +60,7 @@ import javax.print.event.PrintServiceAttributeEvent;
 import javax.print.event.PrintServiceAttributeListener;
 import javax.xml.transform.stream.StreamResult;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.pdf.Document;
 import org.adempiere.print.export.PrintDataExcelExporter;
 import org.apache.ecs.XhtmlDocument;
@@ -97,6 +98,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
+import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
@@ -578,6 +580,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(f)", e);
+			throw new AdempiereException(e);
 		}
 		return false;
 	}	//	createHTML
@@ -623,6 +626,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			if (cssPrefix != null && cssPrefix.trim().length() == 0)
 				cssPrefix = null;
 			
+			table parameterTable = null;
+			if (!m_printFormat.isForm()) {
+				if (m_query != null && m_query.isActive()) {
+					int rows = m_query.getReportProcessQuery() != null ? m_query.getReportProcessQuery().getRestrictionCount() : m_query.getRestrictionCount();
+					if (rows > 0) {
+						parameterTable = new table();
+						if (cssPrefix != null)
+							parameterTable.setClass(cssPrefix + "-parameter-table");
+						else
+							parameterTable.setClass("parameter-table");
+						parameterTable.setNeedClosingTag(false);
+					}
+				}
+			}
+			
 			table table = new table();
 			if (cssPrefix != null)
 				table.setClass(cssPrefix + "-table");
@@ -630,17 +648,17 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			//
 			table.setNeedClosingTag(false);
 			PrintWriter w = new PrintWriter(writer);
-			
+			XhtmlDocument doc = null;
+					
 			if (onlyTable)
 				table.output(w);
 			else
 			{
-				XhtmlDocument doc = new XhtmlDocument();
+				doc = new XhtmlDocument();
 				doc.getHtml().setNeedClosingTag(false);
 				doc.getBody().setNeedClosingTag(false);
 				doc.appendHead("<meta charset=\"UTF-8\" />");
-				doc.appendBody(table);
-				appendInlineCss (doc);
+				
 				if (extension != null && extension.getStyleURL() != null)
 				{
 					// maybe cache style content with key is path
@@ -664,9 +682,103 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				if (extension != null && !isExport){
 					extension.setWebAttribute(doc.getBody());
+				}				
+			}
+			
+			if (doc != null)
+			{
+				//IDEMPIERE-4113
+				mapCssInfo.clear();
+				MPrintFormatItem item = null;
+				int printColIndex = -1;
+				for(int col = 0; col < m_printFormat.getItemCount(); col++)
+				{
+					item = m_printFormat.getItem(col);
+					if(item.isPrinted())
+					{
+						printColIndex++;
+						addCssInfo(item, printColIndex);
+					}
+				}//IDEMPIERE-4113
+				appendInlineCss(doc);
+				
+				StringBuilder styleBuild = new StringBuilder();
+				MPrintTableFormat tf = m_printFormat.getTableFormat();
+				CSSInfo cssInfo = new CSSInfo(tf.getPageHeader_Font(), tf.getPageHeaderFG_Color());
+				if (cssPrefix != null) {
+					if (parameterTable != null)
+						styleBuild.append("."+cssPrefix + "-parameter-table th").append(cssInfo.getCssRule());						
+					styleBuild.append("."+cssPrefix + "-table th").append(cssInfo.getCssRule());
+				}
+				else {
+					if (parameterTable != null)						
+						styleBuild.append("parameter-table th").append(cssInfo.getCssRule());
+					styleBuild.append("table th").append(cssInfo.getCssRule());
 				}
 				
+				cssInfo = new CSSInfo(tf.getParameter_Font(), tf.getParameter_Color());
+				styleBuild.append(".tr-parameter td").append(cssInfo.getCssRule());
+				
+				cssInfo = new CSSInfo(tf.getFunct_Font(), tf.getFunctFG_Color());
+				styleBuild.append(".tr-function td").append(cssInfo.getCssRule());
+				
+				MPrintFont printFont = MPrintFont.get(m_printFormat.getAD_PrintFont_ID());
+				Font base = printFont.getFont();
+				Font newFont = new Font(base.getName(), Font.PLAIN, base.getSize()-1);
+				cssInfo = new CSSInfo(newFont, null);
+				styleBuild.append(".tr-level-1 td").append(cssInfo.getCssRule());
+				
+				newFont = new Font(base.getName(), Font.PLAIN, base.getSize()-2);
+				cssInfo = new CSSInfo(newFont, null);
+				styleBuild.append(".tr-level-2 td").append(cssInfo.getCssRule());
+				
+				styleBuild = new StringBuilder(styleBuild.toString().replaceAll(";", "!important;"));
+				appendInlineCss (doc, styleBuild);
+							
 				doc.output(w);
+				
+				if (parameterTable != null) {
+					parameterTable.output(w);
+					
+					tr tr = new tr();
+					tr.setClass("tr-parameter");
+					th th = new th();
+					tr.addElement(th);
+					th.addElement(Msg.getMsg(getCtx(), "Parameter") + ":");
+					
+					MQuery query = m_query;
+					if (m_query.getReportProcessQuery() != null)
+						query = m_query.getReportProcessQuery();
+					for (int r = 0; r < query.getRestrictionCount(); r++)
+					{
+						if (r > 0) {
+							tr = new tr();
+							tr.setClass("tr-parameter");
+							td td = new td();
+							tr.addElement(td);
+							td.addElement("&nbsp;");
+						}
+						
+						td td = new td();
+						tr.addElement(td);
+						td.addElement(query.getInfoName(r));
+						
+						td = new td();
+						tr.addElement(td);
+						td.addElement(query.getInfoOperator(r));
+						
+						td = new td();
+						tr.addElement(td);
+						td.addElement(query.getInfoDisplayAll(r));
+						
+						tr.output(w);
+					}
+					
+					w.println();
+					w.println("</table>");
+				}
+				
+				table.output(w);
 			}
 			
 			thead thead = new thead();
@@ -674,7 +786,11 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			tbody.setNeedClosingTag(false);
 			
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = new Object [colSuppressRepeats.length];
+			Object [] preValues = null;
+			if (colSuppressRepeats != null){
+				preValues = new Object [colSuppressRepeats.length];
+			}
+
 			int printColIndex = -1;
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
@@ -732,7 +848,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Object obj = m_printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
 							if (obj == null){
 								td.addElement("&nbsp;");
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
 								}
 							}
@@ -741,7 +857,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 								PrintDataElement pde = (PrintDataElement) obj;
 								String value = pde.getValueDisplay(language);	//	formatted
 
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									if (value.equals(preValues[printColIndex])){
 										td.addElement("&nbsp;");
 										continue;
@@ -816,11 +932,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 										td.setClass(cssPrefix + "-date");
 									else
 										td.setClass(cssPrefix + "-text");
-								}			
-								//just run with on record
-								if (row == 0)
-									addCssInfo(item, printColIndex);
-								
+								}											
 							}
 							else if (obj instanceof PrintData)
 							{
@@ -858,8 +970,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(w)", e);
+			throw new AdempiereException(e);
 		}
-		return false;
+		return true;
 	}	//	createHTML
 
 
@@ -916,7 +1029,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-			Object [] preValues = new Object [colSuppressRepeats.length];
+			Object [] preValues = null;
+			if (colSuppressRepeats != null){
+				preValues = new Object [colSuppressRepeats.length];
+			}
 			int printColIndex = -1;
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
@@ -948,7 +1064,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							Object obj = m_printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
 							String data = "";
 							if (obj == null){
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									preValues[printColIndex] = null;
 								}
 							}
@@ -960,7 +1076,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 								else
 									data = pde.getValueDisplay(language);	//	formatted
 								
-								if (colSuppressRepeats[printColIndex]){
+								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
 									if (data.equals(preValues[printColIndex])){
 										continue;
 									}else{
@@ -987,8 +1103,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "(w)", e);
+			return false;
 		}
-		return false;
+		return true;
 	}	//	createCSV
 
 	/**
@@ -1093,7 +1210,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile ("ReportEngine", ".pdf");
+				file = File.createTempFile (makePrefix(getName()), ".pdf");
 		}
 		catch (IOException e)
 		{
@@ -1104,6 +1221,106 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return null;
 	}	//	getPDF
 
+	/**************************************************************************
+	 * 	Create HTML file.
+	 * 	(created in temporary storage)
+	 *	@return HTML file
+	 */
+	public File getHTML()
+	{
+		return getHTML(null);
+	}	//	getHTML
+
+	/**
+	 * 	Create HTML file.
+	 * 	@param file file
+	 *	@return HTML file
+	 */
+	public File getHTML(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".html");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		if (createHTML(file, false, Env.getLanguage(getCtx())))
+			return file;
+		return null;
+	}	//	getHTML
+	
+	/**************************************************************************
+	 * 	Create CSV file.
+	 * 	(created in temporary storage)
+	 *	@return CSV file
+	 */
+	public File getCSV()
+	{
+		return getCSV(null);
+	}	//	getCSV
+
+	/**
+	 * 	Create CSV file.
+	 * 	@param file file
+	 *	@return CSV file
+	 */
+	public File getCSV(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".csv");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		if (createCSV(file, ',', Env.getLanguage(getCtx())))
+			return file;
+		return null;
+	}	//	getCSV
+	
+	/**************************************************************************
+	 * 	Create XLS file.
+	 * 	(created in temporary storage)
+	 *	@return XLS file
+	 */
+	public File getXLS()
+	{
+		return getXLS(null);
+	}	//	getXLS
+
+	/**
+	 * 	Create XLS file.
+	 * 	@param file file
+	 *	@return XLS file
+	 */
+	public File getXLS(File file)
+	{
+		try
+		{
+			if (file == null)
+				file = File.createTempFile (makePrefix(getName()), ".xls");
+		}
+		catch (IOException e)
+		{
+			log.log(Level.SEVERE, "", e);
+		}
+		try 
+		{
+			createXLS(file, Env.getLanguage(getCtx()));
+			return file;
+		} 
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, "", e);
+			return null;
+		}
+	}	//	getXLS
+	
 	/**
 	 * 	Create PDF File
 	 * 	@param file file
@@ -1149,7 +1366,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		catch (Exception e)
 		{
 			log.log(Level.SEVERE, "PDF", e);
-			return false;
+			throw new AdempiereException(e);
 		}
 
 		File file2 = new File(fileName);
@@ -1157,6 +1374,19 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return file2.exists();
 	}	//	createPDF
 
+	private String makePrefix(String name) {
+		StringBuilder prefix = new StringBuilder();
+		char[] nameArray = name.toCharArray();
+		for (char ch : nameArray) {
+			if (Character.isLetterOrDigit(ch)) {
+				prefix.append(ch);
+			} else {
+				prefix.append("_");
+			}
+		}
+		return prefix.toString();
+	}
+	
 	/**
 	 * 	Create PDF as Data array
 	 *	@return pdf data
@@ -1248,7 +1478,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	throws Exception
 	{
 		Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
-		PrintDataExcelExporter exp = new PrintDataExcelExporter(getPrintData(), getPrintFormat(), colSuppressRepeats);
+		Map<MPrintFormatItem, PrintData> childFormats = m_layout != null ? m_layout.getChildPrintFormatDetails() : null;
+		PrintDataExcelExporter exp = new PrintDataExcelExporter(getPrintData(), getPrintFormat(), childFormats, colSuppressRepeats, m_query);
 		exp.export(outFile, language);
 	}
 
@@ -1981,6 +2212,11 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				color = mPrintColor.getColor();
 				
 			}
+		}
+		
+		public CSSInfo (Font font, Color color) {
+			this.font = font;
+			this.color = color;
 		}
 		
 		/**

@@ -43,6 +43,7 @@ import org.adempiere.base.Core;
 import org.adempiere.base.IColumnCallout;
 import org.adempiere.model.MTabCustomization;
 import org.adempiere.util.ContextRunnable;
+import org.adempiere.util.ICalloutUI;
 import org.compiere.Adempiere;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
@@ -111,7 +112,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3115353522698098211L;
+	private static final long serialVersionUID = 5057703093968124177L;
 
 	public static final String DEFAULT_STATUS_MESSAGE = "NavigateOrUpdate";
 
@@ -149,6 +150,9 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		selection = new ArrayList<Integer>();
 	}	//	GridTab
 	
+	/** ICalloutUI*/
+	private ICalloutUI calloutUI;
+
 	/** Value Object                    */
 	private GridTabVO          	m_vo;
 
@@ -3380,4 +3384,52 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	{
 		return m_vo;
 	}
+
+	public ICalloutUI getCalloutUI() {
+		return calloutUI;
+	}
+
+	public void setCalloutUI(ICalloutUI calloutUI) {
+		this.calloutUI = calloutUI;
+	}
+
+	/** Get Max Query Records.
+	 *  @return If defined, you cannot query more records as defined - the query criteria needs to be changed to query less records
+     */
+	public int getMaxQueryRecords() {
+		// minimum between AD_Tab.MaxQueryRecords and AD_Role.MaxQueryRecords
+		int roleMaxQueryRecords = MRole.getDefault().getMaxQueryRecords();
+		int tabMaxQueryRecords = m_vo.MaxQueryRecords;
+		if (roleMaxQueryRecords > 0 && roleMaxQueryRecords < tabMaxQueryRecords)
+			tabMaxQueryRecords = roleMaxQueryRecords;
+		return tabMaxQueryRecords;
+	}
+
+	/**
+	 * 	Require Query
+	 *	@param noRecords records
+	 *	@return true if query required
+	 */
+	public boolean isQueryRequire (int noRecords)
+	{
+		if (noRecords < 2)
+			return false;
+		int max = getMaxQueryRecords();
+		if (max > 0 && noRecords > max)
+			return true;
+		int qu = MRole.getDefault().getConfirmQueryRecords();
+		return (noRecords > qu);
+	}	//	isQueryRequire
+
+	/**
+	 * 	Over max Query
+	 *	@param noRecords records
+	 *	@return true if over max query
+	 */
+	public boolean isQueryMax (int noRecords)
+	{
+		int max = getMaxQueryRecords();
+		return max > 0 && noRecords > max;
+	}	//	isQueryMax
+
 }	//	GridTab

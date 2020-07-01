@@ -42,8 +42,10 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTable;
 import org.compiere.model.Lookup;
 import org.compiere.model.MBPartnerLocation;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLocation;
 import org.compiere.model.MLookup;
+import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
@@ -63,6 +65,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.sys.SessionCtrl;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.DesktopCleanup;
 import org.zkoss.zul.Comboitem;
@@ -319,18 +322,45 @@ ContextMenuListener, IZoomableEditor
                 	if (value instanceof Integer && gridField != null && gridField.getDisplayType() != DisplayType.ID && 
                 			(gridTab==null || !gridTab.getTableModel().isImporting())) // for IDs is ok to be out of the list
                 	{
-                		getComponent().setValue(null);
-                		if (curValue == null)
-                			curValue = value;
-                		ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), curValue, null);
-            	        super.fireValueChange(changeEvent);
-                		oldValue = null;
+                		//if it is problem with record lock, just keep value (no trigger change) and set field readonly
+                		MRole role = MRole.getDefault(Env.getCtx(), false);
+                		int refTableID = -1;
+                		if (gridTab != null) // fields process para don't represent a column ID
+                		{
+                    		MColumn col = MColumn.get(Env.getCtx(), gridField.getAD_Column_ID());
+                    		if (col.get_ID() > 0) {
+                    			String refTable = col.getReferenceTableName();
+                    			if (refTable != null) {
+                        			MTable table = MTable.get(Env.getCtx(), refTable);
+                        			refTableID = table.getAD_Table_ID();
+                    			}
+                    		}
+                		}
+                		if (refTableID > 0 && ! role.isRecordAccess(refTableID, (int)value, false))
+                		{
+                			oldValue = value;
+                			setReadWrite(false);
+                			gridField.setLockedRecord(true);
+                		}
+                		else
+                		{
+                			getComponent().setValue(null);
+                			if (curValue == null)
+                				curValue = value;
+                			ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), curValue, null);
+                			super.fireValueChange(changeEvent);
+                			oldValue = null;
+                			if (gridField!=null)
+                				gridField.setLockedRecord(false);
+                		}
                 	}
                 }
             }
             else
             {
             	oldValue = value;
+				if (gridField!=null)
+            		gridField.setLockedRecord(false);
             }
         }
         else
@@ -478,6 +508,8 @@ ContextMenuListener, IZoomableEditor
 		        			gridField.setLookupEditorSettingValue(false);
 		        	}
 		        }
+		        if (newValue != null)
+		        	focusNext();
     		} finally {
     			onselecting = false;
     		}
@@ -673,7 +705,7 @@ ContextMenuListener, IZoomableEditor
 		else if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
 		{
 			if (isShowPreference())
-				ValuePreference.start (getComponent(), this.getGridField(), getValue());
+				ValuePreference.start (getComponent(), this.getGridField(), getValue(), getDisplay());
 			return;
 		}
 		else if (WEditorPopupMenu.NEW_EVENT.equals(evt.getContextEvent()))
@@ -737,6 +769,7 @@ ContextMenuListener, IZoomableEditor
 	
 	private interface ITableDirEditor {
 		public void setEditor(WTableDirEditor editor);
+		public void cleanup();
 	}
 	
 	private static class EditorCombobox extends Combobox implements ITableDirEditor {
@@ -784,7 +817,7 @@ ContextMenuListener, IZoomableEditor
 		/**
 		 * 
 		 */
-		protected void cleanup() {
+		public void cleanup() {
 			if (editor.tableCacheListener != null) {
 				CacheMgt.get().unregister(editor.tableCacheListener);
 				editor.tableCacheListener = null;
@@ -842,7 +875,7 @@ ContextMenuListener, IZoomableEditor
 		/**
 		 * 
 		 */
-		protected void cleanup() {
+		public void cleanup() {
 			if (editor.tableCacheListener != null) {
 				CacheMgt.get().unregister(editor.tableCacheListener);
 				editor.tableCacheListener = null;
@@ -872,7 +905,7 @@ ContextMenuListener, IZoomableEditor
 		private WTableDirEditor editor;
 		
 		protected CCacheListener(String tableName, WTableDirEditor editor) {
-			super(tableName, tableName, 0, true);
+			super(tableName, tableName+"|CCacheListener", 0, 0, true);
 			this.editor = editor;
 		}
 
@@ -885,7 +918,17 @@ ContextMenuListener, IZoomableEditor
 		}
 
 		private void refreshLookupList() {
-			Executions.schedule(editor.getComponent().getDesktop(), new EventListener<Event>() {
+			Desktop desktop = editor.getComponent().getDesktop();
+			boolean alive = false;
+			if (desktop.isAlive() && desktop.getSession() != null) {
+				SessionCtrl ctrl = (SessionCtrl) desktop.getSession();
+				alive = !ctrl.isInvalidated();
+			}
+			if (!alive) {
+				((ITableDirEditor)editor.getComponent()).cleanup();
+				return;
+			}
+			Executions.schedule(desktop, new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) {
 					try {
