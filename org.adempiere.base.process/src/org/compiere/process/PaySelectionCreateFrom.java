@@ -294,6 +294,16 @@ public class PaySelectionCreateFrom extends SvrProcess
 			else if (p_C_BP_Group_ID != 0)
 				pstmt.setInt (index++, p_C_BP_Group_ID);
 			
+			//MPo,31/10/2016 Add PrCtr selection
+			if (p_User1_ID != 0)
+				pstmt.setInt (index++, p_User1_ID);
+			//
+			//MPo,18/11/18 Add Currency and Organization
+			if (p_C_Currency_ID != 0)
+				pstmt.setInt(index++, p_C_Currency_ID);
+			if (p_AD_Org_ID != 0)
+				pstmt.setInt(index++, p_AD_Org_ID);
+			//
 			if (p_OnlyPositive) {
 				pstmt.setInt(index++, psel.getAD_Client_ID());
 				pstmt.setInt(index++, p_C_PaySelection_ID);
@@ -307,17 +317,17 @@ public class PaySelectionCreateFrom extends SvrProcess
 					pstmt.setInt (index++, p_C_BPartner_ID);
 				else if (p_C_BP_Group_ID != 0)
 					pstmt.setInt (index++, p_C_BP_Group_ID);
+				//MPo,31/10/2016 Add PrCtr selection
+				if (p_User1_ID != 0)
+					pstmt.setInt (index++, p_User1_ID);
+				//
+				//MPo,18/11/18 Add Currency and Organization
+				if (p_C_Currency_ID != 0)
+					pstmt.setInt(index++, p_C_Currency_ID);
+				if (p_AD_Org_ID != 0)
+					pstmt.setInt(index++, p_AD_Org_ID);
 			}
-			//MPo,31/10/2016 Add PrCtr selection
-			if (p_User1_ID != 0)
-				pstmt.setInt (index++, p_User1_ID);
-			//
-			//MPo,18/11/18 Add Currency and Organization
-			if (p_C_Currency_ID != 0)
-				pstmt.setInt(index++, p_C_Currency_ID);
-			if (p_AD_Org_ID != 0)
-				pstmt.setInt(index++, p_AD_Org_ID);
-			//
+			
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
