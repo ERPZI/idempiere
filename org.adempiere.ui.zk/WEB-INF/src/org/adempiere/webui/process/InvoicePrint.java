@@ -69,6 +69,9 @@ public class InvoicePrint extends SvrProcess
 	private String		m_PaymentRule = null;
 	private int	  	    m_C_PaymentTerm_ID = 0;
 	private String		m_DocStatus = null;
+	//MPo, 5/8/20
+	private int         m_AD_PrintFormat_ID = 0;
+	//
 
 	protected volatile StringBuffer sql = new StringBuffer();
 	protected volatile List<Object> params = new ArrayList<Object>();
@@ -114,6 +117,10 @@ public class InvoicePrint extends SvrProcess
 				m_C_PaymentTerm_ID = para[i].getParameterAsInt();
 			else if (name.equals("DocStatus"))
 				m_DocStatus = (String)para[i].getParameter();
+			//MPo, 6/8/20
+			else if (name.equals("AD_PrintFormat_ID"))
+				m_AD_PrintFormat_ID = para[i].getParameterAsInt();
+			//
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
 		}
@@ -336,7 +343,10 @@ public class InvoicePrint extends SvrProcess
 		sql.append(
 			"SELECT i.C_Invoice_ID,bp.AD_Language,c.IsMultiLingualDocument,"		//	1..3
 			//	Prio: 1. BPartner 2. DocType, 3. PrintFormat (Org)	//	see ReportCtl+MInvoice
-			+ " COALESCE(bp.Invoice_PrintFormat_ID, dt.AD_PrintFormat_ID, pf.Invoice_PrintFormat_ID),"	//	4 
+			//MPo, 6/8/20	
+			//+ " COALESCE(bp.Invoice_PrintFormat_ID, dt.AD_PrintFormat_ID, pf.Invoice_PrintFormat_ID),"	//	4
+            + " COALESCE(NULLIF(" + m_AD_PrintFormat_ID + ",'0'), bp.Invoice_PrintFormat_ID, dt.AD_PrintFormat_ID, pf.Invoice_PrintFormat_ID),"	//	4
+            //
 			+ " dt.DocumentCopies+bp.DocumentCopies,"								//	5
 			+ " bpc.AD_User_ID, i.DocumentNo,"										//	6..7
 			+ " bp.C_BPartner_ID "													//	8
