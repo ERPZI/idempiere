@@ -71,6 +71,9 @@ public class InvoicePrint extends SvrProcess
 	private String		m_DocStatus = null;
 	//MPo, 5/8/20
 	private int         m_AD_PrintFormat_ID = 0;
+	private int			m_AD_Org_ID = 0;
+	private int 		m_User1_ID = 0;
+	
 	//
 
 	protected volatile StringBuffer sql = new StringBuffer();
@@ -120,6 +123,11 @@ public class InvoicePrint extends SvrProcess
 			//MPo, 6/8/20
 			else if (name.equals("AD_PrintFormat_ID"))
 				m_AD_PrintFormat_ID = para[i].getParameterAsInt();
+			else if (name.equals("AD_Org_ID"))
+				m_AD_Org_ID = para[i].getParameterAsInt();
+			else if (name.equals("User1_ID"))
+				m_User1_ID = para[i].getParameterAsInt();
+			
 			//
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
@@ -150,8 +158,14 @@ public class InvoicePrint extends SvrProcess
 			+ ", IsPrinted=" + p_IsPrinted
 			+ ", PaymentRule=" + m_PaymentRule
 			+ ", C_PaymentTerm_ID=" + m_C_PaymentTerm_ID
-			+ ", DocStatus=" + m_DocStatus);
-		
+			//MPo, 11/8/20
+			//+ ", DocStatus=" + m_DocStatus);
+			+ ", DocStatus=" + m_DocStatus
+			+ ", AD_PrintFormat_ID=" + m_AD_PrintFormat_ID
+			+ ", AD_Org_ID=" + m_AD_Org_ID
+			+ ", User1_ID=" + m_User1_ID);
+			//
+			
 		MMailText mText = null;
 		if (p_R_MailText_ID != 0)
 		{
@@ -435,6 +449,18 @@ public class InvoicePrint extends SvrProcess
 				sql.append (" AND i.DocStatus=?");
 				params.add(m_DocStatus);
 			}
+			//MPo, 11/8/20
+			if (m_AD_Org_ID != 0)
+			{
+				sql.append (" AND i.AD_Org_ID=?");
+				params.add(m_AD_Org_ID);
+			}
+			if (m_User1_ID != 0)
+			{
+				sql.append (" AND i.User1_ID=?");
+				params.add(m_User1_ID);
+			}
+			//
 		}
 		String orgWhere = MRole.getDefault(getCtx(), false).getOrgWhere(MRole.SQL_RO);
 		if (!Util.isEmpty(orgWhere, true)) {
