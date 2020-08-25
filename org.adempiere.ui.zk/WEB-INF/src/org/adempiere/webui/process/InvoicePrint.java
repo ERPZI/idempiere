@@ -73,6 +73,7 @@ public class InvoicePrint extends SvrProcess
 	private int         m_AD_PrintFormat_ID = 0;
 	private int			m_AD_Org_ID = 0;
 	private int 		m_User1_ID = 0;
+	private String 		m_ZI_HasReceiptOnDelivery = null;
 	
 	//
 
@@ -127,7 +128,9 @@ public class InvoicePrint extends SvrProcess
 				m_AD_Org_ID = para[i].getParameterAsInt();
 			else if (name.equals("User1_ID"))
 				m_User1_ID = para[i].getParameterAsInt();
-			
+			else if (name.equals("ZI_HasReceiptOnDelivery"))
+				m_ZI_HasReceiptOnDelivery = (String)para[i].getParameter();
+
 			//
 			else
 				log.log(Level.SEVERE, "prepare - Unknown Parameter: " + name);
@@ -163,7 +166,8 @@ public class InvoicePrint extends SvrProcess
 			+ ", DocStatus=" + m_DocStatus
 			+ ", AD_PrintFormat_ID=" + m_AD_PrintFormat_ID
 			+ ", AD_Org_ID=" + m_AD_Org_ID
-			+ ", User1_ID=" + m_User1_ID);
+			+ ", User1_ID=" + m_User1_ID
+			+ ", ZI_HasReceiptOnDelivery" + m_ZI_HasReceiptOnDelivery);
 			//
 			
 		MMailText mText = null;
@@ -459,6 +463,11 @@ public class InvoicePrint extends SvrProcess
 			{
 				sql.append (" AND i.User1_ID=?");
 				params.add(m_User1_ID);
+			}
+			if (m_ZI_HasReceiptOnDelivery != null && m_ZI_HasReceiptOnDelivery.length() == 1)
+			{ 
+				sql.append(" AND bp.ZI_HasReceiptOnDelivery=?");
+				params.add(m_ZI_HasReceiptOnDelivery);
 			}
 			//
 		}
