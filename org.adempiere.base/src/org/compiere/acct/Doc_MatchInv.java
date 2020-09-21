@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +78,9 @@ public class Doc_MatchInv extends Doc
 
 	/**	Tolerance G&L				*/
 	private static final BigDecimal	TOLERANCE = BigDecimal.valueOf(0.02);
-	private ArrayList<FactLine>		invGainLossFactLines = null;
-	ArrayList<MInvoice> invList = null;
-	Hashtable<FactLine, Integer> htFactLineInv = null;
+														  
+									
+												   
 	
 	/** Invoice Line			*/
 	private MInvoiceLine	m_invoiceLine = null;
@@ -149,9 +149,12 @@ public class Doc_MatchInv extends Doc
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
-		invGainLossFactLines = new ArrayList<FactLine>();
-		invList = new ArrayList<MInvoice>();
-		htFactLineInv = new Hashtable<FactLine, Integer>();
+		// invoice gain/loss accounting fact line list
+		ArrayList<FactLine> invGainLossFactLines = new ArrayList<FactLine>();
+		// invoice list
+		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
+		// C_Invoice_ID and the current M_MatchInv inventory clearing/expense accounting fact lines
+		HashMap<Integer, ArrayList<FactLine>> htFactLineInv = new HashMap<Integer, ArrayList<FactLine>>();
 		
 		//  Nothing to do
 		if (getM_Product_ID() == 0								//	no Product
@@ -313,15 +316,22 @@ public class Doc_MatchInv extends Doc
 		// gain/loss
 		if (m_invoiceLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			htFactLineInv.put(cr, m_invoiceLine.getC_Invoice_ID());
-			p_Error = createInvoiceGainLoss(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceCr(), cr.getAmtAcctCr());
+			MInvoice invoice = m_invoiceLine.getParent();
+			if (!invList.contains(invoice))
+				invList.add(invoice);
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(cr);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
+			p_Error = createInvoiceGainLoss(as, fact, expense, invoice, cr.getAmtSourceCr(), cr.getAmtAcctCr(), invGainLossFactLines, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
 		// rounding adjustment
 		if (!htFactLineInv.isEmpty())
 		{
-			p_Error = createInvoiceRoundingCorrection(as, fact, expense);
+			p_Error = createInvoiceRoundingCorrection(as, fact, expense, invGainLossFactLines, invList, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
@@ -605,21 +615,27 @@ public class Doc_MatchInv extends Doc
 		return "";
 	}
 	
-	public ArrayList<Fact> createMatShipmentFacts(MAcctSchema as) {
+	private ArrayList<Fact> createMatShipmentFacts(MAcctSchema as) {
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		// invoice gain/loss accounting fact line list
+		ArrayList<FactLine> invGainLossFactLines = new ArrayList<FactLine>();
+		// invoice list
+		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
+		// C_Invoice_ID and the current M_MatchInv inventory clearing/expense accounting fact lines
+		HashMap<Integer, ArrayList<FactLine>> htFactLineInv = new HashMap<Integer, ArrayList<FactLine>>();
 		
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
 		setC_Currency_ID (as.getC_Currency_ID());
 		boolean isInterOrg = isInterOrg(as);
 
-		/**	Needs to be handled in PO Matching as no Receipt info
-		if (m_pc.isService())
-		{
-			log.fine("Service - skipped");
-			return fact;
-		}
-		**/
+														   
+					   
+   
+								 
+			   
+   
+	 
 
 
 		//  NotInvoicedReceipt      DR
@@ -653,7 +669,7 @@ public class Doc_MatchInv extends Doc
 				m_receiptLine.getM_InOut_ID(), m_receiptLine.getM_InOutLine_ID(),
 				multiplier))
 			{
-				p_Error = "Mat.Receipt not posted yet";
+				p_Error = "Mat.Shipment not posted yet";
 				return null;
 			}
 		}
@@ -748,15 +764,22 @@ public class Doc_MatchInv extends Doc
 		// gain/loss
 		if (m_invoiceLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			htFactLineInv.put(cr, m_invoiceLine.getC_Invoice_ID());
-			p_Error = createInvoiceGainLoss(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceDr(), cr.getAmtAcctDr());
+			MInvoice invoice = m_invoiceLine.getParent();
+			if (!invList.contains(invoice))
+				invList.add(invoice);
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(cr);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
+			p_Error = createInvoiceGainLoss(as, fact, expense, invoice, cr.getAmtSourceDr(), cr.getAmtAcctDr(), invGainLossFactLines, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
 		// rounding adjustment
 		if (!htFactLineInv.isEmpty())
 		{
-			p_Error = createInvoiceRoundingCorrection(as, fact, expense);
+			p_Error = createInvoiceRoundingCorrection(as, fact, expense, invGainLossFactLines, invList, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
@@ -834,6 +857,12 @@ public class Doc_MatchInv extends Doc
 	
 	public ArrayList<Fact> createCreditMemoFacts(MAcctSchema as) {
 		ArrayList<Fact> facts = new ArrayList<Fact>();
+		// invoice gain/loss accounting fact line list
+		ArrayList<FactLine> invGainLossFactLines = new ArrayList<FactLine>();
+		// invoice list
+		ArrayList<MInvoice> invList = new ArrayList<MInvoice>();
+		// C_Invoice_ID and the current M_MatchInv inventory clearing/expense accounting fact lines
+		HashMap<Integer, ArrayList<FactLine>> htFactLineInv = new HashMap<Integer, ArrayList<FactLine>>();
 		
 		//  create Fact Header
 		Fact fact = new Fact(this, as, Fact.POST_Actual);
@@ -1017,15 +1046,29 @@ public class Doc_MatchInv extends Doc
 		// gain / loss
 		if (refInvLine != null && refInvLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			htFactLineInv.put(dr, refInvLine.getC_Invoice_ID());
-			p_Error = createInvoiceGainLoss(as, fact, expense, refInvLine.getParent(), dr.getAmtSourceCr(), dr.getAmtAcctCr());
+			MInvoice invoice = refInvLine.getParent();
+			if (!invList.contains(invoice))
+				invList.add(invoice);
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(dr);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
+			p_Error = createInvoiceGainLoss(as, fact, expense, invoice, dr.getAmtSourceCr(), dr.getAmtAcctCr(), invGainLossFactLines, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
 		if (m_invoiceLine != null && m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())	//	in foreign currency
 		{
-			htFactLineInv.put(cr, m_invoiceLine.getC_Invoice_ID());
-			p_Error = createInvoiceGainLoss(as, fact, expense, m_invoiceLine.getParent(), cr.getAmtSourceDr(), cr.getAmtAcctDr());
+			MInvoice invoice = m_invoiceLine.getParent();
+			if (!invList.contains(invoice))
+				invList.add(invoice);
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(cr);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
+			p_Error = createInvoiceGainLoss(as, fact, expense, invoice, cr.getAmtSourceDr(), cr.getAmtAcctDr(), invGainLossFactLines, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
@@ -1033,7 +1076,7 @@ public class Doc_MatchInv extends Doc
 		// rounding adjustment
 		if (!htFactLineInv.isEmpty())
 		{
-			p_Error = createInvoiceRoundingCorrection(as, fact, expense);
+			p_Error = createInvoiceRoundingCorrection(as, fact, expense, invGainLossFactLines, invList, htFactLineInv);
 			if (p_Error != null)
 				return null;
 		}
@@ -1124,229 +1167,230 @@ public class Doc_MatchInv extends Doc
 		factLine.setQty(getQty());
 	}
 	
-	private String createInvoiceGainLossOld(MAcctSchema as, Fact fact, MAccount acct, 
-			MInvoice invoice, BigDecimal matchInvSource, BigDecimal matchInvAccounted)
-	{
-		BigDecimal invoiceSource = null;
-		BigDecimal invoiceAccounted = null;
-		//
-		StringBuilder sql = new StringBuilder()
-			.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
-			.append(" FROM Fact_Acct ")
-			.append("WHERE AD_Table_ID=? AND Record_ID=?")
-			.append(" AND C_AcctSchema_ID=?")
-			.append(" AND Account_ID=?")
-			.append(" AND PostingType='A'");
-
-		// For Invoice
-		List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-				MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
-		if (valuesInv != null) {
-			invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-			invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
-			if (invoiceSource.signum() == 0 && invoiceAccounted.signum() == 0) {
-				invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-				invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
-			}
-		}
-		
-		// 	Requires that Invoice is Posted
-		if (invoiceSource == null || invoiceAccounted == null)
-			return null;
-		//
-		
-		if (m_matchInv.getReversal_ID() == 0)
-		{
-			String matchInvLineSql = "SELECT M_MatchInv_ID FROM M_MatchInv "
-					+ "WHERE C_InvoiceLine_ID IN (SELECT C_InvoiceLine_ID FROM C_InvoiceLine WHERE C_Invoice_ID=?) "
-					+ "AND COALESCE(Reversal_ID,0)=0";
-			List<List<Object>> list  = DB.getSQLArrayObjectsEx(getTrxName(), matchInvLineSql, invoice.get_ID());
-			StringBuffer s = new StringBuffer();
-			
-			if (list == null)
-				return null;
-			
-			for (int index=0; index < list.size(); index++)
-			{
-				List<Object> l = list.get(index);
-				s.append(l.get(0));
-				if (index != list.size()-1)
-					s.append(",");
-			}
-			
-			sql = new StringBuilder()
-				.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
-				.append(" FROM Fact_Acct ")
-				.append("WHERE AD_Table_ID=? AND Record_ID IN (").append(s).append(")")
-				.append(" AND Record_ID <> ?")
-				.append(" AND C_AcctSchema_ID=?")
-				.append(" AND Account_ID=?")
-				.append(" AND PostingType='A'");
-		}
-		else
-		{
-			sql = new StringBuilder()
-				.append("SELECT SUM(AmtSourceDr), SUM(AmtAcctDr), SUM(AmtSourceCr), SUM(AmtAcctCr)")
-				.append(" FROM Fact_Acct ")
-				.append("WHERE AD_Table_ID=? AND Record_ID IN (").append(m_matchInv.getReversal_ID()).append(")")
-				.append(" AND Record_ID <> ?")
-				.append(" AND C_AcctSchema_ID=?")
-				.append(" AND Account_ID=?")
-				.append(" AND PostingType='A'");
-		}
-		
-		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
-		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
-		
-		BigDecimal acctDifference = null;	//	gain is negative
-		// For Match Invoice
-		valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
-				MMatchInv.Table_ID, get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
-		if (valuesInv != null)
-		{
-			BigDecimal totalAmtSourceDr = (BigDecimal) valuesInv.get(0);
-			if (totalAmtSourceDr == null)
-				totalAmtSourceDr = Env.ZERO;
-			BigDecimal totalAmtAcctDr = (BigDecimal) valuesInv.get(1);
-			if (totalAmtAcctDr == null)
-				totalAmtAcctDr = Env.ZERO;
-			BigDecimal totalAmtSourceCr = (BigDecimal) valuesInv.get(2);
-			if (totalAmtSourceCr == null)
-				totalAmtSourceCr = Env.ZERO;
-			BigDecimal totalAmtAcctCr = (BigDecimal) valuesInv.get(3);
-			if (totalAmtAcctCr == null)
-				totalAmtAcctCr = Env.ZERO;
-			
-			if (m_matchInv.getReversal_ID() == 0)
-			{
-				if (totalAmtSourceDr.signum() == 0 && totalAmtAcctDr.signum() == 0)
-				{
-					matchInvSource = matchInvSource.add(totalAmtSourceCr);
-					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-				}
-				else if (totalAmtSourceCr.signum() == 0 && totalAmtAcctCr.signum() == 0)
-				{
-					matchInvSource = matchInvSource.add(totalAmtSourceDr);
-					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
-				}
-				else
-				{
-					BigDecimal currencyAdjustment = Env.ZERO;
-					
-					if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceDr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
-						currencyAdjustment = currencyAdjustment.add(totalAmtAcctCr);
-					}
-					else
-					{
-						matchInvSource = matchInvSource.add(totalAmtSourceCr);
-						matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr).subtract(totalAmtAcctDr);
-						currencyAdjustment = currencyAdjustment.add(totalAmtAcctDr);
-					}
-					
-					if (totalAmtSourceDr.compareTo(totalAmtSourceCr) == 0)
-					{
-						// For Match Invoice
-						String sqlAdj = sql.toString().replaceAll(" AND Account_ID=\\?", " AND (Account_ID=? OR Account_ID=? OR Account_ID=?)");
-						valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sqlAdj.toString(),
-								MMatchInv.Table_ID, get_ID(), as.getC_AcctSchema_ID(), 
-								gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID());
-						if (valuesInv != null) {
-							totalAmtSourceDr = (BigDecimal) valuesInv.get(0);
-							if (totalAmtSourceDr == null)
-								totalAmtSourceDr = Env.ZERO;
-							totalAmtAcctDr = (BigDecimal) valuesInv.get(1);
-							if (totalAmtAcctDr == null)
-								totalAmtAcctDr = Env.ZERO;
-							totalAmtSourceCr = (BigDecimal) valuesInv.get(2);
-							if (totalAmtSourceCr == null)
-								totalAmtSourceCr = Env.ZERO;
-							totalAmtAcctCr = (BigDecimal) valuesInv.get(3);
-							if (totalAmtAcctCr == null)
-								totalAmtAcctCr = Env.ZERO;
-							
-							matchInvAccounted = matchInvAccounted.subtract(totalAmtAcctDr).subtract(totalAmtAcctCr).add(currencyAdjustment);
-						}
-					}
-				}
-			}
-			else
-			{
-				if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
-				{
-					matchInvSource = matchInvSource.add(totalAmtSourceDr);
-					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
-					acctDifference = totalAmtAcctCr;
-				}
-				else
-				{
-					matchInvSource = matchInvSource.add(totalAmtSourceCr);
-					matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
-					acctDifference = totalAmtAcctDr.negate();
-				}
-			}
-		}
-		
-		StringBuilder description = new StringBuilder("Invoice=(").append(invoice.getC_Currency_ID()).append(")").append(invoiceSource).append("/").append(invoiceAccounted)
-				.append(" - MatchInv=(").append(getC_Currency_ID()).append(")").append(matchInvSource).append("/").append(matchInvAccounted);
-			if (log.isLoggable(Level.FINE)) log.fine(description.toString());
-		//
-
-		//	Full Payment in currency
-		if (acctDifference == null && matchInvSource.compareTo(invoiceSource) == 0)
-		{
-			acctDifference = matchInvAccounted.subtract(invoiceAccounted.abs());	//	gain is negative
-			StringBuilder d2 = new StringBuilder("(full) = ").append(acctDifference);
-			if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
-			description.append(" - ").append(d2);
-		}
-
-		if (acctDifference == null || acctDifference.signum() == 0)
-		{
-			log.fine("No Difference");
-			return null;
-		}
-		
-		//
-		if (invoice.isSOTrx())
-		{
-			FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference.negate());
-			fl.setDescription(description.toString());
-			updateFactLine(fl);
-
-			if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID()) {
-				fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference);
-			} else {
-				fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
-			}
-			fl.setDescription(description.toString());
-			updateFactLine(fl);
-		}
-		else
-		{
-			FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference);
-			fl.setDescription(description.toString());
-			updateFactLine(fl);
-			
-			if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID()) {
-				fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
-			} else {
-				fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
-			}
-			fl.setDescription(description.toString());
-			updateFactLine(fl);
-		}
-		return null;
-	}	//	createInvoiceGainLoss
+																				   
+																			 
+  
+								  
+									 
 	
+										 
+																					   
+							  
+												 
+									
+							   
+								   
+
+				
+																				
+																								 
+						  
+																
+																 
+																	   
+																 
+																  
+	
+   
+  
+									 
+														
+			   
+	
+  
+									   
+   
+																   
+																									 
+									   
+																									   
+									   
+   
+					
+				
+   
+												  
+	
+									 
+					   
+							   
+				   
+	
+   
+							
+																						
+							   
+																		   
+								  
+									 
+								
+									
+   
+	  
+   
+							
+																						
+							   
+																									 
+								  
+									 
+								
+									
+   
+  
+																							   
+																							   
+  
+													   
+					  
+																   
+																				 
+						
+   
+															   
+								
+								
+															 
+							  
+							  
+															   
+								
+								
+															 
+							  
+							  
+   
+										
+	
+																	   
+	 
+														   
+															   
+	 
+																			
+	 
+														   
+															   
+	 
+		
+	 
+											  
+	 
+													  
+	  
+															
+																						 
+																  
+	  
+		 
+	  
+															
+																						 
+																  
+	  
+	 
+														   
+	  
+						  
+																															  
+																		  
+															   
+																									
+							  
+														
+									
+									
+													  
+								  
+								  
+														
+									
+									
+													  
+								  
+								  
+	   
+																													   
+	   
+	  
+	 
+	
+	   
+	
+													 
+	 
+														   
+															   
+									 
+	 
+		
+	 
+														   
+															   
+											  
+	 
+	
+   
+  
+																																									  
+																																 
+																	
+	
+
+							 
+																			 
+   
+																						   
+																			
+														   
+										
+   
+
+															 
+   
+							 
+			   
+   
+  
+	
+						
+   
+																							  
+											 
+					  
+
+																						 
+																									   
+		   
+																				   
+	
+											 
+					  
+   
+	  
+   
+																					 
+											 
+					  
+   
+																						 
+																												
+		   
+																							
+	
+											 
+					  
+   
+			  
+						   
+ 
 	private String createInvoiceGainLoss(MAcctSchema as, Fact fact, MAccount acct, 
-			MInvoice invoice, BigDecimal matchInvSource, BigDecimal matchInvAccounted)
+			MInvoice invoice, BigDecimal matchInvSource, BigDecimal matchInvAccounted, 
+			ArrayList<FactLine> invGainLossFactLines, HashMap<Integer, ArrayList<FactLine>> htFactLineInv)
 	{
-		if (!invList.contains(invoice))
-			invList.add(invoice);
-			
+								 
+						
+   
 		BigDecimal invoiceSource = null;
 		BigDecimal invoiceAccounted = null;
 		//
@@ -1422,7 +1466,11 @@ public class Doc_MatchInv extends Doc
 			FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
 			updateFactLine(fl);
-			htFactLineInv.put(fl, invoice.getC_Invoice_ID());
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(fl);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
 			
 			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
@@ -1434,7 +1482,11 @@ public class Doc_MatchInv extends Doc
 			FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
 			updateFactLine(fl);
-			htFactLineInv.put(fl, invoice.getC_Invoice_ID());
+			ArrayList<FactLine> factLineList = htFactLineInv.get(invoice.get_ID());
+			if (factLineList == null)
+				factLineList = new ArrayList<FactLine>();
+			factLineList.add(fl);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
 			
 			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
@@ -1444,10 +1496,13 @@ public class Doc_MatchInv extends Doc
 		return null;
 	}	//	createInvoiceGainLoss
 	
-	private String createInvoiceRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct) 
+	private String createInvoiceRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
+			ArrayList<FactLine> invGainLossFactLines, ArrayList<MInvoice> invList, HashMap<Integer, ArrayList<FactLine>> htFactLineInv) 
 	{
-		Hashtable<Integer, BigDecimal> htInvSource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htInvAccounted = new Hashtable<Integer, BigDecimal>();
+		// C_Invoice_ID and the total source amount from C_Invoice accounting fact lines
+		HashMap<Integer, BigDecimal> htInvSource = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total accounted amount from C_Invoice accounting fact lines
+		HashMap<Integer, BigDecimal> htInvAccounted = new HashMap<Integer, BigDecimal>();
 		for (MInvoice invoice : invList)
 		{
 			StringBuilder sql = new StringBuilder()
@@ -1476,15 +1531,19 @@ public class Doc_MatchInv extends Doc
 		MAccount gain = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedGain_Acct());
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 		
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctDr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtSourceCr = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htTotalAmtAcctCr = new Hashtable<Integer, BigDecimal>();
-		FactLine[] factlines = fact.getLines();
-		for (FactLine factLine : factlines)
+		// C_Invoice_ID and the total source DR amount from the current M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htTotalAmtSourceDr = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total accounted DR amount from the current M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htTotalAmtAcctDr = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total source CR amount from the current M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htTotalAmtSourceCr = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total accounted CR amount from the current M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htTotalAmtAcctCr = new HashMap<Integer, BigDecimal>();
+		for (Integer C_Invoice_ID : htFactLineInv.keySet())
+									 
 		{
-			Integer C_Invoice_ID = htFactLineInv.get(factLine);
-			if (C_Invoice_ID != null && C_Invoice_ID > 0)
+			ArrayList<FactLine> factLineList = htFactLineInv.get(C_Invoice_ID);
+			for (FactLine factLine : factLineList)
 			{
 				if (factLine.getAccount_ID() == acct.getAccount_ID())
 				{
@@ -1532,9 +1591,12 @@ public class Doc_MatchInv extends Doc
 			}
 		}
 		
-		Hashtable<Integer, BigDecimal> htMatchInvSource = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htMatchInvAccounted = new Hashtable<Integer, BigDecimal>();
-		Hashtable<Integer, BigDecimal> htMatchInvAcctDiff = new Hashtable<Integer, BigDecimal>();
+		// C_Invoice_ID and the total source amount from M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htMatchInvSource = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total accounted amount from M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htMatchInvAccounted = new HashMap<Integer, BigDecimal>();
+		// C_Invoice_ID and the total source amount from M_MatchInv accounting fact lines
+		HashMap<Integer, BigDecimal> htMatchInvAcctDiff = new HashMap<Integer, BigDecimal>();
 		for (MInvoice invoice : invList)
 		{
 			BigDecimal matchInvSource = Env.ZERO;
@@ -1844,7 +1906,7 @@ public class Doc_MatchInv extends Doc
 					+ "WHERE M_InOutLine_ID IN (SELECT M_InOutLine_ID FROM M_InOutLine WHERE M_InOut_ID=?) "
 					+ "AND COALESCE(Reversal_ID,0)=0";
 			List<List<Object>> list  = DB.getSQLArrayObjectsEx(getTrxName(), matchInvLineSql, receipt.get_ID());
-			StringBuffer s = new StringBuffer();
+			StringBuilder s = new StringBuilder();
 			
 			if (list == null)
 				return null;
@@ -1910,10 +1972,10 @@ public class Doc_MatchInv extends Doc
 					matchInvSource = matchInvSource.add(totalAmtSourceDr);
 					matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
 				}
-				else if (totalAmtSourceDr.compareTo(totalAmtSourceCr) == 0 && totalAmtAcctDr.compareTo(totalAmtAcctCr) == 0)
-				{
-					//	do nothing
-				}
+																												
+	 
+				  
+	 
 				else if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
 				{
 					matchInvSource = matchInvSource.add(totalAmtSourceDr);
