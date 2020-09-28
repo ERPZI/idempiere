@@ -1307,5 +1307,12 @@ public interface I_C_Payment
 
     /** Column name ZI_HedgeContract_ID */
     public static final String COLUMNNAME_ZI_HedgeContract_ID = "ZI_HedgeContract_ID";
-	
+
+	/** Set ZI_HedgeContract	  */
+	public void setZI_HedgeContract_ID (int ZI_HedgeContract_ID);
+
+	/** Get ZI_HedgeContract	  */
+	public int getZI_HedgeContract_ID();
+
+	public I_ZI_HedgeContract getZI_HedgeContract() throws RuntimeException;
 }
