@@ -437,7 +437,7 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 				//  Get File Info
 				//MPo, 26/5/18 add original change: 1/11/17
 				//MPo, 4/8/18 Add HSBC Direct Deposit payment method 
-				if (PaymentRule.equals("Z") || PaymentRule.equals("T")) {
+				if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
 					java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
 					java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
 					java.util.Date now = new java.util.Date();
@@ -463,7 +463,26 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 						pstmt = null;
 					}	
 					
-					filenameForDownload = "HSBCiFile" + orgValue + (PaymentRule.equals("Z") ? "COS" : "ACH") + dateFormatFile.format(now) + timeFormatFile.format(now);
+					//MPo, 28/9/20
+					String ziPaymentRule = "";
+					switch (PaymentRule) {
+					  case "Z":
+					    ziPaymentRule="HSBC_COS";
+					    break;
+					  case "T":
+						ziPaymentRule="HSBC_ACH";
+						break;
+					  case "X":
+						ziPaymentRule="BBL_SMART";
+						break;
+					  case "Y":
+						ziPaymentRule="BBL_DC";
+						break;
+					}
+					//
+					
+					//filenameForDownload = "HSBCiFile" + orgValue + (PaymentRule.equals("Z") ? "COS" : "ACH") + dateFormatFile.format(now) + timeFormatFile.format(now);
+					filenameForDownload = ziPaymentRule + orgValue + dateFormatFile.format(now) + timeFormatFile.format(now);
 					tempFile = File.createTempFile(filenameForDownload, ".txt");
 				}
 				else {

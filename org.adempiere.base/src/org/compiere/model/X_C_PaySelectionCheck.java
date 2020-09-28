@@ -31,7 +31,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20200928L;
 
     /** Standard Constructor */
     public X_C_PaySelectionCheck (Properties ctx, int C_PaySelectionCheck_ID, String trxName)
@@ -366,8 +366,8 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public static final String PAYMENTRULE_Cash = "B";
 	/** Credit Card = K */
 	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** Direct Deposit AP (HSBC ACH) and AR = T */
+	public static final String PAYMENTRULE_DirectDepositAPHSBCACHAndAR = "T";
 	/** Check = S */
 	public static final String PAYMENTRULE_Check = "S";
 	/** On Credit = P */
@@ -376,8 +376,12 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public static final String PAYMENTRULE_DirectDebit = "D";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
-	/** Check Outsourced (HSBC iFile) = Z */
-	public static final String PAYMENTRULE_CheckOutsourcedHSBCIFile = "Z";
+	/** Check Outsourced (HSBC COS) = Z */
+	public static final String PAYMENTRULE_CheckOutsourcedHSBCCOS = "Z";
+	/** Direct Deposit (BBL Direct Credit) = Y */
+	public static final String PAYMENTRULE_DirectDepositBBLDirectCredit = "Y";
+	/** Direct Deposit (BBL SMART) = X */
+	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice

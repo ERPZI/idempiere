@@ -293,7 +293,7 @@ public class MPayment extends X_C_Payment
 				(preparedPayment.getPaymentRule()));
 		if ( MPaySelectionCheck.PAYMENTRULE_DirectDebit.equals(preparedPayment.getPaymentRule()) )
 			setTenderType(MPayment.TENDERTYPE_DirectDebit);
-		else if ( MPaySelectionCheck.PAYMENTRULE_DirectDeposit.equals(preparedPayment.getPaymentRule()))
+		else if ( MPaySelectionCheck.PAYMENTRULE_DirectDepositAPHSBCACHAndAR.equals(preparedPayment.getPaymentRule()))
 			setTenderType(MPayment.TENDERTYPE_DirectDeposit);
 		//
 		int check = MPaymentValidate.validateRoutingNo(getRoutingNo()).length()

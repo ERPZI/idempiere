@@ -33,7 +33,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20200928L;
 
     /** Standard Constructor */
     public X_C_Payment (Properties ctx, int C_Payment_ID, String trxName)
@@ -2006,6 +2006,10 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public static final String TENDERTYPE_Cash = "X";
 	/** Check Outsourced (HSBC iFile) = Z */
 	public static final String TENDERTYPE_CheckOutsourcedHSBCIFile = "Z";
+	/** Direct Deposit (BBL Direct Credit) = Y */
+	public static final String TENDERTYPE_DirectDepositBBLDirectCredit = "Y";
+	/** Direct Deposit (BBL SMART) = W */
+	public static final String TENDERTYPE_DirectDepositBBLSMART = "W";
 	/** Set Tender type.
 		@param TenderType 
 		Method of Payment
@@ -2148,5 +2152,29 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 			 return Env.ZERO;
 		return bd;
 	}
-	
+
+	public I_ZI_HedgeContract getZI_HedgeContract() throws RuntimeException
+    {
+		return (I_ZI_HedgeContract)MTable.get(getCtx(), I_ZI_HedgeContract.Table_Name)
+			.getPO(getZI_HedgeContract_ID(), get_TrxName());	}
+
+	/** Set ZI_HedgeContract.
+		@param ZI_HedgeContract_ID ZI_HedgeContract	  */
+	public void setZI_HedgeContract_ID (int ZI_HedgeContract_ID)
+	{
+		if (ZI_HedgeContract_ID < 1) 
+			set_Value (COLUMNNAME_ZI_HedgeContract_ID, null);
+		else 
+			set_Value (COLUMNNAME_ZI_HedgeContract_ID, Integer.valueOf(ZI_HedgeContract_ID));
+	}
+
+	/** Get ZI_HedgeContract.
+		@return ZI_HedgeContract	  */
+	public int getZI_HedgeContract_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_HedgeContract_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 }
