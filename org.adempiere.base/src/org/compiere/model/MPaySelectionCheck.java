@@ -111,12 +111,18 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDebit))
 			PaymentRule = PAYMENTRULE_DirectDebit;
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDeposit))
-			PaymentRule = PAYMENTRULE_DirectDeposit;
+			PaymentRule = PAYMENTRULE_DirectDepositAPHSBCACHAndAR;
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_Cash))
 			PaymentRule = PAYMENTRULE_Cash;
 		//MPo, 18/8/2016 Add Payment rule 'Z' Check Outsourcing 
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CheckOutsourcedHSBCIFile))
-			PaymentRule = PAYMENTRULE_CheckOutsourcedHSBCIFile;
+			PaymentRule = PAYMENTRULE_CheckOutsourcedHSBCCOS;
+		//MPo, 28/9/2020 Add BBL payment rules
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLSMART))
+			PaymentRule = PAYMENTRULE_DirectDepositBBLSMART;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit))
+			PaymentRule = PAYMENTRULE_DirectDepositBBLDirectCredit;
+		
 		//
 		//	Create new PaySelection
 		MPaySelection ps = new MPaySelection(ctx, 0, trxName);
@@ -312,13 +318,19 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 					payment.setBankCheck (check.getParent().getC_BankAccount_ID(), false, check.getDocumentNo());
 				else if (check.getPaymentRule().equals(PAYMENTRULE_CreditCard))
 					payment.setTenderType(X_C_Payment.TENDERTYPE_CreditCard);
-				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDeposit)
+				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositAPHSBCACHAndAR)
 					|| check.getPaymentRule().equals(PAYMENTRULE_DirectDebit))
 					payment.setBankACH(check);
-				//MPo, 18/8/2016 Add Payment Rule 'Z' Check Outsourced
-				else if (check.getPaymentRule().equals(PAYMENTRULE_CheckOutsourcedHSBCIFile))
+				//MPo, 18/8/2016 Add Payment Rule 'Z' HSBC COS
+				else if (check.getPaymentRule().equals(PAYMENTRULE_CheckOutsourcedHSBCCOS))
 					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_CheckOutsourcedHSBCIFile);
 				//	payment.setTenderType(X_C_Payment.TENDERTYPE_CheckOutsourced);
+				//MPo, 28/9/2020 Add Payment Rule 'X' BBL SMART
+				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLSMART))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLSMART);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLDirectCredit))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit);
+				
 				//
 				else
 				{
