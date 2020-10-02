@@ -966,4 +966,34 @@ public interface I_C_Invoice
 
 	/** Get ZI_HasLines	  */
 	public boolean isZI_HasLines();
+
+    /** Column name ZI_Pay_BPartner_ID */
+    public static final String COLUMNNAME_ZI_Pay_BPartner_ID = "ZI_Pay_BPartner_ID";
+
+	/** Set Payee Partner.
+	  * Business Partner responsible for the payment (Alternative payee)
+	  */
+	public void setZI_Pay_BPartner_ID (int ZI_Pay_BPartner_ID);
+
+	/** Get Payee Partner.
+	  * Business Partner responsible for the payment (Alternative payee)
+	  */
+	public int getZI_Pay_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getZI_Pay_BPartner() throws RuntimeException;
+
+    /** Column name ZI_Pay_Location_ID */
+    public static final String COLUMNNAME_ZI_Pay_Location_ID = "ZI_Pay_Location_ID";
+
+	/** Set Payee Location.
+	  * Business Partner Location for payment (Alternative Payee)
+	  */
+	public void setZI_Pay_Location_ID (int ZI_Pay_Location_ID);
+
+	/** Get Payee Location.
+	  * Business Partner Location for payment (Alternative Payee)
+	  */
+	public int getZI_Pay_Location_ID();
+
+	public org.compiere.model.I_C_BPartner_Location getZI_Pay_Location() throws RuntimeException;
 }
