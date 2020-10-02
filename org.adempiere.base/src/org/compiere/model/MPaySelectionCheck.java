@@ -430,7 +430,7 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 			int c_BankAccount_ID = checks[0].getC_PaySelection().getC_BankAccount_ID() ;
 			String paymentRule = checks[0].getPaymentRule() ;
 			Boolean isDebit ;
-			if (MInvoice.PAYMENTRULE_DirectDeposit.compareTo(paymentRule) == 0
+			if (MInvoice.PAYMENTRULE_DirectDepositAPHSBCACHAndAR.compareTo(paymentRule) == 0
 					|| MInvoice.PAYMENTRULE_Check.compareTo(paymentRule) == 0
 					|| MInvoice.PAYMENTRULE_OnCredit.compareTo(paymentRule) == 0)
 			{

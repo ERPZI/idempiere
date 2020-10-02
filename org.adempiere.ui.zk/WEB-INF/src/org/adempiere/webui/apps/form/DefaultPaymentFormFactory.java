@@ -35,7 +35,7 @@ public class DefaultPaymentFormFactory implements IPaymentFormFactory {
 			return new WPaymentFormCreditCard(windowNo, mTab);
 		else if (paymentRule.equals(MInvoice.PAYMENTRULE_DirectDebit))
 			return new WPaymentFormDirectDebit(windowNo, mTab);
-		else if (paymentRule.equals(MInvoice.PAYMENTRULE_DirectDeposit))
+		else if (paymentRule.equals(MInvoice.PAYMENTRULE_DirectDepositAPHSBCACHAndAR))
 			return new WPaymentFormDirectDeposit(windowNo, mTab);
 		else if (paymentRule.equals(MInvoice.PAYMENTRULE_MixedPOSPayment))
 			return new WPaymentFormMixedPOS(windowNo, mTab);
