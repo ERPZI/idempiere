@@ -205,7 +205,7 @@ public class MPaymentLookup extends Lookup implements Serializable {
 			if (MInvoice.PAYMENTRULE_DirectDebit.equals(PaymentRule) //	SO
 				&& !m_isSOTrx)
 				continue;
-			else if (MInvoice.PAYMENTRULE_DirectDeposit.equals(PaymentRule)	//	PO 
+			else if (MInvoice.PAYMENTRULE_DirectDepositAPHSBCACHAndAR.equals(PaymentRule)	//	PO 
 				&& m_isSOTrx)
 				continue;
 			list.add(value);
