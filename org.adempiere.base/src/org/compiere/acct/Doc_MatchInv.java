@@ -1470,12 +1470,13 @@ public class Doc_MatchInv extends Doc
 			if (factLineList == null)
 				factLineList = new ArrayList<FactLine>();
 			factLineList.add(fl);
-			htFactLineInv.put(invoice.get_ID(), factLineList);
 			
 			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference);
 			fl.setDescription(description.toString());
 			updateFactLine(fl);
 			invGainLossFactLines.add(fl);
+			factLineList.add(fl);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
 		}
 		else
 		{
@@ -1486,12 +1487,13 @@ public class Doc_MatchInv extends Doc
 			if (factLineList == null)
 				factLineList = new ArrayList<FactLine>();
 			factLineList.add(fl);
-			htFactLineInv.put(invoice.get_ID(), factLineList);
 			
 			fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 			fl.setDescription(description.toString());
 			updateFactLine(fl);
 			invGainLossFactLines.add(fl);
+			factLineList.add(fl);
+			htFactLineInv.put(invoice.get_ID(), factLineList);
 		}
 		return null;
 	}	//	createInvoiceGainLoss
@@ -1499,6 +1501,8 @@ public class Doc_MatchInv extends Doc
 	private String createInvoiceRoundingCorrection(MAcctSchema as, Fact fact, MAccount acct, 
 			ArrayList<FactLine> invGainLossFactLines, ArrayList<MInvoice> invList, HashMap<Integer, ArrayList<FactLine>> htFactLineInv) 
 	{
+		BigDecimal totalInvClrAccounted = Env.ZERO;
+		
 		// C_Invoice_ID and the total source amount from C_Invoice accounting fact lines
 		HashMap<Integer, BigDecimal> htInvSource = new HashMap<Integer, BigDecimal>();
 		// C_Invoice_ID and the total accounted amount from C_Invoice accounting fact lines
@@ -1517,14 +1521,21 @@ public class Doc_MatchInv extends Doc
 			List<Object> valuesInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MInvoice.Table_ID, invoice.getC_Invoice_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
 			if (valuesInv != null) {
-				BigDecimal invoiceSource = (BigDecimal) valuesInv.get(0); // AmtSourceDr
-				BigDecimal invoiceAccounted = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+				BigDecimal invoiceSourceDr = (BigDecimal) valuesInv.get(0); // AmtSourceDr
+				BigDecimal invoiceAccountedDr = (BigDecimal) valuesInv.get(1); // AmtAcctDr
+				BigDecimal invoiceSourceCr = (BigDecimal) valuesInv.get(2); // AmtSourceCr
+				BigDecimal invoiceAccountedCr = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+				
+				BigDecimal invoiceSource = invoiceSourceDr;
+				BigDecimal invoiceAccounted = invoiceAccountedDr;
 				if (invoiceSource.signum() == 0 && invoiceAccounted.signum() == 0) {
-					invoiceSource = (BigDecimal) valuesInv.get(2); // AmtSourceCr
-					invoiceAccounted = (BigDecimal) valuesInv.get(3); // AmtAcctCr
+					invoiceSource = invoiceSourceCr;
+					invoiceAccounted = invoiceAccountedCr;
 				}
 				htInvSource.put(invoice.getC_Invoice_ID(), invoiceSource);
 				htInvAccounted.put(invoice.getC_Invoice_ID(), invoiceAccounted);
+				
+				totalInvClrAccounted = totalInvClrAccounted.add(invoiceAccountedDr).subtract(invoiceAccountedCr);
 			}
 		}
 		
@@ -1569,6 +1580,8 @@ public class Doc_MatchInv extends Doc
 					htTotalAmtAcctDr.put(C_Invoice_ID, totalAmtAcctDr);
 					htTotalAmtSourceCr.put(C_Invoice_ID, totalAmtSourceCr);
 					htTotalAmtAcctCr.put(C_Invoice_ID, totalAmtAcctCr);
+					
+					totalInvClrAccounted = totalInvClrAccounted.add(factLine.getAmtAcctDr()).subtract(factLine.getAmtAcctCr());
 				}
 				else if (factLine.getAccount_ID() == gain.getAccount_ID() || factLine.getAccount_ID() == loss.getAccount_ID())
 				{
@@ -1578,15 +1591,25 @@ public class Doc_MatchInv extends Doc
 					BigDecimal totalAmtSourceDr = htTotalAmtSourceDr.get(C_Invoice_ID);
 					if (totalAmtSourceDr == null)
 						totalAmtSourceDr = Env.ZERO;
+					BigDecimal totalAmtAcctDr = htTotalAmtAcctDr.get(C_Invoice_ID);
+					if (totalAmtAcctDr == null)
+						totalAmtAcctDr = Env.ZERO;
 					BigDecimal totalAmtSourceCr = htTotalAmtSourceCr.get(C_Invoice_ID);
 					if (totalAmtSourceCr == null)
 						totalAmtSourceCr = Env.ZERO;
+					BigDecimal totalAmtAcctCr = htTotalAmtAcctCr.get(C_Invoice_ID);
+					if (totalAmtAcctCr == null)
+						totalAmtAcctCr = Env.ZERO;
 					
 					totalAmtSourceDr = totalAmtSourceDr.subtract(factLine.getAmtSourceCr());
+					totalAmtAcctDr = totalAmtAcctDr.subtract(factLine.getAmtAcctCr());
 					totalAmtSourceCr = totalAmtSourceCr.subtract(factLine.getAmtSourceDr());
+					totalAmtAcctCr = totalAmtAcctCr.subtract(factLine.getAmtAcctDr());
 					
 					htTotalAmtSourceDr.put(C_Invoice_ID, totalAmtSourceDr);
+					htTotalAmtAcctDr.put(C_Invoice_ID, totalAmtAcctDr);
 					htTotalAmtSourceCr.put(C_Invoice_ID, totalAmtSourceCr);
+					htTotalAmtAcctCr.put(C_Invoice_ID, totalAmtAcctCr);
 				}
 			}
 		}
@@ -1706,15 +1729,17 @@ public class Doc_MatchInv extends Doc
 						{
 							if (totalAmtAcctDr.compareTo(totalAmtAcctCr) > 0)
 							{
-								matchInvSource = matchInvSource.add(totalAmtSourceDr);
-								matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr);
+								matchInvSource = matchInvSource.add(totalAmtSourceDr).add(totalAmtSourceCr);
+								matchInvAccounted = matchInvAccounted.add(totalAmtAcctDr).add(totalAmtAcctCr);
 							}
 							else
 							{
-								matchInvSource = matchInvSource.add(totalAmtSourceCr);
-								matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
+								matchInvSource = matchInvSource.add(totalAmtSourceCr).add(totalAmtSourceDr);
+								matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr).add(totalAmtAcctDr);
 							}
 						}
+						
+						totalInvClrAccounted = totalInvClrAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
 					}
 					
 					sql = new StringBuilder()
@@ -1744,6 +1769,7 @@ public class Doc_MatchInv extends Doc
 						if (totalAmtAcctCr == null)
 							totalAmtAcctCr = Env.ZERO;
 						
+						matchInvSource = matchInvSource.subtract(totalAmtSourceDr).subtract(totalAmtSourceCr);
 						matchInvAccounted = matchInvAccounted.subtract(totalAmtAcctDr).subtract(totalAmtAcctCr);
 					}
 				}
@@ -1792,6 +1818,8 @@ public class Doc_MatchInv extends Doc
 						matchInvAccounted = matchInvAccounted.add(totalAmtAcctCr);
 						acctDifference = totalAmtAcctDr;
 					}
+					
+					totalInvClrAccounted = totalInvClrAccounted.add(totalAmtAcctDr).subtract(totalAmtAcctCr);
 				}
 				
 				htMatchInvSource.put(invoice.getC_Invoice_ID(), matchInvSource);
@@ -1800,6 +1828,8 @@ public class Doc_MatchInv extends Doc
 			}
 		}
 		
+		boolean isOneInvoice = invList.size() == 1;
+		boolean isFull = true;
 		for (MInvoice invoice : invList)
 		{
 			BigDecimal invSource = htInvSource.get(invoice.getC_Invoice_ID());
@@ -1826,6 +1856,8 @@ public class Doc_MatchInv extends Doc
 				if (log.isLoggable(Level.FINE)) log.fine(d2.toString());
 				description.append(" - ").append(d2);
 			}
+			else
+				isFull = false;
 			
 			if (acctDifference == null || acctDifference.signum() == 0)
 			{
@@ -1833,10 +1865,32 @@ public class Doc_MatchInv extends Doc
 				continue;
 			}
 			
-			if (acctDifference.abs().compareTo(TOLERANCE) > 0)
+			if (acctDifference.abs().compareTo(TOLERANCE) >= 0)
 			{
 				log.fine("acctDifference="+acctDifference);
 				continue;
+			}
+			
+			if (isOneInvoice && isFull) {
+				if (invoice.isSOTrx()) {
+					if (acctDifference.signum() < 0) {
+						if (acctDifference.compareTo(totalInvClrAccounted.subtract(acctDifference)) == 0)
+							continue;
+					} else {
+						if (acctDifference.compareTo(totalInvClrAccounted.add(acctDifference)) == 0)
+							continue;
+					}
+					
+				} else {
+					acctDifference.negate();
+					if (acctDifference.negate().signum() < 0) {
+						if (acctDifference.negate().compareTo(totalInvClrAccounted.subtract(acctDifference.negate())) == 0)
+							continue;
+					} else {
+						if (acctDifference.negate().compareTo(totalInvClrAccounted.add(acctDifference.negate())) == 0)
+							continue;
+					}
+				}
 			}
 			
 			//
@@ -1845,6 +1899,8 @@ public class Doc_MatchInv extends Doc
 				FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference);
 				fl.setDescription(description.toString());
 				updateFactLine(fl);
+				
+				totalInvClrAccounted = totalInvClrAccounted.add(fl.getAmtAcctDr()).subtract(fl.getAmtAcctCr());
 				
 				if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID())
 					fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference.negate());
@@ -1859,6 +1915,8 @@ public class Doc_MatchInv extends Doc
 				fl.setDescription(description.toString());
 				updateFactLine(fl);
 				
+				totalInvClrAccounted = totalInvClrAccounted.add(fl.getAmtAcctDr()).subtract(fl.getAmtAcctCr());
+				
 				if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID())
 					fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), acctDifference);
 				else
@@ -1867,6 +1925,26 @@ public class Doc_MatchInv extends Doc
 				updateFactLine(fl);
 			}
 		}
+		
+		if (isFull) {
+			if (totalInvClrAccounted != null && totalInvClrAccounted.signum() != 0 && totalInvClrAccounted.abs().compareTo(TOLERANCE) < 0)
+			{
+				StringBuilder description = new StringBuilder("Invoice - MatchInv - (full) = ").append(totalInvClrAccounted);
+				if (log.isLoggable(Level.FINE)) log.fine(description.toString());
+				
+				FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), totalInvClrAccounted.negate());
+				fl.setDescription(description.toString());
+				updateFactLine(fl);
+				
+				if (as.isCurrencyBalancing())
+					fl = fact.createLine (null, as.getCurrencyBalancing_Acct(), as.getC_Currency_ID(), totalInvClrAccounted);
+				else
+					fl = fact.createLine (null, loss, gain, as.getC_Currency_ID(), totalInvClrAccounted);
+				fl.setDescription(description.toString());
+				updateFactLine(fl);
+			}
+		}
+		
 		return null;
 	}
 	
