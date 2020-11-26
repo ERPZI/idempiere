@@ -207,7 +207,9 @@ public class PaySelectionCreateFrom extends SvrProcess
 		}
 		//	Business Partner
 		if (p_C_BPartner_ID != 0)
-			sqlWhere.append(" AND i.C_BPartner_ID=?");	//	##
+			//MPo, 25/11/2020 CRF #
+			//sqlWhere.append(" AND i.C_BPartner_ID=?");	//	##
+			sqlWhere.append(" AND COALESCE(i.ZI_Pay_BPartner_ID, i.C_BPartner_ID)=?");
 		//	Business Partner Group
 		else if (p_C_BP_Group_ID != 0)
 			sqlWhere.append(" AND EXISTS (SELECT * FROM C_BPartner bp ")
