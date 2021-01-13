@@ -516,7 +516,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 			sql += "AND (s.M_AttributeSetInstance_ID=0 OR s.M_AttributeSetInstance_ID IS NULL) ";
 		}
 		
-		MProduct product = MProduct.get(Env.getCtx(), M_Product_ID);
+		MProduct product = MProduct.get(Env.getCtx(), M_Product_ID, trxName);
 		
 		if(product.isUseGuaranteeDateForMPolicy()){
 			sql += "ORDER BY l.PriorityNo DESC, " +
@@ -725,7 +725,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 	 * @param addition
 	 */
 	public void addQtyOnHand(BigDecimal addition) {
-		final String sql = "UPDATE M_StorageOnHand SET QtyOnHand=QtyOnHand+?, Updated=SYSDATE, UpdatedBy=? " +
+		final String sql = "UPDATE M_StorageOnHand SET QtyOnHand=QtyOnHand+?, Updated=getDate(), UpdatedBy=? " +
 				"WHERE M_Product_ID=? AND M_Locator_ID=? AND M_AttributeSetInstance_ID=? AND DateMaterialPolicy=?";
 		DB.executeUpdateEx(sql, 
 			new Object[] {addition, Env.getAD_User_ID(Env.getCtx()), getM_Product_ID(), getM_Locator_ID(), getM_AttributeSetInstance_ID(), getDateMaterialPolicy()}, 
@@ -1017,7 +1017,7 @@ public class MStorageOnHand extends X_M_StorageOnHand
 	 */
 	public String toString()
 	{
-		StringBuffer sb = new StringBuffer("MStorageOnHand[")
+		StringBuilder sb = new StringBuilder("MStorageOnHand[")
 			.append("M_Locator_ID=").append(getM_Locator_ID())
 			.append(",M_Product_ID=").append(getM_Product_ID())
 			.append(",M_AttributeSetInstance_ID=").append(getM_AttributeSetInstance_ID())

@@ -56,7 +56,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6116307358915557651L;
+	private static final long serialVersionUID = 4661098755828765138L;
 
 	/**
 	 * 	Standard Constructor
@@ -213,7 +213,7 @@ public class MJournal extends X_GL_Journal implements DocAction
 	
 	/**************************************************************************
 	 * 	Get Journal Lines
-	 * 	@param requery requery
+	 * 	@param requery requery (not used)
 	 *	@return Array of lines
 	 */
 	public MJournalLine[] getLines (boolean requery)
@@ -329,6 +329,13 @@ public class MJournal extends X_GL_Journal implements DocAction
 					setC_Period_ID(C_Period_ID);
 			}
 		}
+
+		if (getGL_Category_ID() == 0 && getC_DocType_ID() > 0)
+			setGL_Category_ID(MDocType.get(getCtx(), getC_DocType_ID()).getGL_Category_ID());
+		if (getC_AcctSchema_ID() == 0)
+			setC_AcctSchema_ID(MClientInfo.get(getCtx(), getAD_Client_ID()).getC_AcctSchema1_ID());
+		if (getC_ConversionType_ID() == 0)
+			setC_ConversionType_ID(MConversionType.getDefault(getAD_Client_ID()));
 
 		// IDEMPIERE-63
 		// for documents that can be reactivated we cannot allow changing 
@@ -1049,5 +1056,14 @@ public class MJournal extends X_GL_Journal implements DocAction
 			|| DOCSTATUS_Closed.equals(ds)
 			|| DOCSTATUS_Reversed.equals(ds);
 	}	//	isComplete
+
+	/**
+	 * 	Get Document Status
+	 *	@return Document Status Clear Text
+	 */
+	public String getDocStatusName()
+	{
+		return MRefList.getListName(getCtx(), SystemIDs.REFERENCE_DOCUMENTSTATUS, getDocStatus());
+	}	//	getDocStatusName
 
 }	//	MJournal

@@ -166,7 +166,7 @@ public class PackRollProcess extends SvrProcess {
 									// Format Date
 									sqlC = new StringBuffer("UPDATE "
 											+ tableName + " SET " + columnName
-											+ " = SYSDATE WHERE "
+											+ " = getDate() WHERE "
 											+ columnIDName + " = " + recordID);
 
 									DB.executeUpdateEx(sqlC.toString(), get_TrxName());
@@ -197,7 +197,7 @@ public class PackRollProcess extends SvrProcess {
 									if (v_AD_Reference_ID == DisplayType.String
 											|| v_AD_Reference_ID == DisplayType.Text
 											|| v_AD_Reference_ID == DisplayType.Memo
-											|| v_AD_Reference_ID == DisplayType.List
+											|| DisplayType.isList(v_AD_Reference_ID)
 											// Carlos Ruiz globalqss, special
 											// treatment for EntityType
 											// it's a Table reference but must

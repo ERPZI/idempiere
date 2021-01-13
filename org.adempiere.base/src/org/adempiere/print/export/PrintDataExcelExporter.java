@@ -338,7 +338,7 @@ extends AbstractExcelExporter
 							HSSFCell cell = row.createCell(0);
 							HSSFCellStyle style = m_workbook.createCellStyle();
 							HSSFFont font = m_workbook.createFont();
-							font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							font.setBold(true);
 							style.setFont(font);
 							cell.setCellStyle(style);
 							String value = Util.stripDiacritics(Msg.getMsg(getCtx(), "Parameter") + ":");
@@ -532,5 +532,18 @@ extends AbstractExcelExporter
 			}
 		}
 		return super.isVisible(row, col);
+	}
+
+	@Override
+	public boolean isDisplayed(int row, int col)
+	{
+		if (m_printData.getRowIndex() != row)
+			m_printData.setRowIndex(row);
+
+		MPrintFormatItem item = m_printFormat.getItem(col);
+		if (Util.isEmpty(item.getDisplayLogic()))
+			return true;
+
+		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
 	}
 }
