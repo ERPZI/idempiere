@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,10 +48,15 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 
 	private TreeMap<String,String> m_map;
 
+	private String sharedNonce = generateNonce();
+
 	/** Logger */
 	private static final CLogger log = CLogger.getCLogger(Convert_PostgreSQL.class);
 
 	
+	private final static Pattern likePattern = Pattern.compile("\\bLIKE\\b", REGEX_FLAGS);
+	
+	private final static Pattern sysDatePattern = Pattern.compile("\\bSYSDATE\\b", REGEX_FLAGS);
 	
 	/**
 	 * Is Oracle DB
@@ -77,70 +83,124 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 		ArrayList<String> result = new ArrayList<String>();
 		/** Vector to save previous values of quoted strings **/
 		Vector<String> retVars = new Vector<String>();
-		
-		String statement = replaceQuotedStrings(sqlStatement, retVars);
-		statement = convertWithConvertMap(statement);
-		statement = convertSimilarTo(statement);
-		statement = statement.replace(DB_PostgreSQL.NATIVE_MARKER, "");
-		
-		String cmpString = statement.toUpperCase();
-		boolean isCreate = cmpString.startsWith("CREATE ");
 
-		// Process
-		if (isCreate && cmpString.indexOf(" FUNCTION ") != -1)
-			;
-		else if (isCreate && cmpString.indexOf(" TRIGGER ") != -1)
-			;
-		else if (isCreate && cmpString.indexOf(" PROCEDURE ") != -1)
-			;
-		else if (isCreate && cmpString.indexOf(" VIEW ") != -1)
-			;
-		else if (cmpString.indexOf("ALTER TABLE") != -1) {
-			statement = recoverQuotedStrings(statement, retVars);
-			retVars.clear();
-			statement = convertDDL(convertComplexStatement(statement));
-		/*
-		} else if (cmpString.indexOf("ROWNUM") != -1) {
-			result.add(convertRowNum(convertComplexStatement(convertAlias(statement))));*/
-		} else if (cmpString.indexOf("DELETE ") != -1
-				&& cmpString.indexOf("DELETE FROM") == -1) {
-			statement = convertDelete(statement);
-			statement = convertComplexStatement(convertAlias(statement));
-		} else if (cmpString.indexOf("DELETE FROM") != -1) {
-			statement = convertComplexStatement(convertAlias(statement));
-		} else if (cmpString.indexOf("UPDATE ") != -1) {
-			statement = convertComplexStatement(convertUpdate(convertAlias(statement)));
+		String nonce = sharedNonce;
+
+		// check for collision with nonce
+		while ( sqlStatement.contains(nonce))
+		{
+			nonce = generateNonce();
+		}
+
+		String statement = replaceQuotedStrings(sqlStatement, retVars, nonce);
+
+		if (DB_PostgreSQL.isUseNativeDialect()) {
+
+			statement = convertSysDate(statement);
+			statement = convertSimilarTo(statement);
+
 		} else {
-			statement = convertComplexStatement(convertAlias(statement));
+
+			statement = convertWithConvertMap(statement);
+			statement = convertSimilarTo(statement);
+			statement = DB_PostgreSQL.removeNativeKeyworkMarker(statement);
+
+			String cmpString = statement.toUpperCase();
+			boolean isCreate = cmpString.startsWith("CREATE ");
+
+			// Process
+			if (isCreate && cmpString.indexOf(" FUNCTION ") != -1)
+				;
+			else if (isCreate && cmpString.indexOf(" TRIGGER ") != -1)
+				;
+			else if (isCreate && cmpString.indexOf(" PROCEDURE ") != -1)
+				;
+			else if (isCreate && cmpString.indexOf(" VIEW ") != -1)
+				;
+			else if (cmpString.indexOf("ALTER TABLE") != -1) {
+				statement = recoverQuotedStrings(statement, retVars, nonce);
+				retVars.clear();
+				statement = convertDDL(convertComplexStatement(statement));
+				/*
+		    } else if (cmpString.indexOf("ROWNUM") != -1) {
+			    result.add(convertRowNum(convertComplexStatement(convertAlias(statement))));*/
+			} else if (cmpString.indexOf("DELETE ") != -1
+					&& cmpString.indexOf("DELETE FROM") == -1) {
+				statement = convertDelete(statement);
+				statement = convertComplexStatement(convertAlias(statement));
+			} else if (cmpString.indexOf("DELETE FROM") != -1) {
+				statement = convertComplexStatement(convertAlias(statement));
+			} else if (cmpString.indexOf("UPDATE ") != -1) {
+				statement = convertComplexStatement(convertUpdate(convertAlias(statement)));
+			} else {
+				statement = convertComplexStatement(convertAlias(statement));
+			}
 		}
 		if (retVars.size() > 0)
-			statement = recoverQuotedStrings(statement, retVars);
+			statement = recoverQuotedStrings(statement, retVars, nonce);
 		result.add(statement);
 
-		if ("true".equals(System.getProperty("org.idempiere.db.postgresql.debug"))) {
-			log.warning("Oracle -> " + sqlStatement);
-			log.warning("PgSQL  -> " + statement);
+		if ("true".equals(System.getProperty("org.idempiere.db.debug"))) {
+			String filterPgDebug = System.getProperty("org.idempiere.db.debug.filter");
+			boolean print = true;
+			if (filterPgDebug != null)
+				print = statement.matches(filterPgDebug);
+			// log.warning("Oracle -> " + oraStatement);
+			if (print) {
+				log.warning("Oracle -> " + sqlStatement);
+				log.warning("PgSQL  -> " + statement);
+			}
 		}
 		return result;
 	} // convertStatement
 
+	private String convertSysDate(String statement) {
+		String retValue = statement;
+		String replacement = "getDate()";
+		try {
+			Matcher m = sysDatePattern.matcher(retValue);
+			retValue = m.replaceAll(replacement);
+		} catch (Exception e) {
+			String error = "Error expression: " + sysDatePattern.pattern() + " - " + e;
+			log.info(error);
+			m_conversionError = error;
+		}		
+		return retValue;
+	}
+	
 	private String convertSimilarTo(String statement) {
 		String retValue = statement;
-		boolean useSimilarTo = "Y".equals(Env.getContext(Env.getCtx(), "P|IsUseSimilarTo"));
+		boolean useSimilarTo = isUseSimilarTo();
 		if (useSimilarTo) {
-			String regex = "\\bLIKE\\b";
 			String replacement = "SIMILAR TO";
 			try {
-				Pattern p = Pattern.compile(regex, REGEX_FLAGS);
-				Matcher m = p.matcher(retValue);
+				Matcher m = likePattern.matcher(retValue);
 				retValue = m.replaceAll(replacement);
 			} catch (Exception e) {
-				String error = "Error expression: " + regex + " - " + e;
+				String error = "Error expression: " + likePattern.pattern() + " - " + e;
 				log.info(error);
 				m_conversionError = error;
 			}
 		}
 		return retValue;
+	}
+
+	private boolean isUseSimilarTo() {
+		return "Y".equals(Env.getContext(Env.getCtx(), "P|IsUseSimilarTo"));
+	}
+
+	/**
+	 * Generate fairly hard to guess numeric string
+	 */
+	private String generateNonce() {
+
+		String newNonce = Long.toString(ThreadLocalRandom.current()
+				.nextLong(100000000000000000L,
+						999999999999999999L)).intern();
+
+		sharedNonce = newNonce;
+
+		return newNonce;
 	}
 
 	@Override
@@ -887,6 +947,9 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 				return false;
 		}
 		if (token.startsWith("'") && token.endsWith("'"))
+			return false;
+		// quoted string substitution marker
+		else if ( token.matches("QS\\d+QS\\d{18}") )
 			return false;
 		else 
 		{

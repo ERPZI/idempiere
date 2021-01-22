@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Tab_Customization
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 8.2
  */
 public interface I_AD_Tab_Customization 
 {
@@ -156,6 +156,19 @@ public interface I_AD_Tab_Customization
 
 	/** Get Show in Grid	  */
 	public String getIsDisplayedGrid();
+
+    /** Column name IsQuickForm */
+    public static final String COLUMNNAME_IsQuickForm = "IsQuickForm";
+
+	/** Set Quick Form.
+	  * Display in Quick Form
+	  */
+	public void setIsQuickForm (boolean IsQuickForm);
+
+	/** Get Quick Form.
+	  * Display in Quick Form
+	  */
+	public boolean isQuickForm();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

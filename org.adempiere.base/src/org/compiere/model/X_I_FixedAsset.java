@@ -25,15 +25,15 @@ import org.compiere.util.Env;
 
 /** Generated Model for I_FixedAsset
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200402L;
-
+	
+	private static final long serialVersionUID = 20201220L;
 
     /** Standard Constructor */
     public X_I_FixedAsset (Properties ctx, int I_FixedAsset_ID, String trxName)
@@ -81,8 +81,8 @@ public class X_I_FixedAsset extends PO implements I_I_FixedAsset, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_I_FixedAsset[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_I_FixedAsset[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 

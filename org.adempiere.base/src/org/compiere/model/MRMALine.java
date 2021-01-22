@@ -140,7 +140,7 @@ public class MRMALine extends X_M_RMALine
             
             // Retrieve tax Exempt
             String sql = "SELECT C_Tax_ID FROM C_Tax WHERE AD_Client_ID=? AND IsActive='Y' "
-                + "AND IsTaxExempt='Y' AND ValidFrom < SYSDATE ORDER BY IsDefault DESC";
+                + "AND IsTaxExempt='Y' AND ValidFrom < getDate() ORDER BY IsDefault DESC";
             
             // Set tax for charge as exempt        
             taxId = DB.getSQLValueEx(null, sql, Env.getAD_Client_ID(getCtx()));
@@ -480,7 +480,7 @@ public class MRMALine extends X_M_RMALine
 	public MProduct getProduct()
 	{
 		if (m_product == null && getM_Product_ID() != 0)
-			m_product =  MProduct.get (getCtx(), getM_Product_ID());
+			m_product =  MProduct.getCopy(getCtx(), getM_Product_ID(), get_TrxName());
 		return m_product;
 	}
 	
@@ -491,12 +491,12 @@ public class MRMALine extends X_M_RMALine
 	public MCharge getCharge()
 	{
 		if (m_charge == null && getC_Charge_ID() != 0)
-			m_charge =  MCharge.get (getCtx(), getC_Charge_ID());
+			m_charge =  MCharge.getCopy(getCtx(), getC_Charge_ID(), get_TrxName());
 		return m_charge;
 	}
 	
 	/**
-	 * 	Get Tax
+	 * 	Get Tax (immutable)
 	 *	@return tax
 	 */
 	protected MTax getTax()

@@ -288,6 +288,7 @@ public class InvoicePrint extends SvrProcess
 				boolean printed = false;
 				if (p_EMailPDF)
 				{
+					mText.setBPartner(C_BPartner_ID);	//	Context - Translation
 					StringBuilder subject =new StringBuilder(mText.getMailHeader()).append(" - ").append(DocumentNo);
 					EMail email = client.createEMail(to.getEMail(), subject.toString(), null);
 					if (!email.isValid())
@@ -298,7 +299,6 @@ public class InvoicePrint extends SvrProcess
 						continue;
 					}
 					mText.setUser(to);					//	Context
-					mText.setBPartner(C_BPartner_ID);	//	Context
 					mText.setPO(new MInvoice(getCtx(), C_Invoice_ID, get_TrxName()));
 					String message = mText.getMailText(true);
 					if (mText.isHtml())
@@ -348,7 +348,7 @@ public class InvoicePrint extends SvrProcess
 				if (printed)
 				{
 					StringBuilder sb = new StringBuilder ("UPDATE C_Invoice ")
-						.append("SET DatePrinted=SysDate, IsPrinted='Y' WHERE C_Invoice_ID=")
+						.append("SET DatePrinted=getDate(), IsPrinted='Y' WHERE C_Invoice_ID=")
 						.append (C_Invoice_ID);
 					@SuppressWarnings("unused")
 					int no = DB.executeUpdate(sb.toString(), get_TrxName());

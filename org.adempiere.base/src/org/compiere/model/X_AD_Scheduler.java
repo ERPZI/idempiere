@@ -24,14 +24,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Scheduler
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20201220L;
 
     /** Standard Constructor */
     public X_AD_Scheduler (Properties ctx, int AD_Scheduler_ID, String trxName)
@@ -72,8 +72,8 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_AD_Scheduler[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_AD_Scheduler[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -369,10 +369,12 @@ public class X_AD_Scheduler extends PO implements I_AD_Scheduler, I_Persistent
 	public static final String REPORTOUTPUTTYPE_PDF = "PDF";
 	/** HTML = HTML */
 	public static final String REPORTOUTPUTTYPE_HTML = "HTML";
-	/** Excel = XLS */
-	public static final String REPORTOUTPUTTYPE_Excel = "XLS";
+	/** XLS = XLS */
+	public static final String REPORTOUTPUTTYPE_XLS = "XLS";
 	/** CSV = CSV */
 	public static final String REPORTOUTPUTTYPE_CSV = "CSV";
+	/** XLSX = XLSX */
+	public static final String REPORTOUTPUTTYPE_XLSX = "XLSX";
 	/** Set Report Output Type.
 		@param ReportOutputType Report Output Type	  */
 	public void setReportOutputType (String ReportOutputType)

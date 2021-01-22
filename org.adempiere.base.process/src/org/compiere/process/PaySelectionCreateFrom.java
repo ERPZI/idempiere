@@ -148,11 +148,11 @@ public class PaySelectionCreateFrom extends SvrProcess
 
 		StringBuilder sql = new StringBuilder("SELECT C_Invoice_ID,") // 1
 			//	Open
-			.append(" currencyConvert(invoiceOpen(i.C_Invoice_ID, i.C_InvoicePaySchedule_ID)")
-				.append(",i.C_Currency_ID, ?,?, i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) AS PayAmt,")	//	2 ##p1/p2 Currency_To,PayDate
+				.append(" currencyConvertInvoice(i.C_Invoice_ID")
+				.append(",?,invoiceOpen(i.C_Invoice_ID, i.C_InvoicePaySchedule_ID), ?) AS PayAmt,")	//	##1/2 Currency_To,PayDate
 			//	Discount
-			.append(" currencyConvert(invoiceDiscount(i.C_Invoice_ID,?,i.C_InvoicePaySchedule_ID)")	//	##p3 PayDate
-				.append(",i.C_Currency_ID, ?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) AS DiscountAmt,")	//	3 ##p4/p5 Currency_To,PayDate
+				.append(" currencyConvertInvoice(i.C_Invoice_ID")	 
+				.append(",?,invoiceDiscount(i.C_Invoice_ID,?,i.C_InvoicePaySchedule_ID),?) AS DiscountAmt,")	//	##3/4/5 Currency_To,PayDate,PayDate
 			.append(" PaymentRule, IsSOTrx, ") // 4..5
 			.append(" currencyConvert(invoiceWriteOff(i.C_Invoice_ID) ")
 			    .append(",i.C_Currency_ID, ?,?,i.C_ConversionType_ID,i.AD_Client_ID,i.AD_Org_ID) AS WriteOffAmt ")	//	6 ##p6/p7 Currency_To,PayDate
@@ -277,8 +277,8 @@ public class PaySelectionCreateFrom extends SvrProcess
 			pstmt.setInt (index++, C_CurrencyTo_ID);
 			pstmt.setTimestamp(index++, psel.getPayDate());
 			//
-			pstmt.setTimestamp(index++, psel.getPayDate());
 			pstmt.setInt (index++, C_CurrencyTo_ID);
+			pstmt.setTimestamp(index++, psel.getPayDate());
 			pstmt.setTimestamp(index++, psel.getPayDate());
 			pstmt.setInt (index++, C_CurrencyTo_ID);
 			pstmt.setTimestamp(index++, psel.getPayDate());
@@ -329,7 +329,7 @@ public class PaySelectionCreateFrom extends SvrProcess
 				if (p_AD_Org_ID != 0)
 					pstmt.setInt(index++, p_AD_Org_ID);
 			}
-			
+			//
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{

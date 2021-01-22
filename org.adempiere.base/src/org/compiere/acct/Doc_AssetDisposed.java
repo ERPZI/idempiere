@@ -6,12 +6,13 @@ import java.util.ArrayList;
 
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
-import org.compiere.model.MAsset;
 import org.compiere.model.MAssetAcct;
 import org.compiere.model.MAssetChange;
 import org.compiere.model.MAssetDisposed;
 import org.compiere.model.MDocType;
 import org.compiere.util.Env;
+//Mpo, 19/01/2021
+import org.compiere.model.MAsset;
 
 
 /**

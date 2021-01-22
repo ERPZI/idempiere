@@ -59,9 +59,11 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Filedownload;
+import org.zkoss.zul.Popup;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Tabpanel;
 import org.zkoss.zul.Vbox;
+import org.zkoss.zul.impl.LabelImageElement;
 
 /**
  * @author Elaine
@@ -118,6 +120,7 @@ public class ReportAction implements EventListener<Event>
 			cboExportType.appendItem("txt" + " - " + Msg.getMsg(Env.getCtx(), "FileTXT"), "txt");
 			cboExportType.appendItem("ssv" + " - " + Msg.getMsg(Env.getCtx(), "FileSSV"), "ssv");
 			cboExportType.appendItem("csv" + " - " + Msg.getMsg(Env.getCtx(), "FileCSV"), "csv");
+			cboExportType.appendItem("xlsx" + " - " + Msg.getMsg(Env.getCtx(), "FileXLSX"), "xlsx");
 			ListItem li = cboExportType.appendItem("xls" + " - " + Msg.getMsg(Env.getCtx(), "FileXLS"), "xls");
 			cboExportType.setSelectedItem(li);
 			cboExportType.setVisible(false);
@@ -201,7 +204,12 @@ public class ReportAction implements EventListener<Event>
 			confirmPanel.addActionListener(this);
 		}
 
-		LayoutUtils.openPopupWindow(panel.getToolbar().getToolbarItem("Report"), winReport, "after_start");
+		LabelImageElement toolbarItem = panel.getToolbar().getToolbarItem("Report");
+		Popup popup = LayoutUtils.findPopup(toolbarItem);
+		if (popup != null)
+			popup.appendChild(winReport);
+		LayoutUtils.openPopupWindow(toolbarItem, winReport, "after_start");
+		winReport.setFocus(true);
 	}
 	
 	@Override
@@ -314,7 +322,7 @@ public class ReportAction implements EventListener<Event>
 				whereClause.append(" AND ");
 			//	Show only unprocessed or the one updated within x days
 			whereClause.append("(").append(gridTab.getTableName()).append(".Processed='N' OR ").append(gridTab.getTableName()).append(".Updated>");
-			whereClause.append("SysDate-1");
+			whereClause.append("getDate()-1");
 			whereClause.append(")");
 		}
 
@@ -439,6 +447,11 @@ public class ReportAction implements EventListener<Event>
 			{
 				inputFile = File.createTempFile("Export", ".xls");							
 				re.createXLS(inputFile, re.getPrintFormat().getLanguage());
+			}
+			else if (ext.equals("xlsx"))
+			{
+				inputFile = File.createTempFile("Export", ".xlsx");							
+				re.createXLSX(inputFile, re.getPrintFormat().getLanguage());
 			}
 			else
 			{
