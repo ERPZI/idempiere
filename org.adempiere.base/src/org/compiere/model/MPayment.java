@@ -1834,7 +1834,6 @@ public class MPayment extends X_C_Payment
 	protected String		m_processMsg = null;
 	/**	Just Prepared Flag			*/
 	protected boolean		m_justPrepared = false;
-	@SuppressWarnings("unused")
 	protected IProcessUI m_processUI;
 
 	/**
