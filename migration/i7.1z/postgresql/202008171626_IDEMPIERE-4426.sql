@@ -82,12 +82,14 @@ CREATE OPERATOR - (
 
 CREATE OR REPLACE VIEW C_INVOICE_CANDIDATE_V
 (AD_CLIENT_ID, AD_ORG_ID, C_BPARTNER_ID, C_ORDER_ID, DOCUMENTNO, 
- DATEORDERED, C_DOCTYPE_ID, TOTALLINES)
+ DATEORDERED, C_DOCTYPE_ID, TOTALLINES, M_WAREHOUSE_ID, ZI_BRANCH_ID)
 AS 
 SELECT	
 	o.AD_Client_ID, o.AD_Org_ID, o.C_BPartner_ID, o.C_Order_ID,
 	o.DocumentNo, o.DateOrdered, o.C_DocType_ID,
-	SUM((l.QtyOrdered-l.QtyInvoiced)*l.PriceActual) AS TotalLines
+	SUM((l.QtyOrdered-l.QtyInvoiced)*l.PriceActual) AS TotalLines,
+	o.m_warehouse_id,
+    o.zi_branch_id
 FROM C_Order o
   INNER JOIN C_OrderLine l ON (o.C_Order_ID=l.C_Order_ID)
   INNER JOIN C_BPartner bp ON (o.C_BPartner_ID=bp.C_BPartner_ID)
