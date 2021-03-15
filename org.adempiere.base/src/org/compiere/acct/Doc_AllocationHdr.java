@@ -1469,6 +1469,9 @@ public class Doc_AllocationHdr extends Doc
 				FactLine fl = fact.createLine (null, acct, as.getC_Currency_ID(), acctDifference.negate());
 				fl.setDescription(description.toString());
 				fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
+				//MPo, 15/3/21 Add PrCtr
+				fl.setUser1_ID(invoice.getUser1_ID());
+				//
 				if (!fact.isAcctBalanced())
 				{
 					if (as.isCurrencyBalancing() && as.getC_Currency_ID() != invoice.getC_Currency_ID())
