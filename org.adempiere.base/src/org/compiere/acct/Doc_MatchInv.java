@@ -1282,14 +1282,15 @@ public class Doc_MatchInv extends Doc
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 		
 		StringBuilder whereClause = new StringBuilder()
-				.append("Record_ID=?")
+				.append("AD_Table_ID=?")
+				.append(" AND Record_ID=?")
 				.append(" AND C_AcctSchema_ID=?")
 				.append(" AND PostingType='A'")
 				.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=? OR Account_ID=?)")
 				.append(" AND Description LIKE 'Invoice%'");
 		
 		List<MFactAcct> list = new Query(getCtx(), MFactAcct.Table_Name, whereClause.toString(), getTrxName())
-				.setParameters(m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(), 
+				.setParameters(MMatchInv.Table_ID, m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(), 
 						acct.getAccount_ID(), gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID())
 				.setOrderBy(MFactAcct.COLUMNNAME_Fact_Acct_ID)
 				.list();
@@ -1511,6 +1512,18 @@ public class Doc_MatchInv extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND Account_ID=?");
 					
+					if (m_matchInv.getReversal_ID() > 0)
+					{
+						if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+					}
+					else
+					{
+						if (matchInv.getReversal_ID() > 0)
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+					}
+					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
 						if (invoice.isCreditMemo() && matchInv.getQty().compareTo(BigDecimal.ZERO) < 0)
@@ -1550,6 +1563,18 @@ public class Doc_MatchInv extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 						.append(" AND Description LIKE 'Invoice%'");
+					
+					if (m_matchInv.getReversal_ID() > 0)
+					{
+						if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+					}
+					else
+					{
+						if (matchInv.getReversal_ID() > 0)
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+					}
 					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
@@ -1776,6 +1801,18 @@ public class Doc_MatchInv extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND Account_ID=?");
 					
+					if (m_matchInv.getReversal_ID() > 0)
+					{
+						if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+					}
+					else
+					{
+						if (matchInv.getReversal_ID() > 0)
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+					}
+					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
 						if (invoiceLine.getParent().isCreditMemo() && matchInv.getQty().compareTo(BigDecimal.ZERO) < 0)
@@ -1822,6 +1859,18 @@ public class Doc_MatchInv extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 						.append(" AND Description LIKE 'Invoice Line%'");
+					
+					if (m_matchInv.getReversal_ID() > 0)
+					{
+						if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+					}
+					else
+					{
+						if (matchInv.getReversal_ID() > 0)
+							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+					}
 					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
@@ -1999,14 +2048,15 @@ public class Doc_MatchInv extends Doc
 		MAccount loss = MAccount.get (as.getCtx(), as.getAcctSchemaDefault().getRealizedLoss_Acct());
 		
 		StringBuilder whereClause = new StringBuilder()
-				.append("Record_ID=?")
+				.append("AD_Table_ID=?")
+				.append(" AND Record_ID=?")
 				.append(" AND C_AcctSchema_ID=?")
 				.append(" AND PostingType='A'")
 				.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=? OR Account_ID=?)")
 				.append(" AND Description LIKE 'InOut%'");
 		
 		List<MFactAcct> list = new Query(getCtx(), MFactAcct.Table_Name, whereClause.toString(), getTrxName())
-				.setParameters(m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(), 
+				.setParameters(MMatchInv.Table_ID, m_matchInv.getReversal_ID(), as.getC_AcctSchema_ID(), 
 						acct.getAccount_ID(), gain.getAccount_ID(), loss.getAccount_ID(), as.getCurrencyBalancing_Acct().getAccount_ID())
 				.setOrderBy(MFactAcct.COLUMNNAME_Fact_Acct_ID)
 				.list();
@@ -2147,6 +2197,18 @@ public class Doc_MatchInv extends Doc
 				.append(" AND PostingType='A'")
 				.append(" AND Account_ID=?");
 			
+			if (m_matchInv.getReversal_ID() > 0)
+			{
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+			}
+			else
+			{
+				if (matchInv.getReversal_ID() > 0)
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+			}
+			
 			// For Match Inv
 			List<Object> valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MMatchInv.Table_ID, matchInv.get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
@@ -2178,6 +2240,18 @@ public class Doc_MatchInv extends Doc
 				.append(" AND PostingType='A'")
 				.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 				.append(" AND Description LIKE 'InOut%'");
+			
+			if (m_matchInv.getReversal_ID() > 0)
+			{
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+			}
+			else
+			{
+				if (matchInv.getReversal_ID() > 0)
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+			}
 			
 			// For Match Inv
 			valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
@@ -2348,6 +2422,18 @@ public class Doc_MatchInv extends Doc
 				.append(" AND PostingType='A'")
 				.append(" AND Account_ID=?");
 			
+			if (m_matchInv.getReversal_ID() > 0)
+			{
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+			}
+			else
+			{
+				if (matchInv.getReversal_ID() > 0)
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+			}
+			
 			// For Match Inv
 			List<Object> valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
 					MMatchInv.Table_ID, matchInv.get_ID(), as.getC_AcctSchema_ID(), acct.getAccount_ID());
@@ -2377,6 +2463,18 @@ public class Doc_MatchInv extends Doc
 				.append(" AND PostingType='A'")
 				.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 				.append(" AND Description LIKE 'InOut Line%'");
+			
+			if (m_matchInv.getReversal_ID() > 0)
+			{
+				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
+			}
+			else
+			{
+				if (matchInv.getReversal_ID() > 0)
+					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
+			}
 			
 			// For Match Inv
 			valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
