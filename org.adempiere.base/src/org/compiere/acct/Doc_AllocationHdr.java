@@ -223,8 +223,8 @@ public class Doc_AllocationHdr extends Doc
 			if (line.getC_Payment_ID() != 0)
 				payment = new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName());
 			//MPo, 14/3/21 Use as overall Fact PrCtr e.g. balancing
-			if (fact_user1_id != 0 && payment !=null)
-				fact_user1_id=payment.getUser1_ID();
+			if (fact_user1_id == 0 && payment !=null)
+				fact_user1_id = payment.getUser1_ID();
 			//
 			MInvoice invoice = null;
 			if (line.getC_Invoice_ID() != 0)
