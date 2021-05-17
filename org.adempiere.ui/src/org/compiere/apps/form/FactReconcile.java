@@ -269,8 +269,10 @@ public class FactReconcile {
 			rec = new MFactReconciliation(Env.getCtx(), 0, null);
 			rec.setFact_Acct_ID(factId);
 		}
-
 		rec.setMatchCode(matchcode);
+		//MPo, 17/5/2021 Derive org from fact instead of ctx
+		rec.setAD_Org_ID(new org.compiere.model.MFactAcct(Env.getCtx(),factId,null).getAD_Org_ID());
+		//
 		return rec.save();
 	}
 	
