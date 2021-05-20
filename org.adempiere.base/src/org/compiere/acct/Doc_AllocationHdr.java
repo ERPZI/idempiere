@@ -229,6 +229,10 @@ public class Doc_AllocationHdr extends Doc
 			MInvoice invoice = null;
 			if (line.getC_Invoice_ID() != 0)
 				invoice = new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName());
+			//MPo, 20/5/21 Use as overall Fact PrCtr e.g. balancing
+			if (fact_user1_id == 0 && invoice !=null)
+				fact_user1_id = invoice.getUser1_ID();
+			//
 			
 			BigDecimal allocPayAccounted = Env.ZERO;
 			BigDecimal allocPaySource = Env.ZERO;
