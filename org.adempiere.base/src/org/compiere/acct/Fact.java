@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -528,18 +529,23 @@ public final class Fact
 	 *	Return Accounting Balance
 	 *  @return true if accounting lines are balanced
 	 */
+	//MPo, 27/5/2021 Balance Accounting to PrCtr
+	Map<Integer, BigDecimal> factBalanceByPrCtr; 
 	protected BigDecimal getAcctBalance()
 	{
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
+		factBalanceByPrCtr = new HashMap<>();
 		BigDecimal result = Env.ZERO;
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			FactLine line = (FactLine)m_lines.get(i);
 			result = result.add(line.getAcctBalance());
+			//MPo, 27/5/2021 Balance Accounting to PrCtr
+			factBalanceByPrCtr.merge(line.getUser1_ID(), line.getAcctBalance(), BigDecimal::add);
 		}
 	//	log.fine(result.toString());
 		return result;
 	}	//	getAcctBalance
-
 	/**
 	 *  Balance Accounting Currency.
 	 *  If the accounting currency is not balanced,
@@ -553,6 +559,15 @@ public final class Fact
 	public FactLine balanceAccounting()
 	{
 		BigDecimal diff = getAcctBalance();		//	DR-CR
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
+		int balanceAccountingPrCtr = 0;
+		for (Map.Entry<Integer, BigDecimal> entry : factBalanceByPrCtr.entrySet()) {
+		    if (entry.getValue().compareTo(BigDecimal.ZERO) != 0) {
+		    	balanceAccountingPrCtr = entry.getKey().intValue();
+		    	System.out.println("balanceAccountingPrCtr: " + balanceAccountingPrCtr);
+		    }
+		}
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
 		if (log.isLoggable(Level.FINE)) log.fine("Balance=" + diff 
 			+ ", CurrBal=" + m_acctSchema.isCurrencyBalancing() 
 			+ " - " + toString());
@@ -616,13 +631,13 @@ public final class Fact
 					drAmt = difference.negate();
 			}
 			line.setAmtAcct(drAmt, crAmt);
-			//MPo, 9/11/17 balancing posting to CB to be posted with PrCtr, use largest BS if exists, or largest PL
-			if (line.getUser1_ID() < 1) {
-				System.out.println("MPo, BEFORE" + line.getAccount_ID() + " =" + line.getUser1_ID());
-				line.setUser1_ID((BSline != null && BSline.getUser1_ID() > 0) ? BSline.getUser1_ID() : PLline.getUser1_ID());
-				System.out.println("MPo, AFTER" + line.getAccount_ID() + " =" + line.getUser1_ID());
-			}
+			//MPo, 27/5/2021 Balance Accounting to PrCtr
+			if (line.getUser1_ID() == 0) line.setUser1_ID(balanceAccountingPrCtr);
 			//
+			//MPo, 9/11/17 balancing posting to CB to be posted with PrCtr, use largest BS if exists, or largest PL
+			//if (line.getUser1_ID() < 1) {
+			//	line.setUser1_ID((BSline != null && BSline.getUser1_ID() > 0) ? BSline.getUser1_ID() : PLline.getUser1_ID());
+			//}
 			if (log.isLoggable(Level.FINE)) log.fine(line.toString());
 			m_lines.add(line);
 		}
