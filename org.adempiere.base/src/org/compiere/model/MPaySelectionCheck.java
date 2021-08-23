@@ -596,7 +596,10 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		//
 		if (X_C_Order.PAYMENTRULE_DirectDebit.equals(PaymentRule))
 		{
-			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			//MPo, 19/8/21
+			//MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), line.getInvoice().getZI_Pay_BPartner_ID() == 0 ? line.getInvoice().getC_BPartner_ID() : line.getInvoice().getZI_Pay_BPartner_ID());
+			//
 			for (int i = 0; i < bas.length; i++) 
 			{
 				MBPBankAccount account = bas[i];
@@ -609,7 +612,10 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		}
 		else if (X_C_Order.PAYMENTRULE_DirectDeposit.equals(PaymentRule))
 		{
-			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			//MPo, 19/8/21
+			//MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), line.getInvoice().getZI_Pay_BPartner_ID() == 0 ? line.getInvoice().getC_BPartner_ID() : line.getInvoice().getZI_Pay_BPartner_ID());
+			//
 			for (int i = 0; i < bas.length; i++) 
 			{
 				MBPBankAccount account = bas[i];
