@@ -32,7 +32,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20201220L;
+	private static final long serialVersionUID = 20211115L;
 
     /** Standard Constructor */
     public X_C_PaymentTransaction (Properties ctx, int C_PaymentTransaction_ID, String trxName)
@@ -290,7 +290,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
 			.getPO(getC_Activity_ID(), get_TrxName());	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID 
 		Business Activity
 	  */
@@ -302,7 +302,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID () 
@@ -1486,6 +1486,14 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 	public static final String TENDERTYPE_Account = "T";
 	/** Cash = X */
 	public static final String TENDERTYPE_Cash = "X";
+	/** Check HSBC COS = Z */
+	public static final String TENDERTYPE_CheckHSBCCOS = "Z";
+	/** Direct Deposit BBL Direct Credit = Y */
+	public static final String TENDERTYPE_DirectDepositBBLDirectCredit = "Y";
+	/** Direct Deposit BBL SMART = W */
+	public static final String TENDERTYPE_DirectDepositBBLSMART = "W";
+	/** Direct Deposit HSBC PromptPay = P */
+	public static final String TENDERTYPE_DirectDepositHSBCPromptPay = "P";
 	/** Set Tender type.
 		@param TenderType 
 		Method of Payment
@@ -1541,7 +1549,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser1_ID(), get_TrxName());	}
 
-	/** Set User Element List 1.
+	/** Set Profit Center.
 		@param User1_ID 
 		User defined list element #1
 	  */
@@ -1553,7 +1561,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
-	/** Get User Element List 1.
+	/** Get Profit Center.
 		@return User defined list element #1
 	  */
 	public int getUser1_ID () 
@@ -1569,7 +1577,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
 			.getPO(getUser2_ID(), get_TrxName());	}
 
-	/** Set User Element List 2.
+	/** Set Cost Center.
 		@param User2_ID 
 		User defined list element #2
 	  */
@@ -1581,7 +1589,7 @@ public class X_C_PaymentTransaction extends PO implements I_C_PaymentTransaction
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
-	/** Get User Element List 2.
+	/** Get Cost Center.
 		@return User defined list element #2
 	  */
 	public int getUser2_ID () 

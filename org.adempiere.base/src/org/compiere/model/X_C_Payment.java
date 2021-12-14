@@ -33,7 +33,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20201220L;
+	private static final long serialVersionUID = 20211115L;
 
     /** Standard Constructor */
     public X_C_Payment (Properties ctx, int C_Payment_ID, String trxName)
@@ -2070,12 +2070,14 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public static final String TENDERTYPE_Account = "T";
 	/** Cash = X */
 	public static final String TENDERTYPE_Cash = "X";
-	/** Check Outsourced (HSBC iFile) = Z */
-	public static final String TENDERTYPE_CheckOutsourcedHSBCIFile = "Z";
-	/** Direct Deposit (BBL Direct Credit) = Y */
+	/** Check HSBC COS = Z */
+	public static final String TENDERTYPE_CheckHSBCCOS = "Z";
+	/** Direct Deposit BBL Direct Credit = Y */
 	public static final String TENDERTYPE_DirectDepositBBLDirectCredit = "Y";
-	/** Direct Deposit (BBL SMART) = W */
+	/** Direct Deposit BBL SMART = W */
 	public static final String TENDERTYPE_DirectDepositBBLSMART = "W";
+	/** Direct Deposit HSBC PromptPay = P */
+	public static final String TENDERTYPE_DirectDepositHSBCPromptPay = "P";
 	/** Set Tender type.
 		@param TenderType 
 		Method of Payment

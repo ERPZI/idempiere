@@ -31,7 +31,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20201220L;
+	private static final long serialVersionUID = 20211115L;
 
     /** Standard Constructor */
     public X_C_PaySelectionCheck (Properties ctx, int C_PaySelectionCheck_ID, String trxName)
@@ -366,8 +366,8 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public static final String PAYMENTRULE_Cash = "B";
 	/** Credit Card = K */
 	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit AP (HSBC ACH) and AR = T */
-	public static final String PAYMENTRULE_DirectDepositAPHSBCACHAndAR = "T";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
 	/** Check = S */
 	public static final String PAYMENTRULE_Check = "S";
 	/** On Credit = P */
@@ -376,12 +376,14 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public static final String PAYMENTRULE_DirectDebit = "D";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
-	/** Check Outsourced (HSBC COS) = Z */
-	public static final String PAYMENTRULE_CheckOutsourcedHSBCCOS = "Z";
-	/** Direct Deposit (BBL Direct Credit) = Y */
+	/** Check HSBC COS = Z */
+	public static final String PAYMENTRULE_CheckHSBCCOS = "Z";
+	/** Direct Deposit BBL Direct Credit = Y */
 	public static final String PAYMENTRULE_DirectDepositBBLDirectCredit = "Y";
-	/** Direct Deposit (BBL SMART) = X */
+	/** Direct Deposit BBL SMART = X */
 	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
+	/** Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULE_DirectDepositHSBCPromptPay = "W";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice
@@ -497,7 +499,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
 			.getPO(getZI_Pay_BPartner_ID(), get_TrxName());	}
 
-	/** Set Payee Partner.
+	/** Set Alternative Payee Partner.
 		@param ZI_Pay_BPartner_ID 
 		Business Partner responsible for the payment (Alternative payee)
 	  */
@@ -509,7 +511,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 			set_Value (COLUMNNAME_ZI_Pay_BPartner_ID, Integer.valueOf(ZI_Pay_BPartner_ID));
 	}
 
-	/** Get Payee Partner.
+	/** Get Alternative Payee Partner.
 		@return Business Partner responsible for the payment (Alternative payee)
 	  */
 	public int getZI_Pay_BPartner_ID () 

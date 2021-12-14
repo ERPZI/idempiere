@@ -371,8 +371,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		if(sumPayments != null)
 			fSumPayments.setValue(sumPayments);
 
-		//MPo, 30/8/21
-		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z"));
+		//MPo, 15/11/2021 HSBC Host-to-Host and PromptPay
+		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
 
 		if(documentNo != null)
 			fDocumentNo.setValue(documentNo);
@@ -430,8 +430,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		if (no >= 0)
 		{
 			//  Get File Info
-			//MPo, 4/8/18 Add HSBC Direct Deposit payment method 
-			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+			//MPo, 15/11/21 HSBC Host-to-Host ACH, COS, PromptPay and BBL Smart, DirectCredit 
+			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
 				java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
 				java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
 				java.util.Date now = new java.util.Date();
@@ -456,7 +456,7 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 					pstmt = null;
 				}	
 				
-				//MPo, 28/9/20
+				//MPo, 15/11/21 Add HSBC payment rule PromptPay
 				String ziPaymentRule = "";
 				switch (PaymentRule) {
 				  case "Z":
@@ -465,6 +465,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 				  case "T":
 					ziPaymentRule="HSBC_ACH";
 					break;
+				  case "W":
+						ziPaymentRule="HSBC_PRP";
+						break;
 				  case "X":
 					ziPaymentRule="BBL_SMART";
 					break;
@@ -543,11 +546,13 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		if (!getChecks(PaymentRule))
 			return;
 		//MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
-		String attachmentPathRoot = "hsbch2h";
+		String attachmentPathRoot = "hsbch2h-test";
+		//String attachmentPathRoot = "hsbch2h"; >>>> CHANGE!!
+
 		try 
 		{	
-			//Only supports HSBC ACH/"T" and COS/"Z"
-			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z"))) return;
+			//MPo, 15/11/21, Supports Host-to-Host for HSBC ACH/"T", HSBC COS/"Z" and HSCB PromptPay/"W"
+			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
 			else {
 			FDialog.ask(m_WindowNo, form, "WPayTransferPayment?", new Callback<Boolean>() 
 			{
