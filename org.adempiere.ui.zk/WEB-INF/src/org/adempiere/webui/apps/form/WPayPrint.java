@@ -546,8 +546,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		if (!getChecks(PaymentRule))
 			return;
 		//MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
-		String attachmentPathRoot = "hsbch2h-test";
-		//String attachmentPathRoot = "hsbch2h"; >>>> CHANGE!!
+		//String attachmentPathRoot = "hsbch2h-test";
+		String attachmentPathRoot = "hsbch2h"; //>>>> CHANGE!!
 
 		try 
 		{	
