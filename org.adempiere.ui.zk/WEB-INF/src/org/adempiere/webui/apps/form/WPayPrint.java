@@ -545,10 +545,11 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		log.info(PaymentRule);
 		if (!getChecks(PaymentRule))
 			return;
-		//MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
+		//MPo, 02/01/22 HSBC Host-to-Host payment file S3 root path
 		//String attachmentPathRoot = "hsbch2h-test";
-		String attachmentPathRoot = "hsbch2h"; //>>>> CHANGE!!
-
+		//String attachmentPathRoot = "hsbch2h"; //>>>> CHANGE!!
+		String attachmentPathRoot = org.compiere.model.MSysConfig.getValue("ZI_HSBC_H2H_S3_ROOT","hsbch2h-test");
+		System.out.println("SysConfig ZI_HSBC_H2H_S3_ROOT: " + attachmentPathRoot);
 		try 
 		{	
 			//MPo, 15/11/21, Supports Host-to-Host for HSBC ACH/"T", HSBC COS/"Z" and HSCB PromptPay/"W"
