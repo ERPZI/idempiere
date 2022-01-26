@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -310,6 +311,7 @@ public final class Fact
 		FactLine line = new FactLine (m_doc.getCtx(), m_doc.get_Table_ID(), 
 			m_doc.get_ID(), 0, m_trxName);
 		line.setDocumentInfo(m_doc, null);
+		line.setAD_Org_ID(m_doc.getAD_Org_ID());
 		line.setPostingType(m_postingType);
 
 		//	Account
@@ -527,18 +529,23 @@ public final class Fact
 	 *	Return Accounting Balance
 	 *  @return true if accounting lines are balanced
 	 */
+	//MPo, 27/5/2021 Balance Accounting to PrCtr
+	Map<Integer, BigDecimal> factBalanceByPrCtr; 
 	protected BigDecimal getAcctBalance()
 	{
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
+		factBalanceByPrCtr = new HashMap<>();
 		BigDecimal result = Env.ZERO;
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			FactLine line = (FactLine)m_lines.get(i);
 			result = result.add(line.getAcctBalance());
+			//MPo, 27/5/2021 Balance Accounting to PrCtr
+			factBalanceByPrCtr.merge(line.getUser1_ID(), line.getAcctBalance(), BigDecimal::add);
 		}
 	//	log.fine(result.toString());
 		return result;
 	}	//	getAcctBalance
-
 	/**
 	 *  Balance Accounting Currency.
 	 *  If the accounting currency is not balanced,
@@ -552,6 +559,15 @@ public final class Fact
 	public FactLine balanceAccounting()
 	{
 		BigDecimal diff = getAcctBalance();		//	DR-CR
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
+		int balanceAccountingPrCtr = 0;
+		for (Map.Entry<Integer, BigDecimal> entry : factBalanceByPrCtr.entrySet()) {
+		    if (entry.getValue().compareTo(BigDecimal.ZERO) != 0) {
+		    	balanceAccountingPrCtr = entry.getKey().intValue();
+		    	System.out.println("balanceAccountingPrCtr: " + balanceAccountingPrCtr);
+		    }
+		}
+		//MPo, 27/5/2021 Balance Accounting to PrCtr
 		if (log.isLoggable(Level.FINE)) log.fine("Balance=" + diff 
 			+ ", CurrBal=" + m_acctSchema.isCurrencyBalancing() 
 			+ " - " + toString());
@@ -586,6 +602,7 @@ public final class Fact
 				m_doc.get_ID(), 0, m_trxName);
 			line.setDocumentInfo (m_doc, null);
 			line.setPostingType (m_postingType);
+			line.setAD_Org_ID(m_doc.getAD_Org_ID());
 			line.setAccount (m_acctSchema, m_acctSchema.getCurrencyBalancing_Acct());
 						
 			//  Amount
@@ -614,13 +631,13 @@ public final class Fact
 					drAmt = difference.negate();
 			}
 			line.setAmtAcct(drAmt, crAmt);
-			//MPo, 9/11/17 balancing posting to CB to be posted with PrCtr, use largest BS if exists, or largest PL
-			if (line.getUser1_ID() < 1) {
-				System.out.println("MPo, BEFORE" + line.getAccount_ID() + " =" + line.getUser1_ID());
-				line.setUser1_ID((BSline != null && BSline.getUser1_ID() > 0) ? BSline.getUser1_ID() : PLline.getUser1_ID());
-				System.out.println("MPo, AFTER" + line.getAccount_ID() + " =" + line.getUser1_ID());
-			}
+			//MPo, 27/5/2021 Balance Accounting to PrCtr
+			if (line.getUser1_ID() == 0) line.setUser1_ID(balanceAccountingPrCtr);
 			//
+			//MPo, 9/11/17 balancing posting to CB to be posted with PrCtr, use largest BS if exists, or largest PL
+			//if (line.getUser1_ID() < 1) {
+			//	line.setUser1_ID((BSline != null && BSline.getUser1_ID() > 0) ? BSline.getUser1_ID() : PLline.getUser1_ID());
+			//}
 			if (log.isLoggable(Level.FINE)) log.fine(line.toString());
 			m_lines.add(line);
 		}
@@ -707,7 +724,7 @@ public final class Fact
 		{
 			FactLine dLine = (FactLine)m_lines.get(i);
 			MDistribution[] distributions = MDistribution.get (dLine.getAccount(), 
-				m_postingType, m_doc.getC_DocType_ID());
+				m_postingType, m_doc.getC_DocType_ID(), dLine.getDateAcct());
 			//	No Distribution for this line
 			//AZ Goodwill
 			//The above "get" only work in GL Journal because it's using ValidCombination Account
@@ -719,7 +736,7 @@ public final class Fact
 			if (distributions == null || distributions.length == 0)
 			{
 				distributions = MDistribution.get (dLine.getCtx(), dLine.getC_AcctSchema_ID(),
-					m_postingType, m_doc.getC_DocType_ID(),
+					m_postingType, m_doc.getC_DocType_ID(), dLine.getDateAcct(),
 					dLine.getAD_Org_ID(), dLine.getAccount_ID(),
 					dLine.getM_Product_ID(), dLine.getC_BPartner_ID(), dLine.getC_Project_ID(),
 					dLine.getC_Campaign_ID(), dLine.getC_Activity_ID(), dLine.getAD_OrgTrx_ID(),
@@ -731,8 +748,8 @@ public final class Fact
 			//end AZ
 			//	Just the first
 			if (distributions.length > 1)
-				log.warning("More then one Distributiion for " + dLine.getAccount());
-			MDistribution distribution = distributions[0]; 
+				log.warning("More than one Distribution for " + dLine.getAccount());
+			MDistribution distribution = distributions[0];
 
 			// FR 2685367 - GL Distribution delete line instead reverse
 			if (distribution.isCreateReversal()) {

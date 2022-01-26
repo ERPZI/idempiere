@@ -143,7 +143,10 @@ public class PaySelectionCreateCheck extends SvrProcess
 		MPaySelectionCheck check = new MPaySelectionCheck(line, PaymentRule);
 		if (!check.isValid())
 		{
-			int C_BPartner_ID = check.getC_BPartner_ID();
+			//MPo, 19/8/2021 Bank account check against Payee
+			//int C_BPartner_ID = check.getC_BPartner_ID();
+			int C_BPartner_ID = check.getZI_Pay_BPartner_ID() == 0 ? check.getC_BPartner_ID() : check.getZI_Pay_BPartner_ID();
+			//
 			MBPartner bp = MBPartner.get(getCtx(), C_BPartner_ID);
 			StringBuilder msg = new StringBuilder("@NotFound@ @C_BP_BankAccount@: ").append(bp.getName());
 			throw new AdempiereUserError(msg.toString());

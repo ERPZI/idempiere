@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_PaySelectionLine
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 8.2
  */
 public interface I_C_PaySelectionLine 
 {
@@ -335,17 +335,32 @@ public interface I_C_PaySelectionLine
     /** Column name ZI_Pay_BPartner_ID */
     public static final String COLUMNNAME_ZI_Pay_BPartner_ID = "ZI_Pay_BPartner_ID";
 
-	/** Set Payee Partner.
+	/** Set Alternative Payee Partner.
 	  * Business Partner responsible for the payment (Alternative payee)
 	  */
 	public void setZI_Pay_BPartner_ID (int ZI_Pay_BPartner_ID);
 
-	/** Get Payee Partner.
+	/** Get Alternative Payee Partner.
 	  * Business Partner responsible for the payment (Alternative payee)
 	  */
 	public int getZI_Pay_BPartner_ID();
 
 	public org.compiere.model.I_C_BPartner getZI_Pay_BPartner() throws RuntimeException;
+
+    /** Column name ZI_Payee_BPartner_ID */
+    public static final String COLUMNNAME_ZI_Payee_BPartner_ID = "ZI_Payee_BPartner_ID";
+
+	/** Set Payee Partner.
+	  * Payee Business Partner responsible for the payment
+	  */
+	public void setZI_Payee_BPartner_ID (int ZI_Payee_BPartner_ID);
+
+	/** Get Payee Partner.
+	  * Payee Business Partner responsible for the payment
+	  */
+	public int getZI_Payee_BPartner_ID();
+
+	public org.compiere.model.I_C_BPartner getZI_Payee_BPartner() throws RuntimeException;
 
     /** Column name ZI_Pay_Location_ID */
     public static final String COLUMNNAME_ZI_Pay_Location_ID = "ZI_Pay_Location_ID";

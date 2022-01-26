@@ -93,7 +93,7 @@ public class ImportBankStatement extends SvrProcess
 		//	Delete Old Imported
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_BankStatement ")
+			sql = new StringBuilder ("DELETE FROM I_BankStatement ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
@@ -104,9 +104,9 @@ public class ImportBankStatement extends SvrProcess
 			  .append("SET AD_Client_ID = COALESCE (AD_Client_ID,").append (p_AD_Client_ID).append ("),")
 			  .append(" AD_Org_ID = COALESCE (AD_Org_ID,").append (p_AD_Org_ID).append ("),");
 		sql.append(" IsActive = COALESCE (IsActive, 'Y'),")
-			  .append(" Created = COALESCE (Created, SysDate),")
+			  .append(" Created = COALESCE (Created, getDate()),")
 			  .append(" CreatedBy = COALESCE (CreatedBy, 0),")
-			  .append(" Updated = COALESCE (Updated, SysDate),")
+			  .append(" Updated = COALESCE (Updated, getDate()),")
 			  .append(" UpdatedBy = COALESCE (UpdatedBy, 0),")
 			  .append(" I_ErrorMsg = ' ',")
 			  .append(" I_IsImported = 'N' ")
@@ -383,7 +383,7 @@ public class ImportBankStatement extends SvrProcess
 				//	Get the bank account for the first statement
 				if (account == null)
 				{
-					account = MBankAccount.get (m_ctx, imp.getC_BankAccount_ID());
+					account = new MBankAccount(m_ctx, imp.getC_BankAccount_ID(), get_TrxName());
 					statement = null;
 					msglog = new StringBuilder("New Statement, Account=").append(account.getAccountNo());
 					if (log.isLoggable(Level.INFO)) log.info(msglog.toString());
@@ -391,7 +391,7 @@ public class ImportBankStatement extends SvrProcess
 				//	Create a new Bank Statement for every account
 				else if (account.getC_BankAccount_ID() != imp.getC_BankAccount_ID())
 				{
-					account = MBankAccount.get (m_ctx, imp.getC_BankAccount_ID());
+					account = new MBankAccount(m_ctx, imp.getC_BankAccount_ID(), get_TrxName());
 					statement = null;
 					msglog = new StringBuilder("New Statement, Account=").append(account.getAccountNo());
 					if (log.isLoggable(Level.INFO)) log.info(msglog.toString());
@@ -523,7 +523,7 @@ public class ImportBankStatement extends SvrProcess
 		
 		//	Set Error to indicator to not imported
 		sql = new StringBuilder ("UPDATE I_BankStatement ")
-			.append("SET I_IsImported='N', Updated=SysDate ")
+			.append("SET I_IsImported='N', Updated=getDate() ")
 			.append("WHERE I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		addLog (0, null, new BigDecimal (no), "@Errors@");

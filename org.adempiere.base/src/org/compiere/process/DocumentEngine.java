@@ -76,6 +76,11 @@ import org.osgi.service.event.Event;
 public class DocumentEngine implements DocAction
 {
 	/**
+	 * When client accounting is immediate, set this PO attribute to override the default of immediate posting after complete of document
+	 */
+	public static final String DOCUMENT_POST_IMMEDIATE_AFTER_COMPLETE = "Document.PostImmediateAfterComplete";
+
+	/**
 	 * 	Doc Engine (Drafted)
 	 * 	@param po document
 	 */
@@ -279,10 +284,10 @@ public class DocumentEngine implements DocAction
 			throw new IllegalStateException("Status=" + getDocStatus()
 				+ " - Invalid Actions: Process="  + processAction + ", Doc=" + docAction);
 		}
-		if (m_document != null)
-			m_document.get_Logger().info ("**** Action=" + m_action + " (Prc=" + processAction + "/Doc=" + docAction + ") " + m_document);
+		if (m_document != null && m_document.get_Logger().isLoggable(Level.INFO))
+				m_document.get_Logger().info ("**** Action=" + m_action + " (Prc=" + processAction + "/Doc=" + docAction + ") " + m_document);
 		boolean success = processIt (m_action);
-		if (m_document != null)
+		if (m_document != null && m_document.get_Logger().isLoggable(Level.FINE))
 			m_document.get_Logger().fine("**** Action=" + m_action + " - Success=" + success);
 		return success;
 	}	//	process
@@ -345,13 +350,28 @@ public class DocumentEngine implements DocAction
 
 				if (STATUS_Completed.equals(status) && MClient.isClientAccountingImmediate())
 				{
-					m_document.saveEx();
-					postIt();
-
-					if (m_document instanceof PO && docsPostProcess.size() > 0) {
-						for (PO docafter : docsPostProcess) {
-							@SuppressWarnings("unused")
-							String ignoreError = DocumentEngine.postImmediate(docafter.getCtx(), docafter.getAD_Client_ID(), docafter.get_Table_ID(), docafter.get_ID(), true, docafter.get_TrxName());
+					boolean postNow = true;
+					if (m_document instanceof PO)
+					{
+						Object attribute = ((PO) m_document).get_Attribute(DOCUMENT_POST_IMMEDIATE_AFTER_COMPLETE);
+						if (attribute != null && attribute instanceof Boolean)
+						{
+							postNow = (boolean) attribute;
+						}
+					}
+					
+					if (postNow)
+					{
+						m_document.saveEx();
+						postIt();
+	
+						if (m_document instanceof PO && docsPostProcess.size() > 0) {
+							for (PO docafter : docsPostProcess) {								
+								if (docafter.get_ValueAsBoolean("Posted"))
+									continue;
+								@SuppressWarnings("unused")
+								String ignoreError = DocumentEngine.postImmediate(docafter.getCtx(), docafter.getAD_Client_ID(), docafter.get_Table_ID(), docafter.get_ID(), true, docafter.get_TrxName());
+							}
 						}
 					}
 				}
@@ -1038,7 +1058,6 @@ public class DocumentEngine implements DocAction
 				|| docStatus.equals(DocumentEngine.STATUS_Invalid))
 			{
 				options[index++] = DocumentEngine.ACTION_Prepare;
-				options[index++] = DocumentEngine.ACTION_Close;
 				//	Draft Sales Order Quote/Proposal - Process
 				if ("Y".equals(isSOTrx)
 					&& ("OB".equals(orderType) || "ON".equals(orderType)))

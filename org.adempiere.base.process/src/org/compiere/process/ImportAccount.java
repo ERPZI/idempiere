@@ -29,6 +29,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MElementValue;
 import org.compiere.model.X_I_ElementValue;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 /**
  *	Import Accounts from I_ElementValue
@@ -98,7 +99,7 @@ public class ImportAccount extends SvrProcess
 		//	Delete Old Imported
 		if (m_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_ElementValue ")
+			sql = new StringBuilder ("DELETE FROM I_ElementValue ")
 				.append("WHERE I_IsImported='Y'").append(clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
@@ -109,9 +110,9 @@ public class ImportAccount extends SvrProcess
 			.append("SET AD_Client_ID = COALESCE (AD_Client_ID, ").append(m_AD_Client_ID).append("),")
 			.append(" AD_Org_ID = COALESCE (AD_Org_ID, 0),")
 			.append(" IsActive = COALESCE (IsActive, 'Y'),")
-			.append(" Created = COALESCE (Created, SysDate),")
+			.append(" Created = COALESCE (Created, getDate()),")
 			.append(" CreatedBy = COALESCE (CreatedBy, 0),")
-			.append(" Updated = COALESCE (Updated, SysDate),")
+			.append(" Updated = COALESCE (Updated, getDate()),")
 			.append(" UpdatedBy = COALESCE (UpdatedBy, 0),")
 			.append(" I_ErrorMsg = ' ',")
 			.append(" Processed = 'N', ")
@@ -333,7 +334,7 @@ public class ImportAccount extends SvrProcess
 
 		//	Set Error to indicator to not imported
 		sql = new StringBuilder ("UPDATE I_ElementValue ")
-			.append("SET I_IsImported='N', Updated=SysDate ")
+			.append("SET I_IsImported='N', Updated=getDate() ")
 			.append("WHERE I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		addLog (0, null, new BigDecimal (no), "@Errors@");
@@ -605,7 +606,7 @@ public class ImportAccount extends SvrProcess
 				{
 					if (m_createNewCombination)
 					{
-						MAccount acct = MAccount.get(getCtx(), C_ValidCombination_ID);
+						MAccount acct = new MAccount(Env.getCtx(), C_ValidCombination_ID, (String)null);
 						acct.setAccount_ID(C_ElementValue_ID);
 						if (acct.save())
 						{

@@ -35,8 +35,9 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.adempiere.base.Service;
+import org.adempiere.base.Core;
 import org.compiere.Adempiere;
+import org.compiere.db.AdempiereDatabase;
 import org.compiere.db.CConnection;
 import org.compiere.model.MClient;
 import org.idempiere.distributed.IClusterMember;
@@ -560,7 +561,7 @@ public class CLogMgt
 		//
 		//cluster info
 		if (Env.getAD_Client_ID(Env.getCtx()) == 0) {
-			IClusterService service = Service.locator().locate(IClusterService.class).getService();
+			IClusterService service = Core.getClusterService();
 			if (service != null) {
 				IClusterMember local = service.getLocalMember();
 				Collection<IClusterMember> members = service.getMembers();				
@@ -669,18 +670,6 @@ public class CLogMgt
 		//  Host
 		sb.append(cc.getAppsHost());
 		
-		if (Ini.isClient())
-		{
-			sb.append(" (");
-
-			//  Server
-			if (!cc.getAppsHost().equalsIgnoreCase("MyAppsServer") && cc.isAppsServerOK(false))
-				sb.append(CConnection.get().getServerVersion());
-			else
-				sb.append(getMsg("NotActive"));
-			//
-			sb.append(")\n  ");
-		}
 		//
 		return sb.toString();
 	}   //  getServerInfo
@@ -692,9 +681,17 @@ public class CLogMgt
 	private static String getDatabaseInfo()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(CConnection.get().getDbHost()).append(" : ")
-			.append(CConnection.get().getDbPort()).append(" / ")
+		sb.append(CConnection.get().getDbHost()).append(":")
+			.append(CConnection.get().getDbPort()).append("/")
 			.append(CConnection.get().getDbName());
+		
+		AdempiereDatabase db = DB.getDatabase();
+		sb.append(" (").append(db.getName());
+		if (!DB.isOracle()) 
+		{
+			sb.append(", ").append(db.isNativeMode() ? "Native Dialect" : "Oracle Dialect");
+		}
+		sb.append(")");
 		//  Connection Manager
 		if (CConnection.get().isViaFirewall())
 			sb.append(getMsg("via")).append(" ")

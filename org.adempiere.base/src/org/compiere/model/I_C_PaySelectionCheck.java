@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_PaySelectionCheck
  *  @author iDempiere (generated) 
- *  @version Release 7.1
+ *  @version Release 8.2
  */
 public interface I_C_PaySelectionCheck 
 {
@@ -333,12 +333,12 @@ public interface I_C_PaySelectionCheck
     /** Column name ZI_Pay_BPartner_ID */
     public static final String COLUMNNAME_ZI_Pay_BPartner_ID = "ZI_Pay_BPartner_ID";
 
-	/** Set Payee Partner.
+	/** Set Alternative Payee Partner.
 	  * Business Partner responsible for the payment (Alternative payee)
 	  */
 	public void setZI_Pay_BPartner_ID (int ZI_Pay_BPartner_ID);
 
-	/** Get Payee Partner.
+	/** Get Alternative Payee Partner.
 	  * Business Partner responsible for the payment (Alternative payee)
 	  */
 	public int getZI_Pay_BPartner_ID();

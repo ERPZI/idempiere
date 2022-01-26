@@ -17,6 +17,7 @@ import org.compiere.model.MInfoWindow;
 import org.compiere.model.MProcess;
 import org.compiere.model.MTab;
 import org.compiere.model.MTask;
+import org.compiere.model.MUserDefInfo;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.DB;
@@ -201,6 +202,9 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 			Object[] params = new Object[]{helpTextbox.getValue(), ctxHelpMsg.get_ID(), ctxHelpMsg.getAD_Client_ID(), Env.getAD_Language(Env.getCtx())};
 			DB.executeUpdateEx(update.toString(), params, trx.getTrxName());			
 		} else {
+		  try {
+			PO.setCrossTenantSafe();
+			/* this whole block code is forcefully writing records on System tenant */
 			MCtxHelpSuggestion suggestion = new MCtxHelpSuggestion(Env.getCtx(), 0, trx.getTrxName());
 			suggestion.setClientOrg(0, 0);
 			if (ctxHelpMsg != null) {
@@ -239,7 +243,7 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 					} else {
 						StringBuilder insert = new StringBuilder("Insert Into AD_CtxHelpMsg_Trl (AD_Client_ID, AD_Org_ID, AD_CtxHelpMsg_ID, IsActive, IsTranslated, AD_Language, MsgText,");
 						insert.append("Created, CreatedBy, Updated, UpdatedBy, AD_CtxHelpMsg_Trl_UU)")
-							.append(" Values (?, ?, ?, 'Y', 'N', ?, ?, sysdate, ?, sysdate, ?, generate_uuid()) ");
+							.append(" Values (?, ?, ?, 'Y', 'N', ?, ?, getDate(), ?, getDate(), ?, generate_uuid()) ");
 						List<Object> params = new ArrayList<Object>();
 						params.add(0);
 						params.add(0);
@@ -260,7 +264,10 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 			suggestion.setMsgText(helpTextbox.getValue());
 			suggestion.setIsSaveAsTenantCustomization(false);
 			
-			suggestion.saveEx();			
+			suggestion.saveEx();
+		  } finally {
+			  PO.clearCrossTenantSafe();
+		  }
 		} 
 		this.detach();
 	}
@@ -364,7 +371,13 @@ public class WCtxHelpSuggestion extends Window implements EventListener<Event> {
 			ctxHelp.setCtxType(X_AD_CtxHelp.CTXTYPE_Workflow);
 		} else if (po instanceof MInfoWindow) {
 			MInfoWindow info = (MInfoWindow) po;
+			// Load User Def
 			String name = info.getName();
+			MUserDefInfo userDef = MUserDefInfo.getBestMatch(Env.getCtx(), info.getAD_InfoWindow_ID());
+			if(userDef != null && !Util.isEmpty(userDef.getName())) {
+				name = userDef.getName();
+			} 
+
 			String fullName = "Info " + name;
 			if (fullName.length() <= 60) {
 				ctxHelp.setName(fullName);

@@ -2,7 +2,7 @@
 <feature
       id="org.adempiere.base.feature"
       label="Adempiere Base"
-      version="7.1.0.qualifier"
+      version="8.2.0.qualifier"
       provider-name="iDempiere Community">
 
    <description url="http://www.example.com/description">
@@ -63,14 +63,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.adempiere.extend"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.adempiere.ui"
          download-size="0"
          install-size="0"
@@ -79,13 +71,6 @@
 
    <plugin
          id="org.apache.ecs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.restlet"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -377,7 +362,7 @@
          unpack="false"/>
 
    <plugin
-         id="javax.annotation-api"
+         id="jakarta.annotation-api"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -395,14 +380,6 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="javax.transaction"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
    <plugin
@@ -446,26 +423,11 @@
          unpack="false"/>
 
    <plugin
-         id="groovy-swing"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="groovy-xml"
          download-size="0"
          install-size="0"
          version="0.0.0"
          fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="javax.jws"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -512,6 +474,35 @@
 
    <plugin
          id="jakarta.xml.bind-api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.poi.poi-ooxml"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="groovy-sql"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.compress"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jakarta.jws-api"
          download-size="0"
          install-size="0"
          version="0.0.0"

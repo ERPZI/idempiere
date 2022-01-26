@@ -162,7 +162,7 @@ public class AcctProcessor extends AdempiereServer
 				&& m_model.getAD_Table_ID() != AD_Table_ID)
 				continue;
 
-			StringBuffer sql = new StringBuffer ("SELECT DISTINCT ProcessedOn FROM ").append(TableName)
+			StringBuilder sql = new StringBuilder ("SELECT DISTINCT ProcessedOn FROM ").append(TableName)
 				.append(" WHERE AD_Client_ID=? AND ProcessedOn<?")
 				.append(" AND Processed='Y' AND Posted IN ('N','d') AND IsActive='Y'");
 			PreparedStatement pstmt = null;
@@ -212,7 +212,7 @@ public class AcctProcessor extends AdempiereServer
 				&& m_model.getAD_Table_ID() != AD_Table_ID)
 				continue;
 			//  SELECT * FROM table
-			StringBuffer sql = new StringBuffer ("SELECT * FROM ").append(TableName)
+			StringBuilder sql = new StringBuilder ("SELECT * FROM ").append(TableName)
 				.append(" WHERE AD_Client_ID=? AND (ProcessedOn");
 			if (processedOn.compareTo(Env.ZERO) != 0)
 				sql.append("=?");
@@ -251,7 +251,7 @@ public class AcctProcessor extends AdempiereServer
 					{
 						MTable table = MTable.get(Env.getCtx(), AD_Table_ID);
 						int Record_ID = rs.getInt(table.getKeyColumns()[0]);
-						sql = new StringBuffer("SELECT COUNT(*) FROM ").append(table.getTableName());
+						sql = new StringBuilder("SELECT COUNT(*) FROM ").append(table.getTableName());
 						sql.append(" WHERE Posted='Y' AND ").append(table.getTableName()).append("_ID=").append(Record_ID);
 						int no = DB.getSQLValue(null, sql.toString());
 						if (no > 0 )

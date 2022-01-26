@@ -22,14 +22,14 @@ import java.util.Properties;
 
 /** Generated Model for AD_Tab_Customization
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_AD_Tab_Customization extends PO implements I_AD_Tab_Customization, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20201220L;
 
     /** Standard Constructor */
     public X_AD_Tab_Customization (Properties ctx, int AD_Tab_Customization_ID, String trxName)
@@ -65,7 +65,7 @@ public class X_AD_Tab_Customization extends PO implements I_AD_Tab_Customization
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_AD_Tab_Customization[")
+      StringBuilder sb = new StringBuilder ("X_AD_Tab_Customization[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -193,5 +193,29 @@ public class X_AD_Tab_Customization extends PO implements I_AD_Tab_Customization
 	public String getIsDisplayedGrid () 
 	{
 		return (String)get_Value(COLUMNNAME_IsDisplayedGrid);
+	}
+
+	/** Set Quick Form.
+		@param IsQuickForm 
+		Display in Quick Form
+	  */
+	public void setIsQuickForm (boolean IsQuickForm)
+	{
+		set_Value (COLUMNNAME_IsQuickForm, Boolean.valueOf(IsQuickForm));
+	}
+
+	/** Get Quick Form.
+		@return Display in Quick Form
+	  */
+	public boolean isQuickForm () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsQuickForm);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 }

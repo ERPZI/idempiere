@@ -53,6 +53,7 @@ import org.compiere.model.MClientInfo;
 import org.compiere.model.MQuery;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
+import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
 import org.compiere.print.ArchiveEngine;
 import org.compiere.print.CPaper;
@@ -67,7 +68,9 @@ import org.compiere.print.PrintData;
 import org.compiere.print.PrintDataElement;
 import org.compiere.print.util.SerializableMatrix;
 import org.compiere.print.util.SerializableMatrixImpl;
+import org.compiere.report.MReportLine;
 import org.compiere.util.CLogger;
+import org.compiere.util.CacheMgt;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -1765,6 +1768,11 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//
 		HashMap<Point,Color> rowColBackground = new HashMap<Point,Color>();
 		rowColBackground.put(new Point(TableElement.HEADER_ROW,TableElement.ALL), tf.getHeaderBG_Color());
+		//
+		HashMap <Point, MReportLine> rowColReportLine = new HashMap <Point, MReportLine>();
+		//
+		HashMap <String, Integer> colPositions = new HashMap <String, Integer>();
+
 		//	Sizes
 		boolean multiLineHeader = tf.isMultiLineHeader();
 		int pageNoStart = m_pageNo;
@@ -1809,12 +1817,22 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					additionalLines.put(Integer.valueOf(col), Integer.valueOf(item.getBelowColumn()-1));
 					if (!item.isSuppressNull())
 					{
+						if (item.is_Immutable())
+							item = new MPrintFormatItem(item);
 						item.setIsSuppressNull(true);	//	display size will be set to 0 in TableElement
-						item.saveEx();
+						try {
+							//this can be tenant or system print format
+							PO.setCrossTenantSafe();
+							item.saveEx();
+						} finally {
+							PO.clearCrossTenantSafe();
+						}
+						CacheMgt.get().reset(MPrintFormat.Table_Name, format.get_ID());
 					}
 				}
 				columnHeader[col] = new ValueNamePair(item.getColumnName(),
 					item.getPrintName(format.getLanguage()));
+				colPositions.put(item.getPrintName(), col);
 				columnMaxWidth[col] = item.getMaxWidth();
 				fixedWidth[col] = (columnMaxWidth[col] != 0 && item.isFixedWidth());
 				colSuppressRepeats[col] = item.isSuppressRepeats();
@@ -1864,10 +1882,13 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		String pkColumnName = null;
 		ArrayList<Integer> functionRows = new ArrayList<Integer>();
 		ArrayList<Integer> pageBreak = new ArrayList<Integer>();		
+		ArrayList<Integer> finReportSumRows = new ArrayList<Integer>();
+		int lastLevelNo = 0;
 
 		//	for all rows
 		for (int row = 0; row < rows; row++)
 		{
+			int levelNo = 0;
 			ArrayList<Serializable> columns = new ArrayList<Serializable>();
 			printData.setRowIndex(row);
 			if (printData.isFunctionRow())
@@ -1883,23 +1904,32 @@ public class LayoutEngine implements Pageable, Printable, Doc
 						log.finer("PageBreak row=" + row);
 				}
 			}
-			//	Summary/Line Levels for Finanial Reports
+			//	Summary/Line Levels for Financial Reports
 			else
 			{
-				int levelNo = printData.getLineLevelNo();
+				levelNo = printData.getLineLevelNo();
+				if (levelNo < 0)
+					levelNo = -levelNo;
+
+				if (levelNo < lastLevelNo)
+					finReportSumRows.add(row);
+
 				if (levelNo != 0)
 				{
-					if (levelNo < 0)
-						levelNo = -levelNo;
 					Font base = printFont.getFont();
 					if (levelNo == 1)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font (base.getName(),
-							Font.ITALIC, base.getSize()-levelNo));
+						rowColFont.put(new Point(row, TableElement.ALL),
+								new Font(base.getName(), Font.ITALIC, base.getSize() - levelNo));
 					else if (levelNo == 2)
-						rowColFont.put(new Point(row, TableElement.ALL), new Font (base.getName(),
-							Font.PLAIN, base.getSize()-levelNo));
+						rowColFont.put(new Point(row, TableElement.ALL),
+								new Font(base.getName(), Font.PLAIN, base.getSize() - levelNo));
 				}
+
+				lastLevelNo = levelNo;
 			}
+
+			MReportLine rLine = printData.getMReportLine();
+
 			//	for all columns
 			for (int c = 0; c < format.getItemCount(); c++)
 			{
@@ -1908,6 +1938,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 				Serializable dataElement = null;
 				if (item.isPrinted())	//	Text Columns
 				{
+					if (rLine != null && levelNo == 0 && item.getColumnName().startsWith("Col_"))
+						rowColReportLine.put(new Point(row, colPositions.get(item.getPrintName())), rLine);
+
 					if ( !PrintDataEvaluatee.hasPageLogic(item.getDisplayLogic()) && !isDisplayed(printData, item) )
 					{
 						;
@@ -1979,7 +2012,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			elements, pk, pkColumnName,
 			pageNoStart, firstPage, nextPages, repeatedColumns, additionalLines,
 			rowColFont, rowColColor, rowColBackground,
-			tf, pageBreak, colSuppressRepeats);
+			tf, pageBreak, colSuppressRepeats, rowColReportLine, finReportSumRows);
 		table.layout(0,0,false, MPrintFormatItem.FIELDALIGNMENTTYPE_LeadingLeft);
 		if (m_tableElement == null)
 			m_tableElement = table;

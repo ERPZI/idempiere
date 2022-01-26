@@ -66,6 +66,7 @@ import org.compiere.model.MLookupFactory;
 import org.compiere.model.MLookupInfo;
 import org.compiere.model.MNote;
 import org.compiere.model.MPInstance;
+import org.compiere.model.MPInstanceLog;
 import org.compiere.model.MPInstancePara;
 import org.compiere.model.MProcess;
 import org.compiere.model.MRole;
@@ -73,7 +74,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.Query;
 import org.compiere.model.SystemIDs;
-import org.compiere.model.X_AD_ReportView;
+import org.compiere.model.MReportView;
 import org.compiere.print.MPrintFormat;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoUtil;
@@ -107,7 +108,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8232462327114180974L;
+	private static final long serialVersionUID = -9220870163215609274L;
 
 	private static final String ON_COMPLETE = "onComplete";
 	private static final String ON_STATUS_UPDATE = "onStatusUpdate";
@@ -542,7 +543,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		{
 			if (pr.getAD_ReportView_ID() > 0)
 			{
-				X_AD_ReportView m_Reportview = new X_AD_ReportView(m_ctx, pr.getAD_ReportView_ID(), null);
+				MReportView m_Reportview = MReportView.get(m_ctx, pr.getAD_ReportView_ID());
 				table_ID = m_Reportview.getAD_Table_ID();
 			}
 			else if (pr.getAD_PrintFormat_ID() > 0)
@@ -611,8 +612,9 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		
 		if (m_isCanExport)
 		{
-			freportType.appendItem("Excel", "XLS");
+			freportType.appendItem("XLS", "XLS");
 			freportType.appendItem("CSV", "CSV");
+			freportType.appendItem("XLSX", "XLSX");
 		}
 		freportType.setSelectedIndex(-1);
 	}
@@ -820,15 +822,15 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	
 	protected void startProcess()
 	{
+		if (!parameterPanel.validateParameters())
+			return;
+
 		if (m_pi.isProcessRunning(parameterPanel.getParameters())) {
 			FDialog.error(getWindowNo(), "ProcessAlreadyRunning");
 			log.log(Level.WARNING, "Abort process " + m_AD_Process_ID + " because it is already running");
 			return;
 		}
 
-		if (!parameterPanel.validateParameters())
-			return;
-		
 		startProcess0();
 	}
 	
@@ -1211,6 +1213,8 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 							m_pi.setExportFileExtension("csv");
 						else if ("XLS".equals(m_pi.getReportType()))
 							m_pi.setExportFileExtension("xls");
+						else if ("XLSX".equals(m_pi.getReportType()))
+							m_pi.setExportFileExtension("xlsx");
 						else
 							m_pi.setExportFileExtension("pdf");
 					}
@@ -1257,6 +1261,9 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 					}
 					if (attachment != null)
 						attachment.saveEx();
+					MPInstanceLog il = instance.addLog(null, 0, null, Msg.parseTranslation(m_ctx, "@Created@ @AD_Note_ID@ " + note.getAD_Note_ID()),
+							MNote.Table_ID, note.getAD_Note_ID());
+					il.saveEx();
 				}
 			} catch (Exception e) {
 				log.log(Level.SEVERE, e.getLocalizedMessage());				

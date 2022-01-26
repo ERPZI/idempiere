@@ -78,6 +78,16 @@ import org.zkoss.zul.South;
 
 import com.itextpdf.text.pdf.PdfReader;
 
+//MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+//
+
 /**
  *  Payment Print & Export
  *
@@ -361,7 +371,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		if(sumPayments != null)
 			fSumPayments.setValue(sumPayments);
 
-		bProcess.setEnabled(PaymentRule.equals("T"));
+		//MPo, 15/11/2021 HSBC Host-to-Host and PromptPay
+		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
 
 		if(documentNo != null)
 			fDocumentNo.setValue(documentNo);
@@ -406,7 +417,83 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		}
 	}   // getPluginFeatures 
 	
+	//MPo, 29/8/21 
+	int no = 0;
+	StringBuffer err = new StringBuffer("");
+	String PaymentRule = null;
+	File tempFile = null;
+	String filenameForDownload = "";
 	
+	protected void makeFile() {
+		try {
+		no = loadPaymentExportClass(err) ;
+		if (no >= 0)
+		{
+			//  Get File Info
+			//MPo, 15/11/21 HSBC Host-to-Host ACH, COS, PromptPay and BBL Smart, DirectCredit 
+			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+				java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
+				java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
+				java.util.Date now = new java.util.Date();
+				//MPo, 4/8/18 Add payment method to file name
+				String sql = "SELECT org.value FROM C_PaySelection ps, ad_org org WHERE C_PaySelection_ID = ? AND ps.ad_org_id = org.ad_org_id";
+				java.sql.PreparedStatement pstmt = null; 
+				ResultSet rs = null;
+				String orgValue = null;
+				try {
+					pstmt = DB.prepareStatement(sql, null);
+					pstmt.setInt(1, m_C_PaySelection_ID);
+					rs = pstmt.executeQuery();
+					if (rs.next()) 	{
+						orgValue = rs.getString(1);
+					}
+				}
+				catch (SQLException e) {
+				}
+				finally {
+					DB.close(rs, pstmt);
+					rs = null;
+					pstmt = null;
+				}	
+				
+				//MPo, 15/11/21 Add HSBC payment rule PromptPay
+				String ziPaymentRule = "";
+				switch (PaymentRule) {
+				  case "Z":
+				    ziPaymentRule="HSBC_COS";
+				    break;
+				  case "T":
+					ziPaymentRule="HSBC_ACH";
+					break;
+				  case "W":
+						ziPaymentRule="HSBC_PRP";
+						break;
+				  case "X":
+					ziPaymentRule="BBL_SMART";
+					break;
+				  case "Y":
+					ziPaymentRule="BBL_DC";
+					break;
+				}
+				//
+				
+				filenameForDownload = ziPaymentRule + orgValue + dateFormatFile.format(now) + timeFormatFile.format(now);
+				tempFile = File.createTempFile(filenameForDownload, ".txt");
+			}
+			else {
+			tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), m_PaymentExport.getFilenameSuffix());
+			filenameForDownload = m_PaymentExport.getFilenamePrefix() + m_PaymentExport.getFilenameSuffix();
+			}
+			no = m_PaymentExport.exportToFile(m_checks,(Boolean) fDepositBatch.getValue(),PaymentRule, tempFile, err);
+		}
+	} 
+		catch (Exception e)
+		{
+		log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+	}
+}
+	
+	//
 	/**************************************************************************
 	 *  Export payments to file
 	 */
@@ -414,88 +501,13 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	{
 		if (fPaymentRule.getSelectedItem() == null)
 			return;
-		String PaymentRule = fPaymentRule.getSelectedItem().toValueNamePair().getValue();
+		PaymentRule = fPaymentRule.getSelectedItem().toValueNamePair().getValue();
 		log.info(PaymentRule);
 		if (!getChecks(PaymentRule))
 			return;
-
 		try
 		{
-			int no = 0;
-			StringBuffer err = new StringBuffer("");
-			if (m_PaymentExportClass == null || m_PaymentExportClass.trim().length() == 0) {
-				m_PaymentExportClass = "org.compiere.util.GenericPaymentExport";
-			}
-			
-			File tempFile = null;
-			String filenameForDownload = "";
-			
-			no = loadPaymentExportClass(err) ;
-			
-			if (no >= 0)
-			{
-				//  Get File Info
-				//MPo, 26/5/18 add original change: 1/11/17
-				//MPo, 4/8/18 Add HSBC Direct Deposit payment method 
-				if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
-					java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
-					java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
-					java.util.Date now = new java.util.Date();
-					//MPo, 4/8/18 Add payment method to file name
-					String sql = "SELECT org.value FROM C_PaySelection ps, ad_org org WHERE C_PaySelection_ID = ? AND ps.ad_org_id = org.ad_org_id";
-					java.sql.PreparedStatement pstmt = null; 
-					ResultSet rs = null;
-					String orgValue = null;
-					try {
-						pstmt = DB.prepareStatement(sql, null);
-						pstmt.setInt(1, m_C_PaySelection_ID);
-						rs = pstmt.executeQuery();
-						if (rs.next()) 	{
-							orgValue = rs.getString(1);
-						}
-					}
-					catch (SQLException e) {
-						
-					}
-					finally {
-						DB.close(rs, pstmt);
-						rs = null;
-						pstmt = null;
-					}	
-					
-					//MPo, 28/9/20
-					String ziPaymentRule = "";
-					switch (PaymentRule) {
-					  case "Z":
-					    ziPaymentRule="HSBC_COS";
-					    break;
-					  case "T":
-						ziPaymentRule="HSBC_ACH";
-						break;
-					  case "X":
-						ziPaymentRule="BBL_SMART";
-						break;
-					  case "Y":
-						ziPaymentRule="BBL_DC";
-						break;
-					}
-					//
-					
-					//filenameForDownload = "HSBCiFile" + orgValue + (PaymentRule.equals("Z") ? "COS" : "ACH") + dateFormatFile.format(now) + timeFormatFile.format(now);
-					filenameForDownload = ziPaymentRule + orgValue + dateFormatFile.format(now) + timeFormatFile.format(now);
-					tempFile = File.createTempFile(filenameForDownload, ".txt");
-				}
-				else {
-				//	
-				tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), m_PaymentExport.getFilenameSuffix());
-				filenameForDownload = m_PaymentExport.getFilenamePrefix() + m_PaymentExport.getFilenameSuffix();
-				//MPo, 26/5/18 add original change: 1/11/17	
-				}
-				//
-				
-				no = m_PaymentExport.exportToFile(m_checks,(Boolean) fDepositBatch.getValue(),PaymentRule, tempFile, err);
-			}
-			
+			makeFile();
 			if (no >= 0) {
 				Filedownload.save(new FileInputStream(tempFile), m_PaymentExport.getContentType(), filenameForDownload);
 				FDialog.info(m_WindowNo, form, "Saved",
@@ -511,7 +523,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 							MPaySelectionCheck.confirmPrint (m_checks, m_batch, (Boolean) fDepositBatch.getValue());
 							//	document No not updated
 						}
-						
 					}
 				});
 			} else {
@@ -530,11 +541,47 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	 */
 	protected void cmd_EFT()
 	{
-		String PaymentRule = fPaymentRule.getSelectedItem().toValueNamePair().getValue();
+		PaymentRule = fPaymentRule.getSelectedItem().toValueNamePair().getValue();
 		log.info(PaymentRule);
 		if (!getChecks(PaymentRule))
 			return;
-		dispose();
+		//MPo, 02/01/22 HSBC Host-to-Host payment file S3 root path
+		//String attachmentPathRoot = "hsbch2h-test";
+		//String attachmentPathRoot = "hsbch2h"; //>>>> CHANGE!!
+		String attachmentPathRoot = org.compiere.model.MSysConfig.getValue("ZI_HSBC_H2H_S3_ROOT","hsbch2h-test");
+		System.out.println("SysConfig ZI_HSBC_H2H_S3_ROOT: " + attachmentPathRoot);
+		try 
+		{	
+			//MPo, 15/11/21, Supports Host-to-Host for HSBC ACH/"T", HSBC COS/"Z" and HSCB PromptPay/"W"
+			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
+			else {
+			FDialog.ask(m_WindowNo, form, "WPayTransferPayment?", new Callback<Boolean>() 
+			{
+				@Override
+				public void onCallback(Boolean result) 
+				{	
+					if (result) 
+					{
+						makeFile();
+						if (no >= 0) {
+							String fileLocation = "inbox/" + filenameForDownload + ".txt";
+							AmazonS3 s3 = getS3Client();
+							s3.putObject(new PutObjectRequest(attachmentPathRoot, fileLocation, tempFile));
+							FDialog.info(m_WindowNo, form, "Payment file " + filenameForDownload + ".txt sent to AWS S3",
+								Msg.getMsg(Env.getCtx(), "NoOfLines") + "=" + no);
+							MPaySelectionCheck.confirmPrint (m_checks, m_batch, (Boolean) fDepositBatch.getValue());
+							dispose();
+						}
+						
+					}
+				}
+			});
+				
+		}
+		} 
+		catch (Exception e) {
+			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+		}
 	}   //  cmd_EFT
 
 	/**
@@ -768,5 +815,20 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			loadPaySelectInfo();
 		}
 	}
+	//MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
+	private AmazonS3 getS3Client() {
+		AWSCredentials credentials = null;
+		try {
+	        credentials = new ProfileCredentialsProvider().getCredentials();
+	    } catch (Exception e) {
+			log.log(Level.SEVERE, "Cannot log in to AWS S3, check AWS credentials file in /home/user/.aws/credentials, it should look like: [default]    aws_access_key_id=XXX   aws_secret_access_key=YYY");
+	    }
+		
+		AmazonS3 s3 = new AmazonS3Client(credentials);
+	    Region singapore = Region.getRegion(Regions.AP_SOUTHEAST_1);
+	    s3.setRegion(singapore);
+		return s3;
+	}
+	//
 
 }   //  PayPrint

@@ -21,6 +21,7 @@ import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.adempiere.util.ServerContext;
+import org.adempiere.util.ServerContextURLHandler;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.DrillCommand;
 import org.adempiere.webui.component.TokenCommand;
@@ -85,7 +87,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3320656546509525766L;
+	private static final long serialVersionUID = -6725805283410008847L;
 
 	public static final String APPLICATION_DESKTOP_KEY = "application.desktop";
 
@@ -150,6 +152,11 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
         else
         {
         	Clients.showBusy(null);
+        	if (session.getAttribute(CLIENT_INFO) != null)
+        	{
+        		clientInfo = (ClientInfo) session.getAttribute(CLIENT_INFO);
+        	}
+        	getRoot().addEventListener(Events.ON_CLIENT_INFO, this);
         	//use echo event to make sure server push have been started when loginCompleted is call
         	Events.echoEvent(ON_LOGIN_COMPLETED, this, null);
         }
@@ -248,7 +255,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 
 		keyListener = new Keylistener();
 		keyListener.setPage(this.getPage());
-		keyListener.setCtrlKeys("@a@c@d@e@f@h@m@n@o@p@r@s@t@z@x@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup");
+		keyListener.setCtrlKeys("@a@c@d@e@f@h@l@m@n@o@p@r@s@t@z@x@#left@#right@#up@#down@#home@#end#enter^u@u@#pgdn@#pgup$#f2^#f2");
 		keyListener.setAutoBlur(false);
 		
 		//create new desktop
@@ -454,7 +461,7 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 			clientInfo.desktopXOffset = c.getDesktopXOffset();
 			clientInfo.desktopYOffset = c.getDesktopYOffset();
 			clientInfo.orientation = c.getOrientation();
-			clientInfo.timeZone = c.getTimeZone();			
+			clientInfo.timeZone = TimeZone.getTimeZone(c.getZoneId());			
 			String ua = Servlets.getUserAgent((ServletRequest) Executions.getCurrent().getNativeRequest());
 			clientInfo.userAgent = ua;
 			ua = ua.toLowerCase();
@@ -518,9 +525,14 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		//save context for re-login
 		Properties properties = new Properties();
 		Env.setContext(properties, Env.AD_CLIENT_ID, Env.getAD_Client_ID(Env.getCtx()));
+		Env.setContext(properties, "#AD_Client_Name", Env.getContext(Env.getCtx(), "#AD_Client_Name"));
 		Env.setContext(properties, Env.AD_ORG_ID, Env.getAD_Org_ID(Env.getCtx()));
 		Env.setContext(properties, Env.AD_USER_ID, user.getAD_User_ID());
+		Env.setContext(properties, "#SalesRep_ID", user.getAD_User_ID());
+		Env.setContext(properties, "#AD_User_Name", Env.getContext(Env.getCtx(), "#AD_User_Name"));
 		Env.setContext(properties, Env.AD_ROLE_ID, Env.getAD_Role_ID(Env.getCtx()));
+		Env.setContext(properties, "#AD_Role_Name", Env.getContext(Env.getCtx(), "#AD_Role_Name"));
+		Env.setContext(properties, "#User_Level", Env.getContext(Env.getCtx(), "#User_Level"));
 		Env.setContext(properties, Env.AD_ORG_NAME, Env.getContext(Env.getCtx(), Env.AD_ORG_NAME));
 		Env.setContext(properties, Env.M_WAREHOUSE_ID, Env.getContext(Env.getCtx(), Env.M_WAREHOUSE_ID));
 		Env.setContext(properties, UserPreference.LANGUAGE_NAME, Env.getContext(Env.getCtx(), UserPreference.LANGUAGE_NAME));
@@ -529,12 +541,18 @@ public class AdempiereWebUI extends Window implements EventListener<Event>, IWeb
 		Env.setContext(properties, ITheme.ZK_TOOLBAR_BUTTON_SIZE, Env.getContext(Env.getCtx(), ITheme.ZK_TOOLBAR_BUTTON_SIZE));
 		Env.setContext(properties, ITheme.USE_CSS_FOR_WINDOW_SIZE, Env.getContext(Env.getCtx(), ITheme.USE_CSS_FOR_WINDOW_SIZE));
 		Env.setContext(properties, ITheme.USE_FONT_ICON_FOR_IMAGE, Env.getContext(Env.getCtx(), ITheme.USE_FONT_ICON_FOR_IMAGE));
+		Env.setContext(properties, "#clientInfo_desktopWidth", clientInfo.desktopWidth);
+		Env.setContext(properties, "#clientInfo_desktopHeight", clientInfo.desktopHeight);
+		Env.setContext(properties, "#clientInfo_orientation", clientInfo.orientation);
+		Env.setContext(properties, "#clientInfo_mobile", clientInfo.tablet);
 		
 		Desktop desktop = Executions.getCurrent().getDesktop();
 		Locale locale = (Locale) desktop.getSession().getAttribute(Attributes.PREFERRED_LOCALE);
 		HttpServletRequest httpRequest = (HttpServletRequest) Executions.getCurrent().getNativeRequest();		
 		Env.setContext(properties, SessionContextListener.SERVLET_SESSION_ID, httpRequest.getSession().getId());
-		
+		if (Env.getCtx().get(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER) != null)
+			properties.put(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER, Env.getCtx().get(ServerContextURLHandler.SERVER_CONTEXT_URL_HANDLER));
+
 		//stop key listener
 		if (keyListener != null) {
 			keyListener.detach();

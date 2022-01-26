@@ -23,14 +23,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_ReportLine
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20201220L;
 
     /** Standard Constructor */
     public X_PA_ReportLine (Properties ctx, int PA_ReportLine_ID, String trxName)
@@ -74,8 +74,8 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_PA_ReportLine[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_PA_ReportLine[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -197,12 +197,38 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		return false;
 	}
 
+	/** Set Show Opposite Sign.
+		@param IsShowOppositeSign 
+		Display values with the opposite sign
+	  */
+	public void setIsShowOppositeSign (boolean IsShowOppositeSign)
+	{
+		set_Value (COLUMNNAME_IsShowOppositeSign, Boolean.valueOf(IsShowOppositeSign));
+	}
+
+	/** Get Show Opposite Sign.
+		@return Display values with the opposite sign
+	  */
+	public boolean isShowOppositeSign () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsShowOppositeSign);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** LineType AD_Reference_ID=241 */
 	public static final int LINETYPE_AD_Reference_ID=241;
 	/** Segment Value = S */
 	public static final String LINETYPE_SegmentValue = "S";
 	/** Calculation = C */
 	public static final String LINETYPE_Calculation = "C";
+	/** Blank line = B */
+	public static final String LINETYPE_BlankLine = "B";
 	/** Set Line Type.
 		@param LineType Line Type	  */
 	public void setLineType (String LineType)
@@ -297,6 +323,35 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** OverlineStrokeType AD_Reference_ID=200174 */
+	public static final int OVERLINESTROKETYPE_AD_Reference_ID=200174;
+	/** Dotted = DT */
+	public static final String OVERLINESTROKETYPE_Dotted = "DT";
+	/** Dashed = DS */
+	public static final String OVERLINESTROKETYPE_Dashed = "DS";
+	/** Double Dotted = DDT */
+	public static final String OVERLINESTROKETYPE_DoubleDotted = "DDT";
+	/** Double Dashed = DDS */
+	public static final String OVERLINESTROKETYPE_DoubleDashed = "DDS";
+	/** Double Solid = DSD */
+	public static final String OVERLINESTROKETYPE_DoubleSolid = "DSD";
+	/** Solid = SD */
+	public static final String OVERLINESTROKETYPE_Solid = "SD";
+	/** Set Overline Stroke Type.
+		@param OverlineStrokeType Overline Stroke Type	  */
+	public void setOverlineStrokeType (String OverlineStrokeType)
+	{
+
+		set_Value (COLUMNNAME_OverlineStrokeType, OverlineStrokeType);
+	}
+
+	/** Get Overline Stroke Type.
+		@return Overline Stroke Type	  */
+	public String getOverlineStrokeType () 
+	{
+		return (String)get_Value(COLUMNNAME_OverlineStrokeType);
 	}
 
 	/** PAAmountType AD_Reference_ID=53328 */
@@ -466,5 +521,34 @@ public class X_PA_ReportLine extends PO implements I_PA_ReportLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** UnderlineStrokeType AD_Reference_ID=200174 */
+	public static final int UNDERLINESTROKETYPE_AD_Reference_ID=200174;
+	/** Dotted = DT */
+	public static final String UNDERLINESTROKETYPE_Dotted = "DT";
+	/** Dashed = DS */
+	public static final String UNDERLINESTROKETYPE_Dashed = "DS";
+	/** Double Dotted = DDT */
+	public static final String UNDERLINESTROKETYPE_DoubleDotted = "DDT";
+	/** Double Dashed = DDS */
+	public static final String UNDERLINESTROKETYPE_DoubleDashed = "DDS";
+	/** Double Solid = DSD */
+	public static final String UNDERLINESTROKETYPE_DoubleSolid = "DSD";
+	/** Solid = SD */
+	public static final String UNDERLINESTROKETYPE_Solid = "SD";
+	/** Set Underline Stroke Type.
+		@param UnderlineStrokeType Underline Stroke Type	  */
+	public void setUnderlineStrokeType (String UnderlineStrokeType)
+	{
+
+		set_Value (COLUMNNAME_UnderlineStrokeType, UnderlineStrokeType);
+	}
+
+	/** Get Underline Stroke Type.
+		@return Underline Stroke Type	  */
+	public String getUnderlineStrokeType () 
+	{
+		return (String)get_Value(COLUMNNAME_UnderlineStrokeType);
 	}
 }

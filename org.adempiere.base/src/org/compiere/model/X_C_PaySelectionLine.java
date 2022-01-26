@@ -25,14 +25,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelectionLine
  *  @author iDempiere (generated) 
- *  @version Release 7.1 - $Id$ */
+ *  @version Release 8.2 - $Id$ */
 public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191121L;
+	private static final long serialVersionUID = 20211115L;
 
     /** Standard Constructor */
     public X_C_PaySelectionLine (Properties ctx, int C_PaySelectionLine_ID, String trxName)
@@ -84,7 +84,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_C_PaySelectionLine[")
+      StringBuilder sb = new StringBuilder ("X_C_PaySelectionLine[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
@@ -389,8 +389,8 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public static final String PAYMENTRULE_Cash = "B";
 	/** Credit Card = K */
 	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
 	/** Check = S */
 	public static final String PAYMENTRULE_Check = "S";
 	/** On Credit = P */
@@ -399,8 +399,14 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public static final String PAYMENTRULE_DirectDebit = "D";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
-	/** Check Outsourced (HSBC iFile) = Z */
-	public static final String PAYMENTRULE_CheckOutsourcedHSBCIFile = "Z";
+	/** Check HSBC COS = Z */
+	public static final String PAYMENTRULE_CheckHSBCCOS = "Z";
+	/** Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULE_DirectDepositBBLDirectCredit = "Y";
+	/** Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
+	/** Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULE_DirectDepositHSBCPromptPay = "W";
 	/** Set Payment Rule.
 		@param PaymentRule 
 		How you pay the invoice
@@ -496,7 +502,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
 			.getPO(getZI_Pay_BPartner_ID(), get_TrxName());	}
 
-	/** Set Payee Partner.
+	/** Set Alternative Payee Partner.
 		@param ZI_Pay_BPartner_ID 
 		Business Partner responsible for the payment (Alternative payee)
 	  */
@@ -508,12 +514,36 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 			set_Value (COLUMNNAME_ZI_Pay_BPartner_ID, Integer.valueOf(ZI_Pay_BPartner_ID));
 	}
 
-	/** Get Payee Partner.
+	/** Get Alternative Payee Partner.
 		@return Business Partner responsible for the payment (Alternative payee)
 	  */
 	public int getZI_Pay_BPartner_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Pay_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner getZI_Payee_BPartner() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
+			.getPO(getZI_Payee_BPartner_ID(), get_TrxName());	}
+
+	/** Set Payee Partner.
+		@param ZI_Payee_BPartner_ID 
+		Payee Business Partner responsible for the payment
+	  */
+	public void setZI_Payee_BPartner_ID (int ZI_Payee_BPartner_ID)
+	{
+		throw new IllegalArgumentException ("ZI_Payee_BPartner_ID is virtual column");	}
+
+	/** Get Payee Partner.
+		@return Payee Business Partner responsible for the payment
+	  */
+	public int getZI_Payee_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Payee_BPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

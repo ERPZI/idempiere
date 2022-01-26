@@ -111,17 +111,21 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDebit))
 			PaymentRule = PAYMENTRULE_DirectDebit;
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDeposit))
-			PaymentRule = PAYMENTRULE_DirectDepositAPHSBCACHAndAR;
+			PaymentRule = PAYMENTRULE_DirectDepositARAndAPHSBCACH;
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_Cash))
 			PaymentRule = PAYMENTRULE_Cash;
 		//MPo, 18/8/2016 Add Payment rule 'Z' Check Outsourcing 
-		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CheckOutsourcedHSBCIFile))
-			PaymentRule = PAYMENTRULE_CheckOutsourcedHSBCCOS;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CheckHSBCCOS))
+			PaymentRule = PAYMENTRULE_CheckHSBCCOS;
 		//MPo, 28/9/2020 Add BBL payment rules
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLSMART))
 			PaymentRule = PAYMENTRULE_DirectDepositBBLSMART;
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit))
 			PaymentRule = PAYMENTRULE_DirectDepositBBLDirectCredit;
+		//MPo, 15/11/21, HSBC Host-to-Host Add Payment Rule HSBC_PromptPay
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositHSBCPromptPay))
+			PaymentRule = PAYMENTRULE_DirectDepositHSBCPromptPay;
+		//
 		
 		//
 		//	Create new PaySelection
@@ -318,19 +322,21 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 					payment.setBankCheck (check.getParent().getC_BankAccount_ID(), false, check.getDocumentNo());
 				else if (check.getPaymentRule().equals(PAYMENTRULE_CreditCard))
 					payment.setTenderType(X_C_Payment.TENDERTYPE_CreditCard);
-				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositAPHSBCACHAndAR)
+				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositARAndAPHSBCACH)
 					|| check.getPaymentRule().equals(PAYMENTRULE_DirectDebit))
 					payment.setBankACH(check);
 				//MPo, 18/8/2016 Add Payment Rule 'Z' HSBC COS
-				else if (check.getPaymentRule().equals(PAYMENTRULE_CheckOutsourcedHSBCCOS))
-					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_CheckOutsourcedHSBCIFile);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_CheckHSBCCOS))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_CheckHSBCCOS);
 				//	payment.setTenderType(X_C_Payment.TENDERTYPE_CheckOutsourced);
-				//MPo, 28/9/2020 Add Payment Rule 'X' BBL SMART
+				//MPo, 28/9/2020 Add Payment Rule BBL_SMART and BBL_DirectCredit
 				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLSMART))
 					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLSMART);
 				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLDirectCredit))
 					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit);
-				
+				//MPo, 14/11/21, HSBC Host-to-Host Add Payment Rule HSBC_PromptPay
+				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositHSBCPromptPay))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositHSBCPromptPay);
 				//
 				else
 				{
@@ -596,7 +602,10 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		//
 		if (X_C_Order.PAYMENTRULE_DirectDebit.equals(PaymentRule))
 		{
-			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			//MPo, 19/8/21
+			//MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), line.getInvoice().getZI_Pay_BPartner_ID() == 0 ? line.getInvoice().getC_BPartner_ID() : line.getInvoice().getZI_Pay_BPartner_ID());
+			//
 			for (int i = 0; i < bas.length; i++) 
 			{
 				MBPBankAccount account = bas[i];
@@ -609,7 +618,10 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		}
 		else if (X_C_Order.PAYMENTRULE_DirectDeposit.equals(PaymentRule))
 		{
-			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			//MPo, 19/8/21
+			//MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), C_BPartner_ID); 
+			MBPBankAccount[] bas = MBPBankAccount.getOfBPartner (line.getCtx(), line.getInvoice().getZI_Pay_BPartner_ID() == 0 ? line.getInvoice().getC_BPartner_ID() : line.getInvoice().getZI_Pay_BPartner_ID());
+			//
 			for (int i = 0; i < bas.length; i++) 
 			{
 				MBPBankAccount account = bas[i];

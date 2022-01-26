@@ -26,9 +26,6 @@ import java.util.Properties;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
 
-import javax.jnlp.BasicService;
-import javax.jnlp.ServiceManager;
-import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
 import javax.swing.event.EventListenerList;
 
@@ -67,11 +64,11 @@ public final class Adempiere
 	/** Timestamp                   */
 	static public final String	ID				= "$Id: Adempiere.java,v 1.8 2006/08/11 02:58:14 jjanke Exp $";
 	/** Main Version String         */
-	static public String	MAIN_VERSION	= "Release 7.1";
+	static public String	MAIN_VERSION	= "Release 8.2";
 	/** Detail Version as date      Used for Client/Server		*/
-	static public String	DATE_VERSION	= "2019-11-22";
+	static public String	DATE_VERSION	= "2020-12-20";
 	/** Database Version as date    Compared with AD_System		*/
-	static public String	DB_VERSION		= "2019-11-22";
+	static public String	DB_VERSION		= "2020-12-20";
 
 	/** Product Name            */
 	static public final String	NAME 			= "iDempiere\u00AE";
@@ -92,7 +89,7 @@ public final class Adempiere
 	/** Subtitle                */
 	static public final String	SUB_TITLE		= "Smart Suite ERP, CRM and SCM";
 	static public final String	ADEMPIERE_R		= "iDempiere\u00AE";
-	static public final String	COPYRIGHT		= "\u00A9 1999-2019 iDempiere\u00AE";
+	static public final String	COPYRIGHT		= "\u00A9 1999-2021 iDempiere\u00AE";
 
 	static private String		s_ImplementationVersion = null;
 	static private String		s_ImplementationVendor = null;
@@ -222,7 +219,7 @@ public final class Adempiere
 
 	/**
 	 *	Summary (Windows).
-	 * 	iDempiere(tm) Release 1.0c_2013-06-27 -Smart Suite ERP, CRM and SCM- Copyright (c) 1999-2013 iDempiere; Implementation: 2.5.1a 20040417-0243 - (C) 1999-2005 Jorg Janke, iDempiere Inc. USA
+	 * 	iDempiere(tm) Release 1.0c_2013-06-27 -Smart Suite ERP, CRM and SCM- Copyright (c) 1999-2021 iDempiere; Implementation: 2.5.1a 20040417-0243 - (C) 1999-2005 Jorg Janke, iDempiere Inc. USA
 	 *  @return Summary in Windows character set
 	 */
 	public static String getSummary()
@@ -245,7 +242,7 @@ public final class Adempiere
 		if (s_ImplementationVendor != null)
 			return;
 
-		Package adempierePackage = Package.getPackage("org.compiere");
+		Package adempierePackage = Adempiere.class.getClassLoader().getDefinedPackage("org.compiere");
 		s_ImplementationVendor = adempierePackage.getImplementationVendor();
 		s_ImplementationVersion = adempierePackage.getImplementationVersion();
 		if (s_ImplementationVendor == null)
@@ -476,44 +473,6 @@ public final class Adempiere
 		s_supportEmail = email;
 	}   //  setSupportEMail
 
-	/**
-	 * 	Get JNLP CodeBase
-	 *	@return code base or null
-	 */
-	public static URL getCodeBase()
-	{
-		try
-		{
-			BasicService bs = (BasicService)ServiceManager.lookup("javax.jnlp.BasicService");
-			URL url = bs.getCodeBase();
-	        return url;
-		}
-		catch(UnavailableServiceException ue)
-		{
-			return null;
-		}
-	}	//	getCodeBase
-
-	/**
-	 * @return True if client is started using web start
-	 */
-	public static boolean isWebStartClient()
-	{
-		return getCodeBase() != null;
-	}
-
-	/**
-	 * 	Get JNLP CodeBase Host
-	 *	@return code base or null
-	 */
-	public static String getCodeBaseHost()
-	{
-		URL url = getCodeBase();
-		if (url == null)
-			return null;
-		return url.getHost();
-	}	//	getCodeBase
-
 	public static synchronized boolean isStarted()
 	{
 		return (log != null);
@@ -585,7 +544,7 @@ public final class Adempiere
 		}
 
 		//  Set Default Database Connection from Ini
-		DB.setDBTarget(CConnection.get(getCodeBaseHost()));
+		DB.setDBTarget(CConnection.get());
 
 		createThreadPool();
 		
