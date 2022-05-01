@@ -31,7 +31,7 @@ import org.compiere.util.Msg;
  *	
  *  @author Jorg Janke
  *  @author     victor.perez@e-evolution.com, www.e-evolution.com
- *    			<li>RF [ 2214883 ] Remove SQL code and Replace for Query http://sourceforge.net/tracker/index.php?func=detail&aid=2214883&group_id=176962&atid=879335 
+ *    			<li>RF [ 2214883 ] Remove SQL code and Replace for Query https://sourceforge.net/p/adempiere/feature-requests/557/
  *  @version $Id: MAcctProcessor.java,v 1.3 2006/07/30 00:51:02 jjanke Exp $
  */
 public class MAcctProcessor extends X_C_AcctProcessor
@@ -66,10 +66,6 @@ public class MAcctProcessor extends X_C_AcctProcessor
 		super (ctx, C_AcctProcessor_ID, trxName);
 		if (C_AcctProcessor_ID == 0)
 		{
-		//	setName (null);
-		//	setSupervisor_ID (0);
-		//	setFrequencyType (FREQUENCYTYPE_Hour);
-		//	setFrequency (1);
 			setKeepLogDays (7);	// 7
 		}	
 	}	//	MAcctProcessor
@@ -161,9 +157,9 @@ public class MAcctProcessor extends X_C_AcctProcessor
 	{
 		if (getKeepLogDays() < 1)
 			return 0;
-		StringBuilder sql = new StringBuilder("DELETE C_AcctProcessorLog ")
+		StringBuilder sql = new StringBuilder("DELETE FROM C_AcctProcessorLog ")
 					.append("WHERE C_AcctProcessor_ID=").append(getC_AcctProcessor_ID()) 
-					.append(" AND (Created+").append(getKeepLogDays()).append(") < SysDate");
+					.append(" AND (Created+").append(getKeepLogDays()).append(") < getDate()");
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		return no;
 	}	//	deleteLog

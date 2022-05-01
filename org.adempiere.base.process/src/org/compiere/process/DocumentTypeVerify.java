@@ -35,10 +35,11 @@ import org.compiere.util.DB;
  *  @author Jorg Janke
  *  @version $Id: DocumentTypeVerify.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class DocumentTypeVerify extends SvrProcess
 {
 	/**	Static Logger	*/
-	private static CLogger	s_log	= CLogger.getCLogger (DocumentTypeVerify.class);
+	private static final CLogger	s_log	= CLogger.getCLogger (DocumentTypeVerify.class);
 	
 	
 	/**
@@ -132,7 +133,7 @@ public class DocumentTypeVerify extends SvrProcess
 		if (s_log.isLoggable(Level.INFO)) s_log.info("AD_Client_ID=" + AD_Client_ID);
 
 		//	Delete Duplicates
-		String sql = "DELETE C_PeriodControl pc1 "
+		String sql = "DELETE FROM C_PeriodControl pc1 "
 			+ "WHERE (C_Period_ID, DocBaseType) IN "
 				+ "(SELECT C_Period_ID, DocBaseType "
 				+ "FROM C_PeriodControl pc2 "

@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_ToolBarButton
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 9
  */
 public interface I_AD_ToolBarButton 
 {
@@ -187,6 +187,21 @@ public interface I_AD_ToolBarButton
 	  */
 	public String getDisplayLogic();
 
+    /** Column name EntityType */
+    public static final String COLUMNNAME_EntityType = "EntityType";
+
+	/** Set Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public void setEntityType (String EntityType);
+
+	/** Get Entity Type.
+	  * Dictionary Entity Type;
+ Determines ownership and synchronization
+	  */
+	public String getEntityType();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -234,6 +249,15 @@ public interface I_AD_ToolBarButton
 	  * The change is a customization of the data dictionary and can be applied after Migration
 	  */
 	public boolean isCustomization();
+
+    /** Column name IsShowMore */
+    public static final String COLUMNNAME_IsShowMore = "IsShowMore";
+
+	/** Set Group in show more	  */
+	public void setIsShowMore (boolean IsShowMore);
+
+	/** Get Group in show more	  */
+	public boolean isShowMore();
 
     /** Column name KeyStroke_KeyCode */
     public static final String COLUMNNAME_KeyStroke_KeyCode = "KeyStroke_KeyCode";

@@ -54,7 +54,7 @@ public class WLocationEditor extends WEditor implements EventListener<Event>, Pr
 {
     private static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
     
-    private static CLogger log = CLogger.getCLogger(WLocationEditor.class);
+    private static final CLogger log = CLogger.getCLogger(WLocationEditor.class);
     private MLocationLookup     m_Location;
     private MLocation           m_value;
 
@@ -81,7 +81,17 @@ public class WLocationEditor extends WEditor implements EventListener<Event>, Pr
      * @param gridField
      */
     public WLocationEditor(GridField gridField) {
-		super(new Locationbox(), gridField);
+    	this(gridField, false, null);
+    }
+    
+    /**
+     * 
+     * @param gridField
+     * @param tableEditor
+     * @param editorConfiguration
+     */
+    public WLocationEditor(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration) {
+		super(new Locationbox(), gridField, tableEditor, editorConfiguration);
 		m_Location = (MLocationLookup)gridField.getLookup();
         init();
 	}

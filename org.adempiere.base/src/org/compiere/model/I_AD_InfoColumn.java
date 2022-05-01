@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_InfoColumn
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 9
  */
 public interface I_AD_InfoColumn 
 {
@@ -63,6 +63,21 @@ public interface I_AD_InfoColumn
 	public int getAD_Element_ID();
 
 	public org.compiere.model.I_AD_Element getAD_Element() throws RuntimeException;
+
+    /** Column name AD_FieldStyle_ID */
+    public static final String COLUMNNAME_AD_FieldStyle_ID = "AD_FieldStyle_ID";
+
+	/** Set Field Style.
+	  * Field CSS Style 
+	  */
+	public void setAD_FieldStyle_ID (int AD_FieldStyle_ID);
+
+	/** Get Field Style.
+	  * Field CSS Style 
+	  */
+	public int getAD_FieldStyle_ID();
+
+	public org.compiere.model.I_AD_Style getAD_FieldStyle() throws RuntimeException;
 
     /** Column name AD_InfoColumn_ID */
     public static final String COLUMNNAME_AD_InfoColumn_ID = "AD_InfoColumn_ID";
@@ -282,6 +297,19 @@ public interface I_AD_InfoColumn
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsAutocomplete */
+    public static final String COLUMNNAME_IsAutocomplete = "IsAutocomplete";
+
+	/** Set Autocomplete.
+	  * Automatic completion for textfields
+	  */
+	public void setIsAutocomplete (boolean IsAutocomplete);
+
+	/** Get Autocomplete.
+	  * Automatic completion for textfields
+	  */
+	public boolean isAutocomplete();
 
     /** Column name IsCentrallyMaintained */
     public static final String COLUMNNAME_IsCentrallyMaintained = "IsCentrallyMaintained";

@@ -20,13 +20,25 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Properties;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.model.GenericPO;
+import org.compiere.model.MAttachment;
+import org.compiere.model.MTable;
+import org.compiere.model.PO;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
 
@@ -423,12 +435,85 @@ public class FileUtil
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		String dt = sdf.format(cal.getTime());
 		String cleanName = subject.replaceAll("[ &/]", "");
-		String localFile = System.getProperty("java.io.tmpdir")
-				+ System.getProperty("file.separator") + cleanName + "_" + dt + "_" + Env.getContext(Env.getCtx(), "#AD_Session_ID")
-				+ extension;
+		String dir = System.getProperty("java.io.tmpdir")
+				+ System.getProperty("file.separator") + "rpttmp_" + dt + "_" + Env.getContext(Env.getCtx(), Env.AD_SESSION_ID) + System.getProperty("file.separator");
+		String localFile = dir 
+				+ cleanName	+ extension;
+		new File(dir ).mkdirs();
 		return localFile;
 	}
 
+	/**
+	 * 
+	 * @param title
+	 * @param table_ID
+	 * @param record_ID
+	 * @param ctx
+	 * @param m_WindowNo
+	 * @param trxName
+	 * @return
+	 */
+	public static String parseTitle(Properties ctx, String title, int table_ID, int record_ID, int m_WindowNo, String trxName) {
+		if (title.contains("@") && record_ID>0 && table_ID>0) {
+			MTable table=new MTable(ctx,table_ID,trxName );
+			PO po = new GenericPO(table.getTableName(), ctx, record_ID, trxName);
+			title=Env.parseVariable(title, po, trxName, true);
+		}
+		else 
+			title=  Env.parseContext (ctx, m_WindowNo, title,
+					true, true);
+		return title;
+	}
+
+    public static File createTempFile(String prefix, String suffix, File directory) throws IOException
+	{
+        if (prefix.length() < 3) {
+            throw new IllegalArgumentException("Prefix string \"" + prefix +
+                "\" too short: length must be at least 3");
+        }
+        if (suffix == null)
+            suffix = ".tmp";
+
+        Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		String dt = sdf.format(cal.getTime());
+		String tmpdirname = (directory != null) ? directory.getCanonicalPath() : System.getProperty("java.io.tmpdir");
+		tmpdirname += System.getProperty("file.separator") + "rpttmp_" + dt + "_" + Env.getContext(Env.getCtx(), Env.AD_SESSION_ID) + System.getProperty("file.separator");
+
+		File tmpdir = new File(tmpdirname);
+		tmpdir.mkdirs();
+
+		String fileName = prefix + suffix;
+
+        SecurityManager sm = System.getSecurityManager();
+        File f = new File(tmpdirname, fileName);
+
+        if (sm != null) {
+            try {
+                sm.checkWrite(f.getPath());
+            } catch (SecurityException se) {
+                // don't reveal temporary directory location
+                if (directory == null)
+                    throw new SecurityException("Unable to create temporary file");
+                throw se;
+            }
+        }
+
+        return f;	
+	}
+
+    public static File createTempFile(String prefix, String suffix) throws IOException
+    {
+        return createTempFile(prefix, suffix, null);
+    }
+	
+	/**
+	 * 
+	 * @param path
+	 * @return true if deleted
+	 * @throws FileNotFoundException
+	 * @Deprecated
+	 */
 	public static boolean deleteFolderRecursive(File path) throws FileNotFoundException {
 		if (!path.exists())
 			throw new FileNotFoundException(path.getAbsolutePath());
@@ -441,4 +526,55 @@ public class FileUtil
 		return ret && path.delete();
 	}
 
+	/**
+	 * copy attachment entry to file
+	 * @param attachment
+	 * @param destinationFile
+	 * @param index
+	 */
+	public static void copy(MAttachment attachment, File destinationFile, int index)
+	{
+		FileOutputStream destinationFileOutputStream=null;
+		try {
+			destinationFile.createNewFile();
+			destinationFileOutputStream = new FileOutputStream(destinationFile);
+			byte[] buffer = attachment.getEntryData(index);
+			destinationFileOutputStream.write(buffer);
+		} 
+		catch( java.io.FileNotFoundException f ) {
+			throw new AdempiereException("File not found exception : " + destinationFile.getName() + " : " + f);
+		} 
+		catch( java.io.IOException e ) {
+			throw new AdempiereException("IOException : " + e);
+		} finally {
+			try {
+				if (destinationFileOutputStream != null)
+					destinationFileOutputStream.close();
+			} catch(Exception e) { 
+				throw new AdempiereException("Exception : " + e);
+			}
+		}
+	}
+
+	/**
+	 * delete folder recursively
+	 * @param folder
+	 * @throws IOException
+	 */
+	public static void deleteDirectory(File folder) throws IOException {
+		Path directory = folder.toPath();
+		Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+		   @Override
+		   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+		       Files.delete(file);
+		       return FileVisitResult.CONTINUE;
+		   }
+
+		   @Override
+		   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+		       Files.delete(dir);
+		       return FileVisitResult.CONTINUE;
+		   }
+		});
+	}
 }	//	FileUtil

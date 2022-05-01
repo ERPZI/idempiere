@@ -40,6 +40,7 @@ import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -128,7 +129,7 @@ public class Doc_InOut extends Doc
 				continue;
 			}
 
-			DocLine docLine = new DocLine (line, this);
+			DocLine_InOut docLine = new DocLine_InOut (line, this);
 			BigDecimal Qty = line.getMovementQty();
 			docLine.setReversalLine_ID(line.getReversalLine_ID());
 			docLine.setQty (Qty, getDocumentType().equals(DOCTYPE_MatShipment));    //  sets Trx and Storage Qty
@@ -192,7 +193,7 @@ public class Doc_InOut extends Doc
 		{
 			for (int i = 0; i < p_lines.length; i++)
 			{
-				DocLine line = p_lines[i];				
+				DocLine_InOut line = (DocLine_InOut) p_lines[i];				
 				MProduct product = line.getProduct();
 				BigDecimal costs = null;
 				if (!isReversal(line))
@@ -245,7 +246,7 @@ public class Doc_InOut extends Doc
 							}
 							else
 							{
-								p_Error = "No Costs for " + line.getProduct().getName();
+								p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
 								log.log(Level.WARNING, p_Error);
 								return null;
 							}
@@ -266,7 +267,7 @@ public class Doc_InOut extends Doc
 					as.getC_Currency_ID(), costs, null);
 				if (dr == null)
 				{
-					p_Error = "FactLine DR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"FactLine DR not created:" + " ") + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -286,7 +287,7 @@ public class Doc_InOut extends Doc
 							fact.remove(dr);
 							continue;
 						}
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 						return null;
 					}
 				}
@@ -297,7 +298,7 @@ public class Doc_InOut extends Doc
 					as.getC_Currency_ID(), null, costs);
 				if (cr == null)
 				{
-					p_Error = "FactLine CR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"FactLine CR not created:") + " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -311,7 +312,7 @@ public class Doc_InOut extends Doc
 					if (!cr.updateReverseLine (MInOut.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 						return null;
 					}
 					costs = cr.getAcctBalance(); //get original cost
@@ -333,7 +334,7 @@ public class Doc_InOut extends Doc
 										costs, ma.getMovementQty().negate(),
 										line.getDescription(), true, getTrxName()))
 								{
-									p_Error = "Failed to create cost detail record";
+									p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 									return null;
 								}							
 							}						
@@ -350,7 +351,7 @@ public class Doc_InOut extends Doc
 								costs, line.getQty(),
 								line.getDescription(), true, getTrxName()))
 							{
-								p_Error = "Failed to create cost detail record";
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 								return null;
 							}
 						}
@@ -367,7 +368,7 @@ public class Doc_InOut extends Doc
 							costs, line.getQty(),
 							line.getDescription(), true, getTrxName()))
 						{
-							p_Error = "Failed to create cost detail record";
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 							return null;
 						}
 					}
@@ -379,7 +380,7 @@ public class Doc_InOut extends Doc
 			{
 				for (int i = 0; i < p_lines.length; i++)
 				{
-					DocLine line = p_lines[i];
+					DocLine_InOut line = (DocLine_InOut) p_lines[i];
 					Fact factcomm = Doc_Order.getCommitmentSalesRelease(as, this,
 						line.getQty(), line.get_ID(), Env.ONE);
 					if (factcomm != null)
@@ -393,7 +394,7 @@ public class Doc_InOut extends Doc
 		{
 			for (int i = 0; i < p_lines.length; i++)
 			{
-				DocLine line = p_lines[i];
+				DocLine_InOut line = (DocLine_InOut) p_lines[i];
 				MProduct product = line.getProduct();
 				BigDecimal costs = null;
 				if (!isReversal(line)) 
@@ -436,7 +437,7 @@ public class Doc_InOut extends Doc
 					{
 						if (product.isStocked())
 						{
-							p_Error = "No Costs for " + line.getProduct().getName();
+							p_Error = Msg.getMsg(getCtx(),"No Costs for") + " " + line.getProduct().getName();  
 							log.log(Level.WARNING, p_Error);
 							return null;
 						}
@@ -454,7 +455,7 @@ public class Doc_InOut extends Doc
 					as.getC_Currency_ID(), costs, null);
 				if (dr == null)
 				{
-					p_Error = "FactLine DR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"FactLine DR not created:" + " ") + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -471,7 +472,7 @@ public class Doc_InOut extends Doc
 							fact.remove(dr);
 							continue;
 						}
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 						return null;
 					}
 					costs = dr.getAcctBalance(); //get original cost
@@ -494,7 +495,7 @@ public class Doc_InOut extends Doc
 										costs, ma.getMovementQty(),
 										line.getDescription(), true, getTrxName()))
 								{
-									p_Error = "Failed to create cost detail record";
+									p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 									return null;
 								}
 							}
@@ -509,7 +510,7 @@ public class Doc_InOut extends Doc
 								costs, line.getQty(),
 								line.getDescription(), true, getTrxName()))
 							{
-								p_Error = "Failed to create cost detail record";
+								p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 								return null;
 							}
 						}
@@ -525,7 +526,7 @@ public class Doc_InOut extends Doc
 							costs, line.getQty(),
 							line.getDescription(), true, getTrxName()))
 						{
-							p_Error = "Failed to create cost detail record";
+							p_Error = Msg.getMsg(getCtx(),"Failed to create cost detail record");
 							return null;
 						}
 					}
@@ -537,7 +538,7 @@ public class Doc_InOut extends Doc
 					as.getC_Currency_ID(), null, costs);
 				if (cr == null)
 				{
-					p_Error = "FactLine CR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"FactLine CR not created:") + " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -552,7 +553,7 @@ public class Doc_InOut extends Doc
 					if (!cr.updateReverseLine (MInOut.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						p_Error = "Original Shipment/Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Shipment/Receipt not posted yet");
 						return null;
 					}
 				}
@@ -567,7 +568,7 @@ public class Doc_InOut extends Doc
 				// Elaine 2008/06/26
 				int C_Currency_ID = as.getC_Currency_ID();
 				//
-				DocLine line = p_lines[i];
+				DocLine_InOut line = (DocLine_InOut) p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
 				MOrderLine orderLine = null;
@@ -623,7 +624,7 @@ public class Doc_InOut extends Doc
 	                    }
 	                    else
 	                    {	                    	
-	                    	p_Error = "Resubmit - No Costs for " + product.getName() + " (required order line)";
+	                    	p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName() + Msg.getMsg(getCtx()," (required order line)");
 	                        log.log(Level.WARNING, p_Error);
 	                        return null;
 	                    }
@@ -643,7 +644,7 @@ public class Doc_InOut extends Doc
                     	}
 						else
 						{
-							p_Error = "Resubmit - No Costs for " + product.getName();
+							p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
 							log.log(Level.WARNING, p_Error);
 							return null;
 						}
@@ -677,7 +678,7 @@ public class Doc_InOut extends Doc
 				//
 				if (dr == null)
 				{
-					p_Error = "DR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"DR not created:") + " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -694,7 +695,7 @@ public class Doc_InOut extends Doc
 							fact.remove(dr);
 							continue;
 						}
-						p_Error = "Original Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Receipt not posted yet");
 						return null;
 					}
 				}
@@ -706,7 +707,7 @@ public class Doc_InOut extends Doc
 				//
 				if (cr == null)
 				{
-					p_Error = "CR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"CR not created:") + " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -720,7 +721,7 @@ public class Doc_InOut extends Doc
 					if (!cr.updateReverseLine (MInOut.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						p_Error = "Original Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Receipt not posted yet");
 						return null;
 					}
 				}
@@ -734,7 +735,7 @@ public class Doc_InOut extends Doc
 						if (!dr.updateReverseLine (MInOut.Table_ID,
 								m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 						{
-							p_Error = "Original Receipt not posted yet";
+							p_Error = Msg.getMsg(getCtx(),"Original Receipt not posted yet");
 							return null;
 						}
 					}
@@ -746,7 +747,7 @@ public class Doc_InOut extends Doc
 						//
 						if (cr == null)
 						{
-							p_Error = "CR not created: " + line;
+							p_Error = Msg.getMsg(getCtx(),"CR not created:") + " " + line;
 							log.log(Level.WARNING, p_Error);
 							return null;
 						}
@@ -766,7 +767,7 @@ public class Doc_InOut extends Doc
 				// Elaine 2008/06/26
 				int C_Currency_ID = as.getC_Currency_ID();
 				//
-				DocLine line = p_lines[i];
+				DocLine_InOut line = (DocLine_InOut) p_lines[i];
 				BigDecimal costs = null;
 				MProduct product = line.getProduct();
 				if (!isReversal(line))
@@ -797,7 +798,7 @@ public class Doc_InOut extends Doc
 						{
 							costs = MConversionRate.convert (getCtx(),
 									costs, originalOrderLine.getC_Currency_ID(), C_Currency_ID,
-									getDateAcct(), 0, getAD_Client_ID(), getAD_Org_ID(), true);
+									getDateAcct(), line.getC_ConversionType_ID(), getAD_Client_ID(), getAD_Org_ID(), true);
 						}
 
 				    	costs = costs.multiply(line.getQty());
@@ -838,7 +839,7 @@ public class Doc_InOut extends Doc
 						
 						if (costs == null || costs.signum() == 0)
 						{
-							p_Error = "Resubmit - No Costs for " + product.getName();
+							p_Error = Msg.getMsg(getCtx(),"Resubmit - No Costs for") + " " + product.getName();
 							log.log(Level.WARNING, p_Error);
 							return null;
 						}
@@ -849,18 +850,14 @@ public class Doc_InOut extends Doc
 					//update below
 					costs = Env.ONE;
 				}
-				//  NotInvoicedReceipt				DR
-				// Elaine 2008/06/26
-				/*dr = fact.createLine(line,
-					getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as),
-					as.getC_Currency_ID(), costs , null);*/
+
 				dr = fact.createLine(line,
 					getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as),
 					C_Currency_ID, costs , null);
 				//
 				if (dr == null)
 				{
-					p_Error = "CR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"CR not created:")+ " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -878,7 +875,7 @@ public class Doc_InOut extends Doc
 							fact.remove(dr);
 							continue;
 						}
-						p_Error = "Original Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Receipt not posted yet");
 						return null;
 					}
 				}
@@ -887,15 +884,13 @@ public class Doc_InOut extends Doc
 				MAccount assets = line.getAccount(ProductCost.ACCTTYPE_P_Asset, as);
 				if (product.isService())
 					assets = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
-				// Elaine 2008/06/26
-				/*cr = fact.createLine(line, assets,
-					as.getC_Currency_ID(), null, costs);*/
+
 				cr = fact.createLine(line, assets,
 					C_Currency_ID, null, costs);
 				//
 				if (cr == null)
 				{
-					p_Error = "DR not created: " + line;
+					p_Error = Msg.getMsg(getCtx(),"DR not created:") + " " + line;
 					log.log(Level.WARNING, p_Error);
 					return null;
 				}
@@ -908,7 +903,7 @@ public class Doc_InOut extends Doc
 					if (!cr.updateReverseLine (MInOut.Table_ID,
 							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
 					{
-						p_Error = "Original Receipt not posted yet";
+						p_Error = Msg.getMsg(getCtx(),"Original Receipt not posted yet");
 						return null;
 					}
 				}
@@ -924,7 +919,7 @@ public class Doc_InOut extends Doc
 		}	//	Purchasing Return
 		else
 		{
-			p_Error = "DocumentType unknown: " + getDocumentType();
+			p_Error = Msg.getMsg(getCtx(),"DocumentType unknown:") + " " + getDocumentType();
 			log.log(Level.SEVERE, p_Error);
 			return null;
 		}
@@ -984,5 +979,35 @@ public class Doc_InOut extends Doc
 	@Override
 	public boolean isDeferPosting() {
 		return m_deferPosting;
+	}
+	
+	@Override
+	public int getC_Currency_ID()
+	{
+		MInOut io = (MInOut) getPO();
+		if (io.getC_Order_ID() > 0)
+			return io.getC_Order().getC_Currency_ID();
+		else if (io.getM_RMA_ID() > 0) {
+			if (io.getM_RMA().getInOut_ID() > 0) {
+				if (io.getM_RMA().getInOut().getC_Order_ID() > 0)
+					return io.getM_RMA().getInOut().getC_Order().getC_Currency_ID();
+			}
+		}
+		return super.getC_Currency_ID();
+	}
+	
+	@Override
+	public int getC_ConversionType_ID()
+	{
+		MInOut io = (MInOut) getPO();
+		if (io.getC_Order_ID() > 0)
+			return io.getC_Order().getC_ConversionType_ID();
+		else if (io.getM_RMA_ID() > 0) {
+			if (io.getM_RMA().getInOut_ID() > 0) {
+				if (io.getM_RMA().getInOut().getC_Order_ID() > 0)
+					return io.getM_RMA().getInOut().getC_Order().getC_ConversionType_ID();
+			}
+		}
+		return super.getC_ConversionType_ID();
 	}
 }   //  Doc_InOut

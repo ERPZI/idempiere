@@ -66,6 +66,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trace;
 import org.compiere.util.Trx;
+import org.compiere.util.TrxEventListener;
 import org.compiere.util.Util;
 
 /**
@@ -74,6 +75,8 @@ import org.compiere.util.Util;
  *		set Node - startWork
  *
  *  @author Jorg Janke
+ *  @author Silvano Trinchero, www.freepath.it
+ *  		<li>IDEMPIERE-3209 added process-aware resultset-based constructor
  *  @version $Id: MWFActivity.java,v 1.4 2006/07/30 00:51:05 jjanke Exp $
  */
 public class MWFActivity extends X_AD_WF_Activity implements Runnable
@@ -176,6 +179,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		//	Document Link
 		setAD_Table_ID(process.getAD_Table_ID());
 		setRecord_ID(process.getRecord_ID());
+		if(process.getPO() != null)
+        	m_po = process.getPO();
 		//modified by Rob Klein
 		setAD_Client_ID(process.getAD_Client_ID());
 		setAD_Org_ID(process.getAD_Org_ID());
@@ -199,15 +204,29 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		saveEx();
 		//
 		m_audit = new MWFEventAudit(this);
+		m_audit.setAD_Org_ID(getAD_Org_ID());//Add by Hideaki Hagiwara
 		m_audit.saveEx();
 		//
 		m_process = process;
 	}	//	MWFActivity
-
+	
 	/**
-	 * 	Parent Contructor
+	 * 	Process-aware Parent Constructor
 	 *	@param process process
-	 *	@param AD_WF_Node_ID start node
+	 *	@param ctx context
+	 *	@param rs record to load
+	 *  @param trxName transaction name
+	 */
+	public MWFActivity (MWFProcess process, Properties ctx, ResultSet rs, String trxName)
+	{
+		super(ctx, rs, trxName);
+		m_process = process;
+	}
+	
+	/**
+	 * 	Parent Constructor
+	 *	@param process process
+	 *	@param next_ID start node
 	 *	@param lastPO PO from the previously executed node
 	 */
 	public MWFActivity(MWFProcess process, int next_ID, PO lastPO) {
@@ -270,7 +289,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (log.isLoggable(Level.FINE)) log.fine(oldState + "->"+ WFState + ", Msg=" + getTextMsg());
 			super.setWFState (WFState);
 			m_state = new StateEngine (getWFState());
-			saveEx();			//	closed in MWFProcess.checkActivities()
+			boolean valid = save();
+			if (! valid) {
+				// the activity could not be updated, probably it was deleted by the rollback to savepoint
+				// so, set the ID to zero and save it again (insert)
+				setAD_WF_Activity_ID(0);
+				saveEx();
+			}
 			updateEventAudit();
 
 			//	Inform Process
@@ -320,7 +345,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			m_audit.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
-		m_audit.saveEx();
+		boolean valid = m_audit.save();
+		if (! valid) {
+			// the event audit could not be updated, probably it was deleted by the rollback to savepoint
+			// so, set the ID to zero and save it again (insert)
+			m_audit.setAD_WF_EventAudit_ID(0);
+			m_audit.saveEx();
+		}
 	}	//	updateEventAudit
 
 	/**
@@ -460,7 +491,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	public MWFNode getNode()
 	{
 		if (m_node == null)
-			m_node = MWFNode.get (getCtx(), getAD_WF_Node_ID());
+			m_node = MWFNode.getCopy(getCtx(), getAD_WF_Node_ID(), get_TrxName());
 		return m_node;
 	}	//	getNode
 
@@ -622,12 +653,12 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	 */
 	public MWFResponsible getResponsible()
 	{
-		MWFResponsible resp = MWFResponsible.get(getCtx(), getAD_WF_Responsible_ID());
+		MWFResponsible resp = MWFResponsible.getCopy(getCtx(), getAD_WF_Responsible_ID(), get_TrxName());
 		return resp;
 	}	//	isInvoker
 
 	/**
-	 * 	Is Invoker (no user & no role)
+	 * 	Is Invoker (no user and no role)
 	 *	@return true if invoker
 	 */
 	public boolean isInvoker()
@@ -795,7 +826,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			+ "       AND n.Action = 'C' "
 			+ "       AND a.WFState = 'CC' "
 			+ "       AND a.UpdatedBy = " + userid
-			+ "       AND a.Updated > Trunc(SYSDATE) - " + (days-1)
+			+ "       AND a.Updated > Trunc(getDate()) - " + (days-1)
 			+ checkSameSO
 			+ checkSameReceipt
 			+ checkDocAction;
@@ -829,7 +860,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	/**************************************************************************
 	 * 	Execute Work.
 	 * 	Called from MWFProcess.startNext
-	 * 	Feedback to Process via setWFState -> checkActivities
+	 * 	Feedback to Process via setWFState -&gt; checkActivities
 	 */
 	public void run()
 	{
@@ -855,8 +886,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		//
 		try
 		{
-			if (!localTrx)
-				savepoint = trx.setSavepoint(null);
+			if (!localTrx) {
+				// when cascade workflows, avoid setting a savepoint for each workflow
+				// use the same first savepoint from the transaction
+				savepoint = trx.getLastWFSavepoint();
+				if (savepoint == null) {
+					savepoint = trx.setSavepoint(null);
+					trx.setLastWFSavepoint(savepoint);
+				}
+			}
 
 			if (!m_state.isValidAction(StateEngine.ACTION_Start))
 			{
@@ -909,6 +947,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				try
 				{
 					trx.rollback(savepoint);
+					trx.setLastWFSavepoint(null);
 				} catch (SQLException e1) {}
 			}
 
@@ -930,7 +969,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			try {
 				if (contextLost)
 				{
-					Env.getCtx().setProperty("#AD_Client_ID", (m_po != null ? Integer.toString(m_po.getAD_Client_ID()) : "0") );
+					Env.getCtx().setProperty(Env.AD_CLIENT_ID, (m_po != null ? Integer.toString(m_po.getAD_Client_ID()) : "0") );
 					m_state = new StateEngine(WFSTATE_Running);
 					setProcessed(true);
 					setWFState (StateEngine.STATE_Aborted);
@@ -951,11 +990,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				if (m_process != null)
 				{
 					m_process.setProcessMsg(this.getTextMsg());
-					m_process.saveEx();
+					try {
+						m_process.saveEx();
+					} catch (Exception ex) {
+						log.log(Level.SEVERE, ex.getMessage(), ex);
+					}
 				}
 			} finally {
 				if (contextLost)
-					Env.getCtx().remove("#AD_Client_ID");
+					Env.getCtx().remove(Env.AD_CLIENT_ID);
 			}
 		}
 		finally
@@ -992,6 +1035,8 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.MINUTE, m_node.getWaitTime());
 			setEndWaitTime(new Timestamp(cal.getTimeInMillis()));
+			if (m_node.getWaitTime() == -1)
+				prepareCommitEvent();
 			return false;		//	not done
 		}
 
@@ -1059,8 +1104,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		{
 			if (log.isLoggable(Level.FINE)) log.fine("Report:AD_Process_ID=" + m_node.getAD_Process_ID());
 			//	Process
-			MProcess process = MProcess.get(getCtx(), m_node.getAD_Process_ID());
-			process.set_TrxName(trx != null ? trx.getTrxName() : null);
+			MProcess process = MProcess.getCopy(getCtx(), m_node.getAD_Process_ID(), (trx != null ? trx.getTrxName() : null));
 			if (!process.isReport() || process.getAD_ReportView_ID() == 0)
 				throw new IllegalStateException("Not a Report AD_Process_ID=" + m_node.getAD_Process_ID());
 			//
@@ -1103,10 +1147,35 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			//
 			ProcessInfo pi = new ProcessInfo (m_node.getName(true), m_node.getAD_Process_ID(),
 				getAD_Table_ID(), getRecord_ID());
+			
+			//check record id overwrite
+			MWFNodePara[] nParams = m_node.getParameters();
+			for(MWFNodePara p : nParams) 
+			{
+				if (p.getAD_Process_Para_ID() == 0 && p.getAttributeName().equalsIgnoreCase("Record_ID") && !Util.isEmpty(p.getAttributeValue(), true)) 
+				{
+					try 
+					{
+						Object value = parseNodeParaAttribute(p);
+						if (value == p || value == null)
+							break;
+						int recordId = Integer.valueOf(value.toString());
+						pi.setRecord_ID(recordId);
+					}
+					catch (NumberFormatException e)
+					{
+						log.log(Level.WARNING, e.getMessage(), e);
+					}
+					break;
+				}
+			}
+
 			pi.setAD_User_ID(getAD_User_ID());
 			pi.setAD_Client_ID(getAD_Client_ID());
 			pi.setAD_PInstance_ID(pInstance.getAD_PInstance_ID());
-			return process.processItWithoutTrxClose(pi, trx);
+			boolean success = process.processItWithoutTrxClose(pi, trx);
+			setTextMsg(pi.getSummary());
+			return success;
 		}
 
 		/******	Start Task (Probably redundant;
@@ -1214,7 +1283,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						MUserRoles[] urs = MUserRoles.getOfRole(getCtx(), resp.getAD_Role_ID());
 						for (int i = 0; i < urs.length; i++)
 						{
-							if(urs[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+							if(urs[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()) && urs[i].isActive())
 							{
 								autoApproval = true;
 								break;
@@ -1571,50 +1640,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			MPInstancePara iPara = iParams[pi];
 			for (int np = 0; np < nParams.length; np++)
 			{
-				MWFNodePara nPara = nParams[np];
+				MWFNodePara nPara = nParams[np];				
 				if (iPara.getParameterName().equals(nPara.getAttributeName()))
 				{
 					String variableName = nPara.getAttributeValue();
-					if (log.isLoggable(Level.FINE)) log.fine(nPara.getAttributeName()
-						+ " = " + variableName);
-					//	Value - Constant/Variable
-					Object value = variableName;
-					if (variableName == null
-						|| (variableName != null && variableName.length() == 0))
-						value = null;
-					else if (variableName.indexOf('@') != -1 && m_po != null)	//	we have a variable
-					{
-						//	Strip
-						int index = variableName.indexOf('@');
-						String columnName = variableName.substring(index+1);
-						index = columnName.indexOf('@');
-						if (index == -1)
-						{
-							log.warning(nPara.getAttributeName()
-								+ " - cannot evaluate=" + variableName);
-							break;
-						}
-						columnName = columnName.substring(0, index);
-						index = m_po.get_ColumnIndex(columnName);
-						if (index != -1)
-						{
-							value = m_po.get_Value(index);
-						}
-						else	//	not a column
-						{
-							//	try Env
-							String env = Env.getContext(getCtx(), columnName);
-							if (env.length() == 0)
-							{
-								log.warning(nPara.getAttributeName()
-									+ " - not column nor environment =" + columnName
-									+ "(" + variableName + ")");
-								break;
-							}
-							else
-								value = env;
-						}
-					}	//	@variable@
+					Object value = parseNodeParaAttribute(nPara);
+					if (value == nPara)
+						break;
 
 					//	No Value
 					if (value == null)
@@ -1679,6 +1711,52 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}	//	instance parameter loop
 	}	//	fillParameter
 
+	private Object parseNodeParaAttribute(MWFNodePara nPara)
+	{
+		String variableName = nPara.getAttributeValue();
+		if (log.isLoggable(Level.FINE)) log.fine(nPara.getAttributeName()
+			+ " = " + variableName);
+		//	Value - Constant/Variable
+		Object value = variableName;
+		if (variableName == null
+			|| (variableName != null && variableName.length() == 0))
+			value = null;
+		else if (variableName.indexOf('@') != -1 && m_po != null)	//	we have a variable
+		{
+			//	Strip
+			int index = variableName.indexOf('@');
+			String columnName = variableName.substring(index+1);
+			index = columnName.indexOf('@');
+			if (index == -1)
+			{
+				log.warning(nPara.getAttributeName()
+					+ " - cannot evaluate=" + variableName);
+				return nPara;
+			}
+			columnName = columnName.substring(0, index);
+			index = m_po.get_ColumnIndex(columnName);
+			if (index != -1)
+			{
+				value = m_po.get_Value(index);
+			}
+			else	//	not a column
+			{
+				//	try Env
+				String env = Env.getContext(getCtx(), columnName);
+				if (env.length() == 0)
+				{
+					log.warning(nPara.getAttributeName()
+						+ " - not column nor environment =" + columnName
+						+ "(" + variableName + ")");
+					return nPara;
+				}
+				else
+					value = env;
+			}
+		}	//	@variable@
+		return value;
+	}
+	
 	/*********************************
 	 * 	Send EMail
 	 */
@@ -1964,5 +2042,44 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		return sb.toString();
 	}	//	getSummary
+	
+	private void prepareCommitEvent()
+	{
+		Trx trx = null;
+		if (get_TrxName() == null)
+		{
+			return; // no transaction, nothing to commit
+		}
+		MWFActivity activity = new MWFActivity (getCtx(), get_ID(), get_TrxName());
+		trx = Trx.get(get_TrxName(), true);
+		trx.addTrxEventListener(new TrxListener(activity));		
+	}
 
+	
+	
+	static class TrxListener implements TrxEventListener {
+
+		private MWFActivity activity;
+
+		protected TrxListener(MWFActivity activity) {
+			this.activity = activity;
+		}
+		
+		@Override
+		public void afterRollback(Trx trx, boolean success) {
+		}
+		
+		@Override
+		public void afterCommit(Trx trx, boolean success) {
+			if (success) {
+				trx.removeTrxEventListener(this);
+				activity.setWFState (StateEngine.STATE_Completed);
+			}
+		}
+		
+		@Override
+		public void afterClose(Trx trx) {
+			trx.removeTrxEventListener(this);
+		}		
+	}
 }	//	MWFActivity

@@ -36,6 +36,7 @@ import org.compiere.model.MRefList;
 import org.compiere.print.MPrintFormatItem;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
 import org.compiere.util.Util;
@@ -111,10 +112,14 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		yesList.setSeltype("multiple");
 		noList.setSeltype("multiple");
 
-		bAdd.setImage(ThemeManager.getThemeResource("images/Next24.png"));
+		if (ThemeManager.isUseFontIconForImage()) {
+    		bAdd.setIconSclass("z-icon-Next");
+    		bRemove.setIconSclass("z-icon-Previous");
+    	} else {
+    		bAdd.setImage(ThemeManager.getThemeResource("images/Next24.png"));
+    		bRemove.setImage(ThemeManager.getThemeResource("images/Previous24.png"));
+    	}
 		bAdd.addEventListener(Events.ON_CLICK, actionListener);
-
-		bRemove.setImage(ThemeManager.getThemeResource("images/Previous24.png"));
 		bRemove.addEventListener(Events.ON_CLICK, actionListener);
 
 		EventListener<Event> crossListMouseListener = new DragListener();
@@ -159,11 +164,15 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 				migrateValueWithinYesList(event);
 			}
 		};
-		
-		bUp.setImage(ThemeManager.getThemeResource("images/Parent24.png"));
-		bUp.addEventListener(Events.ON_CLICK, actionListener2);
 
-		bDown.setImage(ThemeManager.getThemeResource("images/Detail24.png"));
+    	if (ThemeManager.isUseFontIconForImage()) {
+    		bUp.setIconSclass("z-icon-Parent");
+    		bDown.setIconSclass("z-icon-Detail");
+    	} else {
+    		bUp.setImage(ThemeManager.getThemeResource("images/Parent24.png"));
+    		bDown.setImage(ThemeManager.getThemeResource("images/Detail24.png"));
+    	}
+		bUp.addEventListener(Events.ON_CLICK, actionListener2);
 		bDown.addEventListener(Events.ON_CLICK, actionListener2);
 		
 		vbox = new Vbox();
@@ -233,7 +242,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 			yesModel.removeAllElements();
 			for (int i=0 ; i < yesItems.size() ; i++) {				 
 				 int ID= yesItems.get(i).get_ID();
-				 String name = getName(yesItems.get(i));
+				 String name = yesItems.get(i).getPrintName(Language.getLoginLanguage())==null? yesItems.get(i).getName():yesItems.get(i).getPrintName(Language.getLoginLanguage());
 				 yesList.addItem(new KeyNamePair(ID, name));
 				 yesModel.addElement(new ListElement(ID, name, yesItems.get(i).getSortNo(), true, yesItems.get(i).getAD_Client_ID(), yesItems.get(i).getAD_Org_ID()));	
 			}
@@ -243,7 +252,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 			noModel.removeAllElements();
 			for (int i=0 ; i < noItems.size() ; i++) {
 				 int ID= noItems.get(i).get_ID();
-				 String name = noItems.get(i).getPrintName()== null ? noItems.get(i).getName() : noItems.get(i).getPrintName();
+				 String name = noItems.get(i).getPrintName(Language.getLoginLanguage())== null ? noItems.get(i).getName() : noItems.get(i).getPrintName(Language.getLoginLanguage());
 				 noItems.get(i).setSortNo(0);
 				 noItems.get(i).setIsOrderBy(false);
 				 noList.addItem(new KeyNamePair(ID, name));

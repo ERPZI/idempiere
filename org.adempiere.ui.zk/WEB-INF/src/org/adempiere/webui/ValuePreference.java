@@ -48,6 +48,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -73,9 +74,9 @@ public class ValuePreference extends Window implements EventListener<Event>
 
 	/**
 	 *  Factory
+	 *  @param ref
 	 *  @param mField	field
 	 *  @param aValue	value
-	 *  @return ValuePreference or null
 	 */
 	public static void start (Component ref, GridField mField, Object aValue)
 	{
@@ -89,10 +90,10 @@ public class ValuePreference extends Window implements EventListener<Event>
 
 	/**
 	 *  Factory
+	 *  @param ref
 	 *  @param mField	field
 	 *  @param aValue	value
 	 *  @param aDisplayValue	display value
-	 *  @return ValuePreference or null
 	 */
 	public static void start (Component ref, GridField mField, Object aValue, String aDisplayValue)
 	{
@@ -171,7 +172,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 	/** The Menu Icon               */
 	//private static String ICON_URL = "images/VPreference16.png";
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(ValuePreference.class);
+	private static final CLogger log = CLogger.getCLogger(ValuePreference.class);
 	private AbstractADWindowContent adwindowContent;
 	
 	/**
@@ -241,7 +242,8 @@ public class ValuePreference extends Window implements EventListener<Event>
 			LayoutUtils.openOverlappedWindow(ref, this, "after_start");
 		} else {
 			AEnv.showCenterScreen(this);
-		}		
+		}
+		Executions.schedule(getDesktop(), e -> confirmPanel.getOKButton().focus(), new Event("onPostOpenValuePreferenceDialog"));
 
 	}   //  ValuePreference
 
@@ -467,6 +469,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 		confirmPanel.addActionListener(Events.ON_CLICK, this);		
 		bDelete = confirmPanel.getButton("Delete");
 		setExplanation();
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}   //  dynInit
 
 	/**
@@ -477,7 +480,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 	{
 		if (e.getTarget().getId().equals("Cancel"))
 		{
-			this.detach();
+			onCancel();
 		}
 		else if (e.getTarget().getId().equals("Ok"))
 		{
@@ -496,6 +499,10 @@ public class ValuePreference extends Window implements EventListener<Event>
 		else
 			setExplanation();
 	}   //  actionPerformed
+
+	private void onCancel() {
+		this.detach();
+	}
 
 	/**
 	 *  Set Explanation
@@ -679,7 +686,7 @@ public class ValuePreference extends Window implements EventListener<Event>
 			+ "AD_Preference_ID, AD_Preference_UU, AD_Client_ID, AD_Org_ID, IsActive, Created,CreatedBy,Updated,UpdatedBy,"
 			+ "AD_Window_ID, AD_Process_ID, AD_InfoWindow_ID, PreferenceFor, AD_User_ID, Attribute, Value) VALUES (");
 		sql.append(AD_Preference_ID).append(",").append(DB.TO_STRING(UUID.randomUUID().toString())).append(",").append(Client_ID).append(",").append(Org_ID)
-			.append(", 'Y',SysDate,").append(m_AD_User_ID).append(",SysDate,").append(m_AD_User_ID).append(", ");
+			.append(", 'Y',getDate(),").append(m_AD_User_ID).append(",getDate(),").append(m_AD_User_ID).append(", ");
 		
 		if (cbWindow.isChecked())
 			sql.append(m_AD_Window_ID).append(",");

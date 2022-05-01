@@ -27,6 +27,7 @@ import org.compiere.util.Util;
  *  @author Jorg Janke
  *  @version $Id: UserPassword.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class UserPassword extends SvrProcess
 {
 	private int		p_AD_User_ID = -1;
@@ -79,8 +80,7 @@ public class UserPassword extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info ("AD_User_ID=" + p_AD_User_ID + " from " + getAD_User_ID());
 		
-		MUser user = MUser.get(getCtx(), p_AD_User_ID);
-		user.load(get_TrxName());
+		MUser user = new MUser(getCtx(), p_AD_User_ID, get_TrxName());
 		MUser operator = MUser.get(getCtx(), getAD_User_ID());
 		if (log.isLoggable(Level.FINE)) log.fine("User=" + user + ", Operator=" + operator);
 		

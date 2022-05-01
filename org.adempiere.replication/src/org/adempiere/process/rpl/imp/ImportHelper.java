@@ -69,21 +69,18 @@ import org.w3c.dom.NodeList;
  * @author Trifon N. Trifonov
  * @author Antonio Cañaveral, e-Evolution
  * 				<li>[ 2195016 ] Implementation delete records messages
- * 				<li>http://sourceforge.net/tracker/index.php?func=detail&aid=2195016&group_id=176962&atid=879332
+ * 				<li>https://sourceforge.net/p/adempiere/bugs/1556/
  * @author	victor.perez@e-evolution.com, e-Evolution
  * 				<li>[ 2195090 ] Stabilization of replication
- * 				<li>https://sourceforge.net/tracker/?func=detail&atid=879332&aid=2936561&group_id=176962
+ * 				<li>https://sourceforge.net/p/adempiere/bugs/2294/
  *				<li>BF [2947622] The replication ID (Primary Key) is not working
- *				<li>https://sourceforge.net/tracker/?func=detail&aid=2947622&group_id=176962&atid=879332
+ *				<li>https://sourceforge.net/p/adempiere/bugs/2308/
  *
  */
 public class ImportHelper {
 
-	/** Instance Logger 			*/
-	private CLogger log = CLogger.getCLogger(ImportHelper.class);
-	
-	/** Static Logger 				*/
-	private static CLogger s_log = CLogger.getCLogger(ImportHelper.class);
+	/** Logger 			*/
+	private static final CLogger log = CLogger.getCLogger(ImportHelper.class);
 	
 	/** Custom Date Format			*/
 	private SimpleDateFormat	m_customDateFormat = null;
@@ -99,7 +96,6 @@ public class ImportHelper {
 	}
 	
 	/**
-	 * @param ctx
 	 * @param result
 	 * @param documentToBeImported
 	 * @param trxName
@@ -175,7 +171,7 @@ public class ImportHelper {
 		
 		if(po != null)
 		{
-			 Env.setContext(po.getCtx(), "#AD_Client_ID", po.getAD_Client_ID());
+			 Env.setContext(po.getCtx(), Env.AD_CLIENT_ID, po.getAD_Client_ID());
 			 
 		    	if(MReplicationStrategy.REPLICATION_TABLE==ReplicationMode)
 		    	{    
@@ -567,10 +563,10 @@ public class ImportHelper {
 								.setParameters(value)
 								.firstOnly();
 		
-		if (s_log.isLoggable(Level.INFO)) s_log.info("Client_Value =[" + value + "]");
+		if (log.isLoggable(Level.INFO)) log.info("Client_Value =[" + value + "]");
 		if(result != null)
 		{
-			if (s_log.isLoggable(Level.INFO)) s_log.info("AD_Client_ID = " + result.getAD_Client_ID());
+			if (log.isLoggable(Level.INFO)) log.info("AD_Client_ID = " + result.getAD_Client_ID());
 		}
 		
 		return result;

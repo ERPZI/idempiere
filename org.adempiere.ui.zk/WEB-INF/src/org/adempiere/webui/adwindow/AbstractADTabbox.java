@@ -42,7 +42,7 @@ import org.compiere.util.Util;
 public abstract class AbstractADTabbox extends AbstractUIPart implements IADTabbox
 {
     /** Logger                  */
-    private static CLogger  log = CLogger.getCLogger (AbstractADTabbox.class);
+    private static final CLogger  log = CLogger.getCLogger (AbstractADTabbox.class);
     /** List of dependent Variables     */
     private ArrayList<String>   m_dependents = new ArrayList<String>();
     
@@ -56,9 +56,8 @@ public abstract class AbstractADTabbox extends AbstractUIPart implements IADTabb
     
     /**
      *  Add Tab
-     *  @param tabName name
      *  @param gTab grid tab model
-     *  @param tabElement GridController or VSortTab
+     *  @param tabPanel
      */
     public void addTab(GridTab gTab, IADTabpanel tabPanel)
     {

@@ -27,6 +27,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import org.adempiere.webui.AdempiereWebUI;
+import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Listbox;
@@ -58,15 +59,20 @@ import org.zkoss.zhtml.Text;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
-import org.zkoss.zul.A;
+import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zk.ui.util.Notification;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
 import org.zkoss.zul.North;
+import org.zkoss.zul.Radio;
+import org.zkoss.zul.Radiogroup;
 import org.zkoss.zul.South;
+import org.zkoss.zul.Toolbarbutton;
 
 /**
  * Record Info (Who) With Change History
@@ -92,15 +98,16 @@ public class WRecordInfo extends Window implements EventListener<Event>
 	 *	Record Info
 	 *	@param title title
 	 *	@param dse data status event
+	 * @param gridTab 
 	 */
-	public WRecordInfo (String title, DataStatusEvent dse)
+	public WRecordInfo (String title, DataStatusEvent dse, GridTab gridTab)
 	{
 		super ();
 		this.setTitle(title);
 		if (!ThemeManager.isUseCSSForWindowSize())
 		{
-			ZKUpdateUtil.setWindowWidthX(this, 500);
-			ZKUpdateUtil.setWindowHeightX(this, 400);
+			ZKUpdateUtil.setWindowWidthX(this, 800);
+			ZKUpdateUtil.setWindowHeightX(this, 600);
 		}
 		else
 		{
@@ -118,7 +125,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		
 		try
 		{
-			init ( dynInit(dse, title) );
+			init ( dynInit(gridTab, dse, title) );
 		}
 		catch (Exception e)
 		{
@@ -130,16 +137,19 @@ public class WRecordInfo extends Window implements EventListener<Event>
 
 
 	private Listbox table = new Listbox();
+	private RecordTimeLinePanel timeLinePanel = new RecordTimeLinePanel();
 	private ConfirmPanel confirmPanel = new ConfirmPanel (false);
 
 	/**	Logger			*/
-	protected CLogger		log = CLogger.getCLogger(getClass());
+	private static final CLogger	log = CLogger.getCLogger(WRecordInfo.class);
 	/** The Data		*/
 	private Vector<Vector<String>>	m_data = new Vector<Vector<String>>();
 	/** Info			*/
 	private StringBuffer	m_info = new StringBuffer();
 	/** Permalink			*/
-	private A				m_permalink = new A();
+	private Toolbarbutton m_permalink = new Toolbarbutton();
+	/** Copy Select			*/
+	private Toolbarbutton m_copySelect = new Toolbarbutton();
 
 	/** Date Time Format		*/
 	private SimpleDateFormat	m_dateTimeFormat = DisplayType.getDateFormat
@@ -169,7 +179,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		Pre pre = new Pre();
 		Text text = new Text(m_info.toString());
 		text.setParent(pre);
-		pre.setParent(div);
+		pre.setParent(div);			
 		//
 		
 		Borderlayout layout = new Borderlayout();
@@ -181,15 +191,47 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		center.setParent(layout);
 		if (showTable)
 		{
+			table.setSclass("record-info-changelog-table");
 			ZKUpdateUtil.setHflex(table, "true");
 			ZKUpdateUtil.setVflex(table, "true");
 			North north = new North();
 			north.setParent(layout);
-			north.appendChild(div);
-						
+			north.appendChild(div);						
 			center.appendChild(table);
-			ZKUpdateUtil.setWidth(table, "100%");
-			ZKUpdateUtil.setVflex(table, true);
+			
+			Radiogroup group = new Radiogroup();
+			div.appendChild(group);
+			Hlayout hlayout = new Hlayout();
+			hlayout.setSclass("record-info-radiogroup");
+			Radio radio = new Radio(Msg.getElement(Env.getCtx(), "AD_ChangeLog_ID"));
+			radio.setRadiogroup(group);
+			hlayout.appendChild(radio);		
+			radio = new Radio(Msg.getMsg(Env.getCtx(), "TimeLine"));
+			radio.setRadiogroup(group);
+			hlayout.appendChild(radio);		
+			div.appendChild(hlayout);
+			group.setSelectedIndex(0);
+			
+			group.addEventListener(Events.ON_CHECK, evt -> {
+				int index = group.getSelectedIndex();
+				if (index == 0) {
+					if (table.getParent() == null && timeLinePanel.getParent() != null) {
+						timeLinePanel.detach();
+						center.appendChild(table);
+					}
+				} else if (index == 1) {
+					if (table.getParent() != null && timeLinePanel.getParent() == null) {
+						table.detach();
+						center.appendChild(timeLinePanel);
+					}
+				}
+			});
+			
+			if (ClientInfo.isMobile())
+			{
+				group.setSelectedIndex(1);
+				Events.sendEvent(Events.ON_CHECK, group, null);
+			}
 		}
 		else
 		{
@@ -197,33 +239,37 @@ public class WRecordInfo extends Window implements EventListener<Event>
 			ZKUpdateUtil.setVflex(div, "true");
 			center.appendChild(div);
 		}
+		
 		//
 		South south = new South();
 		south.setSclass("dialog-footer");
 		south.setParent(layout);
 		//
-		m_permalink.setTarget("_blank");
 		m_permalink.setLabel(Msg.getMsg(Env.getCtx(), "Permalink"));
 		m_permalink.setTooltiptext(Msg.getMsg(Env.getCtx(), "Permalink_tooltip"));
+		m_copySelect.setLabel(Msg.getMsg(Env.getCtx(), "CopySelect"));
+		m_copySelect.setTooltiptext(Msg.getMsg(Env.getCtx(), "CopySelect_tooltip"));
 		Hbox hbox = new Hbox();
 		hbox.setWidth("100%");
 		south.appendChild(hbox);
-		ZKUpdateUtil.setHflex(m_permalink, "true");
 		hbox.appendChild(m_permalink);
+		hbox.appendChild(m_copySelect);
 		ZKUpdateUtil.setHflex(confirmPanel, "true");
 		hbox.appendChild(confirmPanel);
 		
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}	//	jbInit
 	
 	
 	/**
 	 * 	Dynamic Init
+	 * @param gridTab 
 	 *	@param dse data status event
 	 *	@param title title
 	 *	@return true if table initialized
 	 */
-	private boolean dynInit(DataStatusEvent dse, String title)
+	private boolean dynInit(GridTab gridTab, DataStatusEvent dse, String title)
 	{
 		if (dse.CreatedBy == null)
 			return false;
@@ -250,10 +296,14 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		//get uuid
 		GridTable gridTable = null;
 		String tabName = null;
-		if (dse.getSource() instanceof GridTab) 
+		if (gridTab != null)
 		{
-			GridTab gridTab = (GridTab) dse.getSource();
 			gridTable = gridTab.getTableModel();
+		}
+		else if (dse.getSource() instanceof GridTab) 
+		{
+			gridTab = (GridTab) dse.getSource();
+			gridTable = gridTab.getTableModel();			
 			tabName = gridTab.getName();
 		}
 		else if (dse.getSource() instanceof GridTable)
@@ -296,9 +346,36 @@ public class WRecordInfo extends Window implements EventListener<Event>
 				}
 				if (!Util.isEmpty(uuid))
 					m_info.append("\n ").append(uuidcol).append("=").append(uuid);
-				m_permalink.setHref(AEnv.getZoomUrlTableID(po));
+				if (po.get_KeyColumns().length == 1) {
+					m_permalink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+						public void onEvent(Event event) throws Exception {
+							String ticketURL = AEnv.getZoomUrlTableID(po);
+							StringBuffer sb = new StringBuffer("navigator.clipboard.writeText(\"")
+								.append(ticketURL)
+								.append("\");");
+							Clients.evalJavaScript(sb.toString());
+							Notification.show(Msg.getMsg(Env.getCtx(), "Copied"), Notification.TYPE_INFO, m_permalink, "end_before", 1000);
+						}
+					});
+				}
 				m_permalink.setVisible(po.get_KeyColumns().length == 1);
+				m_copySelect.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+					public void onEvent(Event event) throws Exception {
+						StringBuffer query = new StringBuffer("navigator.clipboard.writeText(\"SELECT * FROM ")
+							.append(po.get_TableName())
+							.append(" WHERE ")
+							.append(po.get_WhereClause(true));
+						query.append("\");");
+						Clients.evalJavaScript(query.toString());
+						Notification.show(Msg.getMsg(Env.getCtx(), "Copied"), Notification.TYPE_INFO, m_copySelect, "end_before", 1000);
+					}
+				});
+				m_copySelect.setVisible(true);
 			}
+		}
+		if (gridTab != null)
+		{
+			timeLinePanel.render(gridTab);
 		}
 		
 		//	Title
@@ -493,6 +570,11 @@ public class WRecordInfo extends Window implements EventListener<Event>
 	
 	
 	public void onEvent(Event event) throws Exception {
+		onCancel();
+	}
+
+
+	private void onCancel() {
 		this.detach();
 	}
 

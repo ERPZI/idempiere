@@ -25,6 +25,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
  
 /**
  *	Create (Generate) Invoice from Shipment
@@ -32,6 +33,7 @@ import org.compiere.util.Env;
  *  @author Jorg Janke
  *  @version $Id: OrderLineCreateShipment.java,v 1.1 2007/07/23 05:34:35 mfuggle Exp $
  */
+@org.adempiere.base.annotation.Process
 public class OrderLineCreateShipment extends SvrProcess
 {
 	/**	Shipment					*/
@@ -56,7 +58,7 @@ public class OrderLineCreateShipment extends SvrProcess
 		}
 		
 		if (p_MovementDate == null)
-			p_MovementDate = Env.getContextAsDate(getCtx(), "#Date");
+			p_MovementDate = Env.getContextAsDate(getCtx(), Env.DATE);
 		if ( p_MovementDate==null)
 			p_MovementDate = new Timestamp(System.currentTimeMillis());
 		
@@ -72,17 +74,17 @@ public class OrderLineCreateShipment extends SvrProcess
 	{
 		if (log.isLoggable(Level.INFO)) log.info("C_OrderLine_ID=" + p_C_OrderLine_ID );
 		if (p_C_OrderLine_ID == 0)
-			throw new IllegalArgumentException("No OrderLine");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "No OrderLine"));
 		//
 		MOrderLine line = new MOrderLine (getCtx(), p_C_OrderLine_ID, get_TrxName());
 		if (line.get_ID() == 0)
-			throw new IllegalArgumentException("Order line not found");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Order line not found"));
 		MOrder order = new MOrder (getCtx(), line.getC_Order_ID(), get_TrxName());
 		if (!MOrder.DOCSTATUS_Completed.equals(order.getDocStatus()))
-			throw new IllegalArgumentException("Order not completed");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Order not completed"));
 		
 		if ( (line.getQtyOrdered().subtract(line.getQtyDelivered())).compareTo(Env.ZERO) <= 0 )
-			return "Ordered quantity already shipped";
+			return Msg.getMsg(getCtx(), "Ordered quantity already shipped");
 		
 		int C_DocTypeShipment_ID = DB.getSQLValue(get_TrxName(),
 				"SELECT C_DocTypeShipment_ID FROM C_DocType WHERE C_DocType_ID=?", 
@@ -92,18 +94,17 @@ public class OrderLineCreateShipment extends SvrProcess
 		shipment.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		shipment.setMovementDate(line.getDatePromised());
 		if (!shipment.save())
-			throw new IllegalArgumentException("Cannot save shipment header");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Cannot save shipment header"));
 		
 		
 		MInOutLine sline = new MInOutLine( shipment );
 		sline.setOrderLine(line, 0, line.getQtyReserved());
-		//sline.setDatePromised(line.getDatePromised());
 		sline.setQtyEntered(line.getQtyReserved());
 		sline.setC_UOM_ID(line.getC_UOM_ID());
 		sline.setQty(line.getQtyReserved());
 		sline.setM_Warehouse_ID(line.getM_Warehouse_ID());
 		if (!sline.save())
-			throw new IllegalArgumentException("Cannot save Shipment Line");
+			throw new IllegalArgumentException(Msg.getMsg(getCtx(), "Cannot save Shipment Line"));
 	
 		return shipment.getDocumentNo();
 	}	//	OrderLineCreateShipment

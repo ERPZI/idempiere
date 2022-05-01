@@ -37,6 +37,7 @@ import org.compiere.util.Env;
  *  
  */
 
+@org.adempiere.base.annotation.Process
 public class CopyRole extends SvrProcess
 {
 	private int m_AD_Role_ID_From = 0;
@@ -118,8 +119,8 @@ public class CopyRole extends SvrProcess
 				sql.append(") ");
 			sql.append("SELECT ").append(m_AD_Client_ID)
 				.append(", ").append(m_AD_Org_ID)
-				.append(", SYSDATE, ").append(Env.getAD_User_ID(Env.getCtx()))
-				.append(", SYSDATE, ").append(Env.getAD_User_ID(Env.getCtx()))
+				.append(", getDate(), ").append(Env.getAD_User_ID(Env.getCtx()))
+				.append(", getDate(), ").append(Env.getAD_User_ID(Env.getCtx()))
 				.append(", ").append(m_AD_Role_ID_To)
 				.append(", ").append(keycolumn)
 				.append(", IsActive ");

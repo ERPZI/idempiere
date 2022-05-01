@@ -40,9 +40,10 @@ import org.compiere.util.Language;
  *
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
- *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 
+ *			@see https://sourceforge.net/p/adempiere/feature-requests/631/ 
  *  @version $Id: TrialBalance.java,v 1.2 2006/07/30 00:51:05 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class TrialBalance extends SvrProcess
 {
 	/** AcctSchame Parameter			*/
@@ -107,7 +108,7 @@ public class TrialBalance extends SvrProcess
 	 */
 	protected void prepare()
 	{
-		StringBuffer sb = new StringBuffer ("AD_PInstance_ID=")
+		StringBuilder sb = new StringBuilder ("AD_PInstance_ID=")
 			.append(getAD_PInstance_ID());
 		//	Parameter
 		ProcessInfoParameter[] para = getParameter();
@@ -300,8 +301,8 @@ public class TrialBalance extends SvrProcess
 			sql.append("0");
 		else
 			sql.append(p_AD_Org_ID);
-		sql.append(", SysDate,").append(getAD_User_ID())
-			.append(",SysDate,").append(getAD_User_ID()).append(",");
+		sql.append(", getDate(),").append(getAD_User_ID())
+			.append(",getDate(),").append(getAD_User_ID()).append(",");
 		//	C_AcctSchema_ID, Account_ID, AccountValue, DateTrx, DateAcct, C_Period_ID,
 		sql.append(p_C_AcctSchema_ID).append(",");
 		if (p_Account_ID == 0)

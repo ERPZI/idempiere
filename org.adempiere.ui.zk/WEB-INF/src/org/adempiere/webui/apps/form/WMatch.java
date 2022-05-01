@@ -55,7 +55,6 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.form.Match;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.model.MMatchPO;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -78,6 +77,7 @@ import org.zkoss.zul.Vlayout;
  *  @author     Jorg Janke
  *  @version    $Id: VMatch.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VMatch")
 public class WMatch extends Match
 	implements IFormController, EventListener<Event>, WTableModelListener
 {
@@ -111,7 +111,6 @@ public class WMatch extends Match
 			LayoutUtils.addSclass("status-border", statusBar);
 			//
 			
-			MMatchPO.consolidate(Env.getCtx());
 			cmd_matchTo();
 		}
 		catch(Exception e)
@@ -128,7 +127,7 @@ public class WMatch extends Match
 	/**	Window No			*/
 	private int         	m_WindowNo = 0;
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WMatch.class);
+	private static final CLogger log = CLogger.getCLogger(WMatch.class);
 
 	private int     m_AD_Client_ID = Env.getAD_Client_ID(Env.getCtx());
 	private int     m_AD_Org_ID = Env.getAD_Org_ID(Env.getCtx());

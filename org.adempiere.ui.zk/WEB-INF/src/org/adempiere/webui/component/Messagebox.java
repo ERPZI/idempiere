@@ -23,6 +23,8 @@ import org.adempiere.util.Callback;
 import org.adempiere.webui.AdempiereIdGenerator;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.apps.AEnv;
+import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WStringEditor;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -36,6 +38,7 @@ import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Vbox;
@@ -45,6 +48,7 @@ import org.zkoss.zul.Vbox;
 *
 * @author  Niraj Sohun
 * @date    Jul 31, 2007
+* @contributor Andreas Sumerauer IDEMPIERE-4702
 */
 
 public class Messagebox extends Window implements EventListener<Event>
@@ -53,7 +57,7 @@ public class Messagebox extends Window implements EventListener<Event>
 	 * 
 	 */
 	private static final long serialVersionUID = 8928526331932742124L;
-
+	
 	private static final String MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; overflow: auto; max-height: 350pt; min-width: 230pt; max-width: 450pt;";	
 	private static final String SMALLER_MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; overflow: auto; max-height: 350pt; min-width: 180pt; ";
 	private String msg = new String("");
@@ -68,7 +72,7 @@ public class Messagebox extends Window implements EventListener<Event>
 	private Button btnAbort;
 	private Button btnRetry;
 	private Button btnIgnore;
-	private Textbox txtInput = new Textbox();;
+	private WEditor inputField;
 
 	private Image img = new Image();
 
@@ -105,7 +109,7 @@ public class Messagebox extends Window implements EventListener<Event>
 	public static final String QUESTION = "~./zul/img/msgbox/question-btn.png";
 
 	/** A symbol consisting of an exclamation point in a triangle with a yellow background. */
-	public static final String EXCLAMATION  = "~./zul/img/msgbox/warning-btn.png";
+	public static final String EXCLAMATION = "~./zul/img/msgbox/warning-btn.png";
 
 	/** A symbol of a lowercase letter i in a circle. */
 	public static final String INFORMATION = "~./zul/img/msgbox/info-btn.png";
@@ -177,7 +181,7 @@ public class Messagebox extends Window implements EventListener<Event>
 		
 		Panel pnlInput= new Panel();
 		pnlInput.setStyle(MESSAGE_PANEL_STYLE);
-		pnlInput.appendChild(txtInput);
+		pnlInput.appendChild(inputField.getComponent());
 
 		Vbox pnlText = new Vbox();
 		pnlText.appendChild(pnlMessage);
@@ -255,9 +259,18 @@ public class Messagebox extends Window implements EventListener<Event>
 	
 	public int show(String message, String title, int buttons, String icon, Callback<?> callback, boolean modal)
 	{
+		return show(message, title, buttons, icon, null, callback, modal);
+	}
+
+	public int show(String message, String title, int buttons, String icon, WEditor editor, Callback<?> callback, boolean modal)
+	{
 		this.msg = message;
 		this.imgSrc = icon;
 		this.callback = callback;
+		if (editor == null)
+			inputField = new WStringEditor();
+		else
+			inputField = editor;
 
 		init();
 		
@@ -268,7 +281,7 @@ public class Messagebox extends Window implements EventListener<Event>
 		btnRetry.setVisible(false);
 		btnAbort.setVisible(false);
 		btnIgnore.setVisible(false);
-		txtInput.setVisible(false);
+		inputField.setVisible(false);
 
 		if ((buttons & OK) != 0)
 			btnOk.setVisible(true);
@@ -292,7 +305,7 @@ public class Messagebox extends Window implements EventListener<Event>
 			btnIgnore.setVisible(true);
 
 		if ((buttons & INPUT) != 0) {
-			txtInput.setVisible(true);
+			inputField.setVisible(true);
 			isInput = true;
 		}
 
@@ -334,10 +347,23 @@ public class Messagebox extends Window implements EventListener<Event>
 	
 	public static int showDialog(String message, String title, int buttons, String icon, Callback<?> callback, boolean modal) 
 	{
-		Messagebox msg = new Messagebox();
-
-		return msg.show(message, title, buttons, icon, callback, modal);
+		return showDialog(message, title, buttons, icon, null, callback, modal);
 	}
+
+	public static int showDialog(String message, String title, int buttons, String icon, WEditor editor, Callback<?> callback, boolean modal)
+	{
+		Messagebox msg = new Messagebox();
+		return msg.show(message, title, buttons, icon, editor, callback, modal);
+	}
+	
+    // Andreas Sumerauer IDEMPIERE 4702
+	@Listen("onCancel")
+    public void onCancel() throws Exception
+    {
+    	returnValue = CANCEL;
+    	close();
+    }
+
 
 	public void onEvent(Event event) throws Exception
 	{
@@ -372,15 +398,18 @@ public class Messagebox extends Window implements EventListener<Event>
 		{
 			returnValue = IGNORE;
 		}
-
+		close();
+	}
+	
+	private void close() {
 		try {
 			this.detach();
 		} catch (NullPointerException npe) {
 			if (! (SessionManager.getSessionApplication() == null)) // IDEMPIERE-1937 - ignore when session was closed
 				throw npe;
-		}
+		}		
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onPageDetached(Page page) {
@@ -389,7 +418,7 @@ public class Messagebox extends Window implements EventListener<Event>
 		{
 			callback.onCallback(returnValue);
 		} else if (callback != null && isInput) {
-			callback.onCallback(txtInput.getText());
+			callback.onCallback(inputField.getValue());
 		}
 	}
 }

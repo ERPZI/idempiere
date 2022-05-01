@@ -16,7 +16,6 @@
  *****************************************************************************/
 package org.compiere.util;
 
-import java.io.Serializable;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -27,12 +26,8 @@ import java.util.logging.Logger;
  *  @author Jorg Janke
  *  @version $Id: CLogger.java,v 1.3 2006/08/09 16:38:47 jjanke Exp $
  */
-public class CLogger extends Logger implements Serializable
+public class CLogger extends Logger
 {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -4015949992093043663L;
 	private static final String LAST_INFO = "org.compiere.util.CLogger.lastInfo";
 	private static final String LAST_WARNING = "org.compiere.util.CLogger.lastWarning";
 	private static final String LAST_ERROR = "org.compiere.util.CLogger.lastError";
@@ -204,14 +199,14 @@ public class CLogger extends Logger implements Serializable
 	{
 		ValueNamePair vp = (ValueNamePair) Env.getCtx().get(LAST_ERROR);
 		return vp;
-	}   //  retrieveError
+	}   //  peekError
 	
 	/**
 	 * Get Error message from stack
 	 * @param defaultMsg default message (used when there are no errors on stack)
 	 * @return error message, or defaultMsg if there is not error message saved
 	 * @see #retrieveError()
-	 * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+	 * author Teo Sarca, SC ARHIPAC SERVICE SRL
 	 */
 	public static String retrieveErrorString(String defaultMsg) {
 		ValueNamePair vp = retrieveError();
@@ -231,6 +226,16 @@ public class CLogger extends Logger implements Serializable
 	}   //  retrieveError
 
 	/**
+	 *  Peek Exception from Stack
+	 *  @return last exception
+	 */
+	public static Exception peekException()
+	{
+		Exception ex = (Exception) Env.getCtx().get(LAST_EXCEPTION);
+		return ex;
+	}   //  peekException
+	
+	/**
 	 *  Save Warning as ValueNamePair.
 	 *  @param AD_Message message key
 	 *  @param message clear text message
@@ -245,6 +250,19 @@ public class CLogger extends Logger implements Serializable
 			warning(AD_Message + " - " + message);
 		return true;
 	}   //  saveWarning
+
+	/**
+	 * Get Warning message from stack
+	 * @param defaultMsg default message (used when there are no warnings on stack)
+	 * @return error message, or defaultMsg if there is not error message saved
+	 * @see #retrieveError()
+	 */
+	public static String retrieveWarningString(String defaultMsg) {
+		ValueNamePair vp = retrieveWarning();
+		if (vp == null)
+			return defaultMsg;
+		return vp.getName();
+	}
 
 	/**
 	 *  Get Warning from Stack

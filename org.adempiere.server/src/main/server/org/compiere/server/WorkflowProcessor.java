@@ -95,7 +95,7 @@ public class WorkflowProcessor extends AdempiereServer
 		String sql = "SELECT * "
 			+ "FROM AD_WF_Activity a "
 			+ "WHERE Processed='N' AND WFState='OS'"	//	suspended
-			+ " AND EndWaitTime <= SysDate"
+			+ " AND EndWaitTime <= getDate()"
 			+ " AND AD_Client_ID=?"
 			+ " AND EXISTS (SELECT * FROM AD_Workflow wf "
 				+ " INNER JOIN AD_WF_Node wfn ON (wf.AD_Workflow_ID=wfn.AD_Workflow_ID) "
@@ -117,6 +117,8 @@ public class WorkflowProcessor extends AdempiereServer
 				activity.setWFState (StateEngine.STATE_Completed);
 				// saves and calls MWFProcess.checkActivities();
 				count++;
+				MWFProcess wfpr = new MWFProcess(activity.getCtx(), activity.getAD_WF_Process_ID(), activity.get_TrxName());
+				wfpr.checkCloseActivities(activity.get_TrxName());
 			}
 		}
 		catch (Exception e)
@@ -196,7 +198,7 @@ public class WorkflowProcessor extends AdempiereServer
 				+ " AND (DateLastAlert IS NULL";
 			if (m_model.getRemindDays() > 0)
 				sql += " OR (DateLastAlert+" + m_model.getRemindDays() 
-					+ ") < SysDate";
+					+ ") < getDate()";
 			sql += ") AND EXISTS (SELECT * FROM AD_Workflow wf "
 					+ " INNER JOIN AD_WF_Node wfn ON (wf.AD_Workflow_ID=wfn.AD_Workflow_ID) "
 					+ "WHERE a.AD_WF_Node_ID=wfn.AD_WF_Node_ID"
@@ -244,11 +246,11 @@ public class WorkflowProcessor extends AdempiereServer
 		String sql = "SELECT * "
 			+ "FROM AD_WF_Activity a "
 			+ "WHERE Processed='N' AND WFState='OS'"	//	suspended
-			+ " AND EndWaitTime > SysDate"
+			+ " AND EndWaitTime < getDate()"
 			+ " AND (DateLastAlert IS NULL";
 		if (m_model.getRemindDays() > 0)
 			sql += " OR (DateLastAlert+" + m_model.getRemindDays() 
-				+ ") < SysDate";
+				+ ") < getDate()";
 		sql += ") AND EXISTS (SELECT * FROM AD_Workflow wf "
 				+ " INNER JOIN AD_WF_Node wfn ON (wf.AD_Workflow_ID=wfn.AD_Workflow_ID) "
 				+ "WHERE a.AD_WF_Node_ID=wfn.AD_WF_Node_ID"
@@ -298,11 +300,11 @@ public class WorkflowProcessor extends AdempiereServer
 			sql = "SELECT * "
 				+ "FROM AD_WF_Activity a "
 				+ "WHERE Processed='N' AND WFState='OS'"	//	suspended
-				+ " AND (Updated+" + m_model.getInactivityAlertDays() + ") < SysDate"
+				+ " AND (Updated+" + m_model.getInactivityAlertDays() + ") < getDate()"
 				+ " AND (DateLastAlert IS NULL";
 			if (m_model.getRemindDays() > 0)
 				sql += " OR (DateLastAlert+" + m_model.getRemindDays() 
-					+ ") < SysDate";
+					+ ") < getDate()";
 			sql += ") AND EXISTS (SELECT * FROM AD_Workflow wf "
 					+ " INNER JOIN AD_WF_Node wfn ON (wf.AD_Workflow_ID=wfn.AD_Workflow_ID) "
 					+ "WHERE a.AD_WF_Node_ID=wfn.AD_WF_Node_ID"

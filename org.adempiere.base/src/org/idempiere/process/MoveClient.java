@@ -49,6 +49,7 @@ import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Util;
 
+@org.adempiere.base.annotation.Process
 public class MoveClient extends SvrProcess {
 
 	// Process to move a client from a external database to current, or copy a template in current database
@@ -786,8 +787,9 @@ public class MoveClient extends SvrProcess {
 					columnsSB.append(",");
 					valuesSB.append(",");
 				}
-				qColumnsSB.append(tableName).append(".").append(columnName);
-				columnsSB.append(columnName);
+				String quoteColumnName = DB.getDatabase().quoteColumnName(columnName);
+				qColumnsSB.append(tableName).append(".").append(quoteColumnName);
+				columnsSB.append(quoteColumnName);
 				valuesSB.append("?");
 				columns.add(column);
 				ncols++;
@@ -830,7 +832,7 @@ public class MoveClient extends SvrProcess {
 										|| "AD_Language".equalsIgnoreCase(columnName)
 										|| "EntityType".equalsIgnoreCase(columnName))) {
 							convertTable = "";
-						} else if ("Record_ID".equalsIgnoreCase(columnName) && table.getColumnIndex("AD_Table_ID") > 0) {
+						} else if ("Record_ID".equalsIgnoreCase(columnName) && table.columnExistsInDB("AD_Table_ID")) {
 							// Special case for Record_ID
 							int tableId = rsGD.getInt("AD_Table_ID");
 							if (tableId > 0) {
@@ -919,7 +921,7 @@ public class MoveClient extends SvrProcess {
 										// not found in the table - try to get it again - could be missed in first pass
 										convertedId = getLocalIDFor(convertTable, id, tableName);
 										if (convertedId < 0) {
-											if (("Record_ID".equalsIgnoreCase(columnName) && table.getColumnIndex("AD_Table_ID") > 0)
+											if (("Record_ID".equalsIgnoreCase(columnName) && table.columnExistsInDB("AD_Table_ID"))
 													|| (("Node_ID".equalsIgnoreCase(columnName) || "Parent_ID".equalsIgnoreCase(columnName))
 															&& (       "AD_TreeNode".equalsIgnoreCase(tableName)
 																	|| "AD_TreeNodeMM".equalsIgnoreCase(tableName)

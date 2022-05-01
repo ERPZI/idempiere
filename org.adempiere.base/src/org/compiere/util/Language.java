@@ -141,7 +141,8 @@ public class Language implements Serializable
 				if (dblang != null) {
 					if (!(   language.equals(dblang.getLanguageISO()) 
 						  && country.equals(dblang.getCountryCode())
-						 )
+						 ) && dblang.getLanguageISO() != null
+						   && dblang.getCountryCode() != null
 						) {
 						locale = new Locale(dblang.getLanguageISO(), dblang.getCountryCode());
 					}
@@ -357,6 +358,22 @@ public class Language implements Serializable
 		this (name, AD_Language, locale, null, null, null);
 	}	//	Language
 
+	/**
+	 * Copy constructor
+	 * @param copy
+	 */
+	public Language(Language copy)
+	{
+		this.m_AD_Language = copy.m_AD_Language;
+		this.m_dateFormat = copy.m_dateFormat;
+		this.m_dbDateFormat = copy.m_dbDateFormat;
+		this.m_decimalPoint = copy.m_decimalPoint;
+		this.m_fromDB = copy.m_fromDB;
+		this.m_leftToRight = copy.m_leftToRight;
+		this.m_locale = copy.m_locale;
+		this.m_mediaSize = copy.m_mediaSize;
+		this.m_name = copy.m_name;
+	}
 
 	/**	Name					*/
 	private String  m_name;
@@ -479,7 +496,7 @@ public class Language implements Serializable
 	 *  using the upper case function.
 	 *  It also must have leading zero for day and month.
 	 */
-	public void setDateFormat (String javaDatePattern)
+	public synchronized void setDateFormat (String javaDatePattern)
 	{
 		if (javaDatePattern == null)
 			return;
@@ -502,7 +519,7 @@ public class Language implements Serializable
 	 *  i.e. leading zero for date and month
 	 *  @return date format MM/dd/yyyy - dd.MM.yyyy
 	 */
-	public SimpleDateFormat getDateFormat()
+	public synchronized SimpleDateFormat getDateFormat()
 	{
 		if (m_dateFormat == null)
 		{
@@ -537,7 +554,7 @@ public class Language implements Serializable
 			}
 			m_dateFormat.setLenient(true);
 		}
-		return m_dateFormat;
+		return (SimpleDateFormat) m_dateFormat.clone();
 	}   //  getDateFormat
 
 	/**

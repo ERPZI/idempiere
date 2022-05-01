@@ -38,6 +38,7 @@ import org.compiere.util.Env;
  *  Contributor(s):
  *    Carlos Ruiz - globalqss - FR [ 1992542 ] Import Payment doesn't have DocAction parameter
  */
+@org.adempiere.base.annotation.Process
 public class ImportPayment extends SvrProcess
 {
 	/**	Organization to be imported to	*/
@@ -99,7 +100,7 @@ public class ImportPayment extends SvrProcess
 		//	Delete Old Imported
 		if (p_deleteOldImported)
 		{
-			sql = new StringBuilder ("DELETE I_Payment ")
+			sql = new StringBuilder ("DELETE FROM I_Payment ")
 				  .append("WHERE I_IsImported='Y'").append (clientCheck);
 			no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("Delete Old Impored =" + no);
@@ -110,9 +111,9 @@ public class ImportPayment extends SvrProcess
 			  .append("SET AD_Client_ID = COALESCE (AD_Client_ID,").append (ba.getAD_Client_ID()).append ("),")
 			  .append(" AD_Org_ID = COALESCE (AD_Org_ID,").append (p_AD_Org_ID).append ("),");
 		sql.append(" IsActive = COALESCE (IsActive, 'Y'),")
-			  .append(" Created = COALESCE (Created, SysDate),")
+			  .append(" Created = COALESCE (Created, getDate()),")
 			  .append(" CreatedBy = COALESCE (CreatedBy, 0),")
-			  .append(" Updated = COALESCE (Updated, SysDate),")
+			  .append(" Updated = COALESCE (Updated, getDate()),")
 			  .append(" UpdatedBy = COALESCE (UpdatedBy, 0),")
 			  .append(" I_ErrorMsg = ' ',")
 			  .append(" I_IsImported = 'N' ")
@@ -412,13 +413,11 @@ public class ImportPayment extends SvrProcess
 			.append(" ORDER BY C_BankAccount_ID, CheckNo, DateTrx, R_AuthCode");
 			
 		MBankAccount account = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		
 		int noInsert = 0;
-		try
+		try (PreparedStatement pstmt = DB.prepareStatement(sql.toString(), get_TrxName());)
 		{
-			pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
-			rs = pstmt.executeQuery();
+			ResultSet rs = pstmt.executeQuery();
 				
 			while (rs.next())
 			{ 
@@ -459,13 +458,10 @@ public class ImportPayment extends SvrProcess
 				
 				payment.setDateAcct(imp.getDateTrx());
 				payment.setDateTrx(imp.getDateTrx());
-			//	payment.setDescription(imp.getDescription());
-				//
 				payment.setC_BPartner_ID(imp.getC_BPartner_ID());
 				payment.setC_Invoice_ID(imp.getC_Invoice_ID());
 				payment.setC_DocType_ID(imp.getC_DocType_ID());
 				payment.setC_Currency_ID(imp.getC_Currency_ID());
-			//	payment.setC_ConversionType_ID(imp.getC_ConversionType_ID());
 				payment.setC_Charge_ID(imp.getC_Charge_ID());
 				payment.setChargeAmt(imp.getChargeAmt());
 				payment.setTaxAmt(imp.getTaxAmt());
@@ -520,16 +516,10 @@ public class ImportPayment extends SvrProcess
 		{
 			log.log(Level.SEVERE, sql.toString(), e);
 		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
 		
 		//	Set Error to indicator to not imported
 		sql = new StringBuilder ("UPDATE I_Payment ")
-			.append("SET I_IsImported='N', Updated=SysDate ")
+			.append("SET I_IsImported='N', Updated=getDate() ")
 			.append("WHERE I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		addLog (0, null, new BigDecimal (no), "@Errors@");

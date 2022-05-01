@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import org.compiere.model.MClient;
 import org.compiere.model.MInterestArea;
 import org.compiere.model.MMailText;
-import org.compiere.model.MStore;
 import org.compiere.model.MUser;
 import org.compiere.model.MUserMail;
 import org.compiere.util.DB;
@@ -38,6 +37,7 @@ import org.compiere.util.Msg;
  *  @author Jorg Janke
  *  @version $Id: SendMailText.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class SendMailText extends SvrProcess
 {
 	/** What to send			*/
@@ -144,18 +144,6 @@ public class SendMailText extends SvrProcess
 				.append(": ").append(m_ia.getName())
 				.append("\n").append(Msg.getMsg(getCtx(), "UnsubscribeInfo"))
 				.append("\n");
-			MStore[] wstores = MStore.getOfClient(m_client);
-			int index = 0;
-			for (int i = 0; i < wstores.length; i++)
-			{
-				if (wstores[i].isDefault())
-				{
-					index = i;
-					break;
-				}
-			}
-			if (wstores.length > 0)
-				unsubscribe.append(wstores[index].getWebContext(true));
 		}
 
 		//
@@ -259,6 +247,9 @@ public class SendMailText extends SvrProcess
 		//
 		MUser to = new MUser (getCtx(), AD_User_ID, null);
 		m_MailText.setUser(AD_User_ID);		//	parse context
+		if (to.getC_BPartner_ID() > 0)
+			m_MailText.setBPartner(to.getC_BPartner_ID()); //	parse context - translate
+
 		StringBuilder message = new StringBuilder(m_MailText.getMailText(true));
 		//	Unsubscribe
 		if (unsubscribe != null)
@@ -288,7 +279,7 @@ public class SendMailText extends SvrProcess
 		} else {
 			log.warning("FAILURE - " + to.getEMail());
 		}
-		StringBuilder msglog = new StringBuilder((OK ? "@OK@" : "@ERROR@")).append(" - ").append(to.getEMail());
+		StringBuilder msglog = new StringBuilder(Msg.parseTranslation(getCtx(), OK ? "@OK@" : "@ERROR@")).append(" - ").append(to.getEMail());
 		addLog(0, null, null, msglog.toString());
 		return Boolean.valueOf(OK);
 	}	//	sendIndividualMail

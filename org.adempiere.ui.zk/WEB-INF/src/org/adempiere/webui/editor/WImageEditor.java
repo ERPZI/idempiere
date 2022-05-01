@@ -25,9 +25,12 @@ import org.compiere.model.MImage;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.zkoss.image.AImage;
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zul.Cell;
 import org.zkoss.zul.Image;
 
 /**
@@ -49,11 +52,40 @@ public class WImageEditor extends WEditor
 	private boolean readwrite;
 
     /**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WImageEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WImageEditor.class);
     
-    public WImageEditor(GridField gridField)
+	/**
+	 * 
+	 * @param gridField
+	 */
+	public WImageEditor(GridField gridField)
+	{
+		this(gridField, false, null);
+	}
+	
+	/**
+	 * 
+	 * @param gridField
+	 * @param tableEditor
+	 * @param editorConfiguration
+	 */
+    public WImageEditor(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration)
     {
-        super(new Image(), gridField);
+        super(new Image() {
+			private static final long serialVersionUID = 8492629361709791256L;
+
+			@Override
+			public void onPageAttached(Page newpage, Page oldpage) {
+				super.onPageAttached(newpage, oldpage);
+				if (newpage != null && getParent() != null) {
+					Component p = getParent();
+					if (p instanceof Cell) {
+						Cell cell = (Cell) p;
+						LayoutUtils.addSclass("image-field-cell", cell);
+					}
+				}
+			}        	
+        }, gridField, tableEditor, editorConfiguration);
         init();
     }
 
@@ -66,7 +98,7 @@ public class WImageEditor extends WEditor
     {
     	AImage img = null;
         getComponent().setContent(img);
-        getComponent().setSclass("image-field");        
+        getComponent().setSclass("image-field image-fit-contain");        
     }
 
      @Override
@@ -126,7 +158,7 @@ public class WImageEditor extends WEditor
 		}
 		//  Get/Create Image
 		if (m_mImage == null || newValue != m_mImage.get_ID())
-			m_mImage = MImage.get (Env.getCtx(), newValue);
+			m_mImage = MImage.getCopy(Env.getCtx(), newValue, (String)null);
 		//
 		if (log.isLoggable(Level.FINE)) log.fine(m_mImage.toString());
 		AImage img = null;
@@ -178,6 +210,10 @@ public class WImageEditor extends WEditor
 						//
 						ValueChangeEvent vce = new ValueChangeEvent(WImageEditor.this, gridField.getColumnName(), oldValue, newValue);
 						fireValueChange(vce);
+						if (oldValue == null && newValue != null && getGridField() != null && getGridField().getGridTab() != null) {
+							// save automatically when creating a new image
+							getGridField().getGridTab().dataSave(false);
+						}
 					}
 					
 				}

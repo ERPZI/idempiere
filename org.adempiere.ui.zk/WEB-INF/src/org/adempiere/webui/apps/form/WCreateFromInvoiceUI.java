@@ -13,7 +13,6 @@
  *****************************************************************************/
 package org.adempiere.webui.apps.form;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -88,7 +87,7 @@ public class WCreateFromInvoiceUI extends CreateFromInvoice implements EventList
 	private int p_WindowNo;
 
 	/**	Logger			*/
-	private CLogger log = CLogger.getCLogger(getClass());
+	private static final CLogger log = CLogger.getCLogger(WCreateFromInvoiceUI.class);
 		
 	protected Label bPartnerLabel = new Label();
 	protected WEditor bPartnerField;

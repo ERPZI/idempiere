@@ -82,7 +82,7 @@ public class EMailProcessor
 
 	
 	/**	Logger			*/
-	protected CLogger	log = CLogger.getCLogger(getClass());
+	protected static final CLogger	log = CLogger.getCLogger(EMailProcessor.class);
 	
 	/**	Process Error				*/
 	protected static final int		ERROR = 0;
@@ -136,7 +136,8 @@ public class EMailProcessor
 			return m_session;
 		
 		//	Session
-		Properties props = System.getProperties();
+		Properties props = new Properties();
+		props.putAll(System.getProperties());
 		props.put("mail.store.protocol", "smtp");
 		props.put("mail.transport.protocol", "smtp");
 		props.put("mail.host", m_host);

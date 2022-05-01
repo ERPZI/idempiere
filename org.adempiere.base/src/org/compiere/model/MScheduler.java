@@ -18,13 +18,17 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
+import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.idempiere.cache.ImmutablePOSupport;
 
 
 /**
@@ -37,12 +41,12 @@ import org.compiere.util.Msg;
  *    Carlos Ruiz - globalqss - FR [3135351] - Enable Scheduler for buttons
  */
 public class MScheduler extends X_AD_Scheduler
-	implements AdempiereProcessor, AdempiereProcessor2
+	implements AdempiereProcessor, AdempiereProcessor2, ImmutablePOSupport
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5106574386025319255L;
+	private static final long serialVersionUID = -2427229109274587547L;
 
 	/**
 	 * 	Get Active
@@ -85,6 +89,39 @@ public class MScheduler extends X_AD_Scheduler
 		super(ctx, rs, trxName);
 	}	//	MScheduler
 
+	/**
+	 * 
+	 * @param copy
+	 */
+	public MScheduler(MScheduler copy) 
+	{
+		this(Env.getCtx(), copy);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 */
+	public MScheduler(Properties ctx, MScheduler copy) 
+	{
+		this(ctx, copy, (String) null);
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param copy
+	 * @param trxName
+	 */
+	public MScheduler(Properties ctx, MScheduler copy, String trxName) 
+	{
+		this(ctx, 0, trxName);
+		copyPO(copy);
+		this.m_parameter = copy.m_parameter != null ? Arrays.stream(copy.m_parameter).map(e -> {return new MSchedulerPara(ctx, e, trxName);}).toArray(MSchedulerPara[]::new) : null;
+		this.m_recipients = copy.m_recipients != null ? Arrays.stream(copy.m_recipients).map(e -> {return new MSchedulerRecipient(ctx, e, trxName);}).toArray(MSchedulerRecipient[]::new) : null;
+	}
+	
 	/**	Process Parameter			*/
 	private MSchedulerPara[] m_parameter = null;
 	/** Process Recipients			*/
@@ -96,7 +133,14 @@ public class MScheduler extends X_AD_Scheduler
 	 */
 	public String getServerID ()
 	{
-		return "Scheduler" + get_ID();
+		if (get_ID() == 0 && get_IDOld() > 0)
+		{
+			return "Scheduler" + get_IDOld();
+		}
+		else
+		{
+			return "Scheduler" + get_ID();
+		}
 	}	//	getServerID
 
 	/**
@@ -135,9 +179,9 @@ public class MScheduler extends X_AD_Scheduler
 	{
 		if (getKeepLogDays() < 1)
 			return 0;
-		String sql = "DELETE AD_SchedulerLog "
+		String sql = "DELETE FROM AD_SchedulerLog "
 			+ "WHERE AD_Scheduler_ID=" + getAD_Scheduler_ID()
-			+ " AND (Created+" + getKeepLogDays() + ") < SysDate";
+			+ " AND (Created+" + getKeepLogDays() + ") < getDate()";
 		int no = DB.executeUpdateEx(sql, get_TrxName());
 		return no;
 	}	//	deleteLog
@@ -148,7 +192,7 @@ public class MScheduler extends X_AD_Scheduler
 	 */
 	public MProcess getProcess()
 	{
-		return MProcess.get(getCtx(), getAD_Process_ID());
+		return MProcess.getCopy(getCtx(), getAD_Process_ID(), (String)null);
 	}	//	getProcess
 
 	/**
@@ -166,6 +210,8 @@ public class MScheduler extends X_AD_Scheduler
 		.setParameters(getAD_Scheduler_ID())
 		.setOnlyActiveRecords(true)
 		.list();
+		if (list.size() > 0 && is_Immutable())
+			list.stream().forEach(e -> e.markImmutable());
 		m_parameter = new MSchedulerPara[list.size()];
 		list.toArray(m_parameter);
 		return m_parameter;
@@ -186,6 +232,9 @@ public class MScheduler extends X_AD_Scheduler
 		.setParameters(getAD_Scheduler_ID())
 		.setOnlyActiveRecords(true)
 		.list();
+		if (list.size() > 0 && is_Immutable())
+			list.stream().forEach(e -> e.markImmutable());
+			
 		m_recipients = new MSchedulerRecipient[list.size()];
 		list.toArray(m_recipients);
 		return m_recipients;
@@ -197,6 +246,16 @@ public class MScheduler extends X_AD_Scheduler
 	 */
 	public Integer[] getRecipientAD_User_IDs()
 	{
+		return getRecipientAD_User_IDs(false);
+	}
+	
+	/**
+	 * 	Get Recipient AD_User_IDs
+	 *  @param excludeUploadRecipient
+	 *	@return array of user IDs
+	 */
+	public Integer[] getRecipientAD_User_IDs(boolean excludeUploadRecipient)
+	{
 		TreeSet<Integer> list = new TreeSet<Integer>();
 		MSchedulerRecipient[] recipients = getRecipients(false);
 		for (int i = 0; i < recipients.length; i++)
@@ -206,7 +265,8 @@ public class MScheduler extends X_AD_Scheduler
 				continue;
 			if (recipient.getAD_User_ID() != 0)
 			{
-				list.add(recipient.getAD_User_ID());
+				if (!excludeUploadRecipient || !recipient.isUpload())
+					list.add(recipient.getAD_User_ID());
 			}
 			if (recipient.getAD_Role_ID() != 0)
 			{
@@ -309,4 +369,36 @@ public class MScheduler extends X_AD_Scheduler
 	   return MSchedule.get(getCtx(),getAD_Schedule_ID()).getCronPattern();
 	}
 
+	@Override
+	public MScheduler markImmutable() 
+	{
+		if (is_Immutable())
+			return this;
+		
+		makeImmutable();
+		if (m_parameter != null && m_parameter.length > 0)
+			Arrays.stream(m_parameter).forEach(e -> e.markImmutable());
+		if (m_recipients != null && m_recipients.length > 0)
+			Arrays.stream(m_recipients).forEach(e -> e.markImmutable());
+		
+		return this;
+	}
+
+	/**
+	 * 
+	 * @return list of upload recipients
+	 */
+	public MSchedulerRecipient[] getUploadRecipients() {
+		List<MSchedulerRecipient> list = new ArrayList<>();
+		MSchedulerRecipient[] recipients = getRecipients(false);
+		for (int i = 0; i < recipients.length; i++) {
+			MSchedulerRecipient recipient = recipients[i];
+			if (!recipient.isActive())
+				continue;
+			if (recipient.getAD_User_ID() > 0 && recipient.isUpload() && recipient.getAD_AuthorizationAccount_ID() > 0) {
+				list.add(recipient);
+			}
+		}
+		return list.toArray(new MSchedulerRecipient[0]);
+	}
 }	//	MScheduler

@@ -30,6 +30,7 @@ import org.compiere.util.DB;
  *  @author Jorg Janke
  *  @version $Id: BPGroupAcctCopy.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class BPGroupAcctCopy extends SvrProcess
 {
 	/** BP Group					*/
@@ -85,7 +86,7 @@ public class BPGroupAcctCopy extends SvrProcess
 			 + " FROM C_BP_Group_Acct"
 			 + " WHERE C_BP_Group_ID=" + p_C_BP_Group_ID
 			 + " AND C_AcctSchema_ID=" + p_C_AcctSchema_ID
-			+ "), Updated=SysDate, UpdatedBy=0 "
+			+ "), Updated=getDate(), UpdatedBy=0 "
 			+ "WHERE ca.C_AcctSchema_ID=" + p_C_AcctSchema_ID
 			+ " AND EXISTS (SELECT * FROM C_BPartner p "
 				+ "WHERE p.C_BPartner_ID=ca.C_BPartner_ID"
@@ -100,7 +101,7 @@ public class BPGroupAcctCopy extends SvrProcess
 			+ " AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy,"
 			+ " C_Receivable_Acct, C_Receivable_Services_Acct, C_PrePayment_Acct) "
 			+ "SELECT p.C_BPartner_ID, acct.C_AcctSchema_ID,"
-			+ " p.AD_Client_ID, p.AD_Org_ID, 'Y', SysDate, 0, SysDate, 0,"
+			+ " p.AD_Client_ID, p.AD_Org_ID, 'Y', getDate(), 0, getDate(), 0,"
 			+ " acct.C_Receivable_Acct, acct.C_Receivable_Services_Acct, acct.C_PrePayment_Acct "
 			+ "FROM C_BPartner p"
 			+ " INNER JOIN C_BP_Group_Acct acct ON (acct.C_BP_Group_ID=p.C_BP_Group_ID)"
@@ -121,7 +122,7 @@ public class BPGroupAcctCopy extends SvrProcess
 			 + " FROM C_BP_Group_Acct"
 			 + " WHERE C_BP_Group_ID=" + p_C_BP_Group_ID
 			 + " AND C_AcctSchema_ID=" + p_C_AcctSchema_ID
-			+ "), Updated=SysDate, UpdatedBy=0 "
+			+ "), Updated=getDate(), UpdatedBy=0 "
 			+ "WHERE va.C_AcctSchema_ID=" + p_C_AcctSchema_ID
 			+ " AND EXISTS (SELECT * FROM C_BPartner p "
 				+ "WHERE p.C_BPartner_ID=va.C_BPartner_ID"
@@ -136,7 +137,7 @@ public class BPGroupAcctCopy extends SvrProcess
 			+ " AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy,"
 			+ " V_Liability_Acct, V_Liability_Services_Acct, V_PrePayment_Acct) "
 			+ "SELECT p.C_BPartner_ID, acct.C_AcctSchema_ID,"
-			+ " p.AD_Client_ID, p.AD_Org_ID, 'Y', SysDate, 0, SysDate, 0,"
+			+ " p.AD_Client_ID, p.AD_Org_ID, 'Y', getDate(), 0, getDate(), 0,"
 			+ " acct.V_Liability_Acct, acct.V_Liability_Services_Acct, acct.V_PrePayment_Acct "
 			+ "FROM C_BPartner p"
 			+ " INNER JOIN C_BP_Group_Acct acct ON (acct.C_BP_Group_ID=p.C_BP_Group_ID)"

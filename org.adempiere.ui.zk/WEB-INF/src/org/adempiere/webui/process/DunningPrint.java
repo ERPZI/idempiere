@@ -17,15 +17,10 @@
 package org.adempiere.webui.process;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.adempiere.webui.apps.AEnv;
-import org.adempiere.webui.component.Window;
-import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.window.SimplePDFViewer;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
 import org.compiere.model.MDunningLevel;
@@ -51,6 +46,7 @@ import org.compiere.util.EMail;
  *  
  *  FR 2872010 - Dunning Run for a complete Dunning (not just level) - Developer: Carlos Ruiz - globalqss - Sponsor: Metas
  */
+@org.adempiere.base.annotation.Process
 public class DunningPrint extends SvrProcess
 {
 	/**	Mail PDF				*/
@@ -258,38 +254,13 @@ public class DunningPrint extends SvrProcess
 			return msgreturn.toString();
 		}
 		
-		AEnv.executeAsyncDesktopTask(new Runnable() {			
-			@Override
-			public void run() {
-				showReports(pdfList);
+		if (processUI != null)
+		{
+			processUI.showReports(pdfList);
 			}
-		});
 		
 		StringBuilder msgreturn = new StringBuilder("@Printed@=").append(count);
 		return msgreturn.toString();
 	}	//	doIt
 
-	private void showReports(List<File> pdfList) {
-		if (pdfList.size() > 1) {
-			try {
-				File outFile = File.createTempFile("DunningPrint", ".pdf");					
-				AEnv.mergePdf(pdfList, outFile);
-				Window win = new SimplePDFViewer(this.getName(), new FileInputStream(outFile));
-				win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-				SessionManager.getAppDesktop().showWindow(win, "center");
-			} catch (Exception e) {
-				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			}
-		} else if (pdfList.size() > 0) {
-			try {
-				Window win = new SimplePDFViewer(this.getName(), new FileInputStream(pdfList.get(0)));
-				win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-				SessionManager.getAppDesktop().showWindow(win, "center");
-			} catch (Exception e)
-			{
-				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			}
-		}
-	}
-	
 }	//	DunningPrint

@@ -56,9 +56,8 @@ public class ServerReportCtl {
 	/**
 	 * 	Start Document Print for Type with specified printer.
 	 * 	@param type document type in ReportEngine
+	 *  @param customPrintFormat
 	 * 	@param Record_ID id
-	 *  @param parent The window which invoked the printing
-	 *  @param WindowNo The windows number which invoked the printing
 	 * 	@param printerName 	Specified printer name
 	 *  @param pi
 	 * 	@return true if success
@@ -112,6 +111,12 @@ public class ServerReportCtl {
 						pi.setExportFileExtension("xls");
 						pi.setExportFile(re.getXLS());					
 					}
+					else if ("XLSX".equals(pi.getReportType()))
+					{
+						pi.setExport(true);
+						pi.setExportFileExtension("xlsx");
+						pi.setExportFile(re.getXLSX());					
+					}
 					else
 					{
 						pi.setPDFReport(re.getPDF());
@@ -130,7 +135,6 @@ public class ServerReportCtl {
 	/**
 	 * Runs a Jasper process that prints the record
 	 * 
-	 * @param format
 	 * @param Record_ID
 	 * @param re
 	 * @param IsDirectPrint
@@ -144,16 +148,17 @@ public class ServerReportCtl {
 	/**
 	 * Runs a Jasper process that prints the record
 	 * 
-	 * @param format
 	 * @param Record_ID
 	 * @param re
 	 * @param IsDirectPrint
 	 * @param printerName
+	 * @param pi
 	 * @return
 	 */
 	public static boolean runJasperProcess(int Record_ID, ReportEngine re, boolean IsDirectPrint, String printerName, ProcessInfo pi) {
 		MPrintFormat format = re.getPrintFormat();
 		ProcessInfo jasperProcessInfo = new ProcessInfo ("", format.getJasperProcess_ID());
+		PrintInfo printInfo = re.getPrintInfo();
 		if (pi != null) {
 			jasperProcessInfo.setPrintPreview(pi.isPrintPreview());
 			jasperProcessInfo.setIsBatch(pi.isBatch());
@@ -161,6 +166,7 @@ public class ServerReportCtl {
 			jasperProcessInfo.setPrintPreview( !IsDirectPrint );
 		}
 		jasperProcessInfo.setRecord_ID ( Record_ID );
+		jasperProcessInfo.setTable_ID(printInfo.getAD_Table_ID());
 		ArrayList<ProcessInfoParameter> jasperPrintParams = new ArrayList<ProcessInfoParameter>();
 		ProcessInfoParameter pip;
 		if (printerName!=null && printerName.trim().length()>0) {
@@ -245,7 +251,7 @@ public class ServerReportCtl {
 
 	/**************************************************************************
 	 *	Start Standard Report.
-	 *  - Get Table Info & submit
+	 *  - Get Table Info and submit
 	 *  @param pi Process Info
 	 *  @param IsDirectPrint if true, prints directly - otherwise View
 	 *  @return true if OK
@@ -258,14 +264,13 @@ public class ServerReportCtl {
 	
 	/**************************************************************************
 	 *	Start Standard Report.
-	 *  - Get Table Info & submit.<br>
+	 *  - Get Table Info and submit.<br>
 	 *  A report can be created from:
 	 *  <ol>
 	 *  <li>attached MPrintFormat, if any (see {@link ProcessInfo#setTransientObject(Object)}, {@link ProcessInfo#setSerializableObject(java.io.Serializable)}
 	 *  <li>process information (AD_Process.AD_PrintFormat_ID, AD_Process.AD_ReportView_ID)
 	 *  </ol>
 	 *  @param pi Process Info
-	 *  @param IsDirectPrint if true, prints directly - otherwise View
 	 *  @return true if OK
 	 */
 	static public boolean startStandardReport (ProcessInfo pi)
@@ -302,6 +307,12 @@ public class ServerReportCtl {
 					pi.setExport(true);
 					pi.setExportFileExtension("xls");
 					pi.setExportFile(re.getXLS());					
+				}
+				else if ("XLSX".equals(pi.getReportType()))
+				{
+					pi.setExport(true);
+					pi.setExportFileExtension("xlsx");
+					pi.setExportFile(re.getXLSX());					
 				}
 				else
 				{
@@ -344,6 +355,12 @@ public class ServerReportCtl {
 				pi.setExport(true);
 				pi.setExportFileExtension("xls");
 				pi.setExportFile(re.getXLS());					
+			}
+			else if ("XLSX".equals(pi.getReportType()))
+			{
+				pi.setExport(true);
+				pi.setExportFileExtension("xlsx");
+				pi.setExportFile(re.getXLSX());					
 			}
 			else
 			{
@@ -402,6 +419,12 @@ public class ServerReportCtl {
 				pi.setExport(true);
 				pi.setExportFileExtension("xls");
 				pi.setExportFile(re.getXLS());					
+			}
+			else if ("XLSX".equals(pi.getReportType()))
+			{
+				pi.setExport(true);
+				pi.setExportFileExtension("xlsx");
+				pi.setExportFile(re.getXLSX());					
 			}
 			else
 			{

@@ -79,7 +79,7 @@ import org.zkoss.zul.Vbox;
  * 			<li>FR [ 2794312 ] Location AutoComplete
  * @author Teo Sarca, teo.sarca@gmail.com
  * 			<li>BF [ 2995212 ] NPE on Location dialog
- * 				https://sourceforge.net/tracker/?func=detail&aid=2995212&group_id=176962&atid=955896
+ * 				https://sourceforge.net/p/adempiere/zk-web-client/419/
  * 
  * @TODO: Implement fOnline button present in swing client
  *
@@ -93,9 +93,8 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	 * 
 	 */
 	private static final long serialVersionUID = -9116270523919373406L;
-	private static final String LABEL_STYLE = "white-space: nowrap;";
 	/** Logger          */
-	private static CLogger log = CLogger.getCLogger(WLocationDialog.class);
+	private static final CLogger log = CLogger.getCLogger(WLocationDialog.class);
 	private Label lblAddress1;
 	private Label lblAddress2;
 	private Label lblAddress3;
@@ -181,7 +180,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		initComponents();
 		init();
 		//      Current Country
-		for (MCountry country:MCountry.getCountries(Env.getCtx()))
+		for (MCountry country:MCountry.getCountries())
 		{
 			lstCountry.appendItem(country.toString(), country);
 		}
@@ -191,9 +190,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		m_origCountry_ID = m_location.getC_Country_ID();
 		//  Current Region
 		lstRegion.appendItem("", null);
-		for (MRegion region : MRegion.getRegions(Env.getCtx(), m_origCountry_ID))
+		for (MRegion region : MRegion.getRegions(m_origCountry_ID))
 		{
-			lstRegion.appendItem(region.getName(),region);
+			lstRegion.appendItem(region.getTrlName(),region);
 		}
 		if (m_location.getCountry().isHasRegion()) {
 			if (m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName) != null
@@ -228,29 +227,29 @@ public class WLocationDialog extends Window implements EventListener<Event>
 	private void initComponents()
 	{
 		lblAddress1     = new Label(Msg.getElement(Env.getCtx(), "Address1"));
-		lblAddress1.setStyle(LABEL_STYLE);
+		lblAddress1.setSclass("field-label");
 		lblAddress2     = new Label(Msg.getElement(Env.getCtx(), "Address2"));
-		lblAddress2.setStyle(LABEL_STYLE);
+		lblAddress2.setSclass("field-label");
 		lblAddress3     = new Label(Msg.getElement(Env.getCtx(), "Address3"));
-		lblAddress3.setStyle(LABEL_STYLE);
+		lblAddress3.setSclass("field-label");
 		lblAddress4     = new Label(Msg.getElement(Env.getCtx(), "Address4"));
-		lblAddress4.setStyle(LABEL_STYLE);
+		lblAddress4.setSclass("field-label");
 		lblAddress5     = new Label(Msg.getElement(Env.getCtx(), "Address5"));
-		lblAddress5.setStyle(LABEL_STYLE);
+		lblAddress5.setSclass("field-label");
 		lblComments     = new Label(Msg.getElement(Env.getCtx(), "Comments"));
-		lblComments.setStyle(LABEL_STYLE);
+		lblComments.setSclass("field-label");
 		lblCity         = new Label(Msg.getMsg(Env.getCtx(), "City"));
-		lblCity.setStyle(LABEL_STYLE);
+		lblCity.setSclass("field-label");
 		lblZip          = new Label(Msg.getMsg(Env.getCtx(), "Postal"));
-		lblZip.setStyle(LABEL_STYLE);
+		lblZip.setSclass("field-label");
 		lblRegion       = new Label(Msg.getMsg(Env.getCtx(), "Region"));
-		lblRegion.setStyle(LABEL_STYLE);
+		lblRegion.setSclass("field-label");
 		lblPostal       = new Label(Msg.getMsg(Env.getCtx(), "Postal"));
-		lblPostal.setStyle(LABEL_STYLE);
+		lblPostal.setSclass("field-label");
 		lblPostalAdd    = new Label(Msg.getMsg(Env.getCtx(), "PostalAdd"));
-		lblPostalAdd.setStyle(LABEL_STYLE);
+		lblPostalAdd.setSclass("field-label");
 		lblCountry      = new Label(Msg.getMsg(Env.getCtx(), "Country"));
-		lblCountry.setStyle(LABEL_STYLE);
+		lblCountry.setSclass("field-label");
 
 		txtAddress1 = new Textbox();
 		txtAddress1.setCols(20);
@@ -314,7 +313,6 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		txtResult = new Textbox();
 		txtResult.setCols(2);
 		txtResult.setRows(3);
-		ZKUpdateUtil.setHeight(txtResult, "100%");
 		txtResult.setReadonly(true);
 		
 		cbxValid = new Checkbox();
@@ -351,57 +349,57 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		ZKUpdateUtil.setWidth(column, "70%");
 		
 		Row pnlAddress1 = new Row();
-		pnlAddress1.appendChild(lblAddress1.rightAlign());
+		pnlAddress1.appendChild(lblAddress1);
 		pnlAddress1.appendChild(txtAddress1);
 		ZKUpdateUtil.setHflex(txtAddress1, "1");
 
 		Row pnlAddress2 = new Row();
-		pnlAddress2.appendChild(lblAddress2.rightAlign());
+		pnlAddress2.appendChild(lblAddress2);
 		pnlAddress2.appendChild(txtAddress2);
 		ZKUpdateUtil.setHflex(txtAddress2, "1");
 
 		Row pnlAddress3 = new Row();
-		pnlAddress3.appendChild(lblAddress3.rightAlign());
+		pnlAddress3.appendChild(lblAddress3);
 		pnlAddress3.appendChild(txtAddress3);
 		ZKUpdateUtil.setHflex(txtAddress3, "1");
 
 		Row pnlAddress4 = new Row();
-		pnlAddress4.appendChild(lblAddress4.rightAlign());
+		pnlAddress4.appendChild(lblAddress4);
 		pnlAddress4.appendChild(txtAddress4);
 		ZKUpdateUtil.setHflex(txtAddress4, "1");
 
 		Row pnlAddress5 = new Row();
-		pnlAddress5.appendChild(lblAddress5.rightAlign());
+		pnlAddress5.appendChild(lblAddress5);
 		pnlAddress5.appendChild(txtAddress5);
 		ZKUpdateUtil.setHflex(txtAddress5, "1");
 
 		Row pnlComments = new Row();
-		pnlComments.appendChild(lblComments.rightAlign());
+		pnlComments.appendChild(lblComments);
 		pnlComments.appendChild(txtComments);
 		ZKUpdateUtil.setHflex(txtComments, "1");
 
 		Row pnlCity     = new Row();
-		pnlCity.appendChild(lblCity.rightAlign());
+		pnlCity.appendChild(lblCity);
 		pnlCity.appendChild(txtCity);
 		ZKUpdateUtil.setHflex(txtCity, "1");
 
 		Row pnlPostal   = new Row();
-		pnlPostal.appendChild(lblPostal.rightAlign());
+		pnlPostal.appendChild(lblPostal);
 		pnlPostal.appendChild(txtPostal);
 		ZKUpdateUtil.setHflex(pnlPostal, "1");
 
 		Row pnlPostalAdd = new Row();
-		pnlPostalAdd.appendChild(lblPostalAdd.rightAlign());
+		pnlPostalAdd.appendChild(lblPostalAdd);
 		pnlPostalAdd.appendChild(txtPostalAdd);
 		ZKUpdateUtil.setHflex(txtPostalAdd, "1");
 
 		Row pnlRegion    = new Row();
-		pnlRegion.appendChild(lblRegion.rightAlign());
+		pnlRegion.appendChild(lblRegion);
 		pnlRegion.appendChild(lstRegion);
 		ZKUpdateUtil.setHflex(lstRegion, "1");
 
 		Row pnlCountry  = new Row();
-		pnlCountry.appendChild(lblCountry.rightAlign());
+		pnlCountry.appendChild(lblCountry);
 		pnlCountry.appendChild(lstCountry);
 		ZKUpdateUtil.setHflex(lstCountry, "1");
 
@@ -514,6 +512,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		southPane.appendChild(confirmPanel);
 		
 		addEventListener("onSaveError", this);
+		addEventListener(Events.ON_CANCEL, e -> onCancel());
 	}
 	/**
 	 * Dynamically add fields to the Location dialog box
@@ -542,9 +541,9 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			lstRegion.getChildren().clear();
 			if (country.isHasRegion()) {
 				lstRegion.appendItem("", null);
-				for (MRegion region : MRegion.getRegions(Env.getCtx(), country.getC_Country_ID()))
+				for (MRegion region : MRegion.getRegions(country.getC_Country_ID()))
 				{
-					lstRegion.appendItem(region.getName(),region);
+					lstRegion.appendItem(region.getTrlName(),region);
 				}
 				if (m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName) != null
 						&& m_location.getCountry().get_Translation(MCountry.COLUMNNAME_RegionName).trim().length() > 0)
@@ -758,8 +757,7 @@ public class WLocationDialog extends Window implements EventListener<Event>
 		}
 		else if (event.getTarget() == confirmPanel.getButton(ConfirmPanel.A_CANCEL))
 		{
-			m_change = false;
-			this.dispose();
+			onCancel();
 		}
 		else if (toLink.equals(event.getTarget()))
 		{
@@ -930,6 +928,11 @@ public class WLocationDialog extends Window implements EventListener<Event>
 			doPopup();
 			focus();			
 		}
+	}
+
+	private void onCancel() {
+		m_change = false;
+		this.dispose();
 	}
 
 	

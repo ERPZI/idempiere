@@ -17,7 +17,6 @@
 package org.adempiere.webui.process;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -25,10 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.adempiere.webui.apps.AEnv;
-import org.adempiere.webui.component.Window;
-import org.adempiere.webui.session.SessionManager;
-import org.adempiere.webui.window.SimplePDFViewer;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMailText;
@@ -55,6 +50,7 @@ import org.compiere.util.Util;
  * 	@author 	Jorg Janke
  * 	@version 	$Id: InvoicePrint.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class InvoicePrint extends SvrProcess
 {
 	/**	Mail PDF			*/
@@ -254,6 +250,7 @@ public class InvoicePrint extends SvrProcess
 				boolean printed = false;
 				if (p_EMailPDF)
 				{
+					mText.setBPartner(C_BPartner_ID);	//	Context - Translation
 					String subject = mText.getMailHeader() + " - " + DocumentNo;
 					EMail email = client.createEMail(to.getEMail(), subject, null);
 					if (!email.isValid())
@@ -264,7 +261,6 @@ public class InvoicePrint extends SvrProcess
 						continue;
 					}
 					mText.setUser(to);					//	Context
-					mText.setBPartner(C_BPartner_ID);	//	Context
 					mText.setPO(new MInvoice(getCtx(), C_Invoice_ID, get_TrxName()));
 					String message = mText.getMailText(true);
 					if (mText.isHtml())
@@ -310,7 +306,7 @@ public class InvoicePrint extends SvrProcess
 				if (printed)
 				{
 					StringBuffer sb = new StringBuffer ("UPDATE C_Invoice "
-						+ "SET DatePrinted=SysDate, IsPrinted='Y' WHERE C_Invoice_ID=")
+						+ "SET DatePrinted=getDate(), IsPrinted='Y' WHERE C_Invoice_ID=")
 						.append (C_Invoice_ID);
 					DB.executeUpdateEx(sb.toString(), get_TrxName());
 				}
@@ -325,12 +321,10 @@ public class InvoicePrint extends SvrProcess
 			DB.close(rs, pstmt);
 		}
 		
-		AEnv.executeAsyncDesktopTask(new Runnable() {
-			@Override
-			public void run() {
-				showReports(pdfList);
+		if (processUI != null)
+		{
+			processUI.showReports(pdfList);
 			}
-		});
 
 		//
 		if (p_EMailPDF)
@@ -435,35 +429,11 @@ public class InvoicePrint extends SvrProcess
 		}
 		String orgWhere = MRole.getDefault(getCtx(), false).getOrgWhere(MRole.SQL_RO);
 		if (!Util.isEmpty(orgWhere, true)) {
-			sql.append(" AND i.");
+			orgWhere = orgWhere.replaceAll("AD_Org_ID", "i.AD_Org_ID");
+			sql.append(" AND ");
 			sql.append(orgWhere);
 		}
 		sql.append(" ORDER BY i.C_Invoice_ID, pf.AD_Org_ID DESC");	//	more than 1 PF record
-	}
-
-	private void showReports(List<File> pdfList) {
-		if (pdfList.size() > 1) {
-			try {
-				File outFile = File.createTempFile("InvoicePrint", ".pdf");					
-				AEnv.mergePdf(pdfList, outFile);
-
-				Window win = new SimplePDFViewer(this.getName(), new FileInputStream(outFile));
-				win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-				SessionManager.getAppDesktop().showWindow(win, "center");
-			} catch (Exception e) {
-				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			}
-		} else if (pdfList.size() > 0) {
-			try {
-				Window win = new SimplePDFViewer(this.getName(), new FileInputStream(pdfList.get(0)));
-				win.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
-				SessionManager.getAppDesktop().showWindow(win, "center");
-			} catch (Exception e)
-			{
-				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			}
-		}
-		
 	}
 
 }	//	InvoicePrint

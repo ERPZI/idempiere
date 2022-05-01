@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.idempiere</groupId>
 		<artifactId>org.idempiere.parent</artifactId>
-		<version>6.2.0-SNAPSHOT</version>
+		<version>${revision}</version>
 		<relativePath>../org.idempiere.parent/pom.xml</relativePath>
 	</parent>
 	<artifactId>org.adempiere.base</artifactId>
@@ -12,7 +12,7 @@
 
 	<build>
 		<plugins>
-			<plugin>
+		    <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -29,16 +29,6 @@
 									<version>2.0b6</version>
 								</artifactItem>
 								<artifactItem>
-									<groupId>com.sun.script</groupId>
-									<artifactId>jython-engine</artifactId>
-									<version>20080611</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.python</groupId>
-									<artifactId>jython</artifactId>
-									<version>2.7.0</version>
-								</artifactItem>
-								<artifactItem>
 									<groupId>it.sauronsoftware.cron4j</groupId>
 									<artifactId>cron4j</artifactId>
 									<version>2.2.5</version>
@@ -46,12 +36,7 @@
 								<artifactItem>
 									<groupId>commons-validator</groupId>
 									<artifactId>commons-validator</artifactId>
-									<version>1.6</version>
-								</artifactItem>
-								<artifactItem>
-									<groupId>javax.jnlp</groupId>
-									<artifactId>jnlp</artifactId>
-									<version>1.5.0</version>
+									<version>1.7</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.avalon.framework</groupId>

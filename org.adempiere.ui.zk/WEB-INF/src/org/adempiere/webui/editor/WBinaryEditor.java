@@ -38,16 +38,31 @@ public class WBinaryEditor extends WEditor
     private static final String[] LISTENER_EVENTS = {Events.ON_CLICK};
     
     /**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WBinaryEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WBinaryEditor.class);
     
     private boolean         m_mandatory;
     private Object          m_data;
 
 	private ADWindow adwindow;
    
-    public WBinaryEditor(GridField gridField)
+	/**
+	 * 
+	 * @param gridField
+	 */
+	public WBinaryEditor(GridField gridField)
+	{
+		this(gridField, false, null);
+	}
+	
+	/**
+	 * 
+	 * @param gridField
+	 * @param tableEditor
+	 * @param editorConfiguration
+	 */
+    public WBinaryEditor(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration)
     {
-        super(new Button(), gridField);
+        super(new Button(), gridField, tableEditor, editorConfiguration);
         init();
     }
 
@@ -166,9 +181,10 @@ public class WBinaryEditor extends WEditor
 				content.getComponent().getParent().appendChild(dialog);
 				content.showBusyMask(dialog);
 				LayoutUtils.openOverlappedWindow(content.getComponent().getParent(), dialog, "middle_center");
+				dialog.focus();
 			} else {
 				AEnv.showWindow(dialog);
-			}
+			}			
 		}
 	}
 }

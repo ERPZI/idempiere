@@ -17,12 +17,17 @@
 package org.compiere.print;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -30,6 +35,7 @@ import java.util.regex.Pattern;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
+import org.compiere.model.MReportView;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogMgt;
@@ -44,6 +50,9 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
 
+import bsh.EvalError;
+import bsh.Interpreter;
+
 /**
  * Data Engine.
  * Creates SQL and laods data into PrintData (including totals/etc.)
@@ -56,15 +65,15 @@ import org.compiere.util.ValueNamePair;
  * 				<li>BF [ 1807368 ] DataEngine does not close DB connection
  * 				<li>BF [ 2549128 ] Report View Column not working at all
  * 				<li>BF [ 2865545 ] Error if not all parts of multikey are lookups
- * 					https://sourceforge.net/tracker/?func=detail&aid=2865545&group_id=176962&atid=879332
+ * 					https://sourceforge.net/p/adempiere/bugs/2120/
  * @author Teo Sarca, teo.sarca@gmail.com
  * 				<li>BF [ 2876268 ] DataEngine: error on text long fields
- * 					https://sourceforge.net/tracker/?func=detail&aid=2876268&group_id=176962&atid=879332
+ * 					https://sourceforge.net/p/adempiere/bugs/2169/
  * @author victor.perez@e-evolution.com 
- *				<li>FR [ 2011569 ] Implementing new Summary flag in Report View  http://sourceforge.net/tracker/index.php?func=detail&aid=2011569&group_id=176962&atid=879335
+ *				<li>FR [ 2011569 ] Implementing new Summary flag in Report View  https://sourceforge.net/p/adempiere/feature-requests/478/
  * @author Paul Bowden (phib)
  * 				<li> BF 2908435 Virtual columns with lookup reference types can't be printed
- *                   https://sourceforge.net/tracker/?func=detail&aid=2908435&group_id=176962&atid=879332
+ *                   https://sourceforge.net/p/adempiere/bugs/2246/
  *  @contributor  Fernandinho (FAIRE)
  *  				- http://jira.idempiere.com/browse/IDEMPIERE-153
  */
@@ -114,6 +123,7 @@ public class DataEngine
 	/** Key Indicator in Report			*/
 	public static final String KEY = "*";
 
+	private Map<Object, Object> m_summarized = new HashMap<Object, Object>();
 
 	/**************************************************************************
 	 * 	Load Data
@@ -270,20 +280,25 @@ public class DataEngine
 			.append("pfi.IsVarianceCalc, pfi.IsDeviationCalc, ")				//	22..23
 			.append("c.ColumnSQL, COALESCE(pfi.FormatPattern, c.FormatPattern) ")		//	24, 25
 			//BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
-			.append(" , pfi.isDesc ") //26
+			/** START DEVCOFFEE: script column **/
+			.append(" , pfi.isDesc, pfi.Script, pfi.Name, pfi.AD_PrintFormatItem_ID ") // 26..29
 			//END
 			.append("FROM AD_PrintFormat pf")
 			.append(" INNER JOIN AD_PrintFormatItem pfi ON (pf.AD_PrintFormat_ID=pfi.AD_PrintFormat_ID)")
-			.append(" INNER JOIN AD_Column c ON (pfi.AD_Column_ID=c.AD_Column_ID)")
+			.append(" LEFT JOIN AD_Column c ON (pfi.AD_Column_ID=c.AD_Column_ID)")
 			.append(" LEFT OUTER JOIN AD_ReportView_Col rvc ON (pf.AD_ReportView_ID=rvc.AD_ReportView_ID AND c.AD_Column_ID=rvc.AD_Column_ID) ")
 			.append("WHERE pf.AD_PrintFormat_ID=?")					//	#1
-			.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0) ")
+			.append(" AND pfi.IsActive='Y' AND (pfi.IsPrinted='Y' OR c.IsKey='Y' OR pfi.SortNo > 0 ")
+			.append(" OR EXISTS(select 1 from AD_PrintFormatItem x where x.AD_PrintFormat_ID=pf.AD_PrintFormat_ID and x.DisplayLogic is not null and ")
+			.append("(x.DisplayLogic Like '%@'||c.ColumnName||'@%' OR x.DisplayLogic Like '%@'||c.ColumnName||':%@%' OR x.DisplayLogic Like '%@'||c.ColumnName||'.%@%'))) ")
 			.append(" AND pfi.PrintFormatType IN ('"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Field
 				+ "','"
 				+ MPrintFormatItem.PRINTFORMATTYPE_Image
 				+ "','"
 				+ MPrintFormatItem.PRINTFORMATTYPE_PrintFormat
+				+ "','" 
+				+ MPrintFormatItem.PRINTFORMATTYPE_Script 
 				+ "') ")
 			.append("ORDER BY pfi.IsPrinted DESC, pfi.SeqNo");			//	Functions are put in first column
 		PreparedStatement pstmt = null;
@@ -308,8 +323,11 @@ public class DataEngine
 			{
 				//	get Values from record
 				int AD_Column_ID = rs.getInt(1);
+				int AD_PrintFormatItem_ID = rs.getInt("AD_PrintFormatItem_ID");
 				String ColumnName = rs.getString(2);
 				String ColumnSQL = rs.getString(24);
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQLFIND="))
+					ColumnSQL = ColumnSQL.substring(9);
 				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQL="))
 					ColumnSQL = "NULL";
 				if (ColumnSQL != null && ColumnSQL.contains("@"))
@@ -328,7 +346,6 @@ public class DataEngine
 				int FieldLength = rs.getInt(5);
 				boolean IsMandatory = "Y".equals(rs.getString(6));
 				boolean IsKey = "Y".equals(rs.getString(7));
-				//boolean IsParent = "Y".equals(rs.getString(8));
 				//  SQL GroupBy
 				boolean IsGroupFunction = "Y".equals(rs.getString(9));
 				if (IsGroupFunction)
@@ -338,28 +355,28 @@ public class DataEngine
 					FunctionColumn = "";
 				//	Breaks/Column Functions
 				if ("Y".equals(rs.getString(11)))
-					m_group.addGroupColumn(ColumnName);
+					m_group.addGroupColumn(AD_PrintFormatItem_ID);
 				if ("Y".equals(rs.getString(12)))
-					m_group.addFunction(ColumnName, PrintDataFunction.F_SUM);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_SUM);
 				if ("Y".equals(rs.getString(13)))
-					m_group.addFunction(ColumnName, PrintDataFunction.F_MEAN);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_MEAN);
 				if ("Y".equals(rs.getString(14)))
-					m_group.addFunction(ColumnName, PrintDataFunction.F_COUNT);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_COUNT);
 				if ("Y".equals(rs.getString(18)))	//	IsMinCalc
-					m_group.addFunction(ColumnName, PrintDataFunction.F_MIN);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_MIN);
 				if ("Y".equals(rs.getString(19)))	//	IsMaxCalc
-					m_group.addFunction(ColumnName, PrintDataFunction.F_MAX);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_MAX);
 				if ("Y".equals(rs.getString(22)))	//	IsVarianceCalc
-					m_group.addFunction(ColumnName, PrintDataFunction.F_VARIANCE);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_VARIANCE);
 				if ("Y".equals(rs.getString(23)))	//	IsDeviationCalc
-					m_group.addFunction(ColumnName, PrintDataFunction.F_DEVIATION);
+					m_group.addFunction(AD_PrintFormatItem_ID, PrintDataFunction.F_DEVIATION);
 				if ("Y".equals(rs.getString(20)))	//	isRunningTotal
 					//	RunningTotalLines only once - use max
 					m_runningTotalLines = Math.max(m_runningTotalLines, rs.getInt(21));	
 
 				//	General Info
 				boolean IsPrinted = "Y".equals(rs.getString(15));
-				//int SortNo = rs.getInt(16);
+
 				boolean isPageBreak = "Y".equals(rs.getString(17));
 				
 				String formatPattern = rs.getString(25);
@@ -367,6 +384,10 @@ public class DataEngine
 				//BEGIN http://jira.idempiere.com/browse/IDEMPIERE-153
 				boolean isDesc = "Y".equals(rs.getString(26));
 				//END
+				/** START DEVCOFFEE: script column  **/
+				String script = rs.getString(27);
+				String pfiName = rs.getString(28);
+
 
 				//	Fully qualified Table.Column for ordering
 				String orderName = tableName + "." + ColumnName;
@@ -379,16 +400,37 @@ public class DataEngine
 					//	=>	Table.Column,
 					sqlSELECT.append(tableName).append(".").append(ColumnName).append(",");
 					groupByColumns.add(tableName+"."+ColumnName);
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, KEY, isPageBreak);	//	KeyColumn
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, KEY, isPageBreak);	//	KeyColumn
 				}
-				// not printed Sort Columns
-				else if (!IsPrinted)
+				/** START DEVCOFFEE: script column  **/
+				else if (ColumnName == null || script != null && !script.isEmpty())
 				{
-					;
+					//	=> (..) AS AName, Table.ID,
+					if (script != null && !script.isEmpty())
+					{
+						if (script.startsWith("@SQL="))
+						{
+							script = "(" + script.replace("@SQL=", "").trim() + ")";
+							script = Env.parseContext(Env.getCtx(), 0, script, false);
+						}
+						else
+							script = "'@SCRIPT" + script + "'";
+					}
+					else
+						script = "";
+
+					if (ColumnName == null && script.isEmpty())
+						continue;
+
+					sqlSELECT.append(script).append(" AS \"").append(m_synonym).append(pfiName).append("\",")
+					// Warning here: Oracle treats empty strings '' as NULL and the code below checks for wasNull on this column
+					.append("' '").append(" AS \"").append(pfiName).append("\",");
+					//
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, DisplayType.Text, FieldLength, orderName, isPageBreak);
+					synonymNext();
 				}
 				//	-- Parent, TableDir (and unqualified Search) --
-				else if ( /* (IsParent && DisplayType.isLookup(AD_Reference_ID)) || <-- IDEMPIERE-71 Carlos Ruiz - globalqss */ 
-						AD_Reference_ID == DisplayType.TableDir
+				else if ( AD_Reference_ID == DisplayType.TableDir
 						|| (AD_Reference_ID == DisplayType.Search && AD_Reference_Value_ID == 0)
 					)
 				{
@@ -418,7 +460,7 @@ public class DataEngine
 					groupByColumns.add(lookupSQL);
 					orderName = m_synonym + display;
 					//
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
 					synonymNext();
 				}
 
@@ -447,12 +489,12 @@ public class DataEngine
 					//
 					TableReference tr = getTableReference(AD_Reference_Value_ID);
 					String foreignColumnName = tr.KeyColumn;
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, foreignColumnName);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak, foreignColumnName);
 					synonymNext();
 				}
 
 				//	-- List or Button with ReferenceValue --
-				else if (AD_Reference_ID == DisplayType.List 
+				else if (DisplayType.isList(AD_Reference_ID) 
 					|| (AD_Reference_ID == DisplayType.Button && AD_Reference_Value_ID != 0))
 				{
 					if (ColumnSQL.length() > 0)
@@ -492,7 +534,8 @@ public class DataEngine
 					}
 					// 	TableName.ColumnName,
 					sqlSELECT.append(lookupSQL).append(" AS ").append(ColumnName).append(",");
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					groupByColumns.add(lookupSQL); 
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
 					synonymNext();
 				}
 
@@ -560,7 +603,7 @@ public class DataEngine
 						.append(lookupSQL).append("=")
 						.append(m_synonym).append(".").append(key).append(")");
 					//
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, AD_Reference_ID, FieldLength, orderName, isPageBreak);
 					synonymNext();
 				}
 
@@ -597,7 +640,7 @@ public class DataEngine
 							groupByColumns.add(sb.toString());
 						orderName = ColumnName;		//	no prefix for synonym
 					}
-					pdc = new PrintDataColumn(AD_Column_ID, ColumnName, 
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, AD_Column_ID, ColumnName, 
 						AD_Reference_ID, FieldLength, ColumnName, isPageBreak);
 				}
 
@@ -623,9 +666,6 @@ public class DataEngine
 				}
 
 				//
-				if (pdc == null || (!IsPrinted && !IsKey))
-					continue;
-
 				pdc.setFormatPattern(formatPattern);
 				columns.add(pdc);
 			}	//	for all Fields in Tab
@@ -654,6 +694,9 @@ public class DataEngine
 			hasLevelNo = true;
 			if (sqlSELECT.indexOf("LevelNo") == -1)
 				sqlSELECT.append("LevelNo,");
+
+			if (tableName.equals("T_Report") && sqlSELECT.indexOf("PA_ReportLine_ID") == -1)
+				sqlSELECT.append("PA_ReportLine_ID,");
 		}
 
 		/**
@@ -707,7 +750,7 @@ public class DataEngine
 		}
 
 		//	Add ORDER BY clause
-		if (orderColumns != null)
+		if (orderColumns != null && orderColumns.size() > 0)
 		{
 			for (int i = 0; i < orderColumns.size(); i++)
 			{
@@ -721,7 +764,15 @@ public class DataEngine
 				finalSQL.append(by);
 			}
 		}	//	order by
-		
+		else if (format.getAD_ReportView_ID() > 0)
+		{
+			MReportView reportView = MReportView.get(Env.getCtx(),format.getAD_ReportView_ID());
+
+			if (reportView!=null && !Util.isEmpty(reportView.getOrderByClause(), true))
+			{
+				finalSQL.append(" ORDER BY ").append(reportView.getOrderByClause());
+			}
+		} // Report view order by clause.
 
 		//	Print Data
 		PrintData pd = new PrintData (ctx, reportName);
@@ -754,7 +805,13 @@ public class DataEngine
 			length++;
 		}
 		else
+		{
 			cc++;
+			// Refs #6532
+			if (cc == 'X')
+				cc++;
+		}
+
 		//
 		m_synonym = String.valueOf(cc);
 		for (int i = 1; i < length; i++) {
@@ -825,6 +882,7 @@ public class DataEngine
 		PrintDataColumn pdc = null;
 		boolean hasLevelNo = pd.hasLevelNo();
 		int levelNo = 0;
+		int reportLineID = 0;
 		//
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -832,11 +890,30 @@ public class DataEngine
 		{
 			pstmt = DB.prepareNormalReadReplicaStatement(pd.getSQL(), m_trxName);
 			rs = pstmt.executeQuery();
+
+			boolean isExistsT_Report_PA_ReportLine_ID = false;
+			if (pd.getTableName().equals("T_Report"))
+			{
+				ResultSetMetaData rsmd = rs.getMetaData();
+				for (int i = 1; i <= rsmd.getColumnCount(); i++)
+				{
+					if (rsmd.getColumnLabel(i).equalsIgnoreCase("PA_ReportLine_ID"))
+					{
+						isExistsT_Report_PA_ReportLine_ID = true;
+						break;
+					}
+				}
+			}
+
 			//	Row Loop
 			while (rs.next())
 			{
 				if (hasLevelNo)
+				{
 					levelNo = rs.getInt("LevelNo");
+					if (isExistsT_Report_PA_ReportLine_ID)
+						reportLineID = rs.getInt("PA_ReportLine_ID");
+				}
 				else
 					levelNo = 0;
 				//	Check Group Change ----------------------------------------
@@ -850,11 +927,11 @@ public class DataEngine
 					for (int i = 0; i < pd.getColumnInfo().length; i++)	
 					{
 						PrintDataColumn group_pdc = pd.getColumnInfo()[i];
-						if (!m_group.isGroupColumn(group_pdc.getColumnName()))
+						if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
 							continue;
 						
 						//	Group change
-						Object value = m_group.groupChange(group_pdc.getColumnName(), rs.getObject(group_pdc.getAlias()), force);
+						Object value = m_group.groupChange(group_pdc.getAD_PrintFormatItem_ID(), rs.getObject(group_pdc.getAlias()), force);
 						if (value != null)	//	Group change
 						{
 							changedGroups.add(group_pdc);
@@ -868,7 +945,7 @@ public class DataEngine
 						PrintDataColumn group_pdc = changedGroups.get(j);
 						Object value = changedValues.get(j);
 						
-							char[] functions = m_group.getFunctions(group_pdc.getColumnName());
+							char[] functions = m_group.getFunctions(group_pdc.getAD_PrintFormatItem_ID());
 							for (int f = 0; f < functions.length; f++)
 							{
 								printRunningTotal(pd, levelNo, rowNo++);
@@ -879,21 +956,21 @@ public class DataEngine
 									pdc = pd.getColumnInfo()[c];
 								//	log.fine("loadPrintData - PageBreak = " + pdc.isPageBreak());
 
-									if (group_pdc.getColumnName().equals(pdc.getColumnName()))
+									if (group_pdc.getAD_PrintFormatItem_ID() == pdc.getAD_PrintFormatItem_ID())
 									{
 										String valueString = value.toString();
 										if (value instanceof Timestamp)
 											valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
 										if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
 											valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
-										pd.addNode(new PrintDataElement(pdc.getColumnName(),
+										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
 											valueString, DisplayType.String, false, pdc.isPageBreak(), pdc.getFormatPattern()));
 									}
-									else if (m_group.isFunctionColumn(pdc.getColumnName(), functions[f]))
+									else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
 									{
-										pd.addNode(new PrintDataElement(pdc.getColumnName(),
-											m_group.getValue(group_pdc.getColumnName(), 
-												pdc.getColumnName(), functions[f]), 
+										pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
+											m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
+												pdc.getAD_PrintFormatItem_ID(), functions[f]), 
 											PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), 
 												false, pdc.isPageBreak(), pdc.getFormatPattern()));
 									}
@@ -903,7 +980,7 @@ public class DataEngine
 							for (int c = 0; c < pd.getColumnInfo().length; c++)
 							{
 								pdc = pd.getColumnInfo()[c];
-								m_group.reset(group_pdc.getColumnName(), pdc.getColumnName());
+								m_group.reset(group_pdc.getAD_PrintFormatItem_ID(), pdc.getAD_PrintFormatItem_ID());
 							}
 						}	//	Group change
 				}	//	group change
@@ -912,8 +989,8 @@ public class DataEngine
 				printRunningTotal(pd, levelNo, rowNo++);
 
 				/** Report Summary FR [ 2011569 ]**/ 
-				if(!m_summary)					
-					pd.addRow(false, levelNo);
+				if (!m_summary)
+					pd.addRow(false, levelNo, reportLineID);
 				int counter = 1;
 				//	get columns
 				for (int i = 0; i < pd.getColumnInfo().length; i++)
@@ -926,23 +1003,21 @@ public class DataEngine
 					{
 						if (pdc.getColumnName().endsWith("_ID"))
 						{
-						//	int id = rs.getInt(pdc.getColumnIDName());
 							int id = rs.getInt(counter++);
 							if (!rs.wasNull())
 							{
 								KeyNamePair pp = new KeyNamePair(id, KEY);	//	Key
-								pde = new PrintDataElement(pdc.getColumnName(), pp, pdc.getDisplayType(),
+								pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), pp, pdc.getDisplayType(),
 										true, pdc.isPageBreak(), pdc.getFormatPattern());
 							}
 						}
 						else
 						{
-						//	String id = rs.getString(pdc.getColumnIDName());
 							String id = rs.getString(counter++);
 							if (!rs.wasNull())
 							{
 								ValueNamePair pp = new ValueNamePair(id, KEY);	//	Key
-								pde = new PrintDataElement(pdc.getColumnName(), pp, pdc.getDisplayType(),
+								pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), pp, pdc.getDisplayType(),
 										true, pdc.isPageBreak(), pdc.getFormatPattern());
 							}
 						}
@@ -961,7 +1036,7 @@ public class DataEngine
 								if (display != null && !rs.wasNull())
 								{
 									KeyNamePair pp = new KeyNamePair(id, display);
-									pde = new PrintDataElement(pdc.getColumnName(), pp, pdc.getDisplayType(), pdc.getFormatPattern(), pdc.getForeignColumnName());
+									pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), pp, pdc.getDisplayType(), pdc.getFormatPattern(), pdc.getForeignColumnName());
 								}
 							}
 							else
@@ -969,8 +1044,31 @@ public class DataEngine
 								String id = rs.getString(counter++);
 								if (display != null && !rs.wasNull())
 								{
-									ValueNamePair pp = new ValueNamePair(id, display);
-									pde = new PrintDataElement(pdc.getColumnName(), pp, pdc.getDisplayType(), pdc.getFormatPattern());
+									/** START DEVCOFFEE: script column **/
+									int displayType = pdc.getDisplayType();
+									if (display.startsWith("@SCRIPT")) {
+										display = display.replace("@SCRIPT", "");
+										Object value = parseVariable(display, pdc, pd);
+										Interpreter bsh = new Interpreter ();
+										try {
+											value = bsh.eval(value.toString());
+										}
+										catch (EvalError e) {
+											log.severe(e.getMessage());
+										}
+										if (value instanceof Number)
+											displayType = DisplayType.Number;
+										else if (value instanceof Boolean)
+											displayType = DisplayType.YesNo;
+										else if (value instanceof Date)
+											displayType = DisplayType.Date;
+										else
+											displayType = DisplayType.Text;
+										pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), (Serializable) value, displayType, pdc.getFormatPattern());
+									} else {
+										ValueNamePair pp = new ValueNamePair(id, display);
+										pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), pp, displayType, pdc.getFormatPattern());
+									}
 								}
 							}
 						}
@@ -984,7 +1082,7 @@ public class DataEngine
 								if (!rs.wasNull())
 								{
 									boolean b = s.equals("Y");
-									pde = new PrintDataElement(pdc.getColumnName(), Boolean.valueOf(b), pdc.getDisplayType(), pdc.getFormatPattern());
+									pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), Boolean.valueOf(b), pdc.getDisplayType(), pdc.getFormatPattern());
 								}
 							}
 							else if (pdc.getDisplayType() == DisplayType.TextLong)
@@ -1003,13 +1101,13 @@ public class DataEngine
 										value = clob.getSubString(1, (int)length);
 									}
 								}
-								pde = new PrintDataElement(pdc.getColumnName(), value, pdc.getDisplayType(), pdc.getFormatPattern());
+								pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), value, pdc.getDisplayType(), pdc.getFormatPattern());
 							}
                             // fix bug [ 1755592 ] Printing time in format
                             else if (pdc.getDisplayType() == DisplayType.DateTime)
 {
                                 Timestamp datetime = rs.getTimestamp(counter++);
-                                pde = new PrintDataElement(pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
+                                pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), datetime, pdc.getDisplayType(), pdc.getFormatPattern());
                             }
 							else
 							//	The general case
@@ -1028,10 +1126,10 @@ public class DataEngine
 									{
 										String s = (String)obj;
 										s = Msg.parseTranslation(pd.getCtx(), s);
-										pde = new PrintDataElement(pdc.getColumnName(), s, pdc.getDisplayType(), pdc.getFormatPattern());
+										pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), s, pdc.getDisplayType(), pdc.getFormatPattern());
 									}
 									else
-										pde = new PrintDataElement(pdc.getColumnName(), (Serializable)obj, pdc.getDisplayType(), pdc.getFormatPattern());
+										pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), (Serializable)obj, pdc.getDisplayType(), pdc.getFormatPattern());
 								}
 							}
 						}	//	Value only
@@ -1041,7 +1139,7 @@ public class DataEngine
 						/** Report Summary FR [ 2011569 ]**/ 
 						if(!m_summary)
 							pd.addNode(pde);
-						m_group.addValue(pde.getColumnName(), pde.getFunctionValue());
+						m_group.addValue(pde.getAD_PrintFormatItem_ID(), pde.getFunctionValue());
 					}
 				}	//	for all columns
 
@@ -1065,12 +1163,12 @@ public class DataEngine
 			for (int i = pd.getColumnInfo().length-1; i >= 0; i--)	//	backwards (leaset group first)
 			{
 				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
-				if (!m_group.isGroupColumn(group_pdc.getColumnName()))
+				if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
 					continue;
-				Object value = m_group.groupChange(group_pdc.getColumnName(), new Object(), false);
+				Object value = m_group.groupChange(group_pdc.getAD_PrintFormatItem_ID(), new Object(), false);
 				if (value != null)	//	Group change
 				{
-					char[] functions = m_group.getFunctions(group_pdc.getColumnName());
+					char[] functions = m_group.getFunctions(group_pdc.getAD_PrintFormatItem_ID());
 					for (int f = 0; f < functions.length; f++)
 					{
 						printRunningTotal(pd, levelNo, rowNo++);
@@ -1086,14 +1184,14 @@ public class DataEngine
 									valueString = DisplayType.getDateFormat(pdc.getDisplayType(), m_language).format(value);
 								if (format.getTableFormat().isPrintFunctionSymbols())		//	Translate Sum, etc.
 									valueString	+= PrintDataFunction.getFunctionSymbol(functions[f]);
-								pd.addNode(new PrintDataElement(pdc.getColumnName(),
+								pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
 									valueString, DisplayType.String, pdc.getFormatPattern()));
 							}
-							else if (m_group.isFunctionColumn(pdc.getColumnName(), functions[f]))
+							else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
 							{
-								pd.addNode(new PrintDataElement(pdc.getColumnName(),
-									m_group.getValue(group_pdc.getColumnName(), 
-										pdc.getColumnName(), functions[f]),
+								pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
+									m_group.getValue(group_pdc.getAD_PrintFormatItem_ID(), 
+										pdc.getAD_PrintFormatItem_ID(), functions[f]),
 									PrintDataFunction.getFunctionDisplayType(functions[f],
 											pdc.getDisplayType()),pdc.getFormatPattern()));
 							}
@@ -1123,14 +1221,14 @@ public class DataEngine
 							name = Msg.getMsg(format.getLanguage(), PrintDataFunction.getFunctionName(functions[f]));
 						else
 							name = PrintDataFunction.getFunctionSymbol(functions[f]);	//	Symbol
-						pd.addNode(new PrintDataElement(pdc.getColumnName(), name.trim(),
+						pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), name.trim(),
 								DisplayType.String, pdc.getFormatPattern()));
 					}
-					else if (m_group.isFunctionColumn(pdc.getColumnName(), functions[f]))
+					else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), functions[f]))
 					{
-						pd.addNode(new PrintDataElement(pdc.getColumnName(),
+						pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
 							m_group.getValue(PrintDataGroup.TOTAL, 
-								pdc.getColumnName(), functions[f]),
+								pdc.getAD_PrintFormatItem_ID(), functions[f]),
 							PrintDataFunction.getFunctionDisplayType(functions[f], pdc.getDisplayType()), pdc.getFormatPattern()));
 					}
 				}	//	for all columns
@@ -1183,13 +1281,13 @@ public class DataEngine
 				if (c == 0)
 				{
 					String title = "RunningTotal";
-					pd.addNode(new PrintDataElement(pdc.getColumnName(),
+					pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
 						title, DisplayType.String, false, rt==0, pdc.getFormatPattern()));		//	page break
 				}
-				else if (m_group.isFunctionColumn(pdc.getColumnName(), PrintDataFunction.F_SUM))
+				else if (m_group.isFunctionColumn(pdc.getAD_PrintFormatItem_ID(), PrintDataFunction.F_SUM))
 				{
-					pd.addNode(new PrintDataElement(pdc.getColumnName(),
-						m_group.getValue(PrintDataGroup.TOTAL, pdc.getColumnName(), PrintDataFunction.F_SUM),
+					pd.addNode(new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(),
+						m_group.getValue(PrintDataGroup.TOTAL, pdc.getAD_PrintFormatItem_ID(), PrintDataFunction.F_SUM),
 						PrintDataFunction.getFunctionDisplayType(PrintDataFunction.F_SUM,
 								pdc.getDisplayType()), false, false, pdc.getFormatPattern()));
 				}
@@ -1197,7 +1295,81 @@ public class DataEngine
 		}	//	 two lines
 	}	//	printRunningTotal
 
-	
+	/**
+	 * Parse expression, replaces @tag@ with pdc values and/or execute functions
+	 * @param expression
+	 * @param pdc
+	 * @param pd
+	 * @return String
+	 */
+	public String parseVariable(String expression, PrintDataColumn pdc, PrintData pd) {
+		if (expression == null || expression.length() == 0)
+			return "";
+
+		if (log.isLoggable(Level.CONFIG)) log.config("Analyzing Expression " + expression);
+		String token;
+		String inStr = new String(expression);
+		StringBuffer outStr = new StringBuffer();
+		int i = inStr.indexOf('@');
+		while (i != -1)
+		{
+			outStr.append(inStr.substring(0, i));			// up to @
+			inStr = inStr.substring(i+1, inStr.length());	// from first @
+
+			int j = inStr.indexOf('@');						// next @
+			if (j < 0)
+			{
+				return "";						//	no second tag
+			}
+
+			token = inStr.substring(0, j);
+
+			if (token.startsWith("ACCUMULATE/"))
+			{
+				token = token.replace("ACCUMULATE/", "");
+				Object tokenPDE = pd.getNode(token);
+				if (tokenPDE == null)
+					return "\"Item not found: " + token + "\"";
+				BigDecimal value = (BigDecimal) ((PrintDataElement)tokenPDE).getValue();
+
+				if (m_summarized.containsKey(pdc))
+				{
+					value= ((BigDecimal) m_summarized.get(pdc)).add(value);
+					m_summarized.remove(pdc);
+				}
+
+				m_summarized.put(pdc, value);
+
+				outStr.append(value);
+			}
+			else if (token.startsWith("COL/"))
+			{
+				token = token.replace("COL/", "");
+				Object tokenPDE = pd.getNode(token);
+				if (tokenPDE == null)
+					return "\"Item not found: " + token + "\"";
+				Object value = ((PrintDataElement)tokenPDE).getValue();
+				outStr.append(value);
+			}
+			else if (token.equals("LINE"))
+			{
+				BigDecimal value = Env.ONE;
+				if (m_summarized.containsKey(pdc))
+				{
+					value = ((BigDecimal)m_summarized.get(pdc)).add(value);
+					m_summarized.remove(pdc);
+				}
+				m_summarized.put(pdc, value);
+				outStr.append(value);
+			}
+
+			inStr = inStr.substring(j+1, inStr.length());	// from second @
+			i = inStr.indexOf('@');
+		}
+		outStr.append(inStr);						// add the rest of the string
+
+		return outStr.toString();
+	}
 	/*************************************************************************
 	 * 	Test
 	 * 	@param args args
@@ -1206,14 +1378,10 @@ public class DataEngine
 	{
 		org.compiere.Adempiere.startup(true);
 
-	//	DataEngine de = new DataEngine(null);
 		@SuppressWarnings("unused")
 		DataEngine de = new DataEngine(Language.getLanguage("de_DE"));
 		MQuery query = new MQuery();
 		query.addRestriction("AD_Table_ID", MQuery.LESS, 105);
-	//	PrintData pd = de.load_fromTable(100, query, null, null, false);
-	//	pd.dump();
-	//	pd.createXML(new javax.xml.transform.stream.StreamResult(System.out));
 	}
 		
 }	//	DataEngine

@@ -75,7 +75,7 @@ public class FeedbackRequestWindow extends Window implements EventListener<Event
 	 */
 	private static final long serialVersionUID = 8586980192148533197L;
 
-	private static CLogger log = CLogger.getCLogger(FeedbackRequestWindow.class);
+	private static final CLogger log = CLogger.getCLogger(FeedbackRequestWindow.class);
 	
 	protected WTableDirEditor requestTypeField, priorityField, salesRepField;
 	protected Textbox txtSummary;
@@ -146,7 +146,6 @@ public class FeedbackRequestWindow extends Window implements EventListener<Event
 		txtSummary = new Textbox();
 		txtSummary.setRows(10);
 		ZKUpdateUtil.setWidth(txtSummary, "95%");
-		ZKUpdateUtil.setHeight(txtSummary, "100%");
 		
 		confirmPanel = new ConfirmPanel(true);
 		confirmPanel.addActionListener(this);
@@ -222,7 +221,12 @@ public class FeedbackRequestWindow extends Window implements EventListener<Event
 		southPane.appendChild(confirmPanel);
 		
 		Button btn = new Button();
-		btn.setImage(ThemeManager.getThemeResource("images/Attachment24.png"));
+
+		//devCoffee #6142
+		if (ThemeManager.isUseFontIconForImage())
+			btn.setIconSclass("z-icon-Attachment");
+		else
+			btn.setImage(ThemeManager.getThemeResource("images/Attachment24.png"));
 		btn.setUpload(AdempiereWebUI.getUploadSetting());
 		btn.addEventListener(Events.ON_UPLOAD, this);
 		btn.setTooltiptext(Msg.getMsg(Env.getCtx(), "Attachment"));

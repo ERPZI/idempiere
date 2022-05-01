@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 
-import org.compiere.model.Query;
 import org.idempiere.fa.feature.UseLife;
 import org.idempiere.fa.feature.UseLifeImpl;
 
@@ -35,12 +34,12 @@ public class MAssetGroupAcct extends X_A_Asset_Group_Acct
 	/**
 	 * Get Asset Group Accountings for given group
 	 */
-	public static MAssetGroupAcct forA_Asset_Group_ID(Properties ctx, int A_Asset_Group_ID, String postingType)
+	public static List<MAssetGroupAcct>  forA_Asset_Group_ID(Properties ctx, int A_Asset_Group_ID, String postingType)
 	{
 		final String whereClause = COLUMNNAME_A_Asset_Group_ID+"=? AND "+COLUMNNAME_PostingType+"=?";
 		return new Query(ctx, Table_Name, whereClause, null)
 					.setParameters(new Object[]{A_Asset_Group_ID, postingType})
-					.firstOnly();
+					.list();
 	}
 	
 	/**
@@ -74,24 +73,10 @@ public class MAssetGroupAcct extends X_A_Asset_Group_Acct
 		if (m_parent == null)
 		{
 			int A_Asset_Group_ID = getA_Asset_Group_ID();
-			if (is_new())
-			{
-				m_parent = new MAssetGroup(getCtx(), A_Asset_Group_ID, get_TrxName());
-			}
-			else
-			{
-				m_parent = MAssetGroup.get(getCtx(), A_Asset_Group_ID);
-			}
+			m_parent = MAssetGroup.getCopy(getCtx(), A_Asset_Group_ID, get_TrxName());
 		}
 		return m_parent;
 	}
-	
-	/* commented by @win
-	public int getA_Asset_Class_ID()
-	{
-		return getParent().getA_Asset_Class_ID();
-	}
-	*/
 	
 	public Timestamp getAssetServiceDate()
 	{
@@ -138,4 +123,17 @@ public class MAssetGroupAcct extends X_A_Asset_Group_Acct
 			return false;
 		return is_ValueChanged(index);
 	}
+	/**
+	 * Get Asset Group Accountings for given group
+	 */
+	public static MAssetGroupAcct forA_Asset_Group_ID(Properties ctx, int A_Asset_Group_ID, String postingType,
+			int C_AcctSchema_ID) {
+		final String whereClause = COLUMNNAME_A_Asset_Group_ID+"=? AND "+COLUMNNAME_PostingType+"=? AND " + COLUMNNAME_C_AcctSchema_ID +"=? " ;
+		return new Query(ctx, Table_Name, whereClause, null)
+					.setParameters(new Object[]{A_Asset_Group_ID, postingType, C_AcctSchema_ID})
+					.firstOnly();
+	}
+
+	
+
 }	//	MAssetGroupAcct

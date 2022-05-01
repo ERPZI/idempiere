@@ -16,6 +16,8 @@
  *****************************************************************************/
 package org.compiere.process;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.MPeriodControl;
@@ -29,10 +31,11 @@ import org.compiere.util.CacheMgt;
  *  @author Jorg Janke
  *  @version $Id: PeriodControlStatus.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class PeriodControlStatus extends SvrProcess
 {
 	/** Period Control				*/
-	private int 		p_C_PeriodControl_ID = 0;
+	private List<Integer> p_C_PeriodControl_IDs;
 	
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -45,10 +48,16 @@ public class PeriodControlStatus extends SvrProcess
 			String name = para[i].getParameterName();
 			if (para[i].getParameter() == null)
 				;
+			else if (name.equals("*RecordIDs*"))
+				;
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
-		p_C_PeriodControl_ID = getRecord_ID();
+		p_C_PeriodControl_IDs = getRecord_IDs();
+		if (p_C_PeriodControl_IDs == null || p_C_PeriodControl_IDs.size() == 0) {
+			p_C_PeriodControl_IDs = new ArrayList<Integer>();
+			p_C_PeriodControl_IDs.add(getRecord_ID());
+		}
 	}	//	prepare
 
 	/**
@@ -58,7 +67,8 @@ public class PeriodControlStatus extends SvrProcess
 	 */
 	protected String doIt() throws Exception
 	{
-		if (log.isLoggable(Level.INFO)) log.info ("C_PeriodControl_ID=" + p_C_PeriodControl_ID);
+	  if (log.isLoggable(Level.INFO)) log.info ("C_PeriodControl_ID=" + p_C_PeriodControl_IDs);
+	  for (int p_C_PeriodControl_ID : p_C_PeriodControl_IDs) {
 		MPeriodControl pc = new MPeriodControl (getCtx(), p_C_PeriodControl_ID, get_TrxName());
 		if (pc.get_ID() == 0)
 			throw new AdempiereUserError("@NotFound@  @C_PeriodControl_ID@=" + p_C_PeriodControl_ID);
@@ -83,12 +93,13 @@ public class PeriodControlStatus extends SvrProcess
 		boolean ok = pc.save();
 		
 		//	Reset Cache
-		CacheMgt.get().reset("C_PeriodControl", 0);
 		CacheMgt.get().reset("C_Period", pc.getC_Period_ID());
 
 		if (!ok)
 			return "@Error@";
-		return "@OK@";
+	  }
+	  CacheMgt.get().reset("C_PeriodControl", 0);
+	  return "@OK@";
 	}	//	doIt
 
 }	//	PeriodControlStatus

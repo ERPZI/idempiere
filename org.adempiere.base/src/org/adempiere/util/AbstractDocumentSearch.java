@@ -58,7 +58,7 @@ import org.compiere.util.Util;
 public abstract class AbstractDocumentSearch {
 
 	/** the logger */
-	static CLogger log = CLogger.getCLogger(AbstractDocumentSearch.class);
+	protected static final CLogger log = CLogger.getCLogger(AbstractDocumentSearch.class);
 	protected boolean windowOpened = false;
 
 	/**
@@ -146,7 +146,7 @@ public abstract class AbstractDocumentSearch {
 				MTable table = new MTable(Env.getCtx(), msd.getAD_Table_ID(), null);
 				// SearchDefinition with a given table and column
 				if (msd.getSearchType().equals(MSearchDefinition.SEARCHTYPE_TABLE)) {
-					MColumn column = new MColumn(Env.getCtx(), msd.getAD_Column_ID(), null);
+					MColumn column = MColumn.get(Env.getCtx(), msd.getAD_Column_ID());
 					sqlSO = new StringBuilder("SELECT ").append(table.getTableName()).append("_ID FROM ").append(table.getTableName())
 							.append(" ");
 					// search for an Integer

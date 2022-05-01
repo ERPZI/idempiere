@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_UserPreference
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 9
  */
 public interface I_AD_UserPreference 
 {
@@ -142,6 +142,19 @@ public interface I_AD_UserPreference
 	  */
 	public int getCreatedBy();
 
+    /** Column name GridAfterFindThreshold */
+    public static final String COLUMNNAME_GridAfterFindThreshold = "GridAfterFindThreshold";
+
+	/** Set Threshold.
+	  * Force grid view when Find panel closes if number of records exceed threshold
+	  */
+	public void setGridAfterFindThreshold (int GridAfterFindThreshold);
+
+	/** Get Threshold.
+	  * Force grid view when Find panel closes if number of records exceed threshold
+	  */
+	public int getGridAfterFindThreshold();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -173,6 +186,15 @@ public interface I_AD_UserPreference
 	/** Get Use Similar To	  */
 	public boolean isUseSimilarTo();
 
+    /** Column name MigrationScriptComment */
+    public static final String COLUMNNAME_MigrationScriptComment = "MigrationScriptComment";
+
+	/** Set Migration Script Comment	  */
+	public void setMigrationScriptComment (String MigrationScriptComment);
+
+	/** Get Migration Script Comment	  */
+	public String getMigrationScriptComment();
+
     /** Column name ToggleOnDoubleClick */
     public static final String COLUMNNAME_ToggleOnDoubleClick = "ToggleOnDoubleClick";
 
@@ -201,4 +223,17 @@ public interface I_AD_UserPreference
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ViewFindResult */
+    public static final String COLUMNNAME_ViewFindResult = "ViewFindResult";
+
+	/** Set View find result.
+	  * Does the system must switch to grid mode after the Find panel closes
+	  */
+	public void setViewFindResult (String ViewFindResult);
+
+	/** Get View find result.
+	  * Does the system must switch to grid mode after the Find panel closes
+	  */
+	public String getViewFindResult();
 }

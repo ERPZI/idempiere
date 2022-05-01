@@ -61,9 +61,10 @@ import org.zkoss.zul.South;
  * @author Elaine
  * @date September 18, 2012
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VResetPassword")
 public class WResetPassword implements IFormController, EventListener<Event>, ValueChangeListener {
 
-	private static CLogger log = CLogger.getCLogger(WResetPassword.class);
+	private static final CLogger log = CLogger.getCLogger(WResetPassword.class);
 
 	private CustomForm form;
 	private Grid gridPanel;
@@ -309,7 +310,7 @@ public class WResetPassword implements IFormController, EventListener<Event>, Va
 		String p_NewEMailUser = txtNewEMailUser.getValue();
 		String p_NewEMailUserPW = txtNewEMailUserPW.getValue();
 				
-		MUser user = MUser.get(Env.getCtx(), p_AD_User_ID);		
+		MUser user = MUser.getCopy(Env.getCtx(), p_AD_User_ID, null);		
 		if (log.isLoggable(Level.FINE)) log.fine("User=" + user);
 				
 		//	Do we need a password ?
@@ -377,7 +378,6 @@ public class WResetPassword implements IFormController, EventListener<Event>, Va
 		}
 		catch(AdempiereException e)
 		{
-			user.load(user.get_TrxName());
 			throw e;
 		}
 		clearForm();

@@ -26,7 +26,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 
-import org.adempiere.base.IDictionaryService;
 import org.adempiere.util.ServerContext;
 import org.compiere.Adempiere;
 import org.compiere.model.MClient;
@@ -41,76 +40,13 @@ import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 
-public class PackInApplicationActivator extends AbstractActivator {
+public class PackInApplicationActivator extends AbstractActivator{
 
 	protected final static CLogger logger = CLogger.getCLogger(PackInApplicationActivator.class.getName());
 	private List<File> filesToProcess = new ArrayList<>();
 	private File currentFile;
-	
-	@Override
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		if (logger.isLoggable(Level.INFO)) logger.info(getName() + " starting...");
-		serviceTracker = new ServiceTracker<IDictionaryService, IDictionaryService>(context, IDictionaryService.class.getName(), this);
-		serviceTracker.open();
-		start();
-		if (logger.isLoggable(Level.INFO)) 
-			logger.info(getName() + " ready.");		
-	}
-	
-	/**
-	 * call when bundle have been started ( after this.context have been set )
-	 */
-	protected void start() {
-	};
-	
-	/**
-	 * call when bundle is stop ( before this.context is set to null )
-	 */
-	protected void stop() {
-	}
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		stop();
-		serviceTracker.close();
-		this.context = null;
-		if (logger.isLoggable(Level.INFO)) logger.info(context.getBundle().getSymbolicName() + " "
-				+ context.getBundle().getHeaders().get("Bundle-Version")
-				+ " stopped.");		
-	}
-
-	@Override
-	public IDictionaryService addingService(ServiceReference<IDictionaryService> reference) {
-		service = context.getService(reference);
-		if (Adempiere.getThreadPoolExecutor() != null) {
-			Adempiere.getThreadPoolExecutor().execute(new Runnable() {			
-				@Override
-				public void run() {
-					int timeout = MSysConfig.getIntValue(MSysConfig.AUTOMATIC_PACKIN_INITIAL_DELAY, 120) * 1000;
-					String folders = MSysConfig.getValue(MSysConfig.AUTOMATIC_PACKIN_FOLDERS);
-					automaticPackin(timeout, folders, true);
-				}
-			});
-		} else {
-			Adempiere.addServerStateChangeListener(new ServerStateChangeListener() {				
-				@Override
-				public void stateChange(ServerStateChangeEvent event) {
-					if (event.getEventType() == ServerStateChangeEvent.SERVER_START && service != null) {
-						int timeout = MSysConfig.getIntValue(MSysConfig.AUTOMATIC_PACKIN_INITIAL_DELAY, 120) * 1000;
-						String folders = MSysConfig.getValue(MSysConfig.AUTOMATIC_PACKIN_FOLDERS);
-						automaticPackin(timeout, folders, true);
-					}					
-				}
-			});
-		}
-		return null;
-	}
-	
 	public void automaticPackin(int timeout, String folders, boolean fromService) {
 		if (fromService) {
 			//Initial delay - starting from service
@@ -160,11 +96,20 @@ public class PackInApplicationActivator extends AbstractActivator {
 			return;
 		}
 
+		MSession localSession = null;
 		try {
 			if (getDBLock()) {
 				//Create Session to be able to create records in AD_ChangeLog
-				if (Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID") <= 0)
-					MSession.get(Env.getCtx(), true);
+				if (Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID) <= 0) {
+					localSession = MSession.get(Env.getCtx());
+					if(localSession == null) {
+						localSession = MSession.create(Env.getCtx());
+					} else {
+						localSession = new MSession(Env.getCtx(), localSession.getAD_Session_ID(), null);
+					}
+					localSession.setWebSession("PackInApplicationActivator");
+					localSession.saveEx();
+				}
 				for(File zipFile : fileArray) {
 					currentFile = zipFile;
 					if (!packIn(zipFile)) {
@@ -189,6 +134,8 @@ public class PackInApplicationActivator extends AbstractActivator {
 			addLog(Level.WARNING, e.getLocalizedMessage());
 		} finally {
 			releaseLock();
+			if (localSession != null)
+				localSession.logout();
 		}
 		
 		if (filesToProcess.size() > 0) {
@@ -252,7 +199,7 @@ public class PackInApplicationActivator extends AbstractActivator {
 					String message = "Installing " + fileName + " in client " + client.getValue() + "/" + client.getName();
 					statusUpdate(message);
 				}
-				Env.setContext(Env.getCtx(), "#AD_Client_ID", client.getAD_Client_ID());
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, client.getAD_Client_ID());
 				try {
 				    // call 2pack
 					if (service != null) {
@@ -268,7 +215,7 @@ public class PackInApplicationActivator extends AbstractActivator {
 					logger.log(Level.WARNING, "Pack in failed.", e);
 					return false;
 				} finally {
-					Env.setContext(Env.getCtx(), "#AD_Client_ID", 0);
+					Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, 0);
 				}
 				logger.warning(packinFile.getPath() + " installed");
 			}
@@ -388,14 +335,6 @@ public class PackInApplicationActivator extends AbstractActivator {
 				.setOnlyActiveRecords(true);
 		return q.getIDs();
 	}
-	
-	@Override
-	public void modifiedService(ServiceReference<IDictionaryService> reference, IDictionaryService service) {
-	}
-
-	@Override
-	public void removedService(ServiceReference<IDictionaryService> reference, IDictionaryService service) {
-	}
 
 	@Override
 	public String getName() {
@@ -407,8 +346,35 @@ public class PackInApplicationActivator extends AbstractActivator {
 	
 	protected void setupPackInContext() {
 		Properties serverContext = new Properties();
-		serverContext.setProperty("#AD_Client_ID", "0");
+		serverContext.setProperty(Env.AD_CLIENT_ID, "0");
 		ServerContext.setCurrentInstance(serverContext);
 	}
+
+	@Override
+	protected void frameworkStarted() {
+		if (service != null) {
+			if (Adempiere.getThreadPoolExecutor() != null) {
+				Adempiere.getThreadPoolExecutor().execute(new Runnable() {			
+					@Override
+					public void run() {
+						int timeout = MSysConfig.getIntValue(MSysConfig.AUTOMATIC_PACKIN_INITIAL_DELAY, 120) * 1000;
+						String folders = MSysConfig.getValue(MSysConfig.AUTOMATIC_PACKIN_FOLDERS);
+						automaticPackin(timeout, folders, true);
+					}
+				});
+			} else {
+				Adempiere.addServerStateChangeListener(new ServerStateChangeListener() {				
+					@Override
+					public void stateChange(ServerStateChangeEvent event) {
+						if (event.getEventType() == ServerStateChangeEvent.SERVER_START && service != null) {
+							int timeout = MSysConfig.getIntValue(MSysConfig.AUTOMATIC_PACKIN_INITIAL_DELAY, 120) * 1000;
+							String folders = MSysConfig.getValue(MSysConfig.AUTOMATIC_PACKIN_FOLDERS);
+							automaticPackin(timeout, folders, true);
+						}					
+					}
+				});
+			}
+		}
+	};
 
 }

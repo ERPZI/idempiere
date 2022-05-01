@@ -26,8 +26,10 @@ import java.util.Properties;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.adwindow.IFieldEditorContainer;
 import org.adempiere.webui.component.Bandbox;
 import org.adempiere.webui.component.Button;
+import org.adempiere.webui.component.ComboEditorBox;
 import org.adempiere.webui.component.Datebox;
 import org.adempiere.webui.component.DatetimeBox;
 import org.adempiere.webui.component.EditorBox;
@@ -44,11 +46,9 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.MRole;
 import org.compiere.model.MStyle;
-import org.compiere.model.X_AD_StyleLine;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
-import org.compiere.util.Evaluator;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
@@ -60,6 +60,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Timebox;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.XulElement;
 
@@ -93,7 +94,7 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 
     private String description;
 
-    private boolean readOnly;
+    protected boolean readOnly;
 
     private String columnName;
 
@@ -153,16 +154,45 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 		
 	}
 	
+	/**
+	 * 
+	 * @param comp
+	 * @param gridField
+	 */
     public WEditor(Component comp, GridField gridField) {
     	this(comp, gridField, -1);
 	}
 
-	/**
-     *
+    /**
+     * 
      * @param comp
      * @param gridField
+     * @param tableEditor
+     * @param editorConfiguration
      */
-    public WEditor(Component comp, GridField gridField, int rowIndex)
+    public WEditor(Component comp, GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration) {
+    	this(comp, gridField, -1, tableEditor, editorConfiguration);
+	}
+    
+    /**
+     * 
+     * @param comp
+     * @param gridField
+     * @param rowIndex
+     */
+    public WEditor(Component comp, GridField gridField, int rowIndex) {
+	   this(comp, gridField, rowIndex, false, null);
+    }
+   
+	/**
+	 * 
+	 * @param comp
+	 * @param gridField
+	 * @param rowIndex
+	 * @param tableEditor editor for Grid
+	 * @param editorConfiguration
+	 */
+    public WEditor(Component comp, GridField gridField, int rowIndex, boolean tableEditor, IEditorConfiguration editorConfiguration)
     {
         if (comp == null)
         {
@@ -174,7 +204,7 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
             throw new IllegalArgumentException("Grid field cannot be null");
         }
 
-        this.setComponent(comp);
+        this.setComponent(comp);        
         this.gridField = gridField;
         if (gridField.getGridTab() != null) {
         	comp.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, gridField.getGridTab().getTableName()+"0"+gridField.getColumnName());
@@ -182,8 +212,15 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
         } else {
         	comp.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, gridField.getColumnName());
         }
-        this.setMandatory(gridField.isMandatory(true));
-        this.readOnly = gridField.isReadOnly();
+        if (editorConfiguration != null && editorConfiguration.getMandatory() != null)
+        	this.setMandatory(editorConfiguration.getMandatory());
+        else
+        	this.setMandatory(gridField.isMandatory(true));
+        this.tableEditor = tableEditor;
+        if (editorConfiguration != null && editorConfiguration.getReadonly() != null)
+        	this.readOnly = editorConfiguration.getReadonly();
+        else
+        	this.readOnly = gridField.isReadOnly();
         this.description = gridField.getDescription();
         this.columnName = gridField.getColumnName();
         this.strLabel = gridField.getHeader();
@@ -572,7 +609,15 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 	protected void applyLabelStyles(boolean applyDictionaryStyle) {
 		if (label != null) {
 			boolean zoomable = isZoomable();
-			String style = (zoomable ? STYLE_ZOOMABLE_LABEL : "") + (isMandatoryStyle() ? STYLE_EMPTY_MANDATORY_LABEL : STYLE_NORMAL_LABEL);
+			LayoutUtils.addSclass(CLASS_NORMAL_LABEL, label);
+			if (zoomable)
+				LayoutUtils.addSclass(CLASS_ZOOMABLE_LABEL, label);
+			if (isMandatoryStyle())
+				LayoutUtils.addSclass(CLASS_EMPTY_MANDATORY_LABEL, label);
+			else 
+				LayoutUtils.removeSclass(CLASS_EMPTY_MANDATORY_LABEL, label);
+			
+			String style = "";
 			if (ClientInfo.isMobile()) {
 				if (!zoomable && popupMenu != null) {
 					style = style + STYLE_MOBILE_ZOOMABLE;
@@ -604,6 +649,8 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 			} else {
 				label.setStyle(style);
 			}
+//			if (this instanceof WRadioGroupEditor)
+//				System.out.println(getComponent().getUuid() + " label stype="+label.getStyle());
 		}
 	}
 
@@ -614,6 +661,17 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 			style = buildStyle(gridField.getAD_FieldStyle_ID());
 		}
 		setFieldStyle(style);
+		setFieldMandatoryStyle(applyDictionaryStyle);
+	}
+	
+	private void setFieldMandatoryStyle(boolean applyStyle) {
+		HtmlBasedComponent component = (HtmlBasedComponent) getComponent();
+		if (component != null) {
+			if (isMandatoryStyle() && applyStyle)
+				LayoutUtils.addSclass(CLASS_MANDATORY_FIELD, component);
+			else 
+				LayoutUtils.removeSclass(CLASS_MANDATORY_FIELD, component);
+		}
 	}
 
 	protected void setFieldStyle(String style) {
@@ -622,17 +680,23 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 			String sclass = style.substring(MStyle.SCLASS_PREFIX.length());
 			if (component instanceof EditorBox)
 				((EditorBox)component).getTextbox().setSclass(sclass);
+			else if (component instanceof ComboEditorBox)
+				((ComboEditorBox)component).getCombobox().setSclass(sclass);
 			else
 				component.setSclass(sclass);
 		} else if (style != null && style.startsWith(MStyle.ZCLASS_PREFIX)) {
 			String zclass = style.substring(MStyle.ZCLASS_PREFIX.length());
 			if (component instanceof EditorBox)
 				((EditorBox)component).getTextbox().setZclass(zclass);
+			else if (component instanceof ComboEditorBox)
+				((ComboEditorBox)component).getCombobox().setZclass(zclass);
 			else
 				component.setZclass(zclass);
 		} else {
 			if (component instanceof EditorBox)
 				((EditorBox)component).getTextbox().setStyle(style);
+			else if (component instanceof ComboEditorBox)
+				((ComboEditorBox)component).getCombobox().setStyle(style);
 			else
 				component.setStyle(style);
 		}
@@ -647,27 +711,7 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 
 	protected String buildStyle(int AD_Style_ID) {
 		MStyle style = MStyle.get(Env.getCtx(), AD_Style_ID);
-		X_AD_StyleLine[] lines = style.getStyleLines();
-		StringBuilder styleBuilder = new StringBuilder();
-		for (X_AD_StyleLine line : lines) 
-		{
-			String inlineStyle = line.getInlineStyle().trim();
-			String displayLogic = line.getDisplayLogic();
-			String theme = line.getTheme();
-			if (!Util.isEmpty(theme)) {
-				if (!ThemeManager.getTheme().equals(theme))
-					continue;
-			}
-			if (!Util.isEmpty(displayLogic))
-			{
-				if (!Evaluator.evaluateLogic(getStyleEvaluatee(), displayLogic)) 
-					continue;
-			}
-			if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
-				styleBuilder.append("; ");
-			styleBuilder.append(inlineStyle);
-		}
-		return styleBuilder.toString();
+		return style.buildStyle(ThemeManager.getTheme(), getStyleEvaluatee());
 	}
 	
     /**
@@ -678,7 +722,9 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
         if (getComponent() instanceof HtmlBasedComponent) {
         	//can't stretch bandbox & datebox
         	if (!(getComponent() instanceof Bandbox) &&
-        		!(getComponent() instanceof Datebox)) {
+        		!(getComponent() instanceof Datebox) &&
+        		!(getComponent() instanceof DatetimeBox) &&
+        		!(getComponent() instanceof Timebox)) {
         		String width = tableEditor ? "96%" : "100%";
         		if (getComponent() instanceof Button) {
         			if (!tableEditor) {
@@ -773,9 +819,14 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
      * @param popupMenu
      */
 	protected void addTextEditorMenu(WEditorPopupMenu popupMenu) {
-		Menuitem editor = new Menuitem(Msg.getMsg(Env.getCtx(), "Editor"), ThemeManager.getThemeResource("images/Editor16.png"));
+		Menuitem editor = new Menuitem();
 		editor.setAttribute("EVENT", WEditorPopupMenu.EDITOR_EVENT);
-		editor.addEventListener(Events.ON_CLICK, popupMenu);
+		editor.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Editor")).intern());
+        if (ThemeManager.isUseFontIconForImage())
+        	editor.setIconSclass("z-icon-Edit");
+        else
+        	editor.setImage(ThemeManager.getThemeResource("images/Editor16.png"));
+        editor.addEventListener(Events.ON_CLICK, popupMenu);
 		popupMenu.appendChild(editor);
 	}
 	
@@ -835,13 +886,26 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 		return null;
 	}
 
+	protected void focusNext() {
+		Component comp = getComponent();
+		Component parent = comp.getParent();
+		while (parent != null) {
+			if (parent instanceof IFieldEditorContainer) {
+				((IFieldEditorContainer) parent).focusToNextEditor(this);
+				break;
+			}
+			parent = parent.getParent();
+		}
+	}
+
 	protected Evaluatee getStyleEvaluatee() {
 		return new EvaluateeWrapper(this, gridField, tableEditor);
 	}
-	
-	private static final String STYLE_ZOOMABLE_LABEL = "cursor: pointer; text-decoration: underline;";
-	private static final String STYLE_NORMAL_LABEL = "color: #333;";
-	private static final String STYLE_EMPTY_MANDATORY_LABEL = "color: red;";
+
+	private static final String CLASS_MANDATORY_FIELD = "idempiere-mandatory";
+	private static final String CLASS_ZOOMABLE_LABEL = "idempiere-zoomable-label";
+	private static final String CLASS_NORMAL_LABEL = "idempiere-label";
+	private static final String CLASS_EMPTY_MANDATORY_LABEL = "idempiere-mandatory-label";
 	private static final String STYLE_MOBILE_ZOOMABLE = "cursor: pointer;";
 	
 	private static class EvaluateeWrapper implements Evaluatee {

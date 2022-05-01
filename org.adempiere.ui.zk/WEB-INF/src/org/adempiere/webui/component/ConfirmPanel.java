@@ -40,6 +40,8 @@ import org.zkoss.zul.Messagebox;
  **/
 public final class ConfirmPanel extends Div
 {
+	private static final String SMALL_SCREEN_BUTTON_CLASS = "btn-small small-img-btn";
+
 	/**
 	 * 
 	 */
@@ -83,7 +85,7 @@ public final class ConfirmPanel extends Div
     /**
      * Creates a button of the specified id
      *
-     * @param id button id
+     * @param name button id
      * @return  button
      *
      * <p>The string can be any of the following and the corresponding button will be created: </p>
@@ -243,6 +245,8 @@ public final class ConfirmPanel extends Div
 
 	private String extraButtonSClass;
 
+	private boolean useSmallButtonClassForSmallScreen;
+
     /**
      * initialise components
      */
@@ -278,7 +282,12 @@ public final class ConfirmPanel extends Div
     	 Button btProcess = createButton(btName);
     	 // replace default image with image set at info process
     	 if (m_withImage && imgName != null && imgName.trim().length() > 0)
-    		 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+    	 {
+    		 if (ThemeManager.isUseFontIconForImage())
+    			 btProcess.setIconSclass(ThemeManager.getIconSclass(imgName));
+    		 else
+    			 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+    	 }
     	 addComponentsCenter(btProcess);
     	 return btProcess;     	
     }
@@ -287,7 +296,12 @@ public final class ConfirmPanel extends Div
    	 Button btProcess = createButton(btName, imgName, null);
    	 // replace default image with image set at info process
    	 if (m_withImage && imgName != null && imgName.trim().length() > 0)
-   		 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+   	 {
+		 if (ThemeManager.isUseFontIconForImage())
+			 btProcess.setIconSclass(ThemeManager.getIconSclass(imgName));
+		 else
+			 btProcess.setImage(ThemeManager.getThemeResource("images/" + imgName));
+	 }
    	 addComponentsCenter(btProcess);
    	 return btProcess;     	
    }
@@ -301,6 +315,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnLeft.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -312,6 +328,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnRight.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -324,6 +342,8 @@ public final class ConfirmPanel extends Div
     	if (!buttonMap.containsKey(button.getId()))
     		buttonMap.put(button.getId(), button);
         pnlBtnCenter.appendChild(button);
+        if (useSmallButtonClassForSmallScreen)
+        	LayoutUtils.addSclass(SMALL_SCREEN_BUTTON_CLASS, button);
     }
 
     /**
@@ -333,6 +353,15 @@ public final class ConfirmPanel extends Div
     public void addComponentsCenter(Combobox cbb){
     	pnlBtnCenter.appendChild(cbb);
     }
+    
+    /**
+     * Add checkbox to center panel
+     * @param cb
+     */
+    public void addComponentsCenter(Checkbox cb){
+    	pnlBtnCenter.appendChild(cb);
+    	
+    }    
     
     /**
      * return button of the specified id
@@ -361,7 +390,7 @@ public final class ConfirmPanel extends Div
 
     /**
      * sets the visibility of the specified button
-     * @param btnName   button name
+     * @param id   button name
      * @param visible   visibility
      * <p> The button name can be any of the following
      * <dl>
@@ -519,8 +548,11 @@ public final class ConfirmPanel extends Div
         // IDEMPIERE-1334 start
         while (iter3.hasNext())
         {
-            Button button = (Button)iter3.next();
-            button.addEventListener(event, listener);
+        	Object element = iter3.next();
+        	if (element instanceof Button) 
+        	{
+	            ((Button)element).addEventListener(event, listener);
+        	}
         }
         // IDEMPIERE-1334 start
     }
@@ -535,7 +567,7 @@ public final class ConfirmPanel extends Div
 
 	/**
 	 * alias for addComponentsLeft for ease of porting swing form
-	 * @param selectAllButton
+	 * @param button
 	 */
 	public void addButton(Button button) {
 		addComponentsLeft(button);
@@ -560,5 +592,10 @@ public final class ConfirmPanel extends Div
 		for(Button btn : buttonMap.values()) {
 			LayoutUtils.removeSclass(cls, btn);
 		}
+	}
+
+	public void useSmallButtonClassForSmallScreen() {
+		useSmallButtonClassForSmallScreen = true;
+		addButtonSclass(SMALL_SCREEN_BUTTON_CLASS);
 	}
 }   //  ConfirmPanel

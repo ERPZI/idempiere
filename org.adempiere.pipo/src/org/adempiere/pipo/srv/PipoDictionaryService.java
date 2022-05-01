@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
 
 public class PipoDictionaryService implements IDictionaryService {
 
-	CLogger logger = CLogger.getCLogger(PipoDictionaryService.class.getName());
+	private static final CLogger logger = CLogger.getCLogger(PipoDictionaryService.class.getName());
 
 	public PipoDictionaryService() {
 		super();
@@ -61,8 +61,8 @@ public class PipoDictionaryService implements IDictionaryService {
 			else
 				packIn.setPackageName(symbolicName);
 			
-			if (Env.getCtx().getProperty("#AD_Client_ID") == null) {
-				Env.getCtx().put("#AD_Client_ID", 0);
+			if (Env.getCtx().getProperty(Env.AD_CLIENT_ID) == null) {
+				Env.getCtx().put(Env.AD_CLIENT_ID, 0);
 			}
 			//get package version from file name suffix or bundle header
 			String packageVersion = null;
@@ -71,6 +71,10 @@ public class PipoDictionaryService implements IDictionaryService {
 			if (versionSeparatorPos > 0) {
 				int dotPos = fileName.lastIndexOf(".");
 				if (dotPos > 0 && dotPos > versionSeparatorPos) {
+					int extraInfoIndex = fileName.indexOf("_", versionSeparatorPos + 6);
+					if (extraInfoIndex > 0)
+						dotPos=extraInfoIndex;
+					
 					String version = fileName.substring(versionSeparatorPos+"2Pack_".length(), dotPos);
 					if (version.split("[.]").length == 3) {
 						packageVersion = version;
@@ -120,7 +124,9 @@ public class PipoDictionaryService implements IDictionaryService {
 			try {
 				Trx.get(trxName, false).close();
 			} catch (Exception e) {}
-			adPackageImp.save(); // ignoring exceptions
+			
+			if (adPackageImp != null)
+				adPackageImp.save(); // ignoring exceptions
 
 			if (adPackageImp != null && packIn != null) {
 				// Add the attachment to the packin for possible reprocessing

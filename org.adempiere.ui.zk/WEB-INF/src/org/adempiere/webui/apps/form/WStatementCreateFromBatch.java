@@ -62,6 +62,7 @@ import org.zkoss.zul.Hbox;
  * @author Elaine
  *
  */
+@org.idempiere.ui.zk.annotation.Form
 public class WStatementCreateFromBatch extends StatementCreateFromBatch implements IFormController, EventListener<Event>
 {
 	private WCreateFromForm form;
@@ -94,7 +95,7 @@ public class WStatementCreateFromBatch extends StatementCreateFromBatch implemen
 	private int p_WindowNo;
 
 	/**	Logger			*/
-	private CLogger log = CLogger.getCLogger(getClass());
+	private final static CLogger log = CLogger.getCLogger(WStatementCreateFromBatch.class);
 	
 	protected Label bankAccountLabel = new Label();
 	protected WTableDirEditor bankAccountField;

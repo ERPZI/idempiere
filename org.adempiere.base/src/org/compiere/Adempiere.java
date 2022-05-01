@@ -26,9 +26,6 @@ import java.util.Properties;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
 
-import javax.jnlp.BasicService;
-import javax.jnlp.ServiceManager;
-import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
 import javax.swing.event.EventListenerList;
 
@@ -67,11 +64,11 @@ public final class Adempiere
 	/** Timestamp                   */
 	static public final String	ID				= "$Id: Adempiere.java,v 1.8 2006/08/11 02:58:14 jjanke Exp $";
 	/** Main Version String         */
-	static public String	MAIN_VERSION	= "Release 6.2";
+	static public String	MAIN_VERSION	= "Release 9";
 	/** Detail Version as date      Used for Client/Server		*/
-	static public String	DATE_VERSION	= "2019-01-06";
+	static public String	DATE_VERSION	= "2021-12-24";
 	/** Database Version as date    Compared with AD_System		*/
-	static public String	DB_VERSION		= "2019-01-06";
+	static public String	DB_VERSION		= "2021-12-24";
 
 	/** Product Name            */
 	static public final String	NAME 			= "iDempiere\u00AE";
@@ -86,13 +83,15 @@ public final class Adempiere
 	/** 48*15 Product Image.   	*/
 	static private final String	s_file48x15		= "images/iDempiere.png";
 	static private final String	s_file48x15HR	= "images/iDempiereHR.png";
+	/** Header Logo				*/
+	static private final String	s_fileHeaderLogo= "images/header-logo.png";
 	/** Support Email           */
 	static private String		s_supportEmail	= "";
 
 	/** Subtitle                */
 	static public final String	SUB_TITLE		= "Smart Suite ERP, CRM and SCM";
 	static public final String	ADEMPIERE_R		= "iDempiere\u00AE";
-	static public final String	COPYRIGHT		= "\u00A9 1999-2019 iDempiere\u00AE";
+	static public final String	COPYRIGHT		= "\u00A9 1999-2021 iDempiere\u00AE";
 
 	static private String		s_ImplementationVersion = null;
 	static private String		s_ImplementationVendor = null;
@@ -102,6 +101,7 @@ public final class Adempiere
 	static private Image 		s_imageLogo;
 	static private ImageIcon 	s_imageIcon32;
 	static private ImageIcon 	s_imageIconLogo;
+	static private Image		s_headerLogo;
 
 	static private final String ONLINE_HELP_URL = "http://wiki.idempiere.org";
 
@@ -222,7 +222,7 @@ public final class Adempiere
 
 	/**
 	 *	Summary (Windows).
-	 * 	iDempiere(tm) Release 1.0c_2013-06-27 -Smart Suite ERP, CRM and SCM- Copyright (c) 1999-2013 iDempiere; Implementation: 2.5.1a 20040417-0243 - (C) 1999-2005 Jorg Janke, iDempiere Inc. USA
+	 * 	iDempiere(tm) Release 1.0c_2013-06-27 -Smart Suite ERP, CRM and SCM- Copyright (c) 1999-2021 iDempiere; Implementation: 2.5.1a 20040417-0243 - (C) 1999-2005 Jorg Janke, iDempiere Inc. USA
 	 *  @return Summary in Windows character set
 	 */
 	public static String getSummary()
@@ -245,7 +245,7 @@ public final class Adempiere
 		if (s_ImplementationVendor != null)
 			return;
 
-		Package adempierePackage = Package.getPackage("org.compiere");
+		Package adempierePackage = Adempiere.class.getClassLoader().getDefinedPackage("org.compiere");
 		s_ImplementationVendor = adempierePackage.getImplementationVendor();
 		s_ImplementationVersion = adempierePackage.getImplementationVersion();
 		if (s_ImplementationVendor == null)
@@ -397,6 +397,20 @@ public final class Adempiere
 	}   //  getImageLogoSmall
 
 	/**
+	 * Get Header logo
+	 * @return Image
+	 */
+	public static Image getHeaderLogo() {
+		if (s_headerLogo == null) {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			URL url = Core.getResourceFinder().getResource(s_fileHeaderLogo);
+			if (url != null)
+				s_headerLogo = tk.getImage(url);
+		}
+		return s_headerLogo;
+	}
+
+	/**
 	 *  Get Logo Image.
 	 *  @return Image Logo
 	 */
@@ -476,44 +490,6 @@ public final class Adempiere
 		s_supportEmail = email;
 	}   //  setSupportEMail
 
-	/**
-	 * 	Get JNLP CodeBase
-	 *	@return code base or null
-	 */
-	public static URL getCodeBase()
-	{
-		try
-		{
-			BasicService bs = (BasicService)ServiceManager.lookup("javax.jnlp.BasicService");
-			URL url = bs.getCodeBase();
-	        return url;
-		}
-		catch(UnavailableServiceException ue)
-		{
-			return null;
-		}
-	}	//	getCodeBase
-
-	/**
-	 * @return True if client is started using web start
-	 */
-	public static boolean isWebStartClient()
-	{
-		return getCodeBase() != null;
-	}
-
-	/**
-	 * 	Get JNLP CodeBase Host
-	 *	@return code base or null
-	 */
-	public static String getCodeBaseHost()
-	{
-		URL url = getCodeBase();
-		if (url == null)
-			return null;
-		return url.getHost();
-	}	//	getCodeBase
-
 	public static synchronized boolean isStarted()
 	{
 		return (log != null);
@@ -548,10 +524,6 @@ public final class Adempiere
 		log = CLogger.getCLogger(Adempiere.class);
 		//	Greeting
 		if (log.isLoggable(Level.INFO)) log.info(getSummaryAscii());
-	//	log.info(getAdempiereHome() + " - " + getJavaInfo() + " - " + getOSInfo());
-
-		//  Load System environment
-	//	EnvLoader.load(Ini.ENV_PREFIX);
 
 		//  System properties
 		Ini.loadProperties (false);
@@ -584,8 +556,10 @@ public final class Adempiere
 				log.log(Level.FINEST, System.getProperties().toString());
 		}
 
+		loadDBProvider();
+		
 		//  Set Default Database Connection from Ini
-		DB.setDBTarget(CConnection.get(getCodeBaseHost()));
+		DB.setDBTarget(CConnection.get());
 
 		createThreadPool();
 		
@@ -597,24 +571,39 @@ public final class Adempiere
 		return startupEnvironment(isClient);
 	}   //  startup
 
-	private static void createThreadPool() {
-		int max = Runtime.getRuntime().availableProcessors() * 20;
-		int defaultMax = max;
-		Properties properties = Ini.getProperties();
-		String maxSize = properties.getProperty("MaxThreadPoolSize");
-		if (maxSize != null) {
-			try {
-				max = Integer.parseInt(maxSize);
-			} catch (Exception e) {}
+	private static void loadDBProvider() {
+		try {
+			Adempiere.class.getClassLoader().loadClass("org.adempiere.db.oracle.config.ConfigOracle");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		if (max <= 0) {
-			max = defaultMax;
+		try {
+			Adempiere.class.getClassLoader().loadClass("org.adempiere.db.postgresql.config.ConfigPostgreSQL");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		// start thread pool
-		threadPoolExecutor = new ScheduledThreadPoolExecutor(max);		
-		
-		Trx.startTrxMonitor();
+	}
+
+	private static synchronized void createThreadPool() {
+		if (threadPoolExecutor == null) {
+			int max = Runtime.getRuntime().availableProcessors() * 20;
+			int defaultMax = max;
+			Properties properties = Ini.getProperties();
+			String maxSize = properties.getProperty("MaxThreadPoolSize");
+			if (maxSize != null) {
+				try {
+					max = Integer.parseInt(maxSize);
+				} catch (Exception e) {}
+			}
+			if (max <= 0) {
+				max = defaultMax;
+			}
+			
+			// start thread pool
+			threadPoolExecutor = new ScheduledThreadPoolExecutor(max);		
+			
+			Trx.startTrxMonitor();
+		}
 	}
 
 	/**
@@ -703,11 +692,18 @@ public final class Adempiere
 	public static synchronized void stop() {
 		if (threadPoolExecutor != null) {
 			threadPoolExecutor.shutdown();
+			threadPoolExecutor = null;
 		}
 		log = null;
 	}
 	
-	public static ScheduledThreadPoolExecutor getThreadPoolExecutor() {
+	/**
+	 * 
+	 * @return {@link ScheduledThreadPoolExecutor}
+	 */
+	public static synchronized ScheduledThreadPoolExecutor getThreadPoolExecutor() {
+		if (threadPoolExecutor == null)
+			createThreadPool();
 		return threadPoolExecutor;
 	}
 	

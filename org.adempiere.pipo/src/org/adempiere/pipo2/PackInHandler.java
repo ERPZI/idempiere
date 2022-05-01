@@ -69,7 +69,7 @@ public class PackInHandler extends DefaultHandler {
     private String packageDirectory = null;
     private int AD_Package_Imp_ID=0;
 	private int AD_Package_Imp_Inst_ID=0;
-    private CLogger log = CLogger.getCLogger(PackInHandler.class);
+    private static final CLogger log = CLogger.getCLogger(PackInHandler.class);
 	private boolean isInit = false;
 	private String packageStatus = "Installing";
 	private PIPOContext m_ctx = null;
@@ -341,14 +341,14 @@ public class PackInHandler extends DefaultHandler {
     private void updPackageImp(String trxName) {
     	// NOTE: Updating out of model to avoid change log insert that can cause locks
 		//Update package history log with package status
-    	DB.executeUpdateEx("UPDATE AD_Package_Imp SET Processed=?, PK_Status=?, UpdatedBy=?, Updated=SYSDATE WHERE AD_Package_Imp_ID=?",
+    	DB.executeUpdateEx("UPDATE AD_Package_Imp SET Processed=?, PK_Status=?, UpdatedBy=?, Updated=getDate() WHERE AD_Package_Imp_ID=?",
     			new Object[] {"Y", packageStatus, Env.getAD_User_ID(m_ctx.ctx), AD_Package_Imp_ID},
     			trxName);
 	}
 
     private void updPackageImpInst(String trxName) {
     	// NOTE: Updating out of model to avoid change log insert that can cause locks
-    	DB.executeUpdateEx("UPDATE AD_Package_Imp_Inst SET PK_Status=?, UpdatedBy=?, Updated=SYSDATE WHERE AD_Package_Imp_Inst_ID=?",
+    	DB.executeUpdateEx("UPDATE AD_Package_Imp_Inst SET PK_Status=?, UpdatedBy=?, Updated=getDate() WHERE AD_Package_Imp_Inst_ID=?",
     			new Object[] {packageStatus, Env.getAD_User_ID(m_ctx.ctx), AD_Package_Imp_Inst_ID},
     			trxName);
 	}
@@ -521,9 +521,12 @@ public class PackInHandler extends DefaultHandler {
     	if (!isUpdateRoleAccess)
     		return;
 
-    	List<MRole> roles = new Query(m_ctx.ctx, MRole.Table_Name, "IsManual='N'", m_ctx.trx.getTrxName())
+    	int AD_Client_ID=Env.getAD_Client_ID(Env.getCtx());
+    	
+    	List<MRole> roles = new Query(m_ctx.ctx, MRole.Table_Name, "IsManual='N' AND (?=0 OR AD_Client_ID=?)", m_ctx.trx.getTrxName())
 			.setOnlyActiveRecords(true)
 			.setOrderBy("AD_Client_ID, Name")
+			.setParameters(AD_Client_ID, AD_Client_ID)
 			.list();
     	for (MRole role : roles) {
         	role.updateAccessRecords(false);

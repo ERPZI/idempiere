@@ -40,6 +40,7 @@ import org.compiere.util.Env;
  *  @author Jorg Janke
  *  @version $Id: InventoryCountCreate.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class InventoryCountCreate extends SvrProcess
 {
 	
@@ -126,7 +127,7 @@ public class InventoryCountCreate extends SvrProcess
 			if (log.isLoggable(Level.FINE)) log.fine("doIt - Deleted MA #" + no1);
 			//End of Added Line
 			
-			StringBuilder sql = new StringBuilder("DELETE M_InventoryLine WHERE Processed='N' ")
+			StringBuilder sql = new StringBuilder("DELETE FROM M_InventoryLine WHERE Processed='N' ")
 				.append("AND M_Inventory_ID=").append(p_M_Inventory_ID);
 			int no = DB.executeUpdate(sql.toString(), get_TrxName());
 			if (log.isLoggable(Level.FINE)) log.fine("doIt - Deleted #" + no);
@@ -138,10 +139,10 @@ public class InventoryCountCreate extends SvrProcess
 			StringBuilder sql = new StringBuilder("INSERT INTO M_StorageOnHand ");
 								sql.append("(AD_Client_ID, AD_Org_ID, IsActive, Created, CreatedBy, Updated, UpdatedBy,");
 								sql.append(" M_Locator_ID, M_Product_ID, M_AttributeSetInstance_ID,");
-								sql.append(" QtyOnHand, DateLastInventory) ");
-								sql.append("SELECT l.AD_CLIENT_ID, l.AD_ORG_ID, 'Y', SysDate, 0,SysDate, 0,");
+								sql.append(" QtyOnHand, DateLastInventory, DateMaterialPolicy, M_StorageOnHand_UU) ");
+								sql.append("SELECT l.AD_CLIENT_ID, l.AD_ORG_ID, 'Y', getDate(), 0,getDate(), 0,");
 								sql.append(" l.M_Locator_ID, p.M_Product_ID, 0,");
-								sql.append(" 0,null ");
+								sql.append(" 0,null,trunc(getdate()),generate_uuid() ");
 								sql.append("FROM M_Locator l");
 								sql.append(" INNER JOIN M_Product p ON (l.AD_Client_ID=p.AD_Client_ID) ");
 								sql.append("WHERE l.M_Warehouse_ID=");
@@ -194,7 +195,6 @@ public class InventoryCountCreate extends SvrProcess
 			   .append(" AND il.M_Product_ID=s.M_Product_ID")
 			   .append(" AND il.M_Locator_ID=s.M_Locator_ID")
 			   .append(" AND COALESCE(il.M_AttributeSetInstance_ID,0)=COALESCE(s.M_AttributeSetInstance_ID,0))");
-		//	+ " AND il.M_AttributeSetInstance_ID=s.M_AttributeSetInstance_ID)");
 		//
 		sql.append(" ORDER BY l.Value, p.Value, s.M_AttributeSetInstance_ID, s.DateMaterialPolicy, s.QtyOnHand DESC");	//	Locator/Product
 		//

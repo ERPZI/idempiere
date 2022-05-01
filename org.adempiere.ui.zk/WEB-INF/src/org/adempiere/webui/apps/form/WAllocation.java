@@ -66,6 +66,7 @@ import org.compiere.util.TrxRunnable;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
@@ -84,6 +85,7 @@ import static org.adempiere.webui.ClientInfo.*;
  * 
  * Contributor : Fabian Aguilar - OFBConsulting - Multiallocation
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VAllocation")
 public class WAllocation extends Allocation
 	implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener
 {
@@ -92,12 +94,9 @@ public class WAllocation extends Allocation
 	
 	/**
 	 *	Initialize Panel
-	 *  @param WindowNo window
-	 *  @param frame frame
 	 */
 	public WAllocation()
 	{
-		Env.setContext(Env.getCtx(), form.getWindowNo(), "IsSOTrx", "Y");   //  defaults to no
 		try
 		{
 			super.dynInit();
@@ -458,7 +457,7 @@ public class WAllocation extends Allocation
 		
 		//  Date set to Login Date
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(Env.getContextAsDate(Env.getCtx(), "#Date"));
+		cal.setTime(Env.getContextAsDate(Env.getCtx(), Env.DATE));
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
@@ -703,10 +702,15 @@ public class WAllocation extends Allocation
 		
 		paymentInfo.setText(calculatePayment(paymentTable, multiCurrency.isSelected()));
 		invoiceInfo.setText(calculateInvoice(invoiceTable, multiCurrency.isSelected()));
-		
+
 		//	Set AllocationDate
-		if (allocDate != null)
-			dateField.setValue(allocDate);
+		if (allocDate != null) {
+			if (! allocDate.equals(dateField.getValue())) {
+                Clients.showNotification(Msg.getMsg(Env.getCtx(), "AllocationDateUpdated"), Clients.NOTIFICATION_TYPE_INFO, dateField.getComponent(), "start_before", -1, false);       
+                dateField.setValue(allocDate);
+			}
+		}
+
 		//  Set Allocation Currency
 		allocCurrencyLabel.setText(currencyPick.getDisplay());
 		//  Difference

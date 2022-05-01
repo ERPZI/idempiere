@@ -80,7 +80,6 @@ public class WSchedule extends Window implements EventListener<Event>
 	/**
 	 *	Constructor
 	 *  @param is InfoSchedule for call back
-	 *  @param type Type of schedule TYPE_...
 	 */
 	public WSchedule (InfoSchedule is)
 	{		
@@ -97,7 +96,7 @@ public class WSchedule extends Window implements EventListener<Event>
 	}	//	WSchedule
 
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(WSchedule.class);
+	private static final CLogger log = CLogger.getCLogger(WSchedule.class);
 
 
 	private ToolBarButton button;

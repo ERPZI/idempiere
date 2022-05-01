@@ -22,7 +22,7 @@ import org.compiere.util.Msg;
 public class FactReconcile {
 	
 	/**	Logger			*/
-	public static CLogger log = CLogger.getCLogger(FactReconcile.class);
+	public static final CLogger log = CLogger.getCLogger(FactReconcile.class);
 	
 	public int			m_AD_Client_ID = 0;
 	public int			m_AD_Org_ID = 0;
@@ -219,7 +219,7 @@ public class FactReconcile {
 	{
 		log.info("");
 
-		String matchcode = "Manual: " + Env.getContext(Env.getCtx(), "#AD_User_Name") + " " + time;
+		String matchcode = "Manual: " + Env.getContext(Env.getCtx(), Env.AD_USER_NAME) + " " + time;
 		
 		MFactReconciliation rec = new Query(Env.getCtx(), MFactReconciliation.Table_Name, "Fact_Acct_ID = ?", null)
 		.setParameters(new Object[] {factId}).first();
@@ -250,8 +250,7 @@ public class FactReconcile {
 			return false;
 		}
 
-		rec.setMatchCode(null);
-		return rec.save();
+		return rec.delete(false);
 	}
 	
 	protected Vector<KeyNamePair> getAccount(){

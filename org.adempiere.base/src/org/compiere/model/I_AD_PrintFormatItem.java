@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_PrintFormatItem
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 9
  */
 public interface I_AD_PrintFormatItem 
 {
@@ -229,6 +229,19 @@ public interface I_AD_PrintFormatItem
 	  */
 	public int getCreatedBy();
 
+    /** Column name DisplayLogic */
+    public static final String COLUMNNAME_DisplayLogic = "DisplayLogic";
+
+	/** Set Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public void setDisplayLogic (String DisplayLogic);
+
+	/** Get Display Logic.
+	  * If the Field is displayed, the result determines if the field is actually displayed
+	  */
+	public String getDisplayLogic();
+
     /** Column name FieldAlignmentType */
     public static final String COLUMNNAME_FieldAlignmentType = "FieldAlignmentType";
 
@@ -297,12 +310,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsAveraged */
     public static final String COLUMNNAME_IsAveraged = "IsAveraged";
 
-	/** Set Calculate Mean (μ).
+	/** Set Calculate Mean (&#956;
+).
 	  * Calculate Average of numeric content or length
 	  */
 	public void setIsAveraged (boolean IsAveraged);
 
-	/** Get Calculate Mean (μ).
+	/** Get Calculate Mean (&#956;
+).
 	  * Calculate Average of numeric content or length
 	  */
 	public boolean isAveraged();
@@ -323,12 +338,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsCounted */
     public static final String COLUMNNAME_IsCounted = "IsCounted";
 
-	/** Set Calculate Count (№).
+	/** Set Calculate Count (&#8470;
+).
 	  * Count number of not empty elements
 	  */
 	public void setIsCounted (boolean IsCounted);
 
-	/** Get Calculate Count (№).
+	/** Get Calculate Count (&#8470;
+).
 	  * Count number of not empty elements
 	  */
 	public boolean isCounted();
@@ -349,12 +366,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsDeviationCalc */
     public static final String COLUMNNAME_IsDeviationCalc = "IsDeviationCalc";
 
-	/** Set Calculate Deviation (σ).
+	/** Set Calculate Deviation (&#963;
+).
 	  * Calculate Standard Deviation
 	  */
 	public void setIsDeviationCalc (boolean IsDeviationCalc);
 
-	/** Get Calculate Deviation (σ).
+	/** Get Calculate Deviation (&#963;
+).
 	  * Calculate Standard Deviation
 	  */
 	public boolean isDeviationCalc();
@@ -427,12 +446,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsMaxCalc */
     public static final String COLUMNNAME_IsMaxCalc = "IsMaxCalc";
 
-	/** Set Calculate Maximum (↑).
+	/** Set Calculate Maximum (&#8593;
+).
 	  * Calculate the maximum amount
 	  */
 	public void setIsMaxCalc (boolean IsMaxCalc);
 
-	/** Get Calculate Maximum (↑).
+	/** Get Calculate Maximum (&#8593;
+).
 	  * Calculate the maximum amount
 	  */
 	public boolean isMaxCalc();
@@ -440,12 +461,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsMinCalc */
     public static final String COLUMNNAME_IsMinCalc = "IsMinCalc";
 
-	/** Set Calculate Minimum (↓).
+	/** Set Calculate Minimum (&#8595;
+).
 	  * Calculate the minimum amount
 	  */
 	public void setIsMinCalc (boolean IsMinCalc);
 
-	/** Get Calculate Minimum (↓).
+	/** Get Calculate Minimum (&#8595;
+).
 	  * Calculate the minimum amount
 	  */
 	public boolean isMinCalc();
@@ -528,6 +551,19 @@ public interface I_AD_PrintFormatItem
 	  */
 	public boolean isPrinted();
 
+    /** Column name IsPrintInstanceAttributes */
+    public static final String COLUMNNAME_IsPrintInstanceAttributes = "IsPrintInstanceAttributes";
+
+	/** Set Print Attributes.
+	  * Print each attributes as report column instead of printing the description of attribute set instance
+	  */
+	public void setIsPrintInstanceAttributes (boolean IsPrintInstanceAttributes);
+
+	/** Get Print Attributes.
+	  * Print each attributes as report column instead of printing the description of attribute set instance
+	  */
+	public boolean isPrintInstanceAttributes();
+
     /** Column name IsRelativePosition */
     public static final String COLUMNNAME_IsRelativePosition = "IsRelativePosition";
 
@@ -570,12 +606,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsSummarized */
     public static final String COLUMNNAME_IsSummarized = "IsSummarized";
 
-	/** Set Calculate Sum (Σ).
+	/** Set Calculate Sum (&#931;
+).
 	  * Calculate the Sum of numeric content or length
 	  */
 	public void setIsSummarized (boolean IsSummarized);
 
-	/** Get Calculate Sum (Σ).
+	/** Get Calculate Sum (&#931;
+).
 	  * Calculate the Sum of numeric content or length
 	  */
 	public boolean isSummarized();
@@ -609,12 +647,14 @@ public interface I_AD_PrintFormatItem
     /** Column name IsVarianceCalc */
     public static final String COLUMNNAME_IsVarianceCalc = "IsVarianceCalc";
 
-	/** Set Calculate Variance (σ²).
+	/** Set Calculate Variance (&#963;
+²).
 	  * Calculate Variance
 	  */
 	public void setIsVarianceCalc (boolean IsVarianceCalc);
 
-	/** Get Calculate Variance (σ²).
+	/** Get Calculate Variance (&#963;
+²).
 	  * Calculate Variance
 	  */
 	public boolean isVarianceCalc();
@@ -748,6 +788,19 @@ public interface I_AD_PrintFormatItem
 	  * Create Running Total Lines (page break) every x lines
 	  */
 	public int getRunningTotalLines();
+
+    /** Column name Script */
+    public static final String COLUMNNAME_Script = "Script";
+
+	/** Set Script.
+	  * Dynamic Java Language Script to calculate result
+	  */
+	public void setScript (String Script);
+
+	/** Get Script.
+	  * Dynamic Java Language Script to calculate result
+	  */
+	public String getScript();
 
     /** Column name SeqNo */
     public static final String COLUMNNAME_SeqNo = "SeqNo";

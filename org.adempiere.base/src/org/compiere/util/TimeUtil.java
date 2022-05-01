@@ -65,9 +65,9 @@ public class TimeUtil
 
 	/**
 	 * 	Get earliest time of a day (truncate)
-	 *	@param day day 1..31
+	 *	@param year year (if two digits: &lt; 50 is 2000; &gt; 50 is 1900)
 	 *	@param month month 1..12
-	 *	@param year year (if two diguts: < 50 is 2000; > 50 is 1900)
+	 *	@param day day 1..31
 	 *	@return timestamp ** not too reliable
 	 */
 	static public Timestamp getDay (int year, int month, int day)
@@ -755,7 +755,7 @@ public class TimeUtil
 	 * [ ARHIPAC ] Gets calendar instance of given date
 	 * @param date calendar initialization date; if null, the current date is used
 	 * @return calendar
-	 * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+	 * author Teo Sarca, SC ARHIPAC SERVICE SRL
 	 */
 	static public Calendar getCalendar(Timestamp date)
 	{
@@ -849,7 +849,7 @@ public class TimeUtil
 		}
 
 		final String sql = "SELECT Date1 FROM C_NonBusinessDay WHERE IsActive='Y' AND AD_Client_ID=? AND Date1 BETWEEN ? AND ? AND COALESCE(C_Country_ID,0) IN (0, ?)";
-		List<Object> nbd = DB.getSQLValueObjectsEx(trxName, sql, clientID, startDate, endDate, MCountry.getDefault(Env.getCtx()).getC_Country_ID());
+		List<Object> nbd = DB.getSQLValueObjectsEx(trxName, sql, clientID, startDate, endDate, MCountry.getDefault().getC_Country_ID());
 
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(startDate);

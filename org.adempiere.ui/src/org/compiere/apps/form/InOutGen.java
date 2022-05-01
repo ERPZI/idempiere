@@ -47,7 +47,7 @@ import org.compiere.util.Trx;
 public class InOutGen extends GenForm
 {
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(InOutGen.class);
+	private static final CLogger log = CLogger.getCLogger(InOutGen.class);
 	//
 	
 	public Object 			m_M_Warehouse_ID = null;
@@ -211,8 +211,7 @@ public class InOutGen extends GenForm
 	}   //  executeQuery
 	
 	/**
-	 *	Save Selection & return selection Query or ""
-	 *  @return where clause like C_Order_ID IN (...)
+	 *	Save Selection and return selection Query or ""
 	 */
 	public void saveSelection(IMiniTable miniTable)
 	{

@@ -38,6 +38,7 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.model.I_C_ElementValue;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MTable;
 import org.compiere.util.DB;
@@ -100,7 +101,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 	public InfoGeneralPanel(String queryValue, int windowNo,String tableName,String keyColumn, boolean isSOTrx, String whereClause, boolean lookup)
 	{
-		super(windowNo, tableName, keyColumn, false,whereClause, lookup);
+		super(windowNo, tableName, keyColumn, false, whereClause, lookup, 0, queryValue);
 
 		setTitle(Msg.getMsg(Env.getCtx(), "Info"));
 
@@ -111,26 +112,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 			p_loadedOK = initInfo ();
 			
-			if (queryValue != null && queryValue.length() > 0)
-			{				
-				Textbox[] txts = new Textbox[] {txt1, txt2, txt3, txt4};
-				for(Textbox t : txts) 
-				{
-					if (t != null && t.isVisible())
-					{
-						t.setValue(queryValue);
-						testCount();
-						if (m_count <= 0)
-							t.setValue(null);
-						else
-							break;
-					}
-				}
-				if (m_count <= 0)
-				{
-					txt1.setValue(queryValue);
-				}
-			}
+			processQueryValue();
 		}
 		catch (Exception e)
 		{
@@ -145,22 +127,25 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 		if (queryValue != null && queryValue.length() > 0)
         {
-			MTable table = MTable.get(Env.getCtx(), p_tableName);
-			if (   table.getIdentifierColumns().length > 1
-				&& !p_tableName.startsWith("AD_"))  // 32 AD tables with identifiers containing _
+			if (!isAutoComplete)
 			{
-				String separator = I_C_ElementValue.Table_Name.equalsIgnoreCase(p_tableName) ? "-" : "_";
-				if (txt2.isVisible())
+				MTable table = MTable.get(Env.getCtx(), p_tableName);
+				if (   table.getIdentifierColumns().length > 1
+					&& !p_tableName.startsWith("AD_"))  // 32 AD tables with identifiers containing _
 				{
-					String[] values = queryValue.split("["+separator+"]");
-					if (values != null && values.length == 2) 
+					String separator = I_C_ElementValue.Table_Name.equalsIgnoreCase(p_tableName) ? "-" : "_";
+					if (txt2.isVisible())
 					{
-						txt1.setValue(values[0]);
-						txt2.setValue(values[1]);
+						String[] values = queryValue.split("["+separator+"]");
+						if (values != null && values.length == 2) 
+						{
+							txt1.setValue(values[0]);
+							txt2.setValue(values[1]);
+						}
 					}
-				}
-
-			}			
+	
+				}			
+			}
 			
             executeQuery();
             renderItems();
@@ -168,6 +153,42 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		
 		if (ClientInfo.isMobile()) {
 			ClientInfo.onClientInfo(this, this::onClientInfo);
+		}
+	}
+
+	private void processQueryValue() {
+		if (queryValue != null && queryValue.length() > 0)
+		{				
+			Textbox[] txts = new Textbox[] {txt1, txt2, txt3, txt4};
+			int i = 0;
+			for(Textbox t : txts) 
+			{
+				if (t != null && t.isVisible())
+				{
+					if (isAutoComplete)
+					{
+						if (!Util.isEmpty(autoCompleteSearchColumn))
+						{
+							if (!autoCompleteSearchColumn.equals(m_queryColumns.get(i)))
+								continue;
+						}
+					}
+					t.setValue(queryValue);
+					testCount();
+					if (m_count <= 0)
+						t.setValue(null);
+					else
+						break;
+					
+					if (isAutoComplete)
+						break;
+				}
+				i++;
+			}
+			if (m_count <= 0 && !isAutoComplete)
+			{
+				txt1.setValue(queryValue);
+			}
 		}
 	}
 
@@ -299,7 +320,8 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		if (p_whereClause.length() > 0)
 			where.append(" AND (").append(p_whereClause).append(")");
 		prepareTable(m_generalLayout, p_tableName, where.toString(), "2");
-
+		contentPanel.repaint();
+		
 		//	Set & enable Fields
 
 		lbl1.setValue(Util.cleanAmp(Msg.translate(Env.getCtx(), m_queryColumns.get(0).toString())));
@@ -447,6 +469,8 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 			+ " INNER JOIN AD_Tab tab ON (t.AD_Window_ID=tab.AD_Window_ID)"
 			+ " INNER JOIN AD_Field f ON (tab.AD_Tab_ID=f.AD_Tab_ID AND f.AD_Column_ID=c.AD_Column_ID) "
 			+ "WHERE t.AD_Table_ID=? "
+			+ " AND tab.IsSortTab='N'"
+			+ " AND tab.Ad_Tab_ID=(SELECT MIN(mt.AD_Tab_ID) FROM AD_tab mt WHERE mt.AD_Window_ID=t.AD_Window_ID AND mt.AD_Table_ID=t.AD_Table_ID AND mt.IsActive='Y')"
 			+ " AND (c.IsKey='Y' OR "
 				+ " (f.IsEncrypted='N' AND f.ObscureType IS NULL)) "
 			+ "ORDER BY c.IsKey DESC, f.SeqNo";
@@ -464,7 +488,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 				boolean isDisplayed = rs.getString(4).equals("Y");
 				int AD_Reference_Value_ID = rs.getInt(5);
 				String columnSql = rs.getString(6);
-				if (columnSql != null && columnSql.length() > 0 && columnSql.contains("@"))
+				if (columnSql != null && columnSql.length() > 0 && (columnSql.startsWith("@SQL=") || columnSql.startsWith("@SQLFIND=")))
 					columnSql = "NULL";
 				if (columnSql != null && columnSql.contains("@"))
 					columnSql = Env.parseContext(Env.getCtx(), -1, columnSql, false, true);
@@ -510,12 +534,12 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 				if (colClass != null)
 				{
-					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass));
+					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass, true, columnName ));
 					if (log.isLoggable(Level.FINEST)) log.finest("Added Column=" + columnName);
 				}
-				else if (DisplayType.isLookup(displayType))
+				else if (isDisplayed && DisplayType.isLookup(displayType))
 				{
-					ColumnInfo colInfo = createLookupColumnInfo(Msg.translate(Env.getCtx(), columnName), columnName, displayType, AD_Reference_Value_ID, AD_Column_ID);
+					ColumnInfo colInfo = createLookupColumnInfo(Msg.translate(Env.getCtx(), columnName), columnName, displayType, AD_Reference_Value_ID, AD_Column_ID, colSql.toString());
 					if (colInfo != null)
 					{
 						list.add(colInfo);
@@ -591,6 +615,13 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		return s;
 	}   //  getSQLText
 
+	protected void resetParameters() {
+		txt1.setValue("");
+		txt2.setValue("");
+		txt3.setValue("");
+		txt4.setValue("");
+	}
+
 	/**
 	 *  Set Parameters for Query.
 	 *  (as defined in getSQLWhere)
@@ -630,21 +661,28 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		}
 	}
 	
-	protected ColumnInfo createLookupColumnInfo(String name, String columnName, int AD_Reference_ID, int AD_Reference_Value_ID, int AD_Column_ID) {
+	protected ColumnInfo createLookupColumnInfo(String name, String columnName, int AD_Reference_ID, int AD_Reference_Value_ID, int AD_Column_ID, String columnSql) {
 //		MLookupInfo lookupInfo = MLookupFactory.getLookupInfo(Env.getCtx(), p_WindowNo, AD_Column_ID, AD_Reference_ID, Env.getLanguage(Env.getCtx()), columnName, 
 //				AD_Reference_Value_ID, false, null);
 //		String displayColumn = lookupInfo.DisplayColumn;
 //		String keyColumn = lookupInfo.KeyColumn;
+		
+		MTable table = MTable.get(Env.getCtx(), p_tableName);
+		MColumn column = table.getColumn(columnName);
+		String baseColumn = column.isVirtualColumn() ? columnSql : columnName;
 
 		String embedded = AD_Reference_Value_ID > 0 ? MLookupFactory.getLookup_TableEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, AD_Reference_Value_ID)
-				: MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName);
+				: MLookupFactory.getLookup_TableDirEmbed(Env.getLanguage(Env.getCtx()), columnName, p_tableName, baseColumn);
 		embedded = "(" + embedded + ")";
 	
+		if (embedded.contains("@"))
+			embedded = "NULL";
+		
 		ColumnInfo columnInfo = null;
-		if (columnName.endsWith("_ID"))
-			columnInfo = new ColumnInfo(name, embedded, KeyNamePair.class, p_tableName+"."+columnName);
+		if (columnName.endsWith("_ID")  && !column.isVirtualColumn())
+			columnInfo = new ColumnInfo(name, embedded, KeyNamePair.class, true, false, p_tableName+"."+columnName, columnName);
 		else
-			columnInfo = new ColumnInfo(name, embedded, String.class, null);
+			columnInfo = new ColumnInfo(name, embedded, String.class, true, false, null, columnName);
 		return columnInfo;
 	}
 }

@@ -52,7 +52,7 @@ public class Matcher
 	/** Transaction						*/
 	private String				m_trxName = null;
 	/**	Logger							*/
-	protected CLogger			log = CLogger.getCLogger (getClass());
+	private static final CLogger	log = CLogger.getCLogger (Matcher.class);
 
 	/**
 	 * 	Matching
@@ -154,7 +154,6 @@ public class Matcher
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("InvLine=" + C_InvoiceLine_ID + ",Rec=" + M_InOutLine_ID + ", Qty=" + Qty + ", " + DateTrx);
 		
-	//	MMatchInv inv = new MMatchInv ();
 		int M_MatchInv_ID = DB.getNextID (AD_Client_ID, "M_MatchInv", m_trxName);
 		//
 		StringBuilder sql = new StringBuilder("INSERT INTO M_MatchInv (")
@@ -164,7 +163,7 @@ public class Matcher
 			.append("M_Product_ID,DateTrx,Qty, ")
 			.append("Processing,Processed,Posted) VALUES (")
 			.append(M_MatchInv_ID).append(", ")
-			.append(AD_Client_ID).append(",").append(AD_Org_ID).append(",'Y',SysDate,0,SysDate,0, ")
+			.append(AD_Client_ID).append(",").append(AD_Org_ID).append(",'Y',getDate(),0,getDate(),0, ")
 			.append(M_InOutLine_ID).append(",").append(C_InvoiceLine_ID).append(", ")
 			.append(M_Product_ID).append(",").append(DB.TO_DATE(DateTrx,true)).append(",").append(Qty)
 			.append(", 'N','Y','N')");

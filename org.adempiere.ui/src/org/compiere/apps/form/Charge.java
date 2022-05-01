@@ -54,7 +54,7 @@ public class Charge
 	private int         m_AD_Org_ID = 0;
 	private MAcctSchema  m_acctSchema = null;
 	/**	Logger			*/
-	public static CLogger log = CLogger.getCLogger(Charge.class);
+	public static final CLogger log = CLogger.getCLogger(Charge.class);
 
 	/**
 	 *  Dynamic Init
@@ -110,7 +110,7 @@ public class Charge
      */
     public void findChargeElementID()
     {
-    	m_C_AcctSchema_ID = Env.getContextAsInt(Env.getCtx(), "$C_AcctSchema_ID");
+    	m_C_AcctSchema_ID = Env.getContextAsInt(Env.getCtx(), Env.C_ACCTSCHEMA_ID);
         //  get Element
         String sql = "SELECT C_Element_ID "
             + "FROM C_AcctSchema_Element "

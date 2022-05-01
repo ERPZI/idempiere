@@ -37,6 +37,7 @@ import org.compiere.util.DB;
  *  @author Jorg Janke
  *  @version $Id: TreeMaintenance.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class TreeMaintenance extends SvrProcess
 {
 	/**	Tree				*/
@@ -100,7 +101,7 @@ public class TreeMaintenance extends SvrProcess
 		
 		//	Delete unused
 		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE ").append(nodeTableName)
+		sql.append("DELETE FROM ").append(nodeTableName)
 			.append(" WHERE AD_Tree_ID=").append(tree.getAD_Tree_ID())
 			.append(" AND Node_ID NOT IN (SELECT ").append(sourceTableKey)
 			.append(" FROM ").append(sourceTableName)

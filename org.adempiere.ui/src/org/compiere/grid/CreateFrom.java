@@ -36,7 +36,7 @@ import org.compiere.util.KeyNamePair;
 public abstract class CreateFrom implements ICreateFrom
 {
 	/**	Logger			*/
-	protected CLogger log = CLogger.getCLogger(getClass());
+	protected transient CLogger log = CLogger.getCLogger(getClass());
 
 	/** Loaded Order            */
 	protected MOrder p_order = null;
@@ -98,7 +98,7 @@ public abstract class CreateFrom implements ICreateFrom
 
 		String isSOTrxParam = isSOTrx ? "Y":"N";
 		//	Display
-		StringBuffer display = new StringBuffer("o.DocumentNo||' - ' ||")
+		StringBuilder display = new StringBuilder("o.DocumentNo||' - ' ||")
 			.append(DB.TO_CHAR("o.DateOrdered", DisplayType.Date, Env.getAD_Language(Env.getCtx())))
 			.append("||' - '||")
 			.append(DB.TO_CHAR("o.GrandTotal", DisplayType.Amount, Env.getAD_Language(Env.getCtx())));
@@ -110,7 +110,7 @@ public abstract class CreateFrom implements ICreateFrom
 			column = "ol.QtyInvoiced";
 			colBP = "o.Bill_BPartner_ID";
 		}
-		StringBuffer sql = new StringBuffer("SELECT o.C_Order_ID,")
+		StringBuilder sql = new StringBuilder("SELECT o.C_Order_ID,")
 			.append(display)
 			.append(" FROM C_Order o WHERE ")
 			.append(colBP)

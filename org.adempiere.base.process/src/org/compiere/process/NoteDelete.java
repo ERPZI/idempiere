@@ -31,6 +31,7 @@ import org.compiere.util.DB;
  *  [ 1639204 ] Delete Old Notes is deleting all notes
  *  Add parameter KeepLogDays
  */
+@org.adempiere.base.annotation.Process
 public class NoteDelete extends SvrProcess
 {
 	private int		p_AD_User_ID = -1;
@@ -70,7 +71,7 @@ public class NoteDelete extends SvrProcess
 		if (p_AD_User_ID > 0)
 			sql.append(" AND AD_User_ID=").append(p_AD_User_ID);
 		if (p_KeepLogDays > 0)
-			sql.append(" AND (Created+").append(p_KeepLogDays).append(") < SysDate");
+			sql.append(" AND (Created+").append(p_KeepLogDays).append(") < getDate()");
 		//
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		StringBuilder msgreturn = new StringBuilder("@Deleted@ = ").append(no);

@@ -61,15 +61,15 @@ import org.w3c.dom.Document;
  * @author Trifon N. Trifonov
  * @author Antonio Cañaveral, e-Evolution
  * 				<li>[ 2195051 ] Implementing Message Transaction
- * 				<li>http://sourceforge.net/tracker/index.php?func=detail&aid=2195051&group_id=176962&atid=879335
+ * 				<li>https://sourceforge.net/p/adempiere/feature-requests/553/
  * @author Michael Judd
  *				<li>[ 2862500 ]   	 TopicExporter TransformerFactory setAttribute error
- *				<li>https://sourceforge.net/tracker/?func=detail&aid=2862500&group_id=176962&atid=879332
+ *				<li>https://sourceforge.net/p/adempiere/bugs/2109/
  */
 public class TopicExportProcessor implements IExportProcessor {
 
 	/**	Logger	*/
-	protected CLogger	log = CLogger.getCLogger (getClass());
+	protected static final CLogger	log = CLogger.getCLogger (TopicExportProcessor.class);
 	
 	/**
 	 * 

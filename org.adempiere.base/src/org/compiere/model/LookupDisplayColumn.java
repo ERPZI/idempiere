@@ -29,7 +29,7 @@ import org.compiere.util.Util;
  * 
  * @author Teo Sarca
  * 		<li>BF [ 2933367 ] Virtual Column Identifiers are not working
- * 			https://sourceforge.net/tracker/?func=detail&aid=2933367&group_id=176962&atid=879332
+ * 			https://sourceforge.net/p/adempiere/bugs/2291/
  */
 public class LookupDisplayColumn implements Serializable
 {
@@ -67,7 +67,7 @@ public class LookupDisplayColumn implements Serializable
 		IsTranslated = isTranslated;
 		DisplayType = ad_Reference_ID;
 		AD_Reference_ID = ad_Reference_Value_ID;
-		if (columnSQL != null && columnSQL.length() > 0 && columnSQL.startsWith("@SQL="))
+		if (columnSQL != null && columnSQL.length() > 0 && (columnSQL.startsWith("@SQL=") || columnSQL.startsWith("@SQLFIND=")))
 			ColumnSQL = "NULL";
 		else
 			ColumnSQL = columnSQL;

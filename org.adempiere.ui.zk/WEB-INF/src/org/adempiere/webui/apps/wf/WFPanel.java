@@ -82,7 +82,7 @@ public class WFPanel extends Borderlayout implements EventListener<Event>, IHelp
 	private MWorkflow	m_wf = null;
 
 	/**	Logger			*/
-	private static CLogger	log = CLogger.getCLogger(WFPanel.class);
+	private static final CLogger	log = CLogger.getCLogger(WFPanel.class);
 	
 	//	IO
 	private WFNodeContainer nodeContainer = new WFNodeContainer();
@@ -138,7 +138,6 @@ public class WFPanel extends Borderlayout implements EventListener<Event>, IHelp
 		
 	/**
 	 * 	Dispose
-	 * @see org.compiere.apps.form.FormPanel#dispose()
 	 */
 	public void dispose()
 	{
@@ -147,7 +146,7 @@ public class WFPanel extends Borderlayout implements EventListener<Event>, IHelp
 
 	
 	/**
-	 * 	Load Workflow & Nodes
+	 * 	Load Workflow and Nodes
 	 * 	@param AD_Workflow_ID ID
 	 */
 	public void load (int AD_Workflow_ID)

@@ -20,12 +20,16 @@ the License.
 package fi.jawsy.jawwa.zk.atmosphere;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.atmosphere.cpr.AtmosphereResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.lang.Library;
+import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.DesktopUnavailableException;
@@ -45,7 +49,9 @@ import org.zkoss.zk.ui.util.Clients;
  */
 public class AtmosphereServerPush implements ServerPush {
 
-    private static final String ON_ACTIVATE_DESKTOP = "onActivateDesktop";
+    private static final String ATMOSPHERE_SERVER_PUSH_ECHO = "AtmosphereServerPush.Echo";
+
+	private static final String ON_ACTIVATE_DESKTOP = "onActivateDesktop";
 
 	public static final int DEFAULT_TIMEOUT = 1000 * 60 * 2;
 
@@ -58,6 +64,7 @@ public class AtmosphereServerPush implements ServerPush {
     private ThreadInfo _active;
     private ExecutionCarryOver _carryOver;
     private final Object _mutex = new Object();
+    private List<Schedule<Event>> schedules = new ArrayList<>();
 
     public AtmosphereServerPush() {
         String timeoutString = Library.getProperty("fi.jawsy.jawwa.zk.atmosphere.timeout");
@@ -119,7 +126,7 @@ public class AtmosphereServerPush implements ServerPush {
 
     private boolean commitResponse() throws IOException {    	
         AtmosphereResource resource = this.resource.getAndSet(null);
-        if (resource != null && resource.isSuspended()) {
+        if (resource != null) {
         	resource.resume();
         	return true;
         } 
@@ -155,22 +162,56 @@ public class AtmosphereServerPush implements ServerPush {
     	return _active != null && _active.nActive > 0;
     }
 
-    @Override
-    public void onPiggyback() {
+    @SuppressWarnings("unchecked")
+	@Override
+    public void onPiggyback() {    	
+    	if (Executions.getCurrent() != null && Executions.getCurrent().getAttribute(ATMOSPHERE_SERVER_PUSH_ECHO) != null) {
+    		//has pending serverpush echo, wait for next execution piggyback trigger by the pending serverpush echo
+    		return;
+    	}
+    	
+    	Schedule<Event>[] pendings = null;
+    	synchronized (schedules) {
+    		if (!schedules.isEmpty()) {
+    			pendings = schedules.toArray(new Schedule[0]);
+    			schedules = new ArrayList<>();
+    		}
+    	}
+    	if (pendings != null && pendings.length > 0) {
+    		for(Schedule<Event> p : pendings) {
+    			//schedule and execute in desktop's onPiggyBack listener
+    			p.scheduler.schedule(p.task, p.event);
+    		}
+    	}    	
     }
 
-    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
 	public <T extends Event> void schedule(EventListener<T> task, T event,
 			Scheduler<T> scheduler) {
-        scheduler.schedule(task, event);
-        try {
-        	commitResponse();
-		} catch (IOException e) {
-			log.error(e.getLocalizedMessage(), e);
-		}
+    	
+    	if (Executions.getCurrent() == null) {
+    		//schedule and execute in desktop's onPiggyBack listener
+    		scheduler.schedule(task, event);
+	        try {
+	        	commitResponse();
+			} catch (IOException e) {
+				log.error(e.getMessage(), e);
+			}
+    	} else {
+    		// in event listener thread, use echo to execute async
+    		synchronized (schedules) {
+				schedules.add(new Schedule(task, event, scheduler));
+			}
+    		if (Executions.getCurrent().getAttribute(ATMOSPHERE_SERVER_PUSH_ECHO) == null) {
+    			Executions.getCurrent().setAttribute(ATMOSPHERE_SERVER_PUSH_ECHO, Boolean.TRUE);
+    			Clients.response(new AuEcho());
+    		}
+    	}
+    
     }
 
-    @Override
+	@Override
     public void start(Desktop desktop) {
         Desktop oldDesktop = this.desktop.getAndSet(desktop);
         if (oldDesktop != null) {
@@ -178,10 +219,15 @@ public class AtmosphereServerPush implements ServerPush {
             return;
         }
 
-        log.debug("Starting server push for " + desktop);
-        Clients.response("jawwa.atmosphere.serverpush", new AuScript(null, "jawwa.atmosphere.startServerPush('" + desktop.getId() + "', " + timeout
-                + ");"));
+        if (log.isDebugEnabled())
+        	log.debug("Starting server push for " + desktop);
+        startClientPush(desktop);
     }
+
+	private void startClientPush(Desktop desktop) {
+		Clients.response("jawwa.atmosphere.serverpush", new AuScript(null, "jawwa.atmosphere.startServerPush('" + desktop.getId() + "', " + timeout
+                + ");"));
+	}
 
     @Override
     public void stop() {
@@ -191,12 +237,23 @@ public class AtmosphereServerPush implements ServerPush {
             return;
         }
 
-        log.debug("Stopping server push for " + desktop);
-        Clients.response("jawwa.atmosphere.serverpush", new AuScript(null, "jawwa.atmosphere.stopServerPush('" + desktop.getId() + "');"));
-        try {
-			commitResponse();
-		} catch (IOException e) {
+        AtmosphereResource currentResource = this.resource.getAndSet(null);
+        synchronized (schedules) {
+        	schedules.clear();
 		}
+        
+        if (currentResource != null ) {
+        	try {
+				currentResource.close();
+			} catch (IOException e) {
+			}
+        }
+                
+        if (Executions.getCurrent() != null) {
+	        if (log.isDebugEnabled())
+	        	log.debug("Stopping server push for " + desktop);
+	        Clients.response("jawwa.atmosphere.serverpush", new AuScript(null, "jawwa.atmosphere.stopServerPush('" + desktop.getId() + "');"));        
+        }
     }
 
     public void onRequest(AtmosphereResource resource) {
@@ -204,12 +261,6 @@ public class AtmosphereServerPush implements ServerPush {
 	  		log.trace(resource.transport().name());
 	  	}
     	
-		try {
-			commitResponse();
-		} catch (IOException e) {
-			log.error(e.getLocalizedMessage(), e);
-		}
-
     	DesktopCtrl desktopCtrl = (DesktopCtrl) this.desktop.get();
         if (desktopCtrl == null) {
         	log.error("No desktop available");
@@ -217,9 +268,17 @@ public class AtmosphereServerPush implements ServerPush {
         }
 
 	  	if (!resource.isSuspended()) {
-	  		resource.suspend(-1); 
+	  		//browser default timeout is 2 minutes
+	  		resource.suspend(5, TimeUnit.MINUTES); 
 	  	}
-	  	this.resource.set(resource);
+	  	AtmosphereResource oldResource = this.resource.getAndSet(resource);
+	  	if (oldResource != null) {
+	  		try {
+	  			if (!oldResource.isCancelled())
+	  				oldResource.close();
+			} catch (Throwable e) {
+			}
+	  	}
 
     }
 
@@ -237,5 +296,30 @@ public class AtmosphereServerPush implements ServerPush {
 
 	@Override
 	public void resume() {
+		if (desktop == null || desktop.get() == null) {
+			throw new IllegalStateException(
+					"ServerPush cannot be resumed without desktop, or has been stopped!call #start(desktop)} instead");
+		}
+		startClientPush(desktop.get());
 	}
+	
+	/**
+	 * 
+	 * @return true if it is holding an atmosphere resource
+	 */
+	public boolean hasAtmosphereResource() {
+		return this.resource.get() != null;
+	}
+	
+	private class Schedule<T extends Event> {
+    	private EventListener<T> task;
+		private T event;
+		private Scheduler<T> scheduler;
+
+		private Schedule(EventListener<T> task, T event, Scheduler<T> scheduler) {
+    		this.task = task;
+    		this.event = event;
+    		this.scheduler = scheduler;
+    	}
+    }
 }

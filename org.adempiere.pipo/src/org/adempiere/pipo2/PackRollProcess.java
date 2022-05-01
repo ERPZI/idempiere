@@ -166,7 +166,7 @@ public class PackRollProcess extends SvrProcess {
 									// Format Date
 									sqlC = new StringBuffer("UPDATE "
 											+ tableName + " SET " + columnName
-											+ " = SYSDATE WHERE "
+											+ " = getDate() WHERE "
 											+ columnIDName + " = " + recordID);
 
 									DB.executeUpdateEx(sqlC.toString(), get_TrxName());
@@ -197,7 +197,7 @@ public class PackRollProcess extends SvrProcess {
 									if (v_AD_Reference_ID == DisplayType.String
 											|| v_AD_Reference_ID == DisplayType.Text
 											|| v_AD_Reference_ID == DisplayType.Memo
-											|| v_AD_Reference_ID == DisplayType.List
+											|| DisplayType.isList(v_AD_Reference_ID)
 											// Carlos Ruiz globalqss, special
 											// treatment for EntityType
 											// it's a Table reference but must
@@ -348,10 +348,8 @@ public class PackRollProcess extends SvrProcess {
 
 	/**
 	 * Open input file for processing
-	 *
-	 * @param String
-	 *            file with path
-	 *
+	 * @param filePath file with path
+	 * @return
 	 */
 	public FileInputStream OpenInputfile(String filePath) {
 
@@ -369,10 +367,8 @@ public class PackRollProcess extends SvrProcess {
 
 	/**
 	 * Open output file for processing
-	 *
-	 * @param String
-	 *            file with path
-	 *
+	 * @param filePath file with path
+	 * @return
 	 */
 	public OutputStream OpenOutputfile(String filePath) {
 
@@ -390,10 +386,9 @@ public class PackRollProcess extends SvrProcess {
 
 	/**
 	 * Copyfile
-	 *
-	 * @param String
-	 *            file with path
-	 *
+	 * @param sourceFile
+	 * @param targetFile
+	 * @return
 	 */
 	public int copyFile(String sourceFile, String targetFile) {
 
