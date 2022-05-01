@@ -124,7 +124,11 @@ public class MOrderLine extends X_C_OrderLine
 	 */
 	public MOrderLine (Properties ctx, int C_OrderLine_ID, String trxName)
 	{
-		super (ctx, C_OrderLine_ID, trxName);
+		this (ctx, C_OrderLine_ID, trxName, (String[]) null);
+	}	//	MOrderLine
+
+	public MOrderLine(Properties ctx, int C_OrderLine_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_OrderLine_ID, trxName, virtualColumns);
 		if (C_OrderLine_ID == 0)
 		{
 			setFreightAmt (Env.ZERO);
@@ -147,8 +151,8 @@ public class MOrderLine extends X_C_OrderLine
 			setProcessed (false);
 			setLine (0);
 		}
-	}	//	MOrderLine
-	
+	}
+
 	/**
 	 *  Parent Constructor.
 	 		ol.setM_Product_ID(wbl.getM_Product_ID());
@@ -325,10 +329,10 @@ public class MOrderLine extends X_C_OrderLine
 	 */
 	public boolean setTax()
 	{
-		int ii = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID(), getDateOrdered(), getDateOrdered(),
+		int ii = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), getDateOrdered(), getDateOrdered(),
 			getAD_Org_ID(), getM_Warehouse_ID(),
 			getC_BPartner_Location_ID(),		//	should be bill to
-			getC_BPartner_Location_ID(), m_IsSOTrx, get_TrxName());
+			getC_BPartner_Location_ID(), m_IsSOTrx, getParent().getDeliveryViaRule(), get_TrxName());
 		if (ii == 0)
 		{
 			log.log(Level.SEVERE, "No Tax found");
@@ -790,7 +794,8 @@ public class MOrderLine extends X_C_OrderLine
 		
 		//	R/O Check - Product/Warehouse Change
 		if (!newRecord 
-			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Warehouse_ID"))) 
+			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Warehouse_ID") || 
+			(!getParent().isProcessed() && is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID)))) 
 		{
 			if (!canChangeWarehouse())
 				return false;
@@ -825,23 +830,18 @@ public class MOrderLine extends X_C_OrderLine
 				log.saveError("UnderLimitPrice", "PriceEntered=" + getPriceEntered() + ", PriceLimit=" + getPriceLimit()); 
 				return false;
 			}
+			int C_DocType_ID = getParent().getDocTypeID();
+			MDocType docType = MDocType.get(getCtx(), C_DocType_ID);
 			//
-			if (!m_productPrice.isCalculated())
+			if (!docType.isNoPriceListCheck() && !m_productPrice.isCalculated())
 			{
 				throw new ProductNotOnPriceListException(m_productPrice, getLine());
 			}
 		}
 
 		//	UOM
-		if (getC_UOM_ID() == 0 
-			&& (getM_Product_ID() != 0 
-				|| getPriceEntered().compareTo(Env.ZERO) != 0
-				|| getC_Charge_ID() != 0))
-		{
-			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
-			if (C_UOM_ID > 0)
-				setC_UOM_ID (C_UOM_ID);
-		}
+		if (getC_UOM_ID() == 0)
+			setDefaultC_UOM_ID();
 		//	Qty Precision
 		if (newRecord || is_ValueChanged("QtyEntered"))
 			setQtyEntered(getQtyEntered());
@@ -880,7 +880,24 @@ public class MOrderLine extends X_C_OrderLine
 		
 		return true;
 	}	//	beforeSave
+	
+	/***
+	 * Sets the default unit of measure
+	 * If there's a product, it sets the UOM of the product
+	 * If not, it sets the default UOM of the client
+	 */
+	private void setDefaultC_UOM_ID() {
+		int C_UOM_ID = 0;
+		
+		if (MProduct.get(getCtx(), getM_Product_ID()) != null) {
+			C_UOM_ID = MProduct.get(getCtx(), getM_Product_ID()).getC_UOM_ID();	
+		} else {
+			C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
+		}
 
+		if (C_UOM_ID > 0)
+			setC_UOM_ID (C_UOM_ID);
+	}
 	
 	/**
 	 * 	Before Delete
@@ -960,7 +977,7 @@ public class MOrderLine extends X_C_OrderLine
 	 * @param oldTax true if the old C_Tax_ID should be used
 	 * @return true if success, false otherwise
 	 * 
-	 * @author teo_sarca [ 1583825 ]
+	 * author teo_sarca [ 1583825 ]
 	 */
 	public boolean updateOrderTax(boolean oldTax) {
 		MOrderTax tax = MOrderTax.get (this, getPrecision(), oldTax, get_TrxName());
@@ -980,7 +997,7 @@ public class MOrderLine extends X_C_OrderLine
 	}
 	
 	/**
-	 *	Update Tax & Header
+	 *	Update Tax and Header
 	 *	@return true if header updated
 	 */
 	public boolean updateHeaderTax()

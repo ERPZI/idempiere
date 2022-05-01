@@ -28,8 +28,10 @@ import java.util.stream.Collectors;
 import org.adempiere.base.IServiceReferenceHolder;
 import org.adempiere.base.Service;
 import org.adempiere.base.ServiceQuery;
+import org.adempiere.webui.adwindow.IADTabpanel;
 import org.adempiere.webui.apps.IProcessParameterListener;
 import org.adempiere.webui.apps.graph.IChartRendererService;
+import org.adempiere.webui.factory.IADTabPanelFactory;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
 import org.adempiere.webui.factory.IMappedFormFactory;
@@ -264,7 +266,7 @@ public class Extensions {
 	
 	/**
 	 *
-	 * @param AD_Window_ID 
+	 * @param AdWindowID 
 	 * @return IQuickEntryFactory instance or null if AdWindowID not found
 	 */
 	public static AbstractWQuickEntry getQuickEntry(Integer AdWindowID) {
@@ -297,8 +299,8 @@ public class Extensions {
 	/**
 	 *
 	 * @param WindowNo 
-	 * @param AD_Window_ID 
 	 * @param TabNo 
+	 * @param AdWindowID 
 	 * @return IQuickEntry instance or null if AdWindowID not found
 	 */
 	public static AbstractWQuickEntry getQuickEntry(int WindowNo, int TabNo, int AdWindowID) {
@@ -368,4 +370,24 @@ public class Extensions {
 		
 		return null;
 	}
+	
+	/**
+	 * @param  tabType
+	 * @return         {@link IADTabpanel}
+	 */
+	public static IADTabpanel getADTabPanel(String tabType)
+	{
+		IADTabpanel Object = null;
+		List<IADTabPanelFactory> factoryList = Service.locator().list(IADTabPanelFactory.class).getServices();
+		if (factoryList == null)
+			return null;
+
+		for (IADTabPanelFactory factory : factoryList)
+		{
+			Object = factory.getInstance(tabType);
+			if (Object != null)
+				return Object;
+		}
+		return null;
+	} // getADTabPanel
 }

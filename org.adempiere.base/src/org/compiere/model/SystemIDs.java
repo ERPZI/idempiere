@@ -63,11 +63,13 @@ public class SystemIDs
 	public final static int FORM_MFA_REGISTER = 200017;
 
 	public final static int MENU_NOTICE = 233;
-
+	
 	public final static int MESSAGE_REQUESTUPDATE = 834;
 	public final static int MESSAGE_WORKFLOWRESULT = 753;
 	public final static int MESSAGE_NOTES = 52244;
 
+	public static final int MY_PROFILE_MENU_ID = 53246;
+	
 	public final static int PRINTFORMAT_STATEMENTOFACCOUNT = 134;
 	public final static int PRINTFORMAT_ORDER_HEADER_TEMPLATE = 100;
 	public final static int PRINTFORMAT_ORDER_LINETAX_TEMPLATE = 101;
@@ -142,6 +144,8 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_TEXT = 14;
 	public final static int REFERENCE_DATATYPE_TEXTLONG = 36;
 	public final static int REFERENCE_DATATYPE_TIME = 24;
+	public final static int REFERENCE_DATATYPE_TIMESTAMP_WITH_TIMEZONE = 200133;
+	public final static int REFERENCE_DATATYPE_TIMEZONE = 200135;
 	public final static int REFERENCE_DATATYPE_URL = 40;
 	public final static int REFERENCE_DATATYPE_YES_NO = 20;
 
@@ -179,7 +183,10 @@ public class SystemIDs
 	public final static int TREE_MENUPRIMARY = 10;
 
 	public final static int USER_SUPERUSER = 100;
-	public final static int USER_SYSTEM = 0;
+	public final static int USER_SYSTEM = 10;
+	public final static int USER_SYSTEM_DEPRECATED = 0;
+
+	public final static int ROLE_SYSTEM = 0;
 
 	public final static int WINDOW_ACCOUNTCOMBINATION = 153;
 	public final static int WINDOW_ATTRIBUTESETINSTANCE = 358;

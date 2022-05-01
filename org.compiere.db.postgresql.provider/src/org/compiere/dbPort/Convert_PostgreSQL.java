@@ -118,6 +118,7 @@ public class Convert_PostgreSQL extends Convert_SQL92 {
 			else if (isCreate && cmpString.indexOf(" VIEW ") != -1)
 				;
 			else if (cmpString.indexOf("ALTER TABLE") != -1) {
+				// See https://sourceforge.net/p/adempiere/bugs/655/
 				statement = recoverQuotedStrings(statement, retVars, nonce);
 				retVars.clear();
 				statement = convertDDL(convertComplexStatement(statement));

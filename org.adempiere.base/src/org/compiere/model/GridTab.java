@@ -48,6 +48,7 @@ import org.compiere.Adempiere;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -84,35 +85,35 @@ import org.compiere.util.ValueNamePair;
  *  			<li>BF [ 1968598 ] Callout is not called if tab is processed
  *  			<li>BF [ 2104022 ] GridTab.processCallout: throws NPE if callout returns null
  *  			<li>FR [ 2846871 ] Add method org.compiere.model.GridTab.getIncludedTabs
- *  				https://sourceforge.net/tracker/?func=detail&aid=2846871&group_id=176962&atid=879335
+ *  				https://sourceforge.net/p/adempiere/feature-requests/805/
  *  @author Teo Sarca, teo.sarca@gmail.com
  *  			<li>BF [ 2873323 ] ABP: Do not concatenate strings in SQL queries
- *  				https://sourceforge.net/tracker/?func=detail&aid=2873323&group_id=176962&atid=879332
+ *  				https://sourceforge.net/p/adempiere/feature-requests/845/
  *  			<li>BF [ 2874109 ] Tab ORDER BY clause is not supporting context variables
- *  				https://sourceforge.net/tracker/?func=detail&aid=2874109&group_id=176962&atid=879332
+ *  				https://sourceforge.net/p/adempiere/bugs/2162/
  *  			<li>BF [ 2905287 ] GridTab query is not build correctly
- *  				https://sourceforge.net/tracker/?func=detail&aid=2905287&group_id=176962&atid=879332
+ *  				https://sourceforge.net/p/adempiere/bugs/2242/
  *  			<li>BF [ 3007342 ] Included tab context conflict issue
- *  				https://sourceforge.net/tracker/?func=detail&aid=3007342&group_id=176962&atid=879332
+ *  				https://sourceforge.net/p/adempiere/bugs/2409/
  *  @author Victor Perez , e-Evolution.SC
  *  		<li>FR [1877902] Implement JSR 223 Scripting APIs to Callout
  *  		<li>BF [ 2910358 ] Error in context when a field is found in different tabs.
- *  			https://sourceforge.net/tracker/?func=detail&aid=2910358&group_id=176962&atid=879332
+ *  			https://sourceforge.net/p/adempiere/bugs/2255/
  *     		<li>BF [ 2910368 ] Error in context when IsActive field is found in different
- *  			https://sourceforge.net/tracker/?func=detail&aid=2910368&group_id=176962&atid=879332
+ *  			https://sourceforge.net/p/adempiere/bugs/2256/
  *  @author Carlos Ruiz, qss FR [1877902]
- *  @see  http://sourceforge.net/tracker/?func=detail&atid=879335&aid=1877902&group_id=176962 to FR [1877902]
+ *  @see  https://sourceforge.net/p/adempiere/feature-requests/318/ to FR [1877902]
  *  @author Cristina Ghita, www.arhipac.ro FR [2870645] Set null value for an ID
- *  @see  https://sourceforge.net/tracker/?func=detail&atid=879335&aid=2870645&group_id=176962
+ *  @see  https://sourceforge.net/p/adempiere/feature-requests/835/
  *  @author Paul Bowden, phib BF 2900767 Zoom to child tab - inefficient queries
- *  @see https://sourceforge.net/tracker/?func=detail&aid=2900767&group_id=176962&atid=879332
+ *  @see https://sourceforge.net/p/adempiere/bugs/2222/
  */
 public class GridTab implements DataStatusListener, Evaluatee, Serializable
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6119615577891555600L;
+	private static final long serialVersionUID = -2091725732178841608L;
 
 	public static final String DEFAULT_STATUS_MESSAGE = "NavigateOrUpdate";
 
@@ -232,8 +233,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	public static final String CTX_IsLookupOnlySelection = "_TabInfo_IsLookupOnlySelection";
 	public static final String CTX_IsAllowAdvancedLookup = "_TabInfo_IsAllowAdvancedLookup";
 
-	//private HashMap<Integer,Integer>	m_PostIts = null;
-
 	/**************************************************************************
 	 *  Tab loader for Tabs > 0
 	 */
@@ -341,7 +340,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		//
 		if (m_vo.isInitFields())
 			m_vo.getFields().clear();
-		//m_vo.Fields = null;
 		m_vo = null;
 		if (m_loader != null)
 		{
@@ -376,11 +374,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 				GridField field = new GridField (voF);
 				field.setGridTab(this);
 				String columnName = field.getColumnName();
-				//FR [ 1757088 ] - this create Bug [ 1866793 ]
-				/*
-				if(this.isReadOnly()) {
-				   voF.IsReadOnly = true;
-				}*/
 				//	Record Info
 				if (field.isKey()) {
 					setKeyColumnName(columnName);
@@ -587,8 +580,16 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	{
 		//  Setup Events
 		m_mTable.addDataStatusListener(this);
-	//	m_mTable.addTableModelListener(this);
 	}   //  enableEvents
+
+	/**
+	 * get Tab Type
+	 * @return String
+	 */
+	public String getTabType()
+	{
+		return m_vo.AD_TabType;
+	} // getTabType
 
 	/**
 	 *	Assemble whereClause and query MTable and position to row 0.
@@ -677,14 +678,10 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 				//	Check validity
 				if (value.length() == 0)
 				{
-					//log.severe ("No value for link column " + lc);
 					//parent is new, can't retrieve detail
 					m_parentNeedSave = true;
 					if (where.length() != 0)
 						where.append(" AND ");
-					// where.append(lc).append(" is null ");
-					// as opened by this fix [ 1881480 ] Navigation problem between tabs
-					// it's safer to avoid retrieving details at all if there is no parent value
 					where.append (" 2=3");
 				}
 				else
@@ -841,7 +838,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		//	Column NOT in Tab - create EXISTS subquery
 		String tableName = null;
 		String tabKeyColumn = getKeyColumnName();
-		//	Column=SalesRep_ID, Key=AD_User_ID, Query=SalesRep_ID=101
 
 		sql = "SELECT t.TableName "
 			+ "FROM AD_Column c"
@@ -1030,6 +1026,15 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		return false;
 	}   //  dataSave
 
+	/**
+	 * 
+	 * @return true if need save and all mandatory field has value
+	 */
+	public boolean isNeedSaveAndMandatoryFill()
+	{
+		return m_mTable.isNeedSaveAndMandatoryFill();
+	}
+	
 	// Validate if the current tab record has changed in database or any parent record
 	// Return if there are changes
 	public boolean hasChangedCurrentTabAndParents() {
@@ -1068,11 +1073,19 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		return false;
 	}
-
+	
 	/**
 	 * refresh current row of parent tabs
 	 */
 	public void refreshParentTabs() {
+		refreshParentTabs(false);
+	}
+
+
+	/**
+	 * refresh current row of parent tabs
+	 */
+	public void refreshParentTabs(boolean fireParentEvent) {
 		if (isDetail()) {
 			// get parent tab
 			// the parent tab is the first tab above with level = this_tab_level-1
@@ -1081,7 +1094,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 				GridTab parentTab = m_window.getTab(i);
 				if (parentTab.m_vo.TabLevel == level-1) {
 					// this is parent tab
-					parentTab.dataRefresh(false);
+					parentTab.dataRefresh(fireParentEvent);
 					// search for the next parent
 					if (parentTab.isDetail()) {
 						level = parentTab.m_vo.TabLevel;
@@ -1150,23 +1163,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			log.warning ("Insert Not allowed in TabNo=" + m_vo.TabNo);
 			return false;
 		}
-		//	Prevent New Where Main Record is processed
-		//	but not apply for TabLevel=0 - teo_sarca [ 1673902 ]
-		//  hengsin: together with readonly logic, the following validation create confusing situation for user.
-		//  i.e, if readonly logic enable the new button on toolbar, it will just does nothing due to the validation below.
-		//  better let everything decide using just the tab's readonly logic instead.
-		/*
-		if (m_vo.TabLevel > 0 && m_vo.TabNo > 0)
-		{
-			boolean processed = isProcessed();
-		//	boolean active = "Y".equals(Env.getContext(m_vo.ctx, m_vo.WindowNo, "IsActive"));
-			if (processed)
-			{
-				log.warning ("Not allowed in TabNo=" + m_vo.TabNo + " -> Processed=" + processed);
-				return false;
-			}
-			if (log.isLoggable(Level.FINEST)) log.finest("Processed=" + processed);
-		}*/
 
 		//hengsin, don't create new when parent is empty
 		if (isDetail() && m_parentNeedSave)
@@ -1432,32 +1428,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	}	//	getParentColumnNames
 
 	/**
-	 *	Get Tree ID of this tab
-	 *  @return ID
-	 */
-	/*private int getTreeID()
-	{
-		if (log.isLoggable(Level.FINE)) log.fine(m_vo.TableName);
-		String SQL = "SELECT * FROM AD_ClientInfo WHERE AD_Client="
-			+ Env.getContext(m_vo.ctx, m_vo.WindowNo, "AD_Client_ID")
-			+ " ORDER BY AD_Org DESC";
-		//
-		if (m_vo.TableName.equals("AD_Menu"))
-			return 10;		//	MM
-		else if (m_vo.TableName.equals("C_ElementValue"))
-			return 20;		//	EV
-		else if (m_vo.TableName.equals("M_Product"))
-			return 30;     	//	PR
-		else if (m_vo.TableName.equals("C_BPartner"))
-			return 40;    	//	BP
-		else if (m_vo.TableName.equals("AD_Org"))
-			return 50;     	//	OO
-		else if (m_vo.TableName.equals("C_Project"))
-			return 60;		//	PJ
-		return 0;
-	}	//	getTreeID*/
-
-	/**
 	 *	Returns true if this is a detail record
 	 *  @return true if not parent tab
 	 */
@@ -1623,7 +1593,18 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 */
 	public String get_ValueAsString (String variableName)
 	{
-		return Env.getContext (m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, variableName, false, true);
+		return get_ValueAsString (m_vo.ctx, variableName);
+	}	//	get_ValueAsString
+	
+	/**
+	 * 	Get Variable Value (Evaluatee)
+	 *  @param ctx context
+	 *	@param variableName name
+	 *	@return value
+	 */
+	public String get_ValueAsString (Properties ctx, String variableName)
+	{
+		return new DefaultEvaluatee(this, m_vo.WindowNo, m_vo.TabNo).get_ValueAsString(ctx, variableName);
 	}	//	get_ValueAsString
 
 	/**
@@ -2376,7 +2357,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		m_lastDataStatusEventTime = System.currentTimeMillis();
 		m_lastDataStatusEvent = m_DataStatusEvent;
 		m_DataStatusEvent = null;
-	//	log.fine("dataStatusChanged #" + m_vo.TabNo + "- fini", e.toString());
 	}	//	dataStatusChanged
 
 	/**
@@ -2402,7 +2382,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		//  Distribute/fire it
         for (int i = 0; i < listeners.length; i++)
         	listeners[i].dataStatusChanged(e);
-	//	log.fine("fini - " + e.toString());
 	}	//	fireDataStatusChanged
 
 	/**
@@ -2614,10 +2593,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			}
 			else
 			{   //  no rows - set to a reasonable value - not updateable
-//				Object value = null;
-//				if (mField.isKey() || mField.isParent() || mField.getColumnName().equals(m_linkColumnName))
-//					value = mField.getDefault();
-
 				// CarlosRuiz - globalqss [ 1881480 ] Navigation problem between tabs
 				// the implementation of linking with window context variables is very weak
 				// you must be careful when defining a column in a detail tab with a field
@@ -2631,6 +2606,12 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		if (changingRow && keyCalloutDelayed != null)
 			processCallout(keyCalloutDelayed);
+		
+		//set isSOTrx context
+		if (changingRow) {
+			setIsSOTrxContext();
+		}
+		
 		loadDependentInfo();
 
 		if (!fireEvents)    //  prevents informing twice
@@ -2668,10 +2649,51 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		return m_currentRow;
 	}   //  setCurrentRow
 
+	private void setIsSOTrxContext() {
+		final String IsSOTrx = "IsSOTrx";
+		final String C_DocType_ID = "C_DocType_ID";
+		final String C_DocTypeTarget_ID = "C_DocTypeTarget_ID";
+		if (getField(IsSOTrx) != null || getField(C_DocType_ID) != null || getField(C_DocTypeTarget_ID) != null) {
+			String isSOTrx = null;
+			GridField field = getField(IsSOTrx);
+			if (field != null && field.getValue() != null) {
+				Object value = field.getValue();
+				if (value instanceof Boolean) {
+					isSOTrx = ((Boolean) value).booleanValue() ? "Y" : "N";
+				} else if (value instanceof String) {
+					isSOTrx = (String) value;
+				}
+			}
+			if (isSOTrx == null) {
+				field = getField(C_DocType_ID);
+				if (field != null && field.getValue() != null) {
+					int docTypeId = ((Number)field.getValue()).intValue();
+					if (docTypeId > 0) {
+						isSOTrx = MDocType.get(docTypeId).isSOTrx() ? "Y" : "N";
+					}
+				}
+			}
+			if (isSOTrx == null) {
+				field = getField(C_DocTypeTarget_ID);
+				if (field != null && field.getValue() != null) {
+					int docTypeId = ((Number)field.getValue()).intValue();
+					if (docTypeId > 0) {
+						isSOTrx = MDocType.get(docTypeId).isSOTrx() ? "Y" : "N";
+					}
+				}
+			}
+			if (isSOTrx != null) {
+				Env.setContext(Env.getCtx(), getWindowNo(), getTabNo(), IsSOTrx, isSOTrx);
+				if (m_vo.TabNo == 0) {
+					Env.setContext(Env.getCtx(), getWindowNo(), IsSOTrx, isSOTrx);
+				}
+			}
+		}
+	}
+
 
 	/**
 	 *  Set current row - used for deleteSelection
-	 *  @return current row
 	 */
 	public void setCurrentRow(int row){
 			setCurrentRow(row, false);
@@ -2737,7 +2759,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	}   //  getField
 
 	/**
-	 *  Set New Value & call Callout
+	 *  Set New Value and call Callout
 	 *  @param columnName database column name
 	 *  @param value value
 	 *  @return error message or ""
@@ -2750,7 +2772,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	}   //  setValue
 
 	/**
-	 *  Set New Value & call Callout
+	 *  Set New Value and call Callout
 	 *  @param field field
 	 *  @param value value
 	 *  @return error message or ""
@@ -2783,7 +2805,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	/**
 	 * Is the current record active
 	 * @return true if current record is active
-	 * @author Teo Sarca - BF [ 1742159 ]
+	 * author Teo Sarca - BF [ 1742159 ]
 	 */
 	public boolean isActive()
 	{
@@ -3083,7 +3105,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	 * If there is no column with the given name, the context for current window will be checked.
 	 * @param columnName column name
 	 * @return boolean value or false if the field was not found
-	 * @author Teo Sarca
+	 * author Teo Sarca
 	 */
 	public boolean getValueAsBoolean(String columnName)
 	{
@@ -3124,15 +3146,6 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 			return null;
 		return m_mTable.getValueAt(row, col);
 	}   //  getValue
-
-	/*
-	public boolean isNeedToSaveParent()
-	{
-		if (isDetail())
-			return m_parentNeedSave;
-		else
-			return false;
-	}*/
 
 	/**
 	 *  toString
@@ -3198,9 +3211,9 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	/**
 	 * Feature Request [1707462]
 	 * Enable runtime change of VFormat
-	 * @param Identifier field indent
+	 * @param identifier field indent
 	 * @param strNewFormat new mask
-	 * @author fer_luck
+	 * author fer_luck
 	 */
 	public void setFieldVFormat (String identifier, String strNewFormat)
 	{

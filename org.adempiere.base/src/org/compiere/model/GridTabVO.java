@@ -30,6 +30,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
+import org.compiere.util.Util;
 
 /**
  *  Model Tab Value Object
@@ -43,7 +44,7 @@ public class GridTabVO implements Evaluatee, Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2088372161131336289L;
+	private static final long serialVersionUID = 8781340605954851838L;
 
 	/**************************************************************************
 	 *	Create MTab VO
@@ -79,16 +80,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		{
 			vo.Fields = new ArrayList<GridFieldVO>();	//	dummy
 		}
-		/*
-		else
-		{
-			createFields (vo);
-			if (vo.Fields == null || vo.Fields.size() == 0)
-			{
-				CLogger.get().log(Level.SEVERE, "No Fields");
-				return null;
-			}
-		}*/
+
 		return vo;
 	}	//	create
 
@@ -104,7 +96,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		boolean showTrl = "Y".equals(Env.getContext(vo.ctx, Env.SHOW_TRANSLATION));
 		boolean showAcct = "Y".equals(Env.getContext(vo.ctx, Env.SHOW_ACCOUNTING));
 		boolean showAdvanced = "Y".equals(Env.getContext(vo.ctx, Env.SHOW_ADVANCED));
-	//	CLogger.get().warning("ShowTrl=" + showTrl + ", showAcct=" + showAcct);
+
 		try
 		{
 			vo.AD_Tab_ID = rs.getInt("AD_Tab_ID");
@@ -225,6 +217,8 @@ public class GridTabVO implements Evaluatee, Serializable
 				vo.IsDeleteable = true;
 			if (rs.getString("IsHighVolume").equals("Y"))
 				vo.IsHighVolume = true;
+			if (userDef != null && !Util.isEmpty(userDef.getIsHighVolume()))
+				vo.IsHighVolume = "Y".equals(userDef.getIsHighVolume());
 
 			// Lookup Only Selection Fields
 			if (rs.getString("IsLookupOnlySelection").equals("Y"))
@@ -288,6 +282,7 @@ public class GridTabVO implements Evaluatee, Serializable
 				vo.AD_ColumnSortOrder_ID = rs.getInt("AD_ColumnSortOrder_ID");
 				vo.AD_ColumnSortYesNo_ID = rs.getInt("AD_ColumnSortYesNo_ID");
 			}
+			vo.AD_TabType = rs.getString("AD_TabType");
 			//
 			//	Replication Type - set R/O if Reference
 			try
@@ -310,7 +305,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		return true;
 	}	//	loadTabDetails
 
-	private static final CCache<String, ArrayList<GridFieldVO>> s_gridFieldCache = new CCache<String, ArrayList<GridFieldVO>>(MField.Table_Name, "GridFieldVO Cache", 100, 60, false, 1000);
+	private static final CCache<String, ArrayList<GridFieldVO>> s_gridFieldCache = new CCache<String, ArrayList<GridFieldVO>>(MField.Table_Name, "GridFieldVO Cache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 1000);
 	
 	/**************************************************************************
 	 *  Create Tab Fields
@@ -545,6 +540,8 @@ public class GridTabVO implements Evaluatee, Serializable
 	public  boolean     onlyCurrentRows = true;
 	/**	Only Current Days - derived	*/
 	public int			onlyCurrentDays = 0;
+	/** Tab type uses by IADTabpanel service to identify implementors*/
+	public String AD_TabType = null;
 
 	/** Fields contain MFieldVO entities    */
 	private ArrayList<GridFieldVO>	Fields = null;
@@ -642,7 +639,7 @@ public class GridTabVO implements Evaluatee, Serializable
 		//  Derived
 		clone.onlyCurrentRows = true;
 		clone.onlyCurrentDays = 0;
-
+		clone.AD_TabType = AD_TabType;
 		clone.Fields = new ArrayList<GridFieldVO>();
 		for (int i = 0; i < Fields.size(); i++)
 		{

@@ -18,7 +18,6 @@ package org.compiere.print;
 
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_INVENTORY;
 import static org.compiere.model.SystemIDs.PROCESS_RPT_M_MOVEMENT;
-import static org.compiere.model.SystemIDs.TABLE_AD_TABLE;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -40,7 +39,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -89,13 +90,19 @@ import org.compiere.model.MProject;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRfQResponse;
 import org.compiere.model.MRole;
+import org.compiere.model.MStyle;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PrintInfo;
+import org.compiere.model.X_AD_StyleLine;
+import org.compiere.print.layout.InstanceAttributeColumn;
+import org.compiere.print.layout.InstanceAttributeData;
 import org.compiere.print.layout.LayoutEngine;
 import org.compiere.print.layout.PrintDataEvaluatee;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.ServerProcessCtl;
+import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -108,6 +115,8 @@ import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.eevolution.model.MDDOrder;
 import org.eevolution.model.X_PP_Order;
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
 /**
  *	Report Engine.
@@ -127,9 +136,9 @@ import org.eevolution.model.X_PP_Order;
  * 
  * @author Teo Sarca, www.arhipac.ro
  * 			<li>BF [ 2828300 ] Error when printformat table differs from DOC_TABLES
- * 				https://sourceforge.net/tracker/?func=detail&aid=2828300&group_id=176962&atid=879332
+ * 				https://sourceforge.net/p/adempiere/bugs/1995/
  * 			<li>BF [ 2828886 ] Problem with reports from temporary tables
- * 				https://sourceforge.net/tracker/?func=detail&atid=879332&aid=2828886&group_id=176962
+ * 				https://sourceforge.net/p/adempiere/bugs/2000/
  * 
  *  FR 2872010 - Dunning Run for a complete Dunning (not just level) - Developer: Carlos Ruiz - globalqss - Sponsor: Metas
  */
@@ -193,6 +202,7 @@ public class ReportEngine implements PrintServiceAttributeListener
 		m_printFormat = pf;
 		m_info = info;
 		m_trxName = trxName;
+		initName();
 		setQuery(query);		//	loads Data
 		
 	}	//	ReportEngine
@@ -225,6 +235,8 @@ public class ReportEngine implements PrintServiceAttributeListener
 	private int m_language_id = 0;
 	
 	private boolean m_summary = false;
+	
+	private String m_name = null;
 	
 	/**
 	 * store all column has same css rule into a list
@@ -359,12 +371,42 @@ public class ReportEngine implements PrintServiceAttributeListener
 	}	//	getLayout
 
 	/**
+	 * 	Initialize Report Name
+	 */
+	public void initName()
+	{
+		Language language = m_printFormat.getLanguage();
+		String processFileNamePattern = m_printFormat.get_Translation("FileNamePattern", language.getAD_Language());
+	 	if (m_info.getAD_Process_ID()>0) {
+			MProcess process = new MProcess(Env.getCtx(), m_info.getAD_Process_ID(), m_trxName);
+			if (process !=null && !Util.isEmpty(process.getFileNamePattern())) {
+				processFileNamePattern = process.getFileNamePattern();
+			}
+		}  
+
+		if(Util.isEmpty(processFileNamePattern)) {
+
+	        Calendar cal = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			String dt = sdf.format(cal.getTime());
+
+			m_name = m_printFormat.get_Translation("Name") + "_" + dt;
+ 
+
+		} else {
+			m_name = FileUtil.parseTitle(m_ctx, processFileNamePattern, m_info.getAD_Table_ID(), m_info.getRecord_ID(), m_windowNo, m_trxName);
+		}
+	}	//	initName
+	
+	/**
 	 * 	Get PrintFormat (Report) Name
 	 * 	@return name
 	 */
 	public String getName()
 	{
-		return m_printFormat.get_Translation("Name");
+		if (m_name==null)
+			initName();
+		return m_name;
 	}	//	getName
 
 	/**
@@ -464,7 +506,6 @@ public class ReportEngine implements PrintServiceAttributeListener
 				if (log.isLoggable(Level.INFO)) log.info("Copy " + (m_info.getCopies()-1));
 				prats.add(new Copies(m_info.getCopies()-1));
 				job = getPrinterJob(m_info.getPrinterName());
-			//	job.getPrintService().addPrintServiceAttributeListener(this);
 				job.setPageable (m_layout.getPageable(true));		//	Copy
 				PrintUtil.print(job, prats, false, false);
 			}
@@ -494,7 +535,6 @@ PrintServiceAttributeSet - length=1
 queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		**/
 		if (log.isLoggable(Level.FINE)) log.fine("attributeUpdate - " + psae);
-	//	PrintUtil.dump (psae.getAttributes());
 	}	//	attributeUpdate
 
 
@@ -627,6 +667,45 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	{
 		try
 		{
+			//collect column to print
+			List<Object> columns = new ArrayList<>();
+			List<InstanceAttributeData> asiElements = new ArrayList<>();
+			int columnCount = 0;
+			for (int col = 0; col < m_printFormat.getItemCount(); col++)
+			{
+				MPrintFormatItem item = m_printFormat.getItem(col);
+				if (item.isPrinted())
+				{
+					if (item.isTypeField() && item.isPrintInstanceAttributes())
+					{
+						InstanceAttributeData asiElement = new InstanceAttributeData(item, columnCount);
+						asiElement.readAttributesData(m_printData);
+						asiElements.add(asiElement);						
+						continue;
+					}
+					else 
+					{
+						columns.add(item);
+						columnCount++;
+					}
+				}
+			}
+			if (asiElements.size() > 0)
+			{
+				int columnCreated = 0;
+				for(InstanceAttributeData data : asiElements)
+				{
+					List<InstanceAttributeColumn> instanceColumns = data.getColumns();
+					int index = data.getColumnIndex() + columnCreated;
+					for(InstanceAttributeColumn c : instanceColumns)
+					{
+						columns.add(index, c);
+						index++;
+						columnCreated++;
+					}
+				}
+			}
+			
 			String cssPrefix = extension != null ? extension.getClassPrefix() : null;
 			if (cssPrefix != null && cssPrefix.trim().length() == 0)
 				cssPrefix = null;
@@ -654,9 +733,10 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			table.setNeedClosingTag(false);
 			PrintWriter w = new PrintWriter(writer);
 			XhtmlDocument doc = null;
-					
+			boolean minify = MSysConfig.getBooleanValue(MSysConfig.HTML_REPORT_MINIFY, true, Env.getAD_Client_ID(getCtx()));
+						
 			if (onlyTable)
-				table.output(w);
+				w.print(compress(table.toString(), minify));
 			else
 			{
 				doc = new XhtmlDocument();
@@ -696,10 +776,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				mapCssInfo.clear();
 				MPrintFormatItem item = null;
 				int printColIndex = -1;
-				for(int col = 0; col < m_printFormat.getItemCount(); col++)
+				for(int col = 0; col < columns.size(); col++)
 				{
-					item = m_printFormat.getItem(col);
-					if(item.isPrinted())
+					Object colobj = columns.get(col);
+					if (colobj instanceof MPrintFormatItem)
+						item = (MPrintFormatItem) colobj;
+					else if (colobj instanceof InstanceAttributeColumn)
+						item = ((InstanceAttributeColumn) colobj).getPrintFormatItem();
+					if(item != null)
 					{
 						printColIndex++;
 						addCssInfo(item, printColIndex);
@@ -739,15 +823,15 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				styleBuild = new StringBuilder(styleBuild.toString().replaceAll(";", "!important;"));
 				appendInlineCss (doc, styleBuild);
-							
-				doc.output(w);
 				
-				w.println("<div class='"+cssPrefix+"-flex-container'>");
+				w.print(compress(doc.toString(), minify));
+				
+				w.print("<div class='"+cssPrefix+"-flex-container'>");
 				String paraWrapId = null;
 				if (parameterTable != null) {
 					paraWrapId = cssPrefix + "-para-table-wrap";
-					w.println("<div id='" + paraWrapId + "'>");
-					parameterTable.output(w);
+					w.print("<div id='" + paraWrapId + "'>");
+					w.print(compress(parameterTable.toString(), minify));
 					
 					tr tr = new tr();
 					tr.setClass("tr-parameter");
@@ -780,12 +864,11 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						tr.addElement(td);
 						td.addElement(query.getInfoDisplayAll(r));
 						
-						tr.output(w);
+						w.print(compress(tr.toString(), minify));
 					}
-					
-					w.println();					
-					w.println("</table>");
-					w.println("</div>");
+										
+					w.print("</table>");
+					w.print("</div>");
 				}
 				
 				StringBuilder tableWrapDiv = new StringBuilder();
@@ -797,8 +880,8 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				}
 				tableWrapDiv.append(" >");
 				
-				w.println(tableWrapDiv.toString());
-				table.output(w);
+				w.print(compress(tableWrapDiv.toString(), minify));
+				w.print(compress(table.toString(), minify));
 			}
 			
 			thead thead = new thead();
@@ -813,6 +896,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 			int printColIndex = -1;
 			HashMap<Integer, th> suppressMap = new HashMap<>();
+			
 			//	for all rows (-1 = header row)
 			for (int row = -1; row < m_printData.getRowCount(); row++)
 			{
@@ -838,10 +922,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				printColIndex = -1;
 				//	for all columns
-				for (int col = 0; col < m_printFormat.getItemCount(); col++)
+				for (int col = 0; col < columns.size(); col++)
 				{
-					MPrintFormatItem item = m_printFormat.getItem(col);
-					if (item.isPrinted())
+					Object colObj = columns.get(col);
+					MPrintFormatItem item = null;
+					InstanceAttributeColumn instanceAttributeColumn = null;
+					if (colObj instanceof MPrintFormatItem)
+					{
+						item = (MPrintFormatItem) colObj;
+					}
+					else if (colObj instanceof InstanceAttributeColumn)
+					{
+						instanceAttributeColumn = (InstanceAttributeColumn) colObj;
+						item = instanceAttributeColumn.getPrintFormatItem();
+					}
+					if (item != null)
 					{
 						printColIndex++;
 						//	header row
@@ -849,8 +944,9 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						{
 							th th = new th();
 							tr.addElement(th);
-							th.addElement(Util.maskHTML(item.getPrintName(language)));
-							if (cssPrefix != null) 
+							String columnHeader = instanceAttributeColumn != null ? instanceAttributeColumn.getName() : item.getPrintName(language);
+							th.addElement(Util.maskHTML(columnHeader));
+							if (cssPrefix != null && instanceAttributeColumn == null) 
 							{
 								MColumn column = MColumn.get(getCtx(), item.getAD_Column_ID());
 								if (column != null && column.getAD_Column_ID() > 0)
@@ -871,7 +967,31 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 						{
 							td td = new td();
 							tr.addElement(td);
-							Object obj = m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
+							//set style
+							int AD_FieldStyle_ID = item.getAD_FieldStyle_ID();
+							if(AD_FieldStyle_ID > 0) {
+								MStyle style = MStyle.get(Env.getCtx(), AD_FieldStyle_ID);
+								X_AD_StyleLine[] lines = style.getStyleLines();
+								StringBuilder styleBuilder = new StringBuilder();
+								for (X_AD_StyleLine line : lines)
+								{
+									String inlineStyle = line.getInlineStyle().trim();
+									String displayLogic = line.getDisplayLogic();
+									if (!Util.isEmpty(displayLogic))
+									{
+										if (!Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), displayLogic))
+											continue;
+									}
+									if (styleBuilder.length() > 0 && !(styleBuilder.charAt(styleBuilder.length()-1)==';'))
+										styleBuilder.append("; ");
+									styleBuilder.append(inlineStyle);
+								}
+								if(styleBuilder.length() > 0)
+									td.setStyle(styleBuilder.toString());
+							}
+							//
+							Object obj = instanceAttributeColumn != null ? instanceAttributeColumn.getPrintDataElement(row)
+									: m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
 							if (obj == null || !isDisplayPFItem(item)){
 								td.addElement("&nbsp;");
 								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
@@ -911,7 +1031,37 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 											}
 											if (tableID > 0) {
 												MTable mTable = MTable.get(getCtx(), tableID);
-												String foreignColumnName = mTable.getTableName() + "_ID";
+												String tableName = mTable.getTableName();
+												
+												ArrayList<MColumn> list = new ArrayList<MColumn>();
+												for (String idColumnName : mTable.getIdentifierColumns()) {
+													MColumn column = mTable.getColumn(idColumnName);
+													list.add (column);
+												}
+												if(list.size() > 0) {
+													StringBuilder displayColumn = new StringBuilder();
+													String separator = MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, "_", Env.getAD_Client_ID(Env.getCtx()));
+													
+													for(int i = 0; i < list.size(); i++) {
+														MColumn identifierColumn = list.get(i);
+														if(i > 0)
+															displayColumn.append("||'").append(separator).append("'||");
+														
+														displayColumn.append("NVL(")
+																	.append(DB.TO_CHAR(identifierColumn.getColumnName(), 
+																						identifierColumn.getAD_Reference_ID(), 
+																						Env.getAD_Language(Env.getCtx())))
+																	.append(",'')");
+													}
+													StringBuilder sql = new StringBuilder("SELECT ");
+													sql.append(displayColumn.toString());
+													sql.append(" FROM ").append(tableName);
+													sql.append(" WHERE ")
+														.append(tableName).append(".").append(tableName).append("_ID=?");
+													
+													value = DB.getSQLValueStringEx(null, sql.toString(), Integer.parseInt(value));
+												}
+												String foreignColumnName = tableName + "_ID";
 												pde.setForeignColumnName(foreignColumnName);
 												isZoom = true;
 											}
@@ -977,19 +1127,18 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				
 				/* output table header */
 				if (row == -1){
-					thead.output(w);
+					w.print(compress(thead.toString(), minify));
 					// output open of tbody
-					tbody.output(w);
+					w.print(compress(tbody.toString(), minify));
 				}else{
 					// output row by row 
-					tr.output(w);
+					w.print(compress(tr.toString(), minify));
 				}
 				
 			}	//	for all rows
 			
-			w.println();
-			w.println("</tbody>");
-			w.println("</table>");
+			w.print("</tbody>");
+			w.print("</table>");
 			if (suppressMap.size() > 0) 
 			{
 				StringBuilder st = new StringBuilder();
@@ -1002,15 +1151,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				st.append(" {\n\t\tdisplay:none;\n\t}");
 				style styleTag = new style();
 				styleTag.addElement(st.toString());
-				styleTag.output(w);
-				w.println();
+				w.print(compress(styleTag.toString(), minify));
 			}
 			if (!onlyTable)
 			{
-				w.println("</div>");
-				w.println("</div>");
-				w.println("</body>");
-				w.println("</html>");
+				w.print("</div>");
+				w.print("</div>");
+				w.print("</body>");
+				w.print("</html>");
 			}
 			w.flush();
 			w.close();
@@ -1076,6 +1224,45 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			delimiter = '\t';
 		try
 		{
+			//collect columns to be printed
+			ArrayList<Object> columns = new ArrayList<>();
+			List<InstanceAttributeData> asiElements = new ArrayList<>();
+			int columnCount = 0;
+			for (int col = 0; col < m_printFormat.getItemCount(); col++)
+			{
+				MPrintFormatItem item = m_printFormat.getItem(col);
+				if (item.isPrinted())
+				{
+					if (item.isTypeField() && item.isPrintInstanceAttributes())
+					{
+						InstanceAttributeData asiElement = new InstanceAttributeData(item, columnCount);
+						asiElement.readAttributesData(m_printData);
+						asiElements.add(asiElement);						
+						continue;
+					}
+					else 
+					{
+						columns.add(item);
+						columnCount++;
+					}
+				}
+			}
+			if (asiElements.size() > 0)
+			{
+				int columnCreated = 0;
+				for(InstanceAttributeData data : asiElements)
+				{
+					List<InstanceAttributeColumn> instanceColumns = data.getColumns();
+					int index = data.getColumnIndex() + columnCreated;
+					for(InstanceAttributeColumn c : instanceColumns)
+					{
+						columns.add(index, c);
+						index++;
+						columnCreated++;
+					}
+				}
+			}
+						
 			Boolean [] colSuppressRepeats = m_layout == null || m_layout.colSuppressRepeats == null? LayoutEngine.getColSuppressRepeats(m_printFormat):m_layout.colSuppressRepeats;
 			Object [] preValues = null;
 			if (colSuppressRepeats != null){
@@ -1092,10 +1279,21 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 
 				//	for all columns
 				boolean first = true;	//	first column to print
-				for (int col = 0; col < m_printFormat.getItemCount(); col++)
+				for (int col = 0; col < columns.size(); col++)
 				{
-					MPrintFormatItem item = m_printFormat.getItem(col);
-					if (item.isPrinted())
+					Object colObj = columns.get(col);
+					MPrintFormatItem item = null;
+					InstanceAttributeColumn iaColumn = null;
+					if (colObj instanceof InstanceAttributeColumn)
+					{
+						iaColumn = (InstanceAttributeColumn) colObj;
+						item = iaColumn.getPrintFormatItem();
+					} 
+					else if (colObj instanceof MPrintFormatItem)
+					{
+						item = (MPrintFormatItem)colObj;
+					}
+					if (item != null)
 					{
 						//	column delimiter (comma or tab)
 						if (first)
@@ -1104,12 +1302,14 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 							sb.append(delimiter);
 						//	header row
 						if (row == -1)
-							createCSVvalue (sb, delimiter,
-								m_printFormat.getItem(col).getPrintName(language));
+						{
+							String printName = iaColumn != null ? iaColumn.getName() : item.getPrintName(language);
+							createCSVvalue (sb, delimiter, printName);
+						}
 						else
 						{
 							printColIndex++;
-							Object obj = m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
+							Object obj = iaColumn != null ? iaColumn.getPrintDataElement(row) : m_printData.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
 							String data = "";
 							if (obj == null || !isDisplayPFItem(item)){
 								if (colSuppressRepeats != null && colSuppressRepeats[printColIndex]){
@@ -1258,7 +1458,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile (makePrefix(getName()), ".pdf");
+				file = FileUtil.createTempFile (makePrefix(getName()), ".pdf");
 		}
 		catch (IOException e)
 		{
@@ -1289,7 +1489,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile (makePrefix(getName()), ".html");
+				file = FileUtil.createTempFile (makePrefix(getName()), ".html");
 		}
 		catch (IOException e)
 		{
@@ -1320,7 +1520,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile (makePrefix(getName()), ".csv");
+				file = FileUtil.createTempFile (makePrefix(getName()), ".csv");
 		}
 		catch (IOException e)
 		{
@@ -1351,7 +1551,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile (makePrefix(getName()), ".xls");
+				file = FileUtil.createTempFile (makePrefix(getName()), ".xls");
 		}
 		catch (IOException e)
 		{
@@ -1389,7 +1589,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile (makePrefix(getName()), ".xlsx");
+				file = FileUtil.createTempFile (makePrefix(getName()), ".xlsx");
 		}
 		catch (IOException e)
 		{
@@ -1420,7 +1620,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		try
 		{
 			if (file == null)
-				file = File.createTempFile ("ReportEngine", ".pdf");
+				file = FileUtil.createTempFile ("ReportEngine", ".pdf");
 			fileName = file.getAbsolutePath();
 			uri = file.toURI();
 			if (file.exists())
@@ -1755,12 +1955,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 	/** Inventory Move = 11  */
 	public static final int		MOVEMENT = 11;
 	
-
-//	private static final String[]	DOC_TABLES = new String[] {
-//		"C_Order_Header_v", "M_InOut_Header_v", "C_Invoice_Header_v", "C_Project_Header_v",
-//		"C_RfQResponse_v",
-//		"C_PaySelection_Check_v", "C_PaySelection_Check_v",  
-//		"C_DunningRunEntry_v","PP_Order_Header_v","DD_Order_Header_v" };
 	private static final String[]	DOC_BASETABLES = new String[] {
 		"C_Order", "M_InOut", "C_Invoice", "C_Project",
 		"C_RfQResponse",
@@ -2011,7 +2205,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		//	query
 		MQuery query = new MQuery(format.getAD_Table_ID());
 		query.addRestriction(DOC_IDS[type], MQuery.EQUAL, Record_ID);
-	//	log.config( "ReportCtrl.startDocumentPrint - " + format, query + " - " + language.getAD_Language());
+
 		//
 		if (DocumentNo == null || DocumentNo.length() == 0)
 			DocumentNo = "DocPrint";
@@ -2056,7 +2250,7 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				DocSubTypeSO = rs.getString(1);
 			
 			// @Trifon - Order is not completed(C_DoctType_ID=0) then try with C_DocTypeTarget_ID
-			// [ 2819637 ] Wrong print format on non completed order - https://sourceforge.net/tracker/?func=detail&aid=2819637&group_id=176962&atid=879332
+			// [ 2819637 ] Wrong print format on non completed order - https://sourceforge.net/p/adempiere/bugs/1977/
 			if (DocSubTypeSO == null || "".equals(DocSubTypeSO)) {
 				sql = new StringBuilder("SELECT dt.DocSubTypeSO ")
 					.append("FROM C_DocType dt, C_Order o ")
@@ -2107,7 +2301,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-			//	if (i == 1 && ADialog.ask(0, null, what[0] == INVOICE ? "PrintOnlyRecentInvoice?" : "PrintOnlyRecentShipment?")) break;
 				what[1] = rs.getInt(1);
 			}
 			else	//	No Document Found
@@ -2147,38 +2340,6 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 				log.log(Level.SEVERE, "Updated records=" + no + " - should be just one");
 		}
 	}	//	printConfirm
-	
-	
-	/*************************************************************************
-	 * 	Test
-	 * 	@param args args
-	 */
-	public static void main(String[] args)
-	{
-		org.compiere.Adempiere.startupEnvironment(true);
-		//
-		int AD_Table_ID = TABLE_AD_TABLE;
-		MQuery q = new MQuery("AD_Table");
-		q.addRestriction("AD_Table_ID", "<", 108);
-		//
-		MPrintFormat f = MPrintFormat.createFromTable(Env.getCtx(), AD_Table_ID);
-		PrintInfo i = new PrintInfo("test", AD_Table_ID, 108, 0);
-		i.setAD_Table_ID(AD_Table_ID);
-		ReportEngine re = new ReportEngine(Env.getCtx(), f, q, i);
-		re.layout();
-		/**
-		re.createCSV(new File("C:\\Temp\\test.csv"), ',', Language.getLanguage());
-		re.createHTML(new File("C:\\Temp\\test.html"), false, Language.getLanguage());
-		re.createXML(new File("C:\\Temp\\test.xml"));
-		re.createPS(new File ("C:\\Temp\\test.ps"));
-		re.createPDF(new File("C:\\Temp\\test.pdf"));
-		/****/
-		re.print();
-	//	re.print(true, 1, false, "Epson Stylus COLOR 900 ESC/P 2");		//	Dialog
-	//	re.print(true, 1, false, "HP LaserJet 3300 Series PCL 6");		//	Dialog
-	//	re.print(false, 1, false, "Epson Stylus COLOR 900 ESC/P 2");	//	Dialog
-		System.exit(0);
-	}	//	main
 
 	public void setWhereExtended(String whereExtended) {
 		m_whereExtended = whereExtended;
@@ -2452,4 +2613,34 @@ queued-job-count = 0  (class javax.print.attribute.standard.QueuedJobCount)
 		return Evaluator.evaluateLogic(new PrintDataEvaluatee(null, m_printData), item.getDisplayLogic());
 	}
 
+	public String compress(String src, boolean minify) {
+		
+		if(minify) {
+			HtmlCompressor compressor = new HtmlCompressor();
+		    compressor.setEnabled(true);
+		    compressor.setCompressCss(true);
+		    compressor.setCompressJavaScript(true);
+		    compressor.setRemoveComments(true);
+		    compressor.setRemoveMultiSpaces(true);
+		    compressor.setRemoveIntertagSpaces(true);
+//		    compressor.setGenerateStatistics(false);
+//		    compressor.setRemoveQuotes(false);
+//		    compressor.setSimpleDoctype(false);
+//		    compressor.setRemoveScriptAttributes(false);
+//		    compressor.setRemoveStyleAttributes(false);
+//		    compressor.setRemoveLinkAttributes(false);
+//		    compressor.setRemoveFormAttributes(false);
+//		    compressor.setRemoveInputAttributes(false);
+//		    compressor.setSimpleBooleanAttributes(false);
+//		    compressor.setRemoveJavaScriptProtocol(false);
+//		    compressor.setRemoveHttpProtocol(false);
+//		    compressor.setRemoveHttpsProtocol(false);
+//		    compressor.setPreserveLineBreaks(false);
+		    
+		    return compressor.compress(src);
+		}
+		else {
+			return src;
+		}
+	}
 }	//	ReportEngine

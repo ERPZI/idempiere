@@ -72,7 +72,7 @@ import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 
-import com.itextpdf.text.DocumentException;
+import com.lowagie.text.DocumentException;
 
 /**
  *  ZK Application Environment and utilities
@@ -80,7 +80,7 @@ import com.itextpdf.text.DocumentException;
  *  @author 	Jorg Janke
  *  @version 	$Id: AEnv.java,v 1.2 2006/07/30 00:51:27 jjanke Exp $
  *
- *  Colin Rooney (croo) & kstan_79 RFE#1670185
+ *  Colin Rooney (croo) and kstan_79 RFE#1670185
  */
 public final class AEnv
 {
@@ -133,7 +133,7 @@ public final class AEnv
 
 	/**
 	 *  Get Mnemonic character from text.
-	 *  @param text text with '&'
+	 *  @param text text with '&amp;'
 	 *  @return Mnemonic or 0
 	 */
 	public static char getMnemonic (String text)
@@ -211,7 +211,8 @@ public final class AEnv
 		}
 		windowCache.remove(sessionID);
 		//	End Session
-		MSession session = MSession.get(Env.getCtx(), false);	//	finish
+		int ad_Session_ID = Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID);
+		MSession session = ad_Session_ID > 0 ? new MSession(Env.getCtx(), ad_Session_ID, null) : null;	//	finish
 		if (session != null)
 			session.logout();
 		
@@ -755,7 +756,7 @@ public final class AEnv
 	 * when field lie in window, it's id of this window
 	 * when field lie in process parameter dialog it's ad_window_id of window open this process
 	 * when field lie in process parameter open in a standalone window (run process from menu) return id of dummy window
-	 * @param mField
+	 * @param windowNo
 	 * @return
 	 */
 	public static int getADWindowID (int windowNo){
@@ -816,4 +817,17 @@ public final class AEnv
 		return getApplicationUrl() + "?Action=Zoom&TableName" + po.get_TableName() + "&Record_ID=" + po.get_ID();
 	}
 
+	/**
+	 * 
+	 * @param attribute
+	 * @return true if attribute have been set for current executions
+	 */
+	public static boolean getOrSetExecutionAttribute(String attribute) {
+		if (Executions.getCurrent() != null) {
+    		if (Executions.getCurrent().getAttribute(attribute) != null)
+    			return true;
+    		Executions.getCurrent().setAttribute(attribute, Boolean.TRUE);
+    	}
+    	return false;
+	}
 }	//	AEnv

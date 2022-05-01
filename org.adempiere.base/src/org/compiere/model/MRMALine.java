@@ -51,15 +51,19 @@ public class MRMALine extends X_M_RMALine
 	 */
 	public MRMALine (Properties ctx, int M_RMALine_ID, String trxName)
 	{
-		super (ctx, M_RMALine_ID, trxName);
+		this (ctx, M_RMALine_ID, trxName, (String[]) null);
+	}	//	MRMALine
+
+	public MRMALine(Properties ctx, int M_RMALine_ID, String trxName, String... virtualColumns) {
+		super(ctx, M_RMALine_ID, trxName, virtualColumns);
 		if (M_RMALine_ID == 0)
 		{
 			setQty(Env.ONE);
 			this.setQtyDelivered(Env.ZERO);
 		}
-        
-        init();
-	}	//	MRMALine
+
+		init();
+	}
 
 	/**
 	 * 	Load Constructor
@@ -104,7 +108,7 @@ public class MRMALine extends X_M_RMALine
             {
                 MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), getInvoiceLineId(), get_TrxName());
                 precision = invoiceLine.getPrecision();
-                unitAmount = invoiceLine.getPriceEntered();
+                unitAmount = invoiceLine.getPriceActual();
                 originalQty = invoiceLine.getQtyInvoiced();
                 taxId = invoiceLine.getC_Tax_ID();
             }
@@ -112,7 +116,7 @@ public class MRMALine extends X_M_RMALine
             {
                 MOrderLine orderLine = new MOrderLine (getCtx(), m_ioLine.getC_OrderLine_ID(), get_TrxName());
                 precision = orderLine.getPrecision();
-                unitAmount = orderLine.getPriceEntered();
+                unitAmount = orderLine.getPriceActual();
                 originalQty = orderLine.getQtyDelivered();
                 taxId = orderLine.getC_Tax_ID();
             }
@@ -158,10 +162,14 @@ public class MRMALine extends X_M_RMALine
         		pp.setPriceDate(invoice.getDateInvoiced());
         		
         		precision = invoice.getPrecision();
-        		taxId = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID(), invoice.getDateInvoiced(), invoice.getDateInvoiced(),
+        		String deliveryViaRule = null;
+        		if (invoice.getC_Order_ID() > 0) {
+        			deliveryViaRule = new MOrder(getCtx(), invoice.getC_Order_ID(), get_TrxName()).getDeliveryViaRule();
+        		}
+        		taxId = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), invoice.getDateInvoiced(), invoice.getDateInvoiced(),
             			getAD_Org_ID(), getParent().getShipment().getM_Warehouse_ID(),
             			invoice.getC_BPartner_Location_ID(),		//	should be bill to
-            			invoice.getC_BPartner_Location_ID(), getParent().isSOTrx(), get_TrxName());
+            			invoice.getC_BPartner_Location_ID(), getParent().isSOTrx(), deliveryViaRule, get_TrxName());
         	}
         	else 
         	{
@@ -172,10 +180,10 @@ public class MRMALine extends X_M_RMALine
         			pp.setPriceDate(order.getDateOrdered());
         			
         			precision = order.getPrecision();
-        			taxId = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID(), order.getDateOrdered(), order.getDateOrdered(),
+        			taxId = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), order.getDateOrdered(), order.getDateOrdered(),
                 			getAD_Org_ID(), order.getM_Warehouse_ID(),
                 			order.getC_BPartner_Location_ID(),		//	should be bill to
-                			order.getC_BPartner_Location_ID(), getParent().isSOTrx(), get_TrxName());
+                			order.getC_BPartner_Location_ID(), getParent().isSOTrx(), order.getDeliveryViaRule(), get_TrxName());
         		}
             	else
             		throw new IllegalStateException("No Invoice/Order found the Shipment/Receipt associated");

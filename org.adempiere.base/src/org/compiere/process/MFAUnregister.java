@@ -31,11 +31,13 @@ import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import org.compiere.model.MMFARegistration;
+import org.compiere.model.PO;
 
 /**
  *	IDEMPIERE-4782
  * 	@author Carlos Ruiz - globalqss - BX Service
  */
+@org.adempiere.base.annotation.Process
 public class MFAUnregister extends SvrProcess {
 
 	/* MFA Registration */
@@ -67,7 +69,12 @@ public class MFAUnregister extends SvrProcess {
 		MMFARegistration reg = new MMFARegistration(getCtx(), p_MFA_Registration_ID, get_TrxName());
 		reg.setIsActive(false);
 		reg.setMFAUnregisteredAt(new Timestamp(System.currentTimeMillis()));
-		reg.saveEx();
+		try {
+			PO.setCrossTenantSafe();
+			reg.saveEx();
+		} finally {
+			PO.clearCrossTenantSafe();
+		}
 
 		return "@OK@";
 	}

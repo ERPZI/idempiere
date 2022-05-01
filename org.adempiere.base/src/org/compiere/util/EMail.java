@@ -48,6 +48,7 @@ import javax.mail.internet.MimeMultipart;
 
 import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MClient;
+import org.compiere.model.MSMTP;
 import org.compiere.model.MSysConfig;
 
 import com.sun.mail.smtp.SMTPMessage;
@@ -239,12 +240,26 @@ public final class EMail implements Serializable
 	/**	Logger							*/
 	protected transient static CLogger		log = CLogger.getCLogger (EMail.class);
 
+	/** Set it to true if you need to use the SMTP defined at tenant level - otherwise will try to use a SMTP from AD_SMTP table */
+	private boolean m_forceUseTenantSmtp = false; 
+
 	/**
 	 *	Send Mail direct
 	 *	@return OK or error message
 	 */
 	public String send ()
 	{
+		if (!m_forceUseTenantSmtp && getFrom() != null) {
+			MSMTP smtp = MSMTP.get(m_ctx, Env.getAD_Client_ID(m_ctx), getFrom().getAddress());
+			if (smtp != null) {
+				setSmtpHost(smtp.getSMTPHost());
+				setSmtpPort(smtp.getSMTPPort());
+				setSecureSmtp(smtp.isSecureSMTP());
+				createAuthenticator(smtp.getRequestUser(), smtp.getRequestUserPW());
+				if (log.isLoggable(Level.FINE)) log.fine("sending email using from " + getFrom().getAddress() + " using " + smtp.toString());
+			}
+		}
+
 		if (log.isLoggable(Level.INFO)){
 			log.info("(" + m_smtpHost + ") " + m_from + " -> " + m_to);
 			log.info("(m_auth) " + m_auth);
@@ -570,8 +585,8 @@ public final class EMail implements Serializable
 
 	/**
 	 * 	Get Message ID or null
-	 * 	@return Message ID e.g. <20030130004739.15377.qmail@web13506.mail.yahoo.com>
-	 *  <25699763.1043887247538.JavaMail.jjanke@main>
+	 * 	@return Message ID e.g. &lt;20030130004739.15377.qmail@web13506.mail.yahoo.com&gt;
+	 *  &lt;25699763.1043887247538.JavaMail.jjanke@main&gt;
 	 */
 	public String getMessageID()
 	{
@@ -599,7 +614,7 @@ public final class EMail implements Serializable
 	{
 		if (username == null || password == null)
 		{
-			log.warning("Ignored - " +  username + "/" + password);
+			log.fine("Ignored - " +  username + "/" + password);
 			m_auth = null;
 		}
 		else
@@ -951,7 +966,7 @@ public final class EMail implements Serializable
 
 	/**
 	 *	Add url based file Attachment
-	 * 	@param uri url content to attach
+	 * 	@param url url content to attach
 	 */
 	public void addAttachment (URI url)
 	{
@@ -1268,4 +1283,7 @@ public final class EMail implements Serializable
 		return ia;
 	}
 
+	public void setForTenantSmtp(boolean forceTenantSmtp) {
+		m_forceUseTenantSmtp = forceTenantSmtp;	
+	}
 }	//	EMail

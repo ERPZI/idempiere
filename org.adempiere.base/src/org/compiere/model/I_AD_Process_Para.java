@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Process_Para
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 public interface I_AD_Process_Para 
 {
@@ -414,6 +414,19 @@ public interface I_AD_Process_Para
 	/** Get Placeholder2	  */
 	public String getPlaceholder2();
 
+    /** Column name Query */
+    public static final String COLUMNNAME_Query = "Query";
+
+	/** Set Query.
+	  * SQL
+	  */
+	public void setQuery (String Query);
+
+	/** Get Query.
+	  * SQL
+	  */
+	public String getQuery();
+
     /** Column name ReadOnlyLogic */
     public static final String COLUMNNAME_ReadOnlyLogic = "ReadOnlyLogic";
 
@@ -489,13 +502,17 @@ public interface I_AD_Process_Para
 
 	/** Set Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public void setVFormat (String VFormat);
 
 	/** Get Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public String getVFormat();
 }

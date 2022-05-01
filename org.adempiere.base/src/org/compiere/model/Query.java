@@ -28,7 +28,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.adempiere.exceptions.DBException;
 import org.compiere.util.CLogger;
@@ -49,9 +54,9 @@ import org.compiere.util.Util;
  * 			<li>FR [ 2546052 ] Introduce Query aggregate methods
  * 			<li>FR [ 2726447 ] Query aggregate methods for all return types
  * 			<li>FR [ 2818547 ] Implement Query.setOnlySelection
- * 				https://sourceforge.net/tracker/?func=detail&aid=2818547&group_id=176962&atid=879335
+ * 				https://sourceforge.net/p/adempiere/feature-requests/759/
  * 			<li>FR [ 2818646 ] Implement Query.firstId/firstIdOnly
- * 				https://sourceforge.net/tracker/?func=detail&aid=2818646&group_id=176962&atid=879335
+ * 				https://sourceforge.net/p/adempiere/feature-requests/760/
  * @author Redhuan D. Oon
  * 			<li>FR: [ 2214883 ] Remove SQL code and Replace for Query // introducing SQL String prompt in log.info 
  *			<li>FR: [ 2214883 ] - to introduce .setClient_ID
@@ -72,6 +77,12 @@ public class Query
 	private String orderBy = null;
 	private String trxName = null;
 	private Object[] parameters = null;
+
+	/**
+	 * Name of virtual columns to be included in the query
+	 */
+	private String[] virtualColumns = null;
+
 	private boolean applyAccessFilter = false;
 	private boolean applyAccessFilterRW = false;
 	private boolean applyAccessFilterFullyQualified = true;
@@ -79,7 +90,13 @@ public class Query
 	private boolean onlyClient_ID = false;
 	private int onlySelection_ID = -1;
 	private boolean forUpdate = false;
-	private boolean noVirtualColumn = false;
+
+	/**
+	 * Whether to load (<code>false</code> value) all declared virtual columns at once or use 
+	 * lazy loading (<code>true</code> value).
+	 */
+	private boolean noVirtualColumn = true;
+
 	private int queryTimeout = 0;
 	private List<String> joinClauseList = new ArrayList<String>();
 	
@@ -188,7 +205,9 @@ public class Query
 
 	/**
 	 * Turn on data access filter with controls
-	 * @param flag
+	 * @param fullyQualified
+	 * @param RW
+	 * @return
 	 */
 	public Query setApplyAccessFilter(boolean fullyQualified, boolean RW)
 	{
@@ -245,7 +264,14 @@ public class Query
 		this.forUpdate = forUpdate;
 		return this;
 	}
-	
+
+	/**
+	 * Virtual columns are lazy loaded by default. In case lazy loading is not desired use this method with
+	 * the <code>false</code> value.  
+	 * @param noVirtualColumn Whether to load (<code>false</code> value) all declared virtual columns at once or use lazy loading (<code>true</code> value).
+	 * @return
+	 * @see #setVirtualColumns(String...)
+	 */
 	public Query setNoVirtualColumn(boolean noVirtualColumn)
 	{
 		this.noVirtualColumn = noVirtualColumn;
@@ -307,12 +333,19 @@ public class Query
 	public <T extends PO> T first() throws DBException
 	{
 		T po = null;
-		String sql = buildSQL(null, true);
+		
+		int oldPageSize = this.pageSize;
+		if(DB.getDatabase().isPagingSupported())
+			setPageSize(1);	// Limit to One record
+		
+		String sql = null;
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
+			sql = buildSQL(null, true);
+			
 			pstmt = DB.prepareStatement (sql, trxName);
 			rs = createResultSet(pstmt);
 			if (rs.next ())
@@ -327,6 +360,7 @@ public class Query
 		} finally {
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
+			setPageSize(oldPageSize);
 		}
 		return po;
 	}
@@ -342,12 +376,19 @@ public class Query
 	public <T extends PO> T firstOnly() throws DBException
 	{
 		T po = null;
-		String sql = buildSQL(null, true);
+		
+		int oldPageSize = this.pageSize;
+		if(DB.getDatabase().isPagingSupported())
+			setPageSize(2);	// Limit to 2 Records
+		
+		String sql = null;
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
+			sql = buildSQL(null, true);
+			
 			pstmt = DB.prepareStatement (sql, trxName);
 			rs = createResultSet(pstmt);
 			if (rs.next())
@@ -368,6 +409,7 @@ public class Query
 		{
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
+			setPageSize(oldPageSize);
 		}
 		return po;
 	}
@@ -406,13 +448,20 @@ public class Query
 			selectClause.append(table.getTableName()).append(".");
 		selectClause.append(keys[0]);
 		selectClause.append(" FROM ").append(table.getTableName());
-		String sql = buildSQL(selectClause, true);
+		
+		int oldPageSize = this.pageSize;
+		if(DB.getDatabase().isPagingSupported())
+			setPageSize(assumeOnlyOneResult ? 2 : 1);
 
+		String sql = null;
+		
 		int id = -1;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
 		{
+			sql = buildSQL(selectClause, true);
+			
 			pstmt = DB.prepareStatement(sql, trxName);
 			rs = createResultSet(pstmt);
 			if (rs.next())
@@ -432,6 +481,7 @@ public class Query
 		{
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
+			setPageSize(oldPageSize);
 		}
 		//
 		return id;
@@ -600,51 +650,83 @@ public class Query
 	}
 	
 	/**
-	 * Return an Iterator implementation to fetch one PO at a time. The implementation first retrieve
-	 * all IDS that match the query criteria and issue sql query to fetch the PO when caller want to
-	 * fetch the next PO. This minimize memory usage but it is slower than the list method.
-	 * @return Iterator
+	 * Return an Iterable implementation that can be used in a <tt>for</tt> expression. Example:
+	 * <pre>{@code
+	 * Iterable<MTable> query = new Query(...).iterable();
+	 *
+	 * for (MTable table : query) {
+	 *   // Do stuff with the element
+	 * }
+	 * </pre>
+	 *
+	 * @return Iterable
 	 * @throws DBException 
 	 */
-	public <T extends PO> Iterator<T> iterate() throws DBException
+	public <T extends PO> Iterable<T> iterable() throws DBException
 	{
-		String[] keys = table.getKeyColumns();
-		StringBuilder sqlBuffer = new StringBuilder(" SELECT ");
-		for (int i = 0; i < keys.length; i++) {
-			if (i > 0)
-				sqlBuffer.append(", ");
-			if (!joinClauseList.isEmpty())
-				sqlBuffer.append(table.getTableName()).append(".");
-			sqlBuffer.append(keys[i]);
-		}
-		sqlBuffer.append(" FROM ").append(table.getTableName());
-		String sql = buildSQL(sqlBuffer, true);
-		
+		return () -> iterate();
+	}
+	
+	/**
+	 * Return an Stream implementation to fetch one PO at a time. This method will only create POs on-demand and
+	 * they will become eligible for garbage collection once they have been consumed by the stream, so unlike
+	 * {@link #list()} it doesn't have to hold a copy of all the POs in the result set in memory at one time.
+	 * For situations where you need to iterate over a result set and operate on the results one-at-a-time rather
+	 * than operate on the group as a whole, this method is likely to give better performance than <code>list()</code>.
+	 * @return Stream
+	 * @throws DBException 
+	 */
+	public <T extends PO> Stream<T> stream() throws DBException
+	{
+		String sql = buildSQL(null, true);
+
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		List<Object[]> idList = new ArrayList<Object[]>();
-		try
-		{
+		try {
 			pstmt = DB.prepareStatement (sql, trxName);
+			final PreparedStatement finalPstmt = pstmt;
 			rs = createResultSet(pstmt);
-			while (rs.next ())
-			{
-				Object[] ids = new Object[keys.length];
-				for (int i = 0; i < ids.length; i++) {
-					ids[i] = rs.getObject(i+1);
-				}
-				idList.add(ids);
-			}
+			final ResultSet finalRS = rs;
+			
+			return StreamSupport.stream(new Spliterators.AbstractSpliterator<T>(
+						Long.MAX_VALUE,Spliterator.ORDERED) {
+					@Override
+					public boolean tryAdvance(Consumer<? super T> action) {
+						try {
+							if(!finalRS.next()) return false;
+							@SuppressWarnings("unchecked")
+							final T newRec = (T)table.getPO(finalRS, trxName);
+							action.accept(newRec);
+							return true;
+						} catch(SQLException ex) {
+							log.log(Level.SEVERE, sql, ex);
+							throw new DBException(ex, sql);
+						}
+					}
+				}, false).onClose(() -> DB.close(finalRS, finalPstmt));
 		}
 		catch (SQLException e)
 		{
+			DB.close(rs, pstmt);
 			log.log(Level.SEVERE, sql, e);
 			throw new DBException(e, sql);
-		} finally {
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
 		}
-		return new POIterator<T>(table, idList, trxName);
+	}
+
+	/**
+	 * Return an Iterator implementation to fetch one PO at a time. This implementation is equivalent to
+	 * <tt>stream().iterator()</tt> and has similar performance benefits compared with {@link #list()}.
+	 * Useful if the downstream API requires an <code>Iterator</code>; otherwise the additional
+	 * of the {@link #stream()} interface is likely to be more useful.
+	 *
+	 * @return Iterator
+	 * @throws DBException 
+	 * @see #stream()
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends PO> Iterator<T> iterate() throws DBException
+	{
+		return (Iterator<T>) stream().iterator();
 	}
 	
 	/**
@@ -683,8 +765,8 @@ public class Query
 	}
 	
 	/**
-	 * Build SQL Clause
-	 * @param selectClause optional; if null the select clause will be build according to POInfo
+	 * Build SQL SELECT statement.
+	 * @param selectClause optional; if null the select statement will be built by {@link POInfo}
 	 * @return final SQL
 	 */
 	private final String buildSQL(StringBuilder selectClause, boolean useOrderByClause)
@@ -696,7 +778,11 @@ public class Query
 			{
 				throw new IllegalStateException("No POInfo found for AD_Table_ID="+table.getAD_Table_ID());
 			}
-			selectClause = info.buildSelect(!joinClauseList.isEmpty(), noVirtualColumn);
+			boolean isFullyQualified = !joinClauseList.isEmpty();
+			if(virtualColumns == null)
+				selectClause = info.buildSelect(isFullyQualified, noVirtualColumn);
+			else
+				selectClause = info.buildSelect(isFullyQualified, virtualColumns);
 		}
 		if (!joinClauseList.isEmpty()) 
 		{
@@ -923,5 +1009,14 @@ public class Query
 		}
 		return retValue;
 	}	//	get_IDs
+
+	/**
+	 * Virtual columns to be included in the query.
+	 * @param virtualColumns virtual column names
+	 */
+	public Query setVirtualColumns(String ... virtualColumns) {
+		this.virtualColumns = virtualColumns;
+		return this;
+	}
 
 }

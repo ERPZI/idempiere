@@ -209,8 +209,18 @@ public class Incremental2PackActivator extends AbstractActivator {
 
 	protected boolean packIn(URL packout) {
 		if (packout != null && service != null) {
+			MSession localSession = null;
 			//Create Session to be able to create records in AD_ChangeLog
-			MSession.get(Env.getCtx(), true);
+			if (Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID) <= 0) {
+				localSession = MSession.get(Env.getCtx());
+				if(localSession == null) {
+					localSession = MSession.create(Env.getCtx());
+				} else {
+					localSession = new MSession(Env.getCtx(), localSession.getAD_Session_ID(), null);
+				}
+				localSession.setWebSession("Incremental2PackActivator");
+				localSession.saveEx();
+			}
 			String path = packout.getPath();
 			String suffix = "_"+path.substring(path.lastIndexOf("2Pack_"));
 			logger.log(Level.WARNING, "Installing " + getName() + " " + path + " ...");
@@ -237,6 +247,8 @@ public class Incremental2PackActivator extends AbstractActivator {
 						zipstream.close();
 					} catch (Exception e2) {}
 				}
+				if (localSession != null)
+					localSession.logout();
 			}
 			logger.log(Level.WARNING, getName() + " " + packout.getPath() + " installed");
 		} 

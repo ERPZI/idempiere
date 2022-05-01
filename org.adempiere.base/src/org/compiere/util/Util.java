@@ -41,12 +41,12 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfImportedPage;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfWriter;
 
 /**
  *  General Utilities
@@ -228,7 +228,7 @@ public class Util
 	/**
 	 * Is String Empty
 	 * @param str string
-	 * @return true if >= 1 char
+	 * @return true if &gt;= 1 char
 	 */
 	public static boolean isEmpty (String str)
 	{
@@ -239,7 +239,7 @@ public class Util
 	 * Is String Empty
 	 * @param str string
 	 * @param trimWhitespaces trim whitespaces
-	 * @return true if >= 1 char
+	 * @return true if &gt;= 1 char
 	 */
 	public static boolean isEmpty (String str, boolean trimWhitespaces)
 	{
@@ -253,7 +253,7 @@ public class Util
 
 	/**
 	 * Remove accents from string
-	 * @param str string
+	 * @param text string
 	 * @return Unaccented String
 	 */
 	public static String deleteAccents(String text) {
@@ -557,7 +557,7 @@ public class Util
 	/**
 	 * Is 8 Bit
 	 * @param str string
-	 * @return true if string contains chars > 255
+	 * @return true if string contains chars &gt; 255
 	 */
 	public static boolean is8Bit (String str)
 	{

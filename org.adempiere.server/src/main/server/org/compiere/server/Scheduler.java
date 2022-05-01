@@ -95,6 +95,8 @@ public class Scheduler extends AdempiereServer
 	protected Trx					m_trx = null;
 
 	protected int AD_Scheduler_ID;
+	
+	protected ProcessInfo pi;
 
 	private static ImmutableIntPOCache<Integer,MScheduler> s_cache = new ImmutableIntPOCache<Integer,MScheduler>(MScheduler.Table_Name, 10, 60);
 
@@ -106,6 +108,7 @@ public class Scheduler extends AdempiereServer
 		MScheduler scheduler = get(getCtx(), AD_Scheduler_ID);
 		m_summary = new StringBuffer(scheduler.toString())
 			.append(" - ");
+		pi = null;
 
 		// Prepare a ctx for the report/process - BF [1966880]
 		MClient schedclient = MClient.get(getCtx(), scheduler.getAD_Client_ID());
@@ -129,7 +132,12 @@ public class Scheduler extends AdempiereServer
 		Env.setContext(getCtx(), Env.DATE, dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
 
 		//Create new Session and set #AD_Session_ID to context
-		MSession session = MSession.get(getCtx(), true);
+		MSession session = MSession.get(Env.getCtx());
+		if(session == null) {
+			session = MSession.create(Env.getCtx());
+		} else {
+			session = new MSession(Env.getCtx(), session.getAD_Session_ID(), null);
+		}
 		MProcess process = new MProcess(getCtx(), scheduler.getAD_Process_ID(), null);
 		try
 		{
@@ -149,7 +157,7 @@ public class Scheduler extends AdempiereServer
 		{
 			if (m_trx != null)
 				m_trx.close();
-
+			m_trx = null;
 			session.logout();
 			getCtx().remove(Env.AD_SESSION_ID);
 		}
@@ -160,7 +168,9 @@ public class Scheduler extends AdempiereServer
 		//
 		MSchedulerLog pLog = new MSchedulerLog(scheduler, m_summary.toString());
 		pLog.setReference("#" + String.valueOf(p_runCount)
-			+ " - " + TimeUtil.formatElapsed(new Timestamp(p_startWork)));
+			+ " - " + TimeUtil.formatElapsed(new Timestamp(p_startWork))
+			+ (pi != null ? " AD_PInstance_ID="+pi.getAD_PInstance_ID() : ""));
+		pi = null;
 		pLog.saveEx();
 	}	//	doWork
 
@@ -185,7 +195,7 @@ public class Scheduler extends AdempiereServer
 		MPInstance pInstance = new MPInstance(process, Record_ID);
 		fillParameter(pInstance);
 		//
-		ProcessInfo pi = new ProcessInfo (process.getName(), process.getAD_Process_ID(), AD_Table_ID, Record_ID);
+		pi = new ProcessInfo (process.getName(), process.getAD_Process_ID(), AD_Table_ID, Record_ID);
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setAD_Client_ID(scheduler.getAD_Client_ID());
 		pi.setAD_PInstance_ID(pInstance.getAD_PInstance_ID());
@@ -407,7 +417,7 @@ public class Scheduler extends AdempiereServer
 							
 								UploadResponse response = handlers[0].uploadMedia(new UploadMedia(fileName, contentType, new FileInputStream(file), file.length()), account);
 								if (response.getLink() != null) {
-									MSchedulerLog pLog = new MSchedulerLog(get(getCtx(), AD_Scheduler_ID), Msg.getMsg(Env.getCtx(), "UploadSucess"));
+									MSchedulerLog pLog = new MSchedulerLog(get(getCtx(), AD_Scheduler_ID), Msg.getMsg(Env.getCtx(), "UploadSuccess"));
 									pLog.setTextMsg("User: " + upload.getAD_User().getName() + " Account: " + account.getEMail() + 
 											" Link: " + response.getLink());
 									pLog.setIsError(false);

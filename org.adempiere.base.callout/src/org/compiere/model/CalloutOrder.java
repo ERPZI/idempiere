@@ -120,7 +120,7 @@ public class CalloutOrder extends CalloutEngine
 				if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS))
 					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Force);
 				else if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_Prepay))
-					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterPayment);
 				else
 					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Availability);
 				
@@ -396,7 +396,7 @@ public class CalloutOrder extends CalloutEngine
 				if (OrderType.equals(MOrder.DocSubTypeSO_Prepay))
 				{
 					mTab.setValue("InvoiceRule", X_C_Order.INVOICERULE_Immediate);
-					mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+					mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_AfterPayment);
 				}
 				else if (OrderType.equals(MOrder.DocSubTypeSO_POS))	//  for POS
 					mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_Cash);
@@ -815,7 +815,8 @@ public class CalloutOrder extends CalloutEngine
 		if (Env.isSOTrx(ctx, WindowNo))
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID.intValue());
-			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
+			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
+				&& !(product.isBOM() && product.isVerified() && product.isAutoProduce()))
 			{
 				BigDecimal QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 				if (QtyOrdered == null)
@@ -980,9 +981,10 @@ public class CalloutOrder extends CalloutEngine
 		if (log.isLoggable(Level.FINE)) log.fine("Bill BP_Location=" + billC_BPartner_Location_ID);
 
 		//
-		int C_Tax_ID = Tax.get (ctx, M_Product_ID, C_Charge_ID, billDate, shipDate,
+		String deliveryViaRule = Env.getContext(ctx, WindowNo, I_C_Order.COLUMNNAME_DeliveryViaRule, true);
+		int C_Tax_ID = Core.getTaxLookup().get(ctx, M_Product_ID, C_Charge_ID, billDate, shipDate,
 			AD_Org_ID, M_Warehouse_ID, billC_BPartner_Location_ID, shipC_BPartner_Location_ID,
-			"Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx")), null);
+			"Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx")), deliveryViaRule, null);
 		if (log.isLoggable(Level.INFO)) log.info("Tax ID=" + C_Tax_ID);
 		//
 		if (C_Tax_ID == 0)
@@ -1309,7 +1311,8 @@ public class CalloutOrder extends CalloutEngine
 			&& QtyOrdered.signum() > 0)		//	no negative (returns)
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID);
-			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
+			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
+				&& !(product.isBOM() && product.isVerified() && product.isAutoProduce()))
 			{
 				int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 				int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");

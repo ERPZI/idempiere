@@ -49,7 +49,7 @@ public class MAttribute extends X_M_Attribute implements ImmutablePOSupport
 	/**	Logger	*/
 	private static CLogger s_log = CLogger.getCLogger (MAttribute.class);
 
-	private static CCache<Integer, MAttribute>	s_cache				= new CCache<Integer, MAttribute>(Table_Name, 30, 60);
+	private static CCache<Integer, MAttribute>	s_cache				= new CCache<Integer, MAttribute>(Table_Name, 30, CCache.DEFAULT_EXPIRE_MINUTE);
 	
 	/**	Values						*/
 	private MAttributeValue[]		m_values = null;
@@ -150,6 +150,10 @@ public class MAttribute extends X_M_Attribute implements ImmutablePOSupport
 		this(ctx, 0, trxName);
 		copyPO(copy);
 		this.m_values = copy.m_values != null ? Arrays.stream(copy.m_values).map(e -> {return new MAttributeValue(ctx, e, trxName);}).toArray(MAttributeValue[]::new) : null;
+	}
+
+	public MAttribute(Properties ctx, int M_Attribute_ID, String trxName, String... virtualColumns) {
+		super(ctx, M_Attribute_ID, trxName, virtualColumns);
 	}
 
 	/**
