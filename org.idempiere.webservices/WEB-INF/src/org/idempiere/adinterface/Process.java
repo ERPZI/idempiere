@@ -124,9 +124,9 @@ public class Process {
 					if (DisplayType.isDate(para.getAD_Reference_ID()))
 					{
 						if (para.getDefaultValue().indexOf( "@#Date@")>=0) {
-							//Object t = Env.getContextAsDate( cs.getM_ctx(), "#Date" );
-							//String t = Env.getContext( cs.getM_ctx(), "#Date" );
-							String t= cs.dateFormat.format( Env.getContextAsDate( cs.getCtx(), "#Date") );	
+							//Object t = Env.getContextAsDate( cs.getM_ctx(), Env.DATE );
+							//String t = Env.getContext( cs.getM_ctx(), Env.DATE );
+							String t= cs.dateFormat.format( Env.getContextAsDate( cs.getCtx(), Env.DATE) );	
 							
 							p.setDefaultValue( t ); //cs.dateFormat.format( t ));
 						}
@@ -148,9 +148,9 @@ public class Process {
 					if (DisplayType.isDate(para.getAD_Reference_ID()))
 					{						
 						if (para.getDefaultValue2().indexOf( "@#Date@")>=0) {
-							//Object t = Env.getContextAsDate( cs.getM_ctx(), "#Date" );
-							//String t = Env.getContext( cs.getM_ctx(), "#Date" );
-							String t= cs.dateFormat.format( Env.getContextAsDate( cs.getCtx(), "#Date") );
+							//Object t = Env.getContextAsDate( cs.getM_ctx(), Env.DATE );
+							//String t = Env.getContext( cs.getM_ctx(), Env.DATE );
+							String t= cs.dateFormat.format( Env.getContextAsDate( cs.getCtx(), Env.DATE) );
 							p.setDefaultValue2( t ); //cs.dateFormat.format( t ) );
 						}							
 					}
@@ -762,7 +762,6 @@ public class Process {
 	 *  	Called also directly from ProcessDialog, VInOutGen, VInvoiceGen, VPayPrint
 	 * 	@param type document type in ReportEngine
 	 * 	@param Record_ID id
-	 * 	@param IsDirectPrint if true, prints directly - otherwise View
 	 * 	@return true if success
 	 */
 	public static ReportEngine startDocumentPrint (int type, int Record_ID)
@@ -780,9 +779,8 @@ public class Process {
 	
 	/**************************************************************************
 	 *	Start Standard Report.
-	 *  - Get Table Info & submit
+	 *  - Get Table Info and submit
 	 *  @param pi Process Info
-	 *  @param IsDirectPrint if true, prints directly - otherwise View
 	 *  @return true if OK
 	 */
 	static public ReportEngine startStandardReport (ProcessInfo pi)
@@ -801,7 +799,6 @@ public class Process {
 	 * 	Start Check Print.
 	 * 	Find/Create
 	 *	@param C_Payment_ID Payment
-	 * 	@param IsDirectPrint if true, prints directly - otherwise View
 	 * 	@return true if success
 	 */
 	public static ReportEngine startCheckPrint (int C_Payment_ID)

@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import javax.mail.internet.InternetAddress;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.EMail;
@@ -98,7 +99,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	/**
 	 * 	Get all clients
 	 *	@param ctx context
-	 *	@param order by clause
+	 *	@param orderBy by clause
 	 *	@return clients
 	 */
 	public static MClient[] getAll (Properties ctx, String orderBy)
@@ -134,7 +135,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	@SuppressWarnings("unused")
 	private static CLogger	s_log	= CLogger.getCLogger (MClient.class);
 	/**	Cache						*/
-	private static ImmutableIntPOCache<Integer,MClient>	s_cache = new ImmutableIntPOCache<Integer,MClient>(Table_Name, 3, 120, true);
+	private static ImmutableIntPOCache<Integer,MClient>	s_cache = new ImmutableIntPOCache<Integer,MClient>(Table_Name, 3, 120);
 
 
 	/**************************************************************************
@@ -152,8 +153,6 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 		{
 			if (m_createNew)
 			{
-			//	setValue (null);
-			//	setName (null);
 				setAD_Org_ID(0);
 				setIsMultiLingualDocument (false);
 				setIsSmtpAuthorization (false);
@@ -456,6 +455,13 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 			AD_Tree_Org_ID, AD_Tree_BPartner_ID, AD_Tree_Project_ID,
 			AD_Tree_SalesRegion_ID, AD_Tree_Product_ID,
 			AD_Tree_Campaign_ID, AD_Tree_Activity_ID, get_TrxName());
+		int defaultStorageProvider = MStorageProvider.getDefaultStorageProviderID();
+		if (defaultStorageProvider > 0)
+		{
+			clientInfo.setAD_StorageProvider_ID(defaultStorageProvider);
+			clientInfo.setStorageImage_ID(defaultStorageProvider);
+			clientInfo.setStorageArchive_ID(defaultStorageProvider);
+		}
 		success = clientInfo.save();
 		return success;
 	}	//	createTrees
@@ -555,8 +561,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 		}
 		catch (Exception ex)
 		{
-			log.severe(getName() + " - " + ex.getLocalizedMessage());
-			return ex.getLocalizedMessage();
+			throw new AdempiereException(ex);
 		}
 	}	//	testEMail
 
@@ -582,7 +587,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	 *	@param AD_User_ID recipient
 	 *	@param subject subject
 	 *	@param message message
-	 *	@param attachment optional collection of attachments
+	 *	@param attachments optional collection of attachments
 	 *	@return true if sent
 	 */
 	public boolean sendEMailAttachments (int AD_User_ID,
@@ -596,7 +601,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	 *	@param AD_User_ID recipient
 	 *	@param subject subject
 	 *	@param message message
-	 *	@param attachment optional collection of attachments
+	 *	@param attachments optional collection of attachments
 	 *  @param html
 	 *	@return true if sent
 	 */
@@ -631,7 +636,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	 *	@param to recipient
 	 *	@param subject subject
 	 *	@param message message
-	 *	@param attachment optional attachment
+	 *	@param attachments optional attachment
 	 *	@return true if sent
 	 */
 	public boolean sendEMailAttachments (MUser from, MUser to,
@@ -646,7 +651,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	 *	@param to recipient
 	 *	@param subject subject
 	 *	@param message message
-	 *	@param attachment optional attachment
+	 *	@param attachments optional attachment
 	 *  @param isHtml
 	 *	@return true if sent
 	 */
@@ -899,7 +904,12 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 		EMail email = new EMail (this,
 				   from, to,
 				   subject, message, html);
-		if (isSmtpAuthorization())
+
+		MSMTP smtp = MSMTP.get(getCtx(), getAD_Client_ID(), from, get_TrxName());
+
+		if (smtp != null && smtp.isSmtpAuthorization())
+			email.createAuthenticator (smtp.getRequestUser(), smtp.getRequestUserPW());
+		else if (isSmtpAuthorization())
 			email.createAuthenticator (getRequestUser(), getRequestUserPW());
 		return email;
 	}	//	createEMailFrom
@@ -1016,7 +1026,6 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	 *
 	 *	@return boolean representing if client accounting is enabled and it's on a client
 	 */
-	//private static final String CLIENT_ACCOUNTING_DISABLED = "D";
 	private static final String CLIENT_ACCOUNTING_QUEUE = "Q";
 	private static final String CLIENT_ACCOUNTING_IMMEDIATE = "I";
 
@@ -1046,7 +1055,7 @@ public class MClient extends X_AD_Client implements ImmutablePOSupport
 	private ArrayList<Integer>	m_fieldAccess = null;
 	/**
 	 * 	Define is a field is displayed based on ASP rules
-	 * 	@param ad_field_id
+	 * 	@param aDFieldID
 	 *	@return boolean indicating if it's displayed or not
 	 */
 	public boolean isDisplayField(int aDFieldID) {

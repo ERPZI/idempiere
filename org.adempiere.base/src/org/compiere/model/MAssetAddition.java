@@ -81,30 +81,12 @@ public class MAssetAddition extends X_A_Asset_Addition
 			setA_CapvsExp(A_CAPVSEXP_Capital);
 		}
 		
-		//
-		// Check suspect asset values (UseLife, Amount etc):
-		/* arhipac: teo_sarca: TODO need to integrate
-		if (hasZeroValues() && (!m_confirmed_AssetValues && !isProcessed() && is_UserEntry()))
-		{
-			String msg = "@AssetValueAmt@="+getAssetValueAmt()
-						+ "\n@DeltaUseLifeYears@="+getDeltaUseLifeYears()
-							+ "\n@DeltaUseLifeYears_F@="+getDeltaUseLifeYears_F()+"\n";
-			m_confirmed_AssetValues = UIFactory.getUI().ask(get_WindowNo(), null, "Confirm", Msg.parseTranslation(getCtx(), msg), true);
-			if (!m_confirmed_AssetValues)
-			{
-				throw new AssetCheckDocumentException(msg);
-			}
-		}
-		*/
-		
 		// set approved
 		setIsApproved();
 		
 		return true;
 	}	//	beforeSave
 	
-//	private boolean m_confirmed_AssetValues = false;
-
 	/**
 	 * Create Asset and asset Addition from MMatchInv.
 	 * MAssetAddition is saved.
@@ -139,7 +121,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 	/**
 	 * Create Asset and asset Addition from MIFixedAsset. MAssetAddition is saved. 
 	 * (@win note, not referenced from anywhere. incomplete feature)
-	 * @param	match	match invoice
+	 * @param	ifa
 	 * @return asset addition
 	 */
 	public static MAssetAddition createAsset(MIFixedAsset ifa)
@@ -322,7 +304,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		Timestamp dateAcct = ifa.getDateAcct();
 		if (dateAcct != null)
 		{
-			//dateAcct = UseLifeImpl.getDateAcct(dateAcct, 1); //commented by @win -- i don't see why i should add 1 month
 			if (log.isLoggable(Level.FINE)) log.fine("DateAcct=" + dateAcct);
 			setDateAcct(dateAcct);
 		}
@@ -389,7 +370,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 	 * Copy fields from MatchInv+InvoiceLine+InOutLine
 	 * @param model - to copy from
 	 * @param M_MatchInv_ID - matching invoice id
-	 * @param newRecord new object model is created
 	 */
 	public static boolean setM_MatchInv(SetGetModel model, int M_MatchInv_ID)
 	{
@@ -429,27 +409,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		}
 		query += qMatchInv_from + M_MatchInv_ID;
 		
-		/*
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try
-		{
-			pstmt = DB.prepareStatement(query, trxName);
-			DB.setParameters(pstmt, params);
-			rs = pstmt.executeQuery();
-			updateColumns(models, columnNames, rs);
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, query);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		*/
 		SetGetUtil.updateColumns(model, null, query, trxName);
 		
 		s_log.fine("Leaving: RETURN TRUE");
@@ -530,7 +489,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
-	//	setProcessing(false);
 		return true;
 	}	//	unlockIt
 	
@@ -562,17 +520,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		}
 		
 		MAsset asset = getA_Asset(true);
-		
-		// Additions may be made ​​only on sites that depreciates FA 
-		// (WARNING: FA sites scrapped / sold not depreciate)
-		
-		/* @win temporary comment as some assets are not depreciated
-		if(!isA_CreateAsset() && !asset.isDepreciated())
-		{
-			m_processMsg = "@AssetIsNotDepreciating@";
-			return DocAction.STATUS_Invalid;
-		}
-		*/
 		
 		// If new assets (not renewals) must have nonzero values
 		if (isA_CreateAsset() && hasZeroValues())
@@ -705,15 +652,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 		}
 		if (log.isLoggable(Level.FINE)) log.fine("workfile: " + assetwk);
-		//
-		// Can not upgrade a previous period
-		/* 
-		if (!isA_CreateAsset() && assetwk.isDepreciated(getDateAcct()))
-		{
-			throw new AssetAlreadyDepreciatedException();
-		}
-		*/
-		//
+
 		for (MDepreciationWorkfile assetworkFile :  MDepreciationWorkfile.forA_Asset_ID(getCtx(), getA_Asset_ID(), get_TrxName()))
 		{
 			if (A_SOURCETYPE_Imported.equals(getA_SourceType()) && assetworkFile.getC_AcctSchema_ID() != getI_FixedAsset().getC_AcctSchema_ID())
@@ -772,37 +711,8 @@ public class MAssetAddition extends X_A_Asset_Addition
 			// Rebuild depreciation:
 			assetworkFile.buildDepreciation();
 		}		
-				
 		
 		MAssetChange.createAddition(this, assetwk);
-		
-		
-		// Accumulated depreciation (if any):
-		/*
-		if (isA_Accumulated_Depr_Adjust())
-		{
-			Collection<MDepreciationExp> expenses = MDepreciationExp.createDepreciation(assetwk,
-														1, // PeriodNo
-														getDateAcct(),
-														getA_Accumulated_Depr(), getA_Accumulated_Depr_F(),
-														null,	// Accum Amt
-														null,	// Accum Amt (F)
-														null,	// Help
-														null);
-			for (MDepreciationExp exp : expenses)
-			{
-				exp.setA_Asset_Addition_ID(getA_Asset_Addition_ID());
-				exp.process();
-			}
-			
-			if (isA_CreateAsset() && isA_Accumulated_Depr_Adjust())
-			{
-				assetwk.setA_Current_Period(getA_Period_Start());
-				assetwk.saveEx();
-			}
-		}
-		*/
-		
 		
 		//
 		updateSourceDocument(false);
@@ -914,8 +824,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		{
 			MAsset asset = getA_Asset(true);
 			asset.changeStatus(MAsset.A_ASSET_STATUS_New, getDateAcct());
-			//asset.isDepreciated();
-			//asset.setIsDepreciated(true);
 			asset.saveEx();
 			
 			

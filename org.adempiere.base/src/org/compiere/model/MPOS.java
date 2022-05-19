@@ -74,7 +74,8 @@ public class MPOS extends X_C_POS implements ImmutablePOSupport
 	/**
 	 * 	Get POSes for passed argument
 	 *	@param ctx context
-	 *	@param C_POS_ID id
+	 *  @param field
+	 *  @param ID
 	 *	@return POSes
 	 */
 	public static MPOS[] getAll (Properties ctx, String field, int ID)
@@ -102,12 +103,7 @@ public class MPOS extends X_C_POS implements ImmutablePOSupport
 		super (ctx, C_POS_ID, trxName);
 		if (C_POS_ID == 0)
 		{
-		//	setName (null);
-		//	setSalesRep_ID (0);
-		//	setC_CashBook_ID (0);
-		//	setM_PriceList_ID (0);
 			setIsModifyPrice (false);	// N
-		//	setM_Warehouse_ID (0);
 		}	
 	}	//	MPOS
 

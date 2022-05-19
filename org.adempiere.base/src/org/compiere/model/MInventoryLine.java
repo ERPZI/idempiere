@@ -69,21 +69,21 @@ public class MInventoryLine extends X_M_InventoryLine
 	 */
 	public MInventoryLine (Properties ctx, int M_InventoryLine_ID, String trxName)
 	{
-		super (ctx, M_InventoryLine_ID, trxName);
+		this (ctx, M_InventoryLine_ID, trxName, (String[]) null);
+	}	//	MInventoryLine
+
+	public MInventoryLine(Properties ctx, int M_InventoryLine_ID, String trxName, String... virtualColumns) {
+		super(ctx, M_InventoryLine_ID, trxName, virtualColumns);
 		if (M_InventoryLine_ID == 0)
 		{
-		//	setM_Inventory_ID (0);			//	Parent
-		//	setM_InventoryLine_ID (0);		//	PK
-		//	setM_Locator_ID (0);			//	FK
 			setLine(0);
-		//	setM_Product_ID (0);			//	FK
 			setM_AttributeSetInstance_ID(0);	//	FK
 			setInventoryType (INVENTORYTYPE_InventoryDifference);
 			setQtyBook (Env.ZERO);
 			setQtyCount (Env.ZERO);
 			setProcessed(false);
 		}
-	}	//	MInventoryLine
+	}
 
 	/**
 	 * 	Load Constructor
@@ -127,7 +127,6 @@ public class MInventoryLine extends X_M_InventoryLine
 			setQtyCount (QtyCount);
 		if (QtyInternalUse != null && QtyInternalUse.signum() != 0)
 			setQtyInternalUse (QtyInternalUse);
-		// m_isManualEntry = false;
 	}	//	MInventoryLine
 
 	public MInventoryLine (MInventory inventory, 
@@ -170,8 +169,6 @@ public class MInventoryLine extends X_M_InventoryLine
 		this.m_product = copy.m_product != null ? new MProduct(ctx, copy.m_product, trxName) : null;
 	}
 
-	/** Manually created				*/
-	//protected boolean 	m_isManualEntry = true;
 	/** Parent							*/
 	protected MInventory 	m_parent = null;
 	/** Product							*/
@@ -293,8 +290,8 @@ public class MInventoryLine extends X_M_InventoryLine
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_InventoryLine"));
+		if (newRecord && getParent().isProcessed()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Inventory_ID"));
 			return false;
 		}
 
@@ -306,15 +303,6 @@ public class MInventoryLine extends X_M_InventoryLine
 			setLine (ii);
 		}
 
-		// Enforce QtyCount >= 0  - teo_sarca BF [ 1722982 ]
-		// GlobalQSS -> reverting this change because of Bug 2904321 - Create Inventory Count List not taking negative qty products
-		/*
-		if ( (!newRecord) && is_ValueChanged("QtyCount") && getQtyCount().signum() < 0)
-		{
-			log.saveError("Warning", Msg.getElement(getCtx(), COLUMNNAME_QtyCount)+" < 0");
-			return false;
-		}
-		*/
 		//	Enforce Qty UOM
 		if (newRecord || is_ValueChanged("QtyCount"))
 			setQtyCount(getQtyCount());
@@ -395,6 +383,9 @@ public class MInventoryLine extends X_M_InventoryLine
 					log.saveError("NoCostingRecord", "");
 					return false;
 				}
+			} else {
+				if (is_new() || is_ValueChanged(COLUMNNAME_M_Product_ID) || is_ValueChanged(COLUMNNAME_M_AttributeSetInstance_ID))
+					setCurrentCostPrice(cost.getCurrentCostPrice());
 			}
 			setM_Locator_ID(0);
 		} else {
@@ -409,67 +400,6 @@ public class MInventoryLine extends X_M_InventoryLine
 		return true;
 	}	//	beforeSave
 
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return true
-	 */
-	//protected boolean afterSave (boolean newRecord, boolean success)
-	//{
-	//	if (!success)
-	//		return false;
-	//	
-	//	//	Create MA
-	//	//if (newRecord && success 
-	//	//	&& m_isManualEntry && getM_AttributeSetInstance_ID() == 0)
-	//	//	createMA();
-	//	return true;
-	//}	//	afterSave
-	
-	/**
-	 * 	Create Material Allocations for new Instances
-	 */
-	/*protected void createMA()
-	{
-		MStorageOnHand[] storages = MStorageOnHand.getAll(getCtx(), getM_Product_ID(), 
-			getM_Locator_ID(), get_TrxName());
-		boolean allZeroASI = true;
-		for (int i = 0; i < storages.length; i++)
-		{
-			if (storages[i].getM_AttributeSetInstance_ID() != 0)
-			{
-				allZeroASI = false;
-				break;
-			}
-		}
-		if (allZeroASI)
-			return;
-		
-		MInventoryLineMA ma = null; 
-		BigDecimal sum = Env.ZERO;
-		for (int i = 0; i < storages.length; i++)
-		{
-			MStorageOnHand storage = storages[i];
-			if (storage.getQtyOnHand().signum() == 0)
-				continue;
-			if (ma != null 
-				&& ma.getM_AttributeSetInstance_ID() == storage.getM_AttributeSetInstance_ID())
-				ma.setMovementQty(ma.getMovementQty().add(storage.getQtyOnHand()));
-			else
-				ma = new MInventoryLineMA (this, 
-					storage.getM_AttributeSetInstance_ID(), storage.getQtyOnHand());
-			if (!ma.save())
-				;
-			sum = sum.add(storage.getQtyOnHand());
-		}
-		if (sum.compareTo(getQtyBook()) != 0)
-		{
-			log.warning("QtyBook=" + getQtyBook() + " corrected to Sum of MA=" + sum);
-			setQtyBook(sum);
-		}
-	}	//	createMA*/
-	
 	/**
 	 * Is Internal Use Inventory
 	 * @return true if is internal use inventory

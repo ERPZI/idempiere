@@ -52,11 +52,6 @@ public class MMovementLine extends X_M_MovementLine
 		super (ctx, M_MovementLine_ID, trxName);
 		if (M_MovementLine_ID == 0)
 		{
-		//	setM_LocatorTo_ID (0);	// @M_LocatorTo_ID@
-		//	setM_Locator_ID (0);	// @M_Locator_ID@
-		//	setM_MovementLine_ID (0);			
-		//	setLine (0);	
-		//	setM_Product_ID (0);
 			setM_AttributeSetInstance_ID(0);	//	ID
 			setMovementQty (Env.ZERO);	// 1
 			setTargetQty (Env.ZERO);	// 0
@@ -167,8 +162,8 @@ public class MMovementLine extends X_M_MovementLine
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_MovementLine"));
+		if (newRecord && getParent().isProcessed()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Movement_ID"));
 			return false;
 		}
 		if (getParent().pendingConfirmations()) {
@@ -254,14 +249,14 @@ public class MMovementLine extends X_M_MovementLine
 	 *      Set Distribution Order Line. 
 	 *      Does not set Quantity! 
 	 *      @param oLine order line 
-	 *      @param M_Locator_ID locator 
 	 *      @param Qty used only to find suitable locator 
+	 *      @param isReceipt 
 	 */ 
 	public void setOrderLine (MDDOrderLine oLine, BigDecimal Qty, boolean isReceipt) 
 	{ 
 		setDD_OrderLine_ID(oLine.getDD_OrderLine_ID()); 
 		setLine(oLine.getLine()); 
-		//setC_UOM_ID(oLine.getC_UOM_ID()); 
+
 		MProduct product = oLine.getProduct(); 
 		if (product == null) 
 		{ 

@@ -28,13 +28,16 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.base.event.EventManager;
+import org.adempiere.base.event.EventProperty;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-import org.idempiere.cache.ImmutablePOSupport;
 import org.idempiere.cache.ImmutablePOCache;
+import org.idempiere.cache.ImmutablePOSupport;
+import org.osgi.service.event.Event;
 
 /**
  *	Status Line Model
@@ -47,17 +50,21 @@ public class MStatusLine extends X_AD_StatusLine implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2804602992872075936L;
+	private static final long serialVersionUID = -1542116796861052734L;
+
 	/**	Logging								*/
 	private static CLogger		s_log = CLogger.getCLogger(MStatusLine.class);
 	/** Status Line Cache				*/
 	private static ImmutablePOCache<String, MStatusLine> s_cache = new ImmutablePOCache<String, MStatusLine>(Table_Name, 10);
 	private static CCache<String, MStatusLine[]> s_cachew = new CCache<String, MStatusLine[]>(Table_Name, Table_Name+"|MStatusLine[]", 10);
 
+	public static final String BEFORE_PARSE_STATUS_LINE = "idempiere/statusLine/beforeParse";
+	public static final String EVENT_WINDOWNO = "event.windowno";
+
 	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
-	 *	@param AD_Window_ID
+	 *	@param AD_StatusLine_ID
 	 *	@param trxName transaction
 	 */
 	public MStatusLine (Properties ctx, int AD_StatusLine_ID, String trxName)
@@ -165,7 +172,7 @@ public class MStatusLine extends X_AD_StatusLine implements ImmutablePOSupport
 	}
 
 	/**
-	 * Get the widget lines defined for the window&tab&table (immutable)
+	 * Get the widget lines defined for the window and tab and table (immutable)
 	 * @param window_ID
 	 * @param tab_ID
 	 * @param table_ID
@@ -211,6 +218,10 @@ public class MStatusLine extends X_AD_StatusLine implements ImmutablePOSupport
 	}
 
 	public String parseLine(int windowNo) {
+		Event event = EventManager.newEvent(BEFORE_PARSE_STATUS_LINE,
+				new EventProperty(EventManager.EVENT_DATA, this), new EventProperty(EVENT_WINDOWNO, windowNo));
+		EventManager.getInstance().sendEvent(event);
+
 		String sql = getSQLStatement();
 
 		if (sql.indexOf("@") >= 0) {

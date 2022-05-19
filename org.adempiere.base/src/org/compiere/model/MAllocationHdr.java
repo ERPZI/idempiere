@@ -43,11 +43,11 @@ import org.compiere.util.Msg;
  *  @version 	$Id: MAllocationHdr.java,v 1.3 2006/07/30 00:51:03 jjanke Exp $
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  *  			<li>FR [ 1866214 ]  
- *				<li> http://sourceforge.net/tracker/index.php?func=detail&aid=1866214&group_id=176962&atid=879335
+ *				<li> https://sourceforge.net/p/adempiere/feature-requests/298/
  * 				<li>FR [ 2520591 ] Support multiples calendar for Org 
- *				<li> http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 
+ *				<li> https://sourceforge.net/p/adempiere/feature-requests/631/ 
  *				<li>BF [ 2880182 ] Error you can allocate a payment to invoice that was paid
- *				<li> https://sourceforge.net/tracker/index.php?func=detail&aid=2880182&group_id=176962&atid=879332
+ *				<li> https://sourceforge.net/p/adempiere/bugs/2181/
 */
 public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 {
@@ -170,12 +170,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		super (ctx, C_AllocationHdr_ID, trxName);
 		if (C_AllocationHdr_ID == 0)
 		{
-		//	setDocumentNo (null);
 			setDateTrx (new Timestamp(System.currentTimeMillis()));
 			setDateAcct (getDateTrx());
-			setDocAction (DOCACTION_Complete);	// CO
-			setDocStatus (DOCSTATUS_Drafted);	// DR
-		//	setC_Currency_ID (0);
+			setDocAction (DOCACTION_Complete);
+			setDocStatus (DOCSTATUS_Drafted);
 			setApprovalAmt (Env.ZERO);
 			setIsApproved (false);
 			setIsManual (false);
@@ -841,7 +839,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		}
 	
 
-		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), "#Date") : getDateAcct();
+		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getDateAcct();
 		if (reversalDate == null) {
 			reversalDate = new Timestamp(System.currentTimeMillis());
 		}
@@ -1067,7 +1065,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			description = Env.parseVariable(description, this, trxName, true);
 			description = Msg.parseTranslation(getCtx(), description);
 		} else
-			description = Env.getContext(getCtx(), "#AD_User_Name"); // just to be sure
+			description = Env.getContext(getCtx(), Env.AD_USER_NAME); // just to be sure
 
 		return description;
 	}

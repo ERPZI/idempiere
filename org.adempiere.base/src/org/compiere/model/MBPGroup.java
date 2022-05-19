@@ -209,8 +209,6 @@ public class MBPGroup extends X_C_BP_Group implements ImmutablePOSupport
 		super (ctx, C_BP_Group_ID, trxName);
 		if (C_BP_Group_ID == 0)
 		{
-		//	setValue (null);
-		//	setName (null);
 			setIsConfidentialInfo (false);	// N
 			setIsDefault (false);
 			setPriorityBase(PRIORITYBASE_Same);
@@ -258,7 +256,11 @@ public class MBPGroup extends X_C_BP_Group implements ImmutablePOSupport
 		this(ctx, 0, trxName);
 		copyPO(copy);
 	}
-	
+
+	public MBPGroup(Properties ctx, int C_BP_Group_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_BP_Group_ID, trxName, virtualColumns);
+	}
+
 	/**
 	 * 	Get Credit Watch Percent
 	 *	@return 90 or defined percent

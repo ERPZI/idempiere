@@ -89,11 +89,6 @@ public class MRfQ extends X_C_RfQ
 		super (ctx, C_RfQ_ID, trxName);
 		if (C_RfQ_ID == 0)
 		{
-		//	setC_RfQ_Topic_ID (0);
-		//	setName (null);
-		//	setC_Currency_ID (0);	// @$C_Currency_ID @
-		//	setSalesRep_ID (0);
-			//
 			setDateResponse (new Timestamp(System.currentTimeMillis()));
 			setDateWorkStart (new Timestamp(System.currentTimeMillis()));
 			setIsInvitedVendorsOnly (false);
@@ -157,7 +152,7 @@ public class MRfQ extends X_C_RfQ
 		ArrayList<MRfQLine> list = new ArrayList<MRfQLine>();
 		String sql = "SELECT * FROM C_RfQLine "
 			+ "WHERE C_RfQ_ID=? AND IsActive='Y' "
-			+ "ORDER BY Line";
+			+ "ORDER BY Line,C_RfQLine_ID ";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try

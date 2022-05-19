@@ -55,6 +55,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
+@org.adempiere.base.annotation.Process
 public class TranslationImpExp extends SvrProcess {
 
 	// Process to import or export translations
@@ -100,7 +101,7 @@ public class TranslationImpExp extends SvrProcess {
 
 		File tempFolder = null;
 		try {
-			if (! Util.isEmpty(p_FileName, true)) {
+			if (! Util.isEmpty(p_FileName, true) && "import".equals(p_ImportOrExport)) {
 				if (p_FileName.startsWith("http://") || p_FileName.startsWith("https://")) {
 					String tmpZip = null;
 					FileOutputStream fos = null;
@@ -132,7 +133,7 @@ public class TranslationImpExp extends SvrProcess {
 			}
 
 			Translation translation = new Translation(Env.getCtx());
-			String msg = translation.validateLanguage(p_AD_Language);
+			String msg = translation.validateLanguage(p_AD_Language, get_TrxName());
 			if (msg.length() > 0)
 				throw new AdempiereSystemError(msg);
 
@@ -151,7 +152,7 @@ public class TranslationImpExp extends SvrProcess {
 				String tableName = table.getTableName();
 				if ("import".equals(p_ImportOrExport)) {
 					statusUpdate(Msg.parseTranslation(getCtx(), "@Import@ " + tableName + " ..."));
-					msgProc = translation.importTrl(p_Folder, p_AD_Client_ID, p_AD_Language, tableName);
+					msgProc = translation.importTrl(p_Folder, p_AD_Client_ID, p_AD_Language, tableName, get_TrxName());
 				} else {
 					statusUpdate(Msg.parseTranslation(getCtx(), "@Export@ " + tableName + " ..."));
 					msgProc = translation.exportTrl(p_Folder, p_AD_Client_ID, p_AD_Language, tableName, p_IsOnlyCentralizedData);

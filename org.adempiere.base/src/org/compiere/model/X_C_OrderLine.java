@@ -26,14 +26,15 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_OrderLine
  *  @author iDempiere (generated) 
- *  @version Release 8.2 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="C_OrderLine")
 public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20201220L;
+	private static final long serialVersionUID = 20220116L;
 
     /** Standard Constructor */
     public X_C_OrderLine (Properties ctx, int C_OrderLine_ID, String trxName)
@@ -78,6 +79,48 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_OrderLine (Properties ctx, int C_OrderLine_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_OrderLine_ID, trxName, virtualColumns);
+      /** if (C_OrderLine_ID == 0)
+        {
+			setC_BPartner_Location_ID (0);
+// @C_BPartner_Location_ID@
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_Order_ID (0);
+			setC_OrderLine_ID (0);
+			setC_Tax_ID (0);
+			setC_UOM_ID (0);
+// @#C_UOM_ID@
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+// @DateOrdered@
+			setFreightAmt (Env.ZERO);
+			setIsDescription (false);
+// N
+			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM C_OrderLine WHERE C_Order_ID=@C_Order_ID@
+			setLineNetAmt (Env.ZERO);
+			setM_AttributeSetInstance_ID (0);
+			setM_Warehouse_ID (0);
+// @M_Warehouse_ID@
+			setPriceActual (Env.ZERO);
+			setPriceEntered (Env.ZERO);
+			setPriceLimit (Env.ZERO);
+			setPriceList (Env.ZERO);
+			setProcessed (false);
+			setQtyDelivered (Env.ZERO);
+			setQtyEntered (Env.ZERO);
+// 1
+			setQtyInvoiced (Env.ZERO);
+			setQtyLostSales (Env.ZERO);
+			setQtyOrdered (Env.ZERO);
+// 1
+			setQtyReserved (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_OrderLine (Properties ctx, ResultSet rs, String trxName)
     {
@@ -107,21 +150,20 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
     }
 
 	/** Set Trx Organization.
-		@param AD_OrgTrx_ID 
-		Performing or initiating organization
-	  */
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
 	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
 	{
-		if (AD_OrgTrx_ID < 1) 
+		if (AD_OrgTrx_ID < 1)
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
 	}
 
 	/** Get Trx Organization.
 		@return Performing or initiating organization
 	  */
-	public int getAD_OrgTrx_ID () 
+	public int getAD_OrgTrx_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
@@ -130,9 +172,10 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_Name)
-			.getPO(getC_Activity_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_ID)
+			.getPO(getC_Activity_ID(), get_TrxName());
+	}
 
 	/** Set Functional Area.
 		@param C_Activity_ID 
@@ -140,16 +183,16 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	  */
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
-		if (C_Activity_ID < 1) 
+		if (C_Activity_ID < 1)
 			set_Value (COLUMNNAME_C_Activity_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
 	/** Get Functional Area.
 		@return Business Activity
 	  */
-	public int getC_Activity_ID () 
+	public int getC_Activity_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
 		if (ii == null)
@@ -158,26 +201,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getC_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
 
-	/** Set Business Partner .
-		@param C_BPartner_ID 
-		Identifies a Business Partner
-	  */
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
 	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BPartner_ID < 1) 
+		if (C_BPartner_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 		@return Identifies a Business Partner
 	  */
-	public int getC_BPartner_ID () 
+	public int getC_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
@@ -186,26 +229,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getC_BPartner_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getC_BPartner_Location_ID(), get_TrxName());
+	}
 
 	/** Set Partner Location.
-		@param C_BPartner_Location_ID 
-		Identifies the (ship to) address for this Business Partner
-	  */
+		@param C_BPartner_Location_ID Identifies the (ship to) address for this Business Partner
+	*/
 	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID)
 	{
-		if (C_BPartner_Location_ID < 1) 
+		if (C_BPartner_Location_ID < 1)
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_BPartner_Location_ID, Integer.valueOf(C_BPartner_Location_ID));
 	}
 
 	/** Get Partner Location.
 		@return Identifies the (ship to) address for this Business Partner
 	  */
-	public int getC_BPartner_Location_ID () 
+	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
 		if (ii == null)
@@ -214,26 +257,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_Name)
-			.getPO(getC_Campaign_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_ID)
+			.getPO(getC_Campaign_ID(), get_TrxName());
+	}
 
 	/** Set Campaign.
-		@param C_Campaign_ID 
-		Marketing Campaign
-	  */
+		@param C_Campaign_ID Marketing Campaign
+	*/
 	public void setC_Campaign_ID (int C_Campaign_ID)
 	{
-		if (C_Campaign_ID < 1) 
+		if (C_Campaign_ID < 1)
 			set_Value (COLUMNNAME_C_Campaign_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Campaign_ID, Integer.valueOf(C_Campaign_ID));
 	}
 
 	/** Get Campaign.
 		@return Marketing Campaign
 	  */
-	public int getC_Campaign_ID () 
+	public int getC_Campaign_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Campaign_ID);
 		if (ii == null)
@@ -242,26 +285,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Charge getC_Charge() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_Name)
-			.getPO(getC_Charge_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
+			.getPO(getC_Charge_ID(), get_TrxName());
+	}
 
 	/** Set Charge.
-		@param C_Charge_ID 
-		Additional document charges
-	  */
+		@param C_Charge_ID Additional document charges
+	*/
 	public void setC_Charge_ID (int C_Charge_ID)
 	{
-		if (C_Charge_ID < 1) 
+		if (C_Charge_ID < 1)
 			set_Value (COLUMNNAME_C_Charge_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Charge_ID, Integer.valueOf(C_Charge_ID));
 	}
 
 	/** Get Charge.
 		@return Additional document charges
 	  */
-	public int getC_Charge_ID () 
+	public int getC_Charge_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Charge_ID);
 		if (ii == null)
@@ -270,26 +313,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_Name)
-			.getPO(getC_Currency_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getC_Currency_ID(), get_TrxName());
+	}
 
 	/** Set Currency.
-		@param C_Currency_ID 
-		The Currency for this record
-	  */
+		@param C_Currency_ID The Currency for this record
+	*/
 	public void setC_Currency_ID (int C_Currency_ID)
 	{
-		if (C_Currency_ID < 1) 
+		if (C_Currency_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_Currency_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
 	}
 
 	/** Get Currency.
 		@return The Currency for this record
 	  */
-	public int getC_Currency_ID () 
+	public int getC_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
 		if (ii == null)
@@ -298,26 +341,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_Name)
-			.getPO(getC_Order_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
+			.getPO(getC_Order_ID(), get_TrxName());
+	}
 
 	/** Set Order.
-		@param C_Order_ID 
-		Order
-	  */
+		@param C_Order_ID Order
+	*/
 	public void setC_Order_ID (int C_Order_ID)
 	{
-		if (C_Order_ID < 1) 
+		if (C_Order_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
 	}
 
 	/** Get Order.
 		@return Order
 	  */
-	public int getC_Order_ID () 
+	public int getC_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
 		if (ii == null)
@@ -334,21 +377,20 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
     }
 
 	/** Set Sales Order Line.
-		@param C_OrderLine_ID 
-		Sales Order Line
-	  */
+		@param C_OrderLine_ID Sales Order Line
+	*/
 	public void setC_OrderLine_ID (int C_OrderLine_ID)
 	{
-		if (C_OrderLine_ID < 1) 
+		if (C_OrderLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_OrderLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_OrderLine_ID, Integer.valueOf(C_OrderLine_ID));
 	}
 
 	/** Get Sales Order Line.
 		@return Sales Order Line
 	  */
-	public int getC_OrderLine_ID () 
+	public int getC_OrderLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_OrderLine_ID);
 		if (ii == null)
@@ -357,7 +399,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set C_OrderLine_UU.
-		@param C_OrderLine_UU C_OrderLine_UU	  */
+		@param C_OrderLine_UU C_OrderLine_UU
+	*/
 	public void setC_OrderLine_UU (String C_OrderLine_UU)
 	{
 		set_Value (COLUMNNAME_C_OrderLine_UU, C_OrderLine_UU);
@@ -365,32 +408,32 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 
 	/** Get C_OrderLine_UU.
 		@return C_OrderLine_UU	  */
-	public String getC_OrderLine_UU () 
+	public String getC_OrderLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_OrderLine_UU);
 	}
 
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_Name)
-			.getPO(getC_Project_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
 
 	/** Set Project.
-		@param C_Project_ID 
-		Financial Project
-	  */
+		@param C_Project_ID Financial Project
+	*/
 	public void setC_Project_ID (int C_Project_ID)
 	{
-		if (C_Project_ID < 1) 
+		if (C_Project_ID < 1)
 			set_Value (COLUMNNAME_C_Project_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
 	}
 
 	/** Get Project.
 		@return Financial Project
 	  */
-	public int getC_Project_ID () 
+	public int getC_Project_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
@@ -399,26 +442,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_ProjectPhase getC_ProjectPhase() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_Name)
-			.getPO(getC_ProjectPhase_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_ID)
+			.getPO(getC_ProjectPhase_ID(), get_TrxName());
+	}
 
 	/** Set Project Phase.
-		@param C_ProjectPhase_ID 
-		Phase of a Project
-	  */
+		@param C_ProjectPhase_ID Phase of a Project
+	*/
 	public void setC_ProjectPhase_ID (int C_ProjectPhase_ID)
 	{
-		if (C_ProjectPhase_ID < 1) 
+		if (C_ProjectPhase_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_ProjectPhase_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_ProjectPhase_ID, Integer.valueOf(C_ProjectPhase_ID));
 	}
 
 	/** Get Project Phase.
 		@return Phase of a Project
 	  */
-	public int getC_ProjectPhase_ID () 
+	public int getC_ProjectPhase_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectPhase_ID);
 		if (ii == null)
@@ -427,26 +470,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_ProjectTask getC_ProjectTask() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ProjectTask)MTable.get(getCtx(), org.compiere.model.I_C_ProjectTask.Table_Name)
-			.getPO(getC_ProjectTask_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ProjectTask)MTable.get(getCtx(), org.compiere.model.I_C_ProjectTask.Table_ID)
+			.getPO(getC_ProjectTask_ID(), get_TrxName());
+	}
 
 	/** Set Project Task.
-		@param C_ProjectTask_ID 
-		Actual Project Task in a Phase
-	  */
+		@param C_ProjectTask_ID Actual Project Task in a Phase
+	*/
 	public void setC_ProjectTask_ID (int C_ProjectTask_ID)
 	{
-		if (C_ProjectTask_ID < 1) 
+		if (C_ProjectTask_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_C_ProjectTask_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_C_ProjectTask_ID, Integer.valueOf(C_ProjectTask_ID));
 	}
 
 	/** Get Project Task.
 		@return Actual Project Task in a Phase
 	  */
-	public int getC_ProjectTask_ID () 
+	public int getC_ProjectTask_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectTask_ID);
 		if (ii == null)
@@ -455,7 +498,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Create Production.
-		@param CreateProduction Create Production	  */
+		@param CreateProduction Create Production
+	*/
 	public void setCreateProduction (String CreateProduction)
 	{
 		set_Value (COLUMNNAME_CreateProduction, CreateProduction);
@@ -463,13 +507,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 
 	/** Get Create Production.
 		@return Create Production	  */
-	public String getCreateProduction () 
+	public String getCreateProduction()
 	{
 		return (String)get_Value(COLUMNNAME_CreateProduction);
 	}
 
 	/** Set Create Shipment.
-		@param CreateShipment Create Shipment	  */
+		@param CreateShipment Create Shipment
+	*/
 	public void setCreateShipment (String CreateShipment)
 	{
 		set_Value (COLUMNNAME_CreateShipment, CreateShipment);
@@ -477,32 +522,32 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 
 	/** Get Create Shipment.
 		@return Create Shipment	  */
-	public String getCreateShipment () 
+	public String getCreateShipment()
 	{
 		return (String)get_Value(COLUMNNAME_CreateShipment);
 	}
 
 	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_Name)
-			.getPO(getC_Tax_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_ID)
+			.getPO(getC_Tax_ID(), get_TrxName());
+	}
 
 	/** Set Tax.
-		@param C_Tax_ID 
-		Tax identifier
-	  */
+		@param C_Tax_ID Tax identifier
+	*/
 	public void setC_Tax_ID (int C_Tax_ID)
 	{
-		if (C_Tax_ID < 1) 
+		if (C_Tax_ID < 1)
 			set_Value (COLUMNNAME_C_Tax_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
 	}
 
 	/** Get Tax.
 		@return Tax identifier
 	  */
-	public int getC_Tax_ID () 
+	public int getC_Tax_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Tax_ID);
 		if (ii == null)
@@ -511,26 +556,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_Name)
-			.getPO(getC_UOM_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_ID)
+			.getPO(getC_UOM_ID(), get_TrxName());
+	}
 
 	/** Set UOM.
-		@param C_UOM_ID 
-		Unit of Measure
-	  */
+		@param C_UOM_ID Unit of Measure
+	*/
 	public void setC_UOM_ID (int C_UOM_ID)
 	{
-		if (C_UOM_ID < 1) 
-			set_Value (COLUMNNAME_C_UOM_ID, null);
-		else 
-			set_Value (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
+		if (C_UOM_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_UOM_ID, Integer.valueOf(C_UOM_ID));
 	}
 
 	/** Get UOM.
 		@return Unit of Measure
 	  */
-	public int getC_UOM_ID () 
+	public int getC_UOM_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_UOM_ID);
 		if (ii == null)
@@ -539,9 +584,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Date Delivered.
-		@param DateDelivered 
-		Date when the product was delivered
-	  */
+		@param DateDelivered Date when the product was delivered
+	*/
 	public void setDateDelivered (Timestamp DateDelivered)
 	{
 		set_ValueNoCheck (COLUMNNAME_DateDelivered, DateDelivered);
@@ -550,15 +594,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Date Delivered.
 		@return Date when the product was delivered
 	  */
-	public Timestamp getDateDelivered () 
+	public Timestamp getDateDelivered()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateDelivered);
 	}
 
 	/** Set Date Invoiced.
-		@param DateInvoiced 
-		Date printed on Invoice
-	  */
+		@param DateInvoiced Date printed on Invoice
+	*/
 	public void setDateInvoiced (Timestamp DateInvoiced)
 	{
 		set_ValueNoCheck (COLUMNNAME_DateInvoiced, DateInvoiced);
@@ -567,15 +610,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Date Invoiced.
 		@return Date printed on Invoice
 	  */
-	public Timestamp getDateInvoiced () 
+	public Timestamp getDateInvoiced()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateInvoiced);
 	}
 
 	/** Set Date Ordered.
-		@param DateOrdered 
-		Date of Order
-	  */
+		@param DateOrdered Date of Order
+	*/
 	public void setDateOrdered (Timestamp DateOrdered)
 	{
 		set_Value (COLUMNNAME_DateOrdered, DateOrdered);
@@ -584,15 +626,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Date Ordered.
 		@return Date of Order
 	  */
-	public Timestamp getDateOrdered () 
+	public Timestamp getDateOrdered()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateOrdered);
 	}
 
 	/** Set Date Promised.
-		@param DatePromised 
-		Date Order was promised
-	  */
+		@param DatePromised Date Order was promised
+	*/
 	public void setDatePromised (Timestamp DatePromised)
 	{
 		set_Value (COLUMNNAME_DatePromised, DatePromised);
@@ -601,15 +642,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Date Promised.
 		@return Date Order was promised
 	  */
-	public Timestamp getDatePromised () 
+	public Timestamp getDatePromised()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
 	}
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -618,15 +658,14 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Discount %.
-		@param Discount 
-		Discount in percent
-	  */
+		@param Discount Discount in percent
+	*/
 	public void setDiscount (BigDecimal Discount)
 	{
 		set_Value (COLUMNNAME_Discount, Discount);
@@ -635,7 +674,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Discount %.
 		@return Discount in percent
 	  */
-	public BigDecimal getDiscount () 
+	public BigDecimal getDiscount()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Discount);
 		if (bd == null)
@@ -644,9 +683,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Freight Amount.
-		@param FreightAmt 
-		Freight Amount 
-	  */
+		@param FreightAmt Freight Amount 
+	*/
 	public void setFreightAmt (BigDecimal FreightAmt)
 	{
 		set_Value (COLUMNNAME_FreightAmt, FreightAmt);
@@ -655,7 +693,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Freight Amount.
 		@return Freight Amount 
 	  */
-	public BigDecimal getFreightAmt () 
+	public BigDecimal getFreightAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_FreightAmt);
 		if (bd == null)
@@ -664,9 +702,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Description Only.
-		@param IsDescription 
-		if true, the line is just description and no transaction
-	  */
+		@param IsDescription if true, the line is just description and no transaction
+	*/
 	public void setIsDescription (boolean IsDescription)
 	{
 		set_Value (COLUMNNAME_IsDescription, Boolean.valueOf(IsDescription));
@@ -675,7 +712,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Description Only.
 		@return if true, the line is just description and no transaction
 	  */
-	public boolean isDescription () 
+	public boolean isDescription()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDescription);
 		if (oo != null) 
@@ -688,9 +725,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Line No.
-		@param Line 
-		Unique line for this document
-	  */
+		@param Line Unique line for this document
+	*/
 	public void setLine (int Line)
 	{
 		set_Value (COLUMNNAME_Line, Integer.valueOf(Line));
@@ -699,7 +735,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Line No.
 		@return Unique line for this document
 	  */
-	public int getLine () 
+	public int getLine()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Line);
 		if (ii == null)
@@ -708,9 +744,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Line Amount.
-		@param LineNetAmt 
-		Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	  */
+		@param LineNetAmt Line Extended Amount (Quantity * Actual Price) without Freight and Charges
+	*/
 	public void setLineNetAmt (BigDecimal LineNetAmt)
 	{
 		set_ValueNoCheck (COLUMNNAME_LineNetAmt, LineNetAmt);
@@ -719,7 +754,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Line Amount.
 		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
-	public BigDecimal getLineNetAmt () 
+	public BigDecimal getLineNetAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineNetAmt);
 		if (bd == null)
@@ -728,26 +763,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_OrderLine getLink_OrderLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_Name)
-			.getPO(getLink_OrderLine_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
+			.getPO(getLink_OrderLine_ID(), get_TrxName());
+	}
 
 	/** Set Linked Order Line.
-		@param Link_OrderLine_ID 
-		This field links a sales order line to the purchase order line that is generated from it.
-	  */
+		@param Link_OrderLine_ID This field links a sales order line to the purchase order line that is generated from it.
+	*/
 	public void setLink_OrderLine_ID (int Link_OrderLine_ID)
 	{
-		if (Link_OrderLine_ID < 1) 
+		if (Link_OrderLine_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_Link_OrderLine_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_Link_OrderLine_ID, Integer.valueOf(Link_OrderLine_ID));
 	}
 
 	/** Get Linked Order Line.
 		@return This field links a sales order line to the purchase order line that is generated from it.
 	  */
-	public int getLink_OrderLine_ID () 
+	public int getLink_OrderLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Link_OrderLine_ID);
 		if (ii == null)
@@ -756,26 +791,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
-    {
-		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_Name)
-			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());	}
+	{
+		return (I_M_AttributeSetInstance)MTable.get(getCtx(), I_M_AttributeSetInstance.Table_ID)
+			.getPO(getM_AttributeSetInstance_ID(), get_TrxName());
+	}
 
 	/** Set Attribute Set Instance.
-		@param M_AttributeSetInstance_ID 
-		Product Attribute Set Instance
-	  */
+		@param M_AttributeSetInstance_ID Product Attribute Set Instance
+	*/
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
-		if (M_AttributeSetInstance_ID < 0) 
+		if (M_AttributeSetInstance_ID < 0)
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
 	}
 
 	/** Get Attribute Set Instance.
 		@return Product Attribute Set Instance
 	  */
-	public int getM_AttributeSetInstance_ID () 
+	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
 		if (ii == null)
@@ -784,26 +819,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_Name)
-			.getPO(getM_Product_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getM_Product_ID(), get_TrxName());
+	}
 
 	/** Set Product.
-		@param M_Product_ID 
-		Product, Service, Item
-	  */
+		@param M_Product_ID Product, Service, Item
+	*/
 	public void setM_Product_ID (int M_Product_ID)
 	{
-		if (M_Product_ID < 1) 
+		if (M_Product_ID < 1)
 			set_Value (COLUMNNAME_M_Product_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
 	}
 
 	/** Get Product.
 		@return Product, Service, Item
 	  */
-	public int getM_Product_ID () 
+	public int getM_Product_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
 		if (ii == null)
@@ -812,23 +847,25 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_M_Promotion getM_Promotion() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Promotion)MTable.get(getCtx(), org.compiere.model.I_M_Promotion.Table_Name)
-			.getPO(getM_Promotion_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Promotion)MTable.get(getCtx(), org.compiere.model.I_M_Promotion.Table_ID)
+			.getPO(getM_Promotion_ID(), get_TrxName());
+	}
 
 	/** Set Promotion.
-		@param M_Promotion_ID Promotion	  */
+		@param M_Promotion_ID Promotion
+	*/
 	public void setM_Promotion_ID (int M_Promotion_ID)
 	{
-		if (M_Promotion_ID < 1) 
+		if (M_Promotion_ID < 1)
 			set_Value (COLUMNNAME_M_Promotion_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Promotion_ID, Integer.valueOf(M_Promotion_ID));
 	}
 
 	/** Get Promotion.
 		@return Promotion	  */
-	public int getM_Promotion_ID () 
+	public int getM_Promotion_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Promotion_ID);
 		if (ii == null)
@@ -837,26 +874,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Shipper)MTable.get(getCtx(), org.compiere.model.I_M_Shipper.Table_Name)
-			.getPO(getM_Shipper_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Shipper)MTable.get(getCtx(), org.compiere.model.I_M_Shipper.Table_ID)
+			.getPO(getM_Shipper_ID(), get_TrxName());
+	}
 
 	/** Set Shipper.
-		@param M_Shipper_ID 
-		Method or manner of product delivery
-	  */
+		@param M_Shipper_ID Method or manner of product delivery
+	*/
 	public void setM_Shipper_ID (int M_Shipper_ID)
 	{
-		if (M_Shipper_ID < 1) 
+		if (M_Shipper_ID < 1)
 			set_Value (COLUMNNAME_M_Shipper_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Shipper_ID, Integer.valueOf(M_Shipper_ID));
 	}
 
 	/** Get Shipper.
 		@return Method or manner of product delivery
 	  */
-	public int getM_Shipper_ID () 
+	public int getM_Shipper_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Shipper_ID);
 		if (ii == null)
@@ -865,26 +902,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
-    {
-		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_Name)
-			.getPO(getM_Warehouse_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_ID)
+			.getPO(getM_Warehouse_ID(), get_TrxName());
+	}
 
 	/** Set Warehouse.
-		@param M_Warehouse_ID 
-		Storage Warehouse and Service Point
-	  */
+		@param M_Warehouse_ID Storage Warehouse and Service Point
+	*/
 	public void setM_Warehouse_ID (int M_Warehouse_ID)
 	{
-		if (M_Warehouse_ID < 1) 
+		if (M_Warehouse_ID < 1)
 			set_Value (COLUMNNAME_M_Warehouse_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
 	}
 
 	/** Get Warehouse.
 		@return Storage Warehouse and Service Point
 	  */
-	public int getM_Warehouse_ID () 
+	public int getM_Warehouse_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
 		if (ii == null)
@@ -893,23 +930,25 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.eevolution.model.I_PP_Cost_Collector getPP_Cost_Collector() throws RuntimeException
-    {
-		return (org.eevolution.model.I_PP_Cost_Collector)MTable.get(getCtx(), org.eevolution.model.I_PP_Cost_Collector.Table_Name)
-			.getPO(getPP_Cost_Collector_ID(), get_TrxName());	}
+	{
+		return (org.eevolution.model.I_PP_Cost_Collector)MTable.get(getCtx(), org.eevolution.model.I_PP_Cost_Collector.Table_ID)
+			.getPO(getPP_Cost_Collector_ID(), get_TrxName());
+	}
 
 	/** Set Manufacturing Cost Collector.
-		@param PP_Cost_Collector_ID Manufacturing Cost Collector	  */
+		@param PP_Cost_Collector_ID Manufacturing Cost Collector
+	*/
 	public void setPP_Cost_Collector_ID (int PP_Cost_Collector_ID)
 	{
-		if (PP_Cost_Collector_ID < 1) 
+		if (PP_Cost_Collector_ID < 1)
 			set_Value (COLUMNNAME_PP_Cost_Collector_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_PP_Cost_Collector_ID, Integer.valueOf(PP_Cost_Collector_ID));
 	}
 
 	/** Get Manufacturing Cost Collector.
 		@return Manufacturing Cost Collector	  */
-	public int getPP_Cost_Collector_ID () 
+	public int getPP_Cost_Collector_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Cost_Collector_ID);
 		if (ii == null)
@@ -918,9 +957,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Unit Price.
-		@param PriceActual 
-		Actual Price 
-	  */
+		@param PriceActual Actual Price 
+	*/
 	public void setPriceActual (BigDecimal PriceActual)
 	{
 		set_ValueNoCheck (COLUMNNAME_PriceActual, PriceActual);
@@ -929,7 +967,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Unit Price.
 		@return Actual Price 
 	  */
-	public BigDecimal getPriceActual () 
+	public BigDecimal getPriceActual()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceActual);
 		if (bd == null)
@@ -938,9 +976,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Cost Price.
-		@param PriceCost 
-		Price per Unit of Measure including all indirect costs (Freight, etc.)
-	  */
+		@param PriceCost Price per Unit of Measure including all indirect costs (Freight, etc.)
+	*/
 	public void setPriceCost (BigDecimal PriceCost)
 	{
 		set_Value (COLUMNNAME_PriceCost, PriceCost);
@@ -949,7 +986,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Cost Price.
 		@return Price per Unit of Measure including all indirect costs (Freight, etc.)
 	  */
-	public BigDecimal getPriceCost () 
+	public BigDecimal getPriceCost()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceCost);
 		if (bd == null)
@@ -958,9 +995,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Price.
-		@param PriceEntered 
-		Price Entered - the price based on the selected/base UoM
-	  */
+		@param PriceEntered Price Entered - the price based on the selected/base UoM
+	*/
 	public void setPriceEntered (BigDecimal PriceEntered)
 	{
 		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
@@ -969,7 +1005,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Price.
 		@return Price Entered - the price based on the selected/base UoM
 	  */
-	public BigDecimal getPriceEntered () 
+	public BigDecimal getPriceEntered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
 		if (bd == null)
@@ -978,9 +1014,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Limit Price.
-		@param PriceLimit 
-		Lowest price for a product
-	  */
+		@param PriceLimit Lowest price for a product
+	*/
 	public void setPriceLimit (BigDecimal PriceLimit)
 	{
 		set_Value (COLUMNNAME_PriceLimit, PriceLimit);
@@ -989,7 +1024,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Limit Price.
 		@return Lowest price for a product
 	  */
-	public BigDecimal getPriceLimit () 
+	public BigDecimal getPriceLimit()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceLimit);
 		if (bd == null)
@@ -998,9 +1033,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set List Price.
-		@param PriceList 
-		List Price
-	  */
+		@param PriceList List Price
+	*/
 	public void setPriceList (BigDecimal PriceList)
 	{
 		set_Value (COLUMNNAME_PriceList, PriceList);
@@ -1009,7 +1043,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get List Price.
 		@return List Price
 	  */
-	public BigDecimal getPriceList () 
+	public BigDecimal getPriceList()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceList);
 		if (bd == null)
@@ -1018,9 +1052,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Processed.
-		@param Processed 
-		The document has been processed
-	  */
+		@param Processed The document has been processed
+	*/
 	public void setProcessed (boolean Processed)
 	{
 		set_Value (COLUMNNAME_Processed, Boolean.valueOf(Processed));
@@ -1029,7 +1062,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Processed.
 		@return The document has been processed
 	  */
-	public boolean isProcessed () 
+	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
 		if (oo != null) 
@@ -1042,9 +1075,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Delivered Quantity.
-		@param QtyDelivered 
-		Delivered Quantity
-	  */
+		@param QtyDelivered Delivered Quantity
+	*/
 	public void setQtyDelivered (BigDecimal QtyDelivered)
 	{
 		set_ValueNoCheck (COLUMNNAME_QtyDelivered, QtyDelivered);
@@ -1053,7 +1085,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Delivered Quantity.
 		@return Delivered Quantity
 	  */
-	public BigDecimal getQtyDelivered () 
+	public BigDecimal getQtyDelivered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyDelivered);
 		if (bd == null)
@@ -1062,9 +1094,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Quantity.
-		@param QtyEntered 
-		The Quantity Entered is based on the selected UoM
-	  */
+		@param QtyEntered The Quantity Entered is based on the selected UoM
+	*/
 	public void setQtyEntered (BigDecimal QtyEntered)
 	{
 		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
@@ -1073,7 +1104,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Quantity.
 		@return The Quantity Entered is based on the selected UoM
 	  */
-	public BigDecimal getQtyEntered () 
+	public BigDecimal getQtyEntered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
 		if (bd == null)
@@ -1082,9 +1113,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Quantity Invoiced.
-		@param QtyInvoiced 
-		Invoiced Quantity
-	  */
+		@param QtyInvoiced Invoiced Quantity
+	*/
 	public void setQtyInvoiced (BigDecimal QtyInvoiced)
 	{
 		set_ValueNoCheck (COLUMNNAME_QtyInvoiced, QtyInvoiced);
@@ -1093,7 +1123,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Quantity Invoiced.
 		@return Invoiced Quantity
 	  */
-	public BigDecimal getQtyInvoiced () 
+	public BigDecimal getQtyInvoiced()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyInvoiced);
 		if (bd == null)
@@ -1102,9 +1132,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Lost Sales Qty.
-		@param QtyLostSales 
-		Quantity of potential sales
-	  */
+		@param QtyLostSales Quantity of potential sales
+	*/
 	public void setQtyLostSales (BigDecimal QtyLostSales)
 	{
 		set_Value (COLUMNNAME_QtyLostSales, QtyLostSales);
@@ -1113,7 +1142,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Lost Sales Qty.
 		@return Quantity of potential sales
 	  */
-	public BigDecimal getQtyLostSales () 
+	public BigDecimal getQtyLostSales()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyLostSales);
 		if (bd == null)
@@ -1122,9 +1151,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Ordered Quantity.
-		@param QtyOrdered 
-		Ordered Quantity
-	  */
+		@param QtyOrdered Ordered Quantity
+	*/
 	public void setQtyOrdered (BigDecimal QtyOrdered)
 	{
 		set_Value (COLUMNNAME_QtyOrdered, QtyOrdered);
@@ -1133,7 +1161,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Ordered Quantity.
 		@return Ordered Quantity
 	  */
-	public BigDecimal getQtyOrdered () 
+	public BigDecimal getQtyOrdered()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyOrdered);
 		if (bd == null)
@@ -1142,9 +1170,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Reserved Quantity.
-		@param QtyReserved 
-		Reserved Quantity
-	  */
+		@param QtyReserved Reserved Quantity
+	*/
 	public void setQtyReserved (BigDecimal QtyReserved)
 	{
 		set_ValueNoCheck (COLUMNNAME_QtyReserved, QtyReserved);
@@ -1153,7 +1180,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Reserved Quantity.
 		@return Reserved Quantity
 	  */
-	public BigDecimal getQtyReserved () 
+	public BigDecimal getQtyReserved()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyReserved);
 		if (bd == null)
@@ -1162,26 +1189,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_OrderLine getRef_OrderLine() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_Name)
-			.getPO(getRef_OrderLine_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
+			.getPO(getRef_OrderLine_ID(), get_TrxName());
+	}
 
 	/** Set Referenced Order Line.
-		@param Ref_OrderLine_ID 
-		Reference to corresponding Sales/Purchase Order
-	  */
+		@param Ref_OrderLine_ID Reference to corresponding Sales/Purchase Order
+	*/
 	public void setRef_OrderLine_ID (int Ref_OrderLine_ID)
 	{
-		if (Ref_OrderLine_ID < 1) 
+		if (Ref_OrderLine_ID < 1)
 			set_Value (COLUMNNAME_Ref_OrderLine_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_Ref_OrderLine_ID, Integer.valueOf(Ref_OrderLine_ID));
 	}
 
 	/** Get Referenced Order Line.
 		@return Reference to corresponding Sales/Purchase Order
 	  */
-	public int getRef_OrderLine_ID () 
+	public int getRef_OrderLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Ref_OrderLine_ID);
 		if (ii == null)
@@ -1190,9 +1217,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Revenue Recognition Amt.
-		@param RRAmt 
-		Revenue Recognition Amount
-	  */
+		@param RRAmt Revenue Recognition Amount
+	*/
 	public void setRRAmt (BigDecimal RRAmt)
 	{
 		set_Value (COLUMNNAME_RRAmt, RRAmt);
@@ -1201,7 +1227,7 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Revenue Recognition Amt.
 		@return Revenue Recognition Amount
 	  */
-	public BigDecimal getRRAmt () 
+	public BigDecimal getRRAmt()
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_RRAmt);
 		if (bd == null)
@@ -1210,9 +1236,8 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	/** Set Revenue Recognition Start.
-		@param RRStartDate 
-		Revenue Recognition Start Date
-	  */
+		@param RRStartDate Revenue Recognition Start Date
+	*/
 	public void setRRStartDate (Timestamp RRStartDate)
 	{
 		set_Value (COLUMNNAME_RRStartDate, RRStartDate);
@@ -1221,27 +1246,26 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	/** Get Revenue Recognition Start.
 		@return Revenue Recognition Start Date
 	  */
-	public Timestamp getRRStartDate () 
+	public Timestamp getRRStartDate()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_RRStartDate);
 	}
 
 	/** Set Resource Assignment.
-		@param S_ResourceAssignment_ID 
-		Resource Assignment
-	  */
+		@param S_ResourceAssignment_ID Resource Assignment
+	*/
 	public void setS_ResourceAssignment_ID (int S_ResourceAssignment_ID)
 	{
-		if (S_ResourceAssignment_ID < 1) 
+		if (S_ResourceAssignment_ID < 1)
 			set_Value (COLUMNNAME_S_ResourceAssignment_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_S_ResourceAssignment_ID, Integer.valueOf(S_ResourceAssignment_ID));
 	}
 
 	/** Get Resource Assignment.
 		@return Resource Assignment
 	  */
-	public int getS_ResourceAssignment_ID () 
+	public int getS_ResourceAssignment_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_S_ResourceAssignment_ID);
 		if (ii == null)
@@ -1250,9 +1274,10 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser1_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
 
 	/** Set Profit Center.
 		@param User1_ID 
@@ -1260,16 +1285,16 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	  */
 	public void setUser1_ID (int User1_ID)
 	{
-		if (User1_ID < 1) 
+		if (User1_ID < 1)
 			set_Value (COLUMNNAME_User1_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
 	/** Get Profit Center.
 		@return User defined list element #1
 	  */
-	public int getUser1_ID () 
+	public int getUser1_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
 		if (ii == null)
@@ -1278,9 +1303,10 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser2_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
 
 	/** Set Cost Center.
 		@param User2_ID 
@@ -1288,16 +1314,16 @@ public class X_C_OrderLine extends PO implements I_C_OrderLine, I_Persistent
 	  */
 	public void setUser2_ID (int User2_ID)
 	{
-		if (User2_ID < 1) 
+		if (User2_ID < 1)
 			set_Value (COLUMNNAME_User2_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
 	}
 
 	/** Get Cost Center.
 		@return User defined list element #2
 	  */
-	public int getUser2_ID () 
+	public int getUser2_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
 		if (ii == null)

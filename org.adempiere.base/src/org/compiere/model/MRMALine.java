@@ -51,15 +51,19 @@ public class MRMALine extends X_M_RMALine
 	 */
 	public MRMALine (Properties ctx, int M_RMALine_ID, String trxName)
 	{
-		super (ctx, M_RMALine_ID, trxName);
+		this (ctx, M_RMALine_ID, trxName, (String[]) null);
+	}	//	MRMALine
+
+	public MRMALine(Properties ctx, int M_RMALine_ID, String trxName, String... virtualColumns) {
+		super(ctx, M_RMALine_ID, trxName, virtualColumns);
 		if (M_RMALine_ID == 0)
 		{
 			setQty(Env.ONE);
 			this.setQtyDelivered(Env.ZERO);
 		}
-        
-        init();
-	}	//	MRMALine
+
+		init();
+	}
 
 	/**
 	 * 	Load Constructor
@@ -104,7 +108,7 @@ public class MRMALine extends X_M_RMALine
             {
                 MInvoiceLine invoiceLine = new MInvoiceLine(getCtx(), getInvoiceLineId(), get_TrxName());
                 precision = invoiceLine.getPrecision();
-                unitAmount = invoiceLine.getPriceEntered();
+                unitAmount = invoiceLine.getPriceActual();
                 originalQty = invoiceLine.getQtyInvoiced();
                 taxId = invoiceLine.getC_Tax_ID();
             }
@@ -112,7 +116,7 @@ public class MRMALine extends X_M_RMALine
             {
                 MOrderLine orderLine = new MOrderLine (getCtx(), m_ioLine.getC_OrderLine_ID(), get_TrxName());
                 precision = orderLine.getPrecision();
-                unitAmount = orderLine.getPriceEntered();
+                unitAmount = orderLine.getPriceActual();
                 originalQty = orderLine.getQtyDelivered();
                 taxId = orderLine.getC_Tax_ID();
             }
@@ -267,9 +271,9 @@ public class MRMALine extends X_M_RMALine
     @Override
     protected boolean beforeSave(boolean newRecord)
     {
-		if (newRecord && getParent().isComplete()) 
+		if (newRecord && getParent().isProcessed()) 
 		{
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_RMA"));
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_RMA_ID"));
 			return false;
 		}
         if (getM_InOutLine_ID() == 0 && getC_Charge_ID() == 0 && getM_Product_ID() == 0)

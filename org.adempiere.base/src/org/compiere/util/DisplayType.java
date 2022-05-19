@@ -775,7 +775,7 @@ public final class DisplayType
 		if (displayType == DisplayType.Binary)
 			return getDatabase().getBlobDataType();
 		if (displayType == DisplayType.TextLong
-			|| (displayType == DisplayType.Text && fieldLength >= 4000))
+			|| (displayType == DisplayType.Text && (fieldLength == 0 || fieldLength >= 4000)))
 			return getDatabase().getClobDataType();
 		if (displayType == DisplayType.YesNo)
 			return getDatabase().getCharacterDataType()+"(1)";
@@ -922,8 +922,8 @@ public final class DisplayType
 
 	/**
 	 *	Helper method to get a currency format in a language (multi-currency and multi-language system)
-	 *  @param language locale code
-	 *  @param currency code
+	 *  @param langcode language locale code
+	 *  @param currencyCode currency code
 	 *  @return number format
 	 */
 	public static NumberFormat getCurrencyFormat(String langcode, String currencyCode)

@@ -59,7 +59,7 @@ import org.compiere.util.Util;
  	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4096456424277340847L;
+	private static final long serialVersionUID = 8482717913976119270L;
 
 	/**	Number of statement lines imported			*/
 	private int loadCount = 0;
@@ -81,6 +81,9 @@ import org.compiere.util.Util;
 	
 	/** Map of currency ISO-Codes to lookup id */
 	private HashMap<String,Integer> currencyMap;
+
+	/* Last saved line, to be retrieved on loaders */
+	private X_I_BankStatement m_lastSavedLine;
 	
 	/**
 	 * 	Create a Statement Loader
@@ -257,7 +260,6 @@ import org.compiere.util.Util;
 		imp.setEftTrxID(m_loader.getTrxID());
 		if (log.isLoggable(Level.CONFIG))log.config( "MBankStatementLoader.importLine Statement Line Date=" + m_loader.getStatementLineDate());
 		imp.setStatementLineDate(m_loader.getStatementLineDate());
-		imp.setStatementLineDate(m_loader.getStatementLineDate());
 		imp.setEftStatementLineDate(m_loader.getStatementLineDate());
 		if (log.isLoggable(Level.CONFIG))log.config( "MBankStatementLoader.importLine Valuta Date=" + m_loader.getValutaDate());
 		imp.setValutaDate(m_loader.getValutaDate());
@@ -311,6 +313,7 @@ import org.compiere.util.Util;
 		imp.setI_IsImported(false);
 		
 		result = imp.save();
+		m_lastSavedLine = imp;
 		if (result)
 		{
 			loadCount ++;
@@ -321,7 +324,15 @@ import org.compiere.util.Util;
 		}
 		imp = null;
 		return result;
-	}	//	importLine
+	}	//	saveLine
+
+	/**
+	 * Return the last saved line
+	 * @return
+	 */
+	public X_I_BankStatement getLastSavedLine() {
+		return m_lastSavedLine;
+	}
 
 	/**
 	 * 	Return the most recent error

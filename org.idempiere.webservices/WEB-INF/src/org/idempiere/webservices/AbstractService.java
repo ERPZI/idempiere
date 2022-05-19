@@ -34,13 +34,11 @@ import org.adempiere.exceptions.AdempiereException;
 import org.apache.commons.codec.binary.Base64;
 import org.compiere.model.Lookup;
 import org.compiere.model.MUser;
-import org.compiere.model.MWebService;
-import org.compiere.model.MWebServiceType;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
 import org.compiere.model.Query;
-import org.compiere.model.X_WS_WebServiceMethod;
-import org.compiere.model.X_WS_WebServiceTypeAccess;
+import org.idempiere.webservices.model.X_WS_WebServiceMethod;
+import org.idempiere.webservices.model.X_WS_WebServiceTypeAccess;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -57,6 +55,8 @@ import org.idempiere.adInterface.x10.StandardResponseDocument;
 import org.idempiere.adinterface.CompiereService;
 import org.idempiere.cache.ImmutablePOCache;
 import org.idempiere.webservices.fault.IdempiereServiceFault;
+import org.idempiere.webservices.model.MWebService;
+import org.idempiere.webservices.model.MWebServiceType;
 
 
 
@@ -131,13 +131,13 @@ public class AbstractService {
 		if (!okclient)
 			return "Error logging in - client not allowed for this user";
 
-		m_cs.getCtx().setProperty("#AD_Client_ID", "" + loginRequest.getClientID());
-       	Env.setContext(m_cs.getCtx(), "#AD_Client_ID", (String) selectedClient.getID());
+		m_cs.getCtx().setProperty(Env.AD_CLIENT_ID, "" + loginRequest.getClientID());
+       	Env.setContext(m_cs.getCtx(), Env.AD_CLIENT_ID, (String) selectedClient.getID());
     	MUser user = MUser.get (m_cs.getCtx(), loginRequest.getUser());
     	if (user != null) {
-    		Env.setContext(m_cs.getCtx(), "#AD_User_ID", user.getAD_User_ID() );
-    		Env.setContext(m_cs.getCtx(), "#AD_User_Name", user.getName() );
-    		Env.setContext(m_cs.getCtx(), "#SalesRep_ID", user.getAD_User_ID() );
+    		Env.setContext(m_cs.getCtx(), Env.AD_USER_ID, user.getAD_User_ID() );
+    		Env.setContext(m_cs.getCtx(), Env.AD_USER_NAME, user.getName() );
+    		Env.setContext(m_cs.getCtx(), Env.SALESREP_ID, user.getAD_User_ID() );
     		String userAgent = getHttpServletRequest().getHeader("User-Agent");
     		Env.setContext(m_cs.getCtx(), "#UserAgent",   userAgent == null ? "Unknown" : userAgent);
     	}
@@ -209,7 +209,7 @@ public class AbstractService {
 	}
 
 	private static ImmutablePOCache<String,MWebServiceType> s_WebServiceTypeCache	= new ImmutablePOCache<String,MWebServiceType>(MWebServiceType.Table_Name, 10, 60);	//60 minutes
-	private static CCache<String,Boolean> s_RoleAccessCache = new CCache<>(X_WS_WebServiceTypeAccess.Table_Name, 60, 60);
+	private static CCache<String,Boolean> s_RoleAccessCache = new CCache<>(X_WS_WebServiceTypeAccess.Table_Name, 60, CCache.DEFAULT_EXPIRE_MINUTE);
 
 	/**
 	 * Authenticate user for requested service type
@@ -496,11 +496,9 @@ public class AbstractService {
 	}
 	
 	/**
-	 * 
 	 * @param strValue
 	 * @param columnClass
 	 * @param colName
-	 * @param m_webservicetype
 	 * @return
 	 */
 	protected Object convertToObj(String strValue,Class<?> columnClass,String colName){

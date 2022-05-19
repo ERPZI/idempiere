@@ -320,7 +320,8 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		if (p_whereClause.length() > 0)
 			where.append(" AND (").append(p_whereClause).append(")");
 		prepareTable(m_generalLayout, p_tableName, where.toString(), "2");
-
+		contentPanel.repaint();
+		
 		//	Set & enable Fields
 
 		lbl1.setValue(Util.cleanAmp(Msg.translate(Env.getCtx(), m_queryColumns.get(0).toString())));
@@ -533,7 +534,7 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 
 				if (colClass != null)
 				{
-					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass));
+					list.add(new ColumnInfo(Msg.translate(Env.getCtx(), columnName), colSql.toString(), colClass, true, columnName ));
 					if (log.isLoggable(Level.FINEST)) log.finest("Added Column=" + columnName);
 				}
 				else if (isDisplayed && DisplayType.isLookup(displayType))
@@ -614,6 +615,13 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		return s;
 	}   //  getSQLText
 
+	protected void resetParameters() {
+		txt1.setValue("");
+		txt2.setValue("");
+		txt3.setValue("");
+		txt4.setValue("");
+	}
+
 	/**
 	 *  Set Parameters for Query.
 	 *  (as defined in getSQLWhere)
@@ -672,9 +680,9 @@ public class InfoGeneralPanel extends InfoPanel implements EventListener<Event>
 		
 		ColumnInfo columnInfo = null;
 		if (columnName.endsWith("_ID")  && !column.isVirtualColumn())
-			columnInfo = new ColumnInfo(name, embedded, KeyNamePair.class, p_tableName+"."+columnName);
+			columnInfo = new ColumnInfo(name, embedded, KeyNamePair.class, true, false, p_tableName+"."+columnName, columnName);
 		else
-			columnInfo = new ColumnInfo(name, embedded, String.class, null);
+			columnInfo = new ColumnInfo(name, embedded, String.class, true, false, null, columnName);
 		return columnInfo;
 	}
 }

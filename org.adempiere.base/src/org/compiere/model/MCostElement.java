@@ -245,9 +245,12 @@ public class MCostElement extends X_M_CostElement implements ImmutablePOSupport
 	/**
 	 * Get All Cost Elements for current AD_Client_ID
 	 * @param ctx context
-	 * @param trxName transaction
+	 * @param CostingMethod
 	 * @return array cost elements
 	 **/
+	/**
+	 * @return
+	 */
 	public static List<MCostElement> getByCostingMethod (Properties ctx, String CostingMethod)
 	{		
 		final String whereClause = "AD_Client_ID = ? AND CostingMethod=?";
@@ -275,7 +278,6 @@ public class MCostElement extends X_M_CostElement implements ImmutablePOSupport
 		super (ctx, M_CostElement_ID, trxName);
 		if (M_CostElement_ID == 0)
 		{
-		//	setName (null);
 			setCostElementType (COSTELEMENTTYPE_Material);
 			setIsCalculated (false);
 		}
@@ -333,9 +335,6 @@ public class MCostElement extends X_M_CostElement implements ImmutablePOSupport
 		//	Check Unique Costing Method
 		if (
 			(  COSTELEMENTTYPE_Material.equals(getCostElementType())
-//			|| COSTELEMENTTYPE_Resource.equals(getCostElementType())
-//			|| COSTELEMENTTYPE_BurdenMOverhead.equals(getCostElementType())
-//			|| COSTELEMENTTYPE_Overhead.equals(getCostElementType())
 			|| COSTELEMENTTYPE_OutsideProcessing.equals(getCostElementType())
 			)
 			&& (newRecord || is_ValueChanged(COLUMNNAME_CostingMethod)))
@@ -349,25 +348,6 @@ public class MCostElement extends X_M_CostElement implements ImmutablePOSupport
 				return false;
 			}
 		}
-
-		//	Maintain Calculated
-		/*
-		if (COSTELEMENTTYPE_Material.equals(getCostElementType()))
-		{
-			String cm = getCostingMethod();
-			if (cm == null || cm.length() == 0
-				|| COSTINGMETHOD_StandardCosting.equals(cm))
-				setIsCalculated(false);
-			else
-				setIsCalculated(true);
-		}
-		else
-		{
-			if (isCalculated())
-				setIsCalculated(false);
-			if (getCostingMethod() != null)
-				setCostingMethod(null);
-		}*/
 		
 		if (getAD_Org_ID() != 0)
 			setAD_Org_ID(0);

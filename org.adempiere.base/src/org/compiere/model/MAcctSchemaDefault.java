@@ -30,7 +30,7 @@ import org.idempiere.cache.ImmutablePOSupport;
  *	
  *  @author Jorg Janke
  *  @author     victor.perez@e-evolution.com, www.e-evolution.com
- *    			<li>RF [ 2214883 ] Remove SQL code and Replace for Query http://sourceforge.net/tracker/index.php?func=detail&aid=2214883&group_id=176962&atid=879335
+ *    			<li>RF [ 2214883 ] Remove SQL code and Replace for Query https://sourceforge.net/p/adempiere/feature-requests/557/
  *  @version $Id: MAcctSchemaDefault.java,v 1.3 2006/07/30 00:58:37 jjanke Exp $
  */
 public class MAcctSchemaDefault extends X_C_AcctSchema_Default implements ImmutablePOSupport
@@ -111,37 +111,6 @@ public class MAcctSchemaDefault extends X_C_AcctSchema_Default implements Immuta
 		copyPO(copy);
 	}
 	
-	/**
-	 * 	Get Realized Gain Acct for currency
-	 *	@param C_Currency_ID currency
-	 *	@return gain acct
-	 */
-//    IDEMPIERE-362 Hide things that don't work on iDempiere
-	
-//	public int getRealizedGain_Acct (int C_Currency_ID)
-//	{
-//		MCurrencyAcct acct = MCurrencyAcct.get (this, C_Currency_ID);
-//		if (acct != null)
-//			return acct.getRealizedGain_Acct(); 
-//		return super.getRealizedGain_Acct();
-//	}	//	getRealizedGain_Acct
-	
-	/**
-	 * 	Get Realized Loss Acct for currency
-	 *	@param C_Currency_ID currency
-	 *	@return loss acct
-	 */
-	
-//  IDEMPIERE-362 Hide things that don't work on iDempiere
-	
-//	public int getRealizedLoss_Acct (int C_Currency_ID) 
-//	{
-//		MCurrencyAcct acct = MCurrencyAcct.get (this, C_Currency_ID);
-//		if (acct != null)
-//			return acct.getRealizedLoss_Acct(); 
-//		return super.getRealizedLoss_Acct();
-//	}	//	getRealizedLoss_Acct
-
 	/**
 	 * 	Get Acct Info list 
 	 *	@return list

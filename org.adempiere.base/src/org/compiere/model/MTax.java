@@ -150,15 +150,12 @@ public class MTax extends X_C_Tax implements ImmutablePOSupport
 		super (ctx, C_Tax_ID, trxName);
 		if (C_Tax_ID == 0)
 		{
-		//	setC_Tax_ID (0);		PK
 			setIsDefault (false);
 			setIsDocumentLevel (true);
 			setIsSummary (false);
 			setIsTaxExempt (false);
-		//	setName (null);
 			setRate (Env.ZERO);
 			setRequiresTaxCertificate (false);
-		//	setC_TaxCategory_ID (0);	//	FK
 			setSOPOType (SOPOTYPE_Both);
 			setValidFrom (TimeUtil.getDay(1990,1,1));
 			setIsSalesTax(false);
@@ -378,13 +375,11 @@ public class MTax extends X_C_Tax implements ImmutablePOSupport
 				return false;
 			}
 		}
-		if (getC_Country_ID() > 0 && getC_CountryGroupFrom_ID() > 0) {
-			setC_Country_ID(0);
+		if (isSummary()) {
+			if (getParent_Tax_ID() > 0) {
+				setParent_Tax_ID(0);
+			}
 		}
-		if (getTo_Country_ID() > 0 && getC_CountryGroupTo_ID() > 0) {
-			setTo_Country_ID(0);
-		}
-
 		return super.beforeSave(newRecord);
 	}
 	

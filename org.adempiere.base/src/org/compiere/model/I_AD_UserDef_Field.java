@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_UserDef_Field
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 public interface I_AD_UserDef_Field 
 {
@@ -359,6 +359,15 @@ public interface I_AD_UserDef_Field
 	  */
 	public String getIsDisplayed();
 
+    /** Column name IsDisplayedGrid */
+    public static final String COLUMNNAME_IsDisplayedGrid = "IsDisplayedGrid";
+
+	/** Set Show in Grid	  */
+	public void setIsDisplayedGrid (String IsDisplayedGrid);
+
+	/** Get Show in Grid	  */
+	public String getIsDisplayedGrid();
+
     /** Column name IsMandatory */
     public static final String COLUMNNAME_IsMandatory = "IsMandatory";
 
@@ -507,6 +516,15 @@ public interface I_AD_UserDef_Field
 	  */
 	public int getSeqNo();
 
+    /** Column name SeqNoGrid */
+    public static final String COLUMNNAME_SeqNoGrid = "SeqNoGrid";
+
+	/** Set Grid Sequence No	  */
+	public void setSeqNoGrid (int SeqNoGrid);
+
+	/** Get Grid Sequence No	  */
+	public int getSeqNoGrid();
+
     /** Column name SortNo */
     public static final String COLUMNNAME_SortNo = "SortNo";
 
@@ -541,13 +559,17 @@ public interface I_AD_UserDef_Field
 
 	/** Set Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public void setVFormat (String VFormat);
 
 	/** Get Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public String getVFormat();
 

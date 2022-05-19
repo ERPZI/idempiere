@@ -120,7 +120,7 @@ public class CalloutOrder extends CalloutEngine
 				if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_POS))
 					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Force);
 				else if (DocSubTypeSO.equals(MOrder.DocSubTypeSO_Prepay))
-					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_AfterPayment);
 				else
 					mTab.setValue ("DeliveryRule", X_C_Order.DELIVERYRULE_Availability);
 				
@@ -286,7 +286,7 @@ public class CalloutOrder extends CalloutEngine
 					mTab.setValue("M_PriceList_ID", ii);
 				else
 				{	//	get default PriceList
-					int i = Env.getContextAsInt(ctx, "#M_PriceList_ID");
+					int i = Env.getContextAsInt(ctx, Env.M_PRICELIST_ID);
 					if (i != 0)
 					{
 						MPriceList pl = new MPriceList(ctx, i, null);
@@ -396,7 +396,7 @@ public class CalloutOrder extends CalloutEngine
 				if (OrderType.equals(MOrder.DocSubTypeSO_Prepay))
 				{
 					mTab.setValue("InvoiceRule", X_C_Order.INVOICERULE_Immediate);
-					mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_AfterReceipt);
+					mTab.setValue("DeliveryRule", X_C_Order.DELIVERYRULE_AfterPayment);
 				}
 				else if (OrderType.equals(MOrder.DocSubTypeSO_POS))	//  for POS
 					mTab.setValue("PaymentRule", X_C_Order.PAYMENTRULE_Cash);
@@ -495,7 +495,7 @@ public class CalloutOrder extends CalloutEngine
 					mTab.setValue("M_PriceList_ID", ii);
 				else
 				{	//	get default PriceList
-					int i = Env.getContextAsInt(ctx, "#M_PriceList_ID");
+					int i = Env.getContextAsInt(ctx, Env.M_PRICELIST_ID);
 					if (i != 0)
 					{
 						MPriceList pl = new MPriceList(ctx, i, null);
@@ -817,7 +817,8 @@ public class CalloutOrder extends CalloutEngine
 		if (Env.isSOTrx(ctx, WindowNo))
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID.intValue());
-			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
+			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
+				&& !(product.isBOM() && product.isVerified() && product.isAutoProduce()))
 			{
 				BigDecimal QtyOrdered = (BigDecimal)mTab.getValue("QtyOrdered");
 				if (QtyOrdered == null)
@@ -1311,7 +1312,8 @@ public class CalloutOrder extends CalloutEngine
 			&& QtyOrdered.signum() > 0)		//	no negative (returns)
 		{
 			MProduct product = MProduct.get (ctx, M_Product_ID);
-			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N"))
+			if (product.isStocked() && Env.getContext(ctx, WindowNo, "IsDropShip").equals("N")
+				&& !(product.isBOM() && product.isVerified() && product.isAutoProduce()))
 			{
 				int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 				int M_AttributeSetInstance_ID = Env.getContextAsInt(ctx, WindowNo, mTab.getTabNo(), "M_AttributeSetInstance_ID");

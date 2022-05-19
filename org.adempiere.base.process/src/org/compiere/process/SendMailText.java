@@ -37,6 +37,7 @@ import org.compiere.util.Msg;
  *  @author Jorg Janke
  *  @version $Id: SendMailText.java,v 1.2 2006/07/30 00:51:01 jjanke Exp $
  */
+@org.adempiere.base.annotation.Process
 public class SendMailText extends SvrProcess
 {
 	/** What to send			*/
@@ -278,7 +279,7 @@ public class SendMailText extends SvrProcess
 		} else {
 			log.warning("FAILURE - " + to.getEMail());
 		}
-		StringBuilder msglog = new StringBuilder((OK ? "@OK@" : "@ERROR@")).append(" - ").append(to.getEMail());
+		StringBuilder msglog = new StringBuilder(Msg.parseTranslation(getCtx(), OK ? "@OK@" : "@ERROR@")).append(" - ").append(to.getEMail());
 		addLog(0, null, null, msglog.toString());
 		return Boolean.valueOf(OK);
 	}	//	sendIndividualMail

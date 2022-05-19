@@ -28,6 +28,7 @@ import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
+import org.compiere.util.Util;
 
 /**
  *	System Configuration
@@ -43,13 +44,14 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8581992138870649241L;
+	private static final long serialVersionUID = -3851200335563922376L;
 
 	public static final String ADDRESS_VALIDATION = "ADDRESS_VALIDATION";
     public static final String ALERT_SEND_ATTACHMENT_AS_XLS = "ALERT_SEND_ATTACHMENT_AS_XLS";
     public static final String ALLOCATION_DESCRIPTION = "ALLOCATION_DESCRIPTION";
     public static final String ALLOW_APPLY_PAYMENT_TO_CREDITMEMO = "ALLOW_APPLY_PAYMENT_TO_CREDITMEMO";
     public static final String ALLOW_OVER_APPLIED_PAYMENT = "ALLOW_OVER_APPLIED_PAYMENT";
+    public static final String ALLOW_REVERSAL_OF_RECONCILED_PAYMENT = "ALLOW_REVERSAL_OF_RECONCILED_PAYMENT";
     public static final String ALogin_ShowDate = "ALogin_ShowDate";
     public static final String ALogin_ShowOneRole = "ALogin_ShowOneRole"; // deprecated
     public static final String APPLICATION_DATABASE_VERSION = "APPLICATION_DATABASE_VERSION";
@@ -74,6 +76,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String BACKGROUND_JOB_MAX_IN_SYSTEM = "BACKGROUND_JOB_MAX_IN_SYSTEM";
     public static final String BACKGROUND_JOB_MAX_PER_CLIENT = "BACKGROUND_JOB_MAX_PER_CLIENT";
     public static final String BACKGROUND_JOB_MAX_PER_USER = "BACKGROUND_JOB_MAX_PER_USER";
+    public static final String BANK_STATEMENT_POST_WITH_DATE_FROM_LINE = "BANK_STATEMENT_POST_WITH_DATE_FROM_LINE";
 	public static final String BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES = "BPARTNER_QUICK_ENTRY_OPTIONAL_LOCATION_TABLES";
     public static final String CALENDAR_ALTERNATE_TIMEZONE = "CALENDAR_ALTERNATE_TIMEZONE";
     public static final String CASH_AS_PAYMENT = "CASH_AS_PAYMENT";
@@ -105,6 +108,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String IMAGE_DB_STORAGE_SAVE_AS_ZIP = "IMAGE_DB_STORAGE_SAVE_AS_ZIP";
     public static final String INFO_DEFAULTSELECTED = "INFO_DEFAULTSELECTED";
     public static final String INFO_DOUBLECLICKTOGGLESSELECTION = "INFO_DOUBLECLICKTOGGLESSELECTION";
+	public static final String INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE = "INFO_PRODUCT_SHOW_PRODUCTS_WITHOUT_PRICE";
     public static final String Invoice_ReverseUseNewNumber = "Invoice_ReverseUseNewNumber";
     public static final String JASPER_SWAP_MAX_PAGES = "JASPER_SWAP_MAX_PAGES";
     public static final String LASTRUN_RECORD_COUNT = "LASTRUN_RECORD_COUNT";
@@ -124,6 +128,9 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String MAX_RESULTS_PER_SEARCH_IN_DOCUMENT_CONTROLLER = "MAX_RESULTS_PER_SEARCH_IN_DOCUMENT_CONTROLLER";
     public static final String MAX_TEXT_LENGTH_ON_GRID_VIEW = "MAX_TEXT_LENGTH_ON_GRID_VIEW";
     public static final String MENU_INFOUPDATER_SLEEP_MS = "MENU_INFOUPDATER_SLEEP_MS";
+    public static final String MESSAGES_AT_TENANT_LEVEL = "MESSAGES_AT_TENANT_LEVEL";
+    public static final String MFA_NTP_TIMEOUT_IN_MILLISECONDS = "MFA_NTP_TIMEOUT_IN_MILLISECONDS";
+	public static final String MFA_REGISTERED_DEVICE_EXPIRATION_DAYS = "MFA_REGISTERED_DEVICE_EXPIRATION_DAYS";
     public static final String MONITOR_INITIAL_WAIT_FOR_CLUSTER_IN_SECONDS = "MONITOR_INITIAL_WAIT_FOR_CLUSTER_IN_SECONDS";
     public static final String MONITOR_MAX_WAIT_FOR_CLUSTER_IN_SECONDS = "MONITOR_MAX_WAIT_FOR_CLUSTER_IN_SECONDS";
     public static final String MFG_ValidateCostsDifferenceOnCreate = "MFG_ValidateCostsDifferenceOnCreate";
@@ -164,8 +171,10 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String USER_LOCKING_MAX_PASSWORD_AGE_DAY = "USER_LOCKING_MAX_PASSWORD_AGE_DAY";
     public static final String USER_LOCKING_PASSWORD_NOTIFY_DAY = "USER_LOCKING_PASSWORD_NOTIFY_DAY";
     public static final String USER_PASSWORD_HASH = "USER_PASSWORD_HASH";
+    public static final String VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT = "VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT";
     public static final String VALIDATE_MATCHING_TO_ORDERED_QTY = "VALIDATE_MATCHING_TO_ORDERED_QTY";
     public static final String WEBUI_LOGOURL = "WEBUI_LOGOURL";
+    public static final String ZK_ADVANCE_FIND_FILTER_COLUMN_LIST = "ZK_ADVANCE_FIND_FILTER_COLUMN_LIST";
     public static final String ZK_BROWSER_ICON = "ZK_BROWSER_ICON";
     public static final String ZK_BROWSER_TITLE = "ZK_BROWSER_TITLE";
     public static final String ZK_BUTTON_STYLE = "ZK_BUTTON_STYLE";
@@ -175,9 +184,14 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_DASHBOARD_REFRESH_INTERVAL = "ZK_DASHBOARD_REFRESH_INTERVAL";
     public static final String ZK_DECIMALBOX_PROCESS_DOTKEYPAD = "ZK_DECIMALBOX_PROCESS_DOTKEYPAD";
     public static final String ZK_DESKTOP_CLASS = "ZK_DESKTOP_CLASS";
+    public static final String ZK_DESKTOP_SHOW_HOME_BUTTON = "ZK_DESKTOP_SHOW_HOME_BUTTON";
+    public static final String ZK_DESKTOP_SHOW_TAB_LIST_BUTTON = "ZK_DESKTOP_SHOW_TAB_LIST_BUTTON";
+    public static final String ZK_DESKTOP_TAB_AUTO_SHRINK_TO_FIT = "ZK_DESKTOP_TAB_AUTO_SHRINK_TO_FIT";
+    public static final String ZK_DESKTOP_TAB_MAX_TITLE_LENGTH = "ZK_DESKTOP_TAB_MAX_TITLE_LENGTH";
     public static final String ZK_FOOTER_SERVER_DATETIME_FORMAT = "ZK_FOOTER_SERVER_DATETIME_FORMAT";
     public static final String ZK_FOOTER_SERVER_MSG = "ZK_FOOTER_SERVER_MSG";
     public static final String ZK_GRID_AFTER_FIND = "ZK_GRID_AFTER_FIND";
+    public static final String ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS = "ZK_GRID_AUTO_HIDE_EMPTY_COLUMNS";
     public static final String ZK_GRID_EDIT_MODELESS = "ZK_GRID_EDIT_MODELESS";
     public static final String ZK_GRID_MOBILE_EDITABLE = "ZK_GRID_MOBILE_EDITABLE";
     public static final String ZK_GRID_MOBILE_EDIT_MODELESS = "ZK_GRID_MOBILE_EDIT_MODELESS";
@@ -185,6 +199,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_GRID_MOBILE_MAX_COLUMNS = "ZK_GRID_MOBILE_MAX_COLUMNS";
     public static final String ZK_GRID_MOBILE_SHOW_CURRENT_ROW_INDICATOR = "ZK_GRID_MOBILE_SHOW_CURRENT_ROW_INDICATOR";
     public static final String ZK_GRID_VIEW_USE_DEFER_RENDERING = "ZK_GRID_VIEW_USE_DEFER_RENDERING";
+    public static final String ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS = "ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS";
     public static final String ZK_INFO_NUM_PAGE_PRELOAD = "ZK_INFO_NUM_PAGE_PRELOAD";
     public static final String ZK_INFO_QUERY_TIME_OUT =  "ZK_INFO_QUERY_TIME_OUT";
     public static final String ZK_LOGIN_ALLOW_CHROME_SAVE_PASSWORD = "ZK_LOGIN_ALLOW_CHROME_SAVE_PASSWORD";
@@ -201,6 +216,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_REPORT_ONLY_PRINTFORMAT_LINKEDTO_REPORTVIEW = "ZK_REPORT_ONLY_PRINTFORMAT_LINKEDTO_REPORTVIEW";
     public static final String ZK_REPORT_TABLE_OUTPUT_TYPE = "ZK_REPORT_TABLE_OUTPUT_TYPE";
     public static final String ZK_ROOT_FOLDER_BROWSER = "ZK_ROOT_FOLDER_BROWSER";
+    public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
     public static final String ZK_SEQ_DEFAULT_VALUE_PANEL = "ZK_SEQ_DEFAULT_VALUE_PANEL";
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
@@ -217,11 +233,6 @@ public class MSysConfig extends X_AD_SysConfig
 	public MSysConfig (Properties ctx, int AD_SysConfig_ID, String trxName)
 	{
 		super (ctx, AD_SysConfig_ID, trxName);
-		if (AD_SysConfig_ID == 0)
-		{
-		//	setName (null);
-		//  setValue (null);
-		}	
 	}	//	MSysConfig
 
 	/**
@@ -237,7 +248,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MSysConfig.class);
 	/** Cache			*/
-	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0, true);
+	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0);
 	
 	/**
 	 * Get system configuration property of type string
@@ -357,7 +368,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get client configuration property of type string
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return String
 	 */
 	public static String getValue(String Name, String defaultValue, int AD_Client_ID)
@@ -368,7 +379,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * Get system configuration property of type string
 	 * @param Name
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return String
 	 */
 	public static String getValue(String Name, int AD_Client_ID)
@@ -380,7 +391,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type int
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return int
 	 */
 	public static int getIntValue(String Name, int defaultValue, int AD_Client_ID)
@@ -407,7 +418,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type double
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return double
 	 * @deprecated use better getBigDecimalValue
 	 */
@@ -432,7 +443,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type BigDecimal
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return BigDecimal
 	 */
 	public static BigDecimal getBigDecimalValue(String Name, BigDecimal defaultValue, int AD_Client_ID)
@@ -456,7 +467,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type boolean
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return boolean
 	 */
 	public static boolean getBooleanValue(String Name, boolean defaultValue, int AD_Client_ID)
@@ -477,8 +488,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get client configuration property of type string
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return String
 	 */
 	public static String getValue(String Name, String defaultValue, int AD_Client_ID, int AD_Org_ID)
@@ -535,8 +546,8 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * Get system configuration property of type string
 	 * @param Name
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return String
 	 */
 	public static String getValue(String Name, int AD_Client_ID, int AD_Org_ID)
@@ -548,8 +559,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type int
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return int
 	 */
 	public static int getIntValue(String Name, int defaultValue, int AD_Client_ID, int AD_Org_ID)
@@ -576,8 +587,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type double
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return double
 	 * @deprecated use better getBigDecimalValue
 	 */
@@ -602,8 +613,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type BigDecimal
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return BigDecimal
 	 */
 	public static BigDecimal getBigDecimalValue(String Name, BigDecimal defaultValue, int AD_Client_ID, int AD_Org_ID)
@@ -627,8 +638,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type boolean
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return boolean
 	 */
 	public static boolean getBooleanValue(String Name, boolean defaultValue, int AD_Client_ID, int AD_Org_ID)
@@ -670,7 +681,7 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type Timestamp
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
+	 * @param AD_Client_ID Client ID
 	 * @return Timestamp
 	 */
 	public static Timestamp getTimestampValue(String Name, Timestamp defaultValue, int AD_Client_ID)
@@ -682,8 +693,8 @@ public class MSysConfig extends X_AD_SysConfig
 	 * Get system configuration property of type Timestamp
 	 * @param Name
 	 * @param defaultValue
-	 * @param Client ID
-	 * @param Organization ID
+	 * @param AD_Client_ID Client ID
+	 * @param AD_Org_ID Organization ID
 	 * @return Timestamp
 	 */
 	public static Timestamp getTimestampValue(String Name, Timestamp defaultValue, int AD_Client_ID, int AD_Org_ID)
@@ -810,7 +821,7 @@ public class MSysConfig extends X_AD_SysConfig
 				// fix possible wrong config level
 				if (getAD_Org_ID() != 0)
 					setConfigurationLevel(CONFIGURATIONLEVEL_Organization);
-				else if (getAD_Client_ID() != 0 && getConfigurationLevel().equals(MSysConfig.CONFIGURATIONLEVEL_System))
+				else if (getAD_Client_ID() != 0 && (Util.isEmpty(getConfigurationLevel()) || getConfigurationLevel().equals(MSysConfig.CONFIGURATIONLEVEL_System)))
 					setConfigurationLevel(CONFIGURATIONLEVEL_Client);
 				
 			}

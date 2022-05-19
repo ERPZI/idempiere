@@ -135,7 +135,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 
     private static final String NATIVE_MARKER = "NATIVE_"+Database.DB_POSTGRESQL+"_KEYWORK";
 
-    private CCache<String, String> convertCache = new CCache<String, String>(null, "DB_PostgreSQL_Convert_Cache", 1000, 60, false);
+    private CCache<String, String> convertCache = new CCache<String, String>(null, "DB_PostgreSQL_Convert_Cache", 1000, CCache.DEFAULT_EXPIRE_MINUTE, false);
 
     private Random rand = new Random();
 
@@ -209,7 +209,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			.append(connection.getDbHost())
 			.append(":").append(connection.getDbPort())
 			.append("/").append(connection.getDbName())
-			.append("?encoding=UNICODE");
+			.append("?encoding=UNICODE&ApplicationName=iDempiere");
 
 		String urlParameters = System.getProperty("org.idempiere.postgresql.URLParameters");
 	    if (!Util.isEmpty(urlParameters)) {
@@ -434,19 +434,19 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	 *  @param  time Date to be converted
 	 *  @param  dayOnly true if time set to 00:00:00
 	 *
-	 *  @return TO_DATE('2001-01-30 18:10:20',''YYYY-MM-DD HH24:MI:SS')
-	 *      or  TO_DATE('2001-01-30',''YYYY-MM-DD')
+	 *  @return TO_TIMESTAMP('2001-01-30 18:10:20',''YYYY-MM-DD HH24:MI:SS')
+	 *      or  TO_TIMESTAMP('2001-01-30',''YYYY-MM-DD')
 	 */
 	public String TO_DATE (Timestamp time, boolean dayOnly)
 	{
 		if (time == null)
 		{
 			if (dayOnly)
-				return "current_date()";
-			return "current_date()";
+				return "current_date";
+			return "current_timestamp";
 		}
 
-		StringBuilder dateString = new StringBuilder("TO_DATE('");
+		StringBuilder dateString = new StringBuilder("TO_TIMESTAMP('");
 		//  YYYY-MM-DD HH24:MI:SS.mmmm  JDBC Timestamp format
 		String myDate = time.toString();
 		if (dayOnly)
@@ -1043,21 +1043,23 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	}
 
 	/**
-	 * Implemented using the limit and offset feature. use 1 base index for start and end parameter
+	 * Implemented using the fetch first and offset feature. use 1 base index for start and end parameter
 	 * @param sql
 	 * @param start
 	 * @param end
 	 */
 	public String addPagingSQL(String sql, int start, int end) {
 		StringBuilder newSql = new StringBuilder(sql);
-		if (end > 0) {
-			newSql.append(" ")
-				.append(markNativeKeyword("LIMIT "))
-				.append(( end - start + 1 ));
+		if (start > 1) {
+			newSql.append(" OFFSET ")
+				.append((start - 1))
+				.append( " ROWS");
 		}
-		newSql.append(" ")
-			.append(markNativeKeyword("OFFSET "))
-			.append((start - 1));
+		if (end > 0) {
+			newSql.append(" FETCH FIRST ")
+				.append(( end - start + 1 ))
+				.append(" ROWS ONLY");
+		}
 		return newSql.toString();
 	}
 
@@ -1186,9 +1188,9 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			.append(columnName)
 			.append(",',')");
 		builder.append(" <@ "); //is contained by
-		builder.append("string_to_array('")
-			.append(csv)
-			.append("',',')");
+		builder.append("string_to_array(")
+			.append(DB.TO_STRING(csv))
+			.append(",',')");
 
 		return builder.toString();
 	}
@@ -1215,10 +1217,10 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		builder.append("string_to_array(")
 			.append(columnName)
 			.append(",',')");
-		builder.append(" && "); //is contained by
-		builder.append("string_to_array('")
-			.append(csv)
-			.append("',',')");
+		builder.append(" && "); //intersect
+		builder.append("string_to_array(")
+			.append(DB.TO_STRING(csv))
+			.append(",',')");
 
 		return builder.toString();
 	}
@@ -1236,8 +1238,10 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			return false;
 		else if (sysNative != null)
 			return sysNative;
-		else
+		else if (!Util.isEmpty(Ini.getProperty(P_POSTGRE_SQL_NATIVE), true))
 			return Ini.isPropertyBool(P_POSTGRE_SQL_NATIVE);
+		else
+			return true;
 	}
 	
 	/**
@@ -1388,6 +1392,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			
 		//	Default
 		String defaultValue = column.getDefaultValue();
+		String originalDefaultValue = defaultValue;
 		if (defaultValue != null 
 			&& defaultValue.length() > 0
 			&& defaultValue.indexOf('@') == -1		//	no variables
@@ -1396,12 +1401,13 @@ public class DB_PostgreSQL implements AdempiereDatabase
 			if (defaultValue.equalsIgnoreCase("sysdate"))
 				defaultValue = "getDate()";
 			if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'"))
-				defaultValue = "'" + defaultValue + "'";
+				defaultValue = DB.TO_STRING(defaultValue);
 			sql.append(defaultValue);
 		}
 		else
 		{
 			sql.append("null");
+			defaultValue = null;
 		}
 		sql.append(")");
 		
@@ -1409,6 +1415,19 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		//	Null Values
 		if (column.isMandatory() && defaultValue != null && defaultValue.length() > 0)
 		{
+			if (!(DisplayType.isText(column.getAD_Reference_ID()) 
+					|| DisplayType.isList(column.getAD_Reference_ID())
+					|| column.getAD_Reference_ID() == DisplayType.YesNo
+					|| column.getAD_Reference_ID() == DisplayType.Payment
+					// Two special columns: Defined as Table but DB Type is String 
+					|| column.getColumnName().equals("EntityType") || column.getColumnName().equals("AD_Language")
+					|| (column.getAD_Reference_ID() == DisplayType.Button &&
+							!(column.getColumnName().endsWith("_ID")))))
+			{
+				defaultValue = originalDefaultValue;
+				if (defaultValue.equalsIgnoreCase("sysdate"))
+					defaultValue = "getDate()";
+			}
 			StringBuilder sqlSet = new StringBuilder("UPDATE ")
 				.append(table.getTableName())
 				.append(" SET ").append(quoteColumnName(column.getColumnName()))

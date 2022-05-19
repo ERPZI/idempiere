@@ -65,7 +65,7 @@ import org.compiere.util.Util;
  *  Posting Document Root.
  *
  *  <pre>
- *  Table               Base Document Types (C_DocType.DocBaseType & AD_Reference_ID=183)
+ *  Table               Base Document Types (C_DocType.DocBaseType and AD_Reference_ID=183)
  *      Class           AD_Table_ID
  *  ------------------  ------------------------------
  *  C_Invoice:          ARI, ARC, ARF, API, APC
@@ -117,7 +117,7 @@ import org.compiere.util.Util;
  *  @author Jorg Janke
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 				<li>FR [ 2520591 ] Support multiples calendar for Org
- *				@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962
+ *				@see https://sourceforge.net/p/adempiere/feature-requests/631/
  *  @version  $Id: Doc.java,v 1.6 2006/07/30 00:53:33 jjanke Exp $
  */
 public abstract class Doc
@@ -125,7 +125,7 @@ public abstract class Doc
 	/**************************************************************************
 	 * 	 Document Types
 	 *  --------------
-	 *  C_DocType.DocBaseType & AD_Reference_ID=183
+	 *  C_DocType.DocBaseType and AD_Reference_ID=183
 	 *  C_Invoice:          ARI, ARC, ARF, API, APC
 	 *  C_Payment:          ARP, APP
 	 *  C_Order:            SOO, POO
@@ -138,7 +138,7 @@ public abstract class Doc
 	 *  M_Requisition		POR
 	 **************************************************************************/
 
-	private static final String DOC_TYPE_BY_DOC_BASE_TYPE_SQL = "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType=? AND IsActive='Y' ORDER BY IsDefault DESC, C_DocType_ID";
+	public static final String DOC_TYPE_BY_DOC_BASE_TYPE_SQL = "SELECT C_DocType_ID FROM C_DocType WHERE AD_Client_ID=? AND DocBaseType=? AND IsActive='Y' ORDER BY IsDefault DESC, C_DocType_ID";
 	
 	/**	AR Invoices - ARI       */
 	public static final String 	DOCTYPE_ARInvoice       = MDocType.DOCBASETYPE_ARInvoice;
@@ -346,7 +346,7 @@ public abstract class Doc
 		p_Status = STATUS_Error;
 		m_as = as;
 		m_ctx = new Properties(m_as.getCtx());
-		m_ctx.setProperty("#AD_Client_ID", String.valueOf(m_as.getAD_Client_ID()));
+		m_ctx.setProperty(Env.AD_CLIENT_ID, String.valueOf(m_as.getAD_Client_ID()));
 
 		String className = clazz.getName();
 		className = className.substring(className.lastIndexOf('.')+1);
@@ -505,7 +505,7 @@ public abstract class Doc
 	 *          - postlogic (for all Accounting Schema)
 	 *              - create Fact lines
 	 *          - postCommit
-	 *              - commits Fact lines and Document & sets Processing = 'N'
+	 *              - commits Fact lines and Document and sets Processing = 'N'
 	 *              - if error - create Note
 	 *  </pre>
 	 *  @param force if true ignore that locked

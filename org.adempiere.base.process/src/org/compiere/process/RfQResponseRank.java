@@ -36,8 +36,9 @@ import org.compiere.util.Env;
  *  
  *  @author Teo Sarca, teo.sarca@gmail.com
  *  	<li>BF [ 2892595 ] RfQResponseRank - ranking is not good
- *  		https://sourceforge.net/tracker/?func=detail&aid=2892595&group_id=176962&atid=879332
+ *  		https://sourceforge.net/p/adempiere/bugs/2205/
  */
+@org.adempiere.base.annotation.Process
 public class RfQResponseRank extends SvrProcess
 {
 	/**	RfQ 			*/
@@ -216,10 +217,10 @@ public class RfQResponseRank extends SvrProcess
 						&& respQty.getRfQLineQty().isPurchaseQty())
 					{
 						respLine.setIsSelectedWinner(true);
-						respLine.saveEx();
 						break;
 					}
 				}
+				respLine.saveEx();
 			}
 			response.setRanking(ranking);
 			response.saveEx();

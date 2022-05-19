@@ -56,8 +56,6 @@ public class MCashLine extends X_C_CashLine
 		super (ctx, C_CashLine_ID, trxName);
 		if (C_CashLine_ID == 0)
 		{
-		//	setLine (0);
-		//	setCashType (CASHTYPE_GeneralExpense);
 			setAmount (Env.ZERO);
 			setDiscountAmt(Env.ZERO);
 			setWriteOffAmt(Env.ZERO);
@@ -87,6 +85,10 @@ public class MCashLine extends X_C_CashLine
 		setC_Cash_ID(cash.getC_Cash_ID());
 		m_parent = cash;
 	}	//	MCashLine
+
+	public MCashLine(Properties ctx, int C_CashLine_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_CashLine_ID, trxName, virtualColumns);
+	}
 
 	/** Parent					*/
 	protected MCash		m_parent = null;
@@ -302,8 +304,8 @@ public class MCashLine extends X_C_CashLine
 	 */
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_CashLine"));
+		if (newRecord && getParent().isProcessed()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_Cash_ID"));
 			return false;
 		}
 		//	Cannot change generated Invoices

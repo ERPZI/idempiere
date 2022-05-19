@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.process.UUIDGenerator;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -47,6 +48,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trace;
 import org.compiere.util.Util;
 import org.compiere.wf.MWorkflow;
+import org.compiere.wf.MWorkflowAccess;
 import org.idempiere.cache.ImmutablePOSupport;
 import org.idempiere.cache.POCopyCache;
 
@@ -66,7 +68,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6317084960843429042L;
+	private static final long serialVersionUID = 7597852750014990009L;
 
 	/**
 	 * 	Get Default (Client) Role
@@ -86,10 +88,9 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	 */
 	public static MRole getDefault (Properties ctx, boolean reload)
 	{
-		int AD_Role_ID = Env.getContextAsInt(ctx, "#AD_Role_ID");
-		int AD_User_ID = Env.getContextAsInt(ctx, "#AD_User_ID");
-//		if (!Ini.isClient())	//	none for Server
-//			AD_User_ID = 0;
+		int AD_Role_ID = Env.getContextAsInt(ctx, Env.AD_ROLE_ID);
+		int AD_User_ID = Env.getContextAsInt(ctx, Env.AD_USER_ID);
+
 		MRole defaultRole = getDefaultRole(); 
 		if (reload || defaultRole == null)
 		{
@@ -153,21 +154,6 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	public static MRole get (Properties ctx, int AD_Role_ID)
 	{
 		return get(ctx, AD_Role_ID, Env.getAD_User_ID(ctx), false); // metas-2009_0021_AP1_G94 - we need to use this method because we need to load/reload all accesses
-		/* metas-2009_0021_AP1_G94
-		String key = String.valueOf(AD_Role_ID);
-		MRole role = (MRole)s_roles.get (key);
-		String trxName = null;
-		if (role == null)
-		{
-			role = new MRole (ctx, AD_Role_ID, trxName);
-			s_roles.put (key, role);
-			if (AD_Role_ID == 0)	//	System Role
-			{
-				role.load(trxName);	//	special Handling
-			}
-		}
-		return role;
-		/**/ // metas-2009_0021_AP1_G94
 	}	//	get
 	
 	/**
@@ -273,6 +259,8 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	
 	/**************************************************************************
 	 * 	Standard Constructor
+	 *  NOTE - This method must not be used when the role is being requested to manage permissions,
+	 *         in such case is necessary to use one of the get methods setting the userID
 	 *	@param ctx context
 	 *	@param AD_Role_ID id
 	 *	@param trxName transaction
@@ -283,7 +271,6 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		//	ID=0 == System Administrator
 		if (AD_Role_ID == 0)
 		{
-		//	setName (null);
 			setIsCanExport (true);
 			setIsCanReport (true);
 			setIsManual (false);
@@ -303,6 +290,8 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 
 	/**
 	 * 	Load Constructor
+	 *  NOTE - This method must not be used when the role is being requested to manage permissions,
+	 *         in such case is necessary to use one of the get methods setting the userID
 	 *	@param ctx context
 	 *	@param rs result set
 	 *	@param trxName transaction
@@ -409,16 +398,13 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	 */
 	protected boolean beforeSave(boolean newRecord)
 	{
-	//	if (newRecord || is_ValueChanged("UserLevel"))
-	//	{
-			if (getAD_Client_ID() == 0)
-				setUserLevel(USERLEVEL_System);
-			else if (getUserLevel().equals(USERLEVEL_System))
-			{
-				log.saveError("AccessTableNoUpdate", Msg.getElement(getCtx(), "UserLevel"));
-				return false;
-			}
-	//	}
+		if (getAD_Client_ID() == 0)
+			setUserLevel(USERLEVEL_System);
+		else if (getUserLevel().equals(USERLEVEL_System))
+		{
+			log.saveError("AccessTableNoUpdate", Msg.getElement(getCtx(), "UserLevel"));
+			return false;
+		}
 		return true;
 	}	//	beforeSave
 	
@@ -504,7 +490,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			+ " LEFT JOIN AD_Window_Access wa ON "
 			+ "(wa.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND w.AD_Window_ID = wa.AD_Window_ID) "
-			+ "WHERE wa.AD_Window_ID IS NULL AND t.SeqNo=(SELECT MIN(SeqNo) FROM AD_Tab xt "	// only check first tab
+			+ "WHERE w.IsActive = 'Y' AND wa.AD_Window_ID IS NULL AND t.SeqNo=(SELECT MIN(SeqNo) FROM AD_Tab xt "	// only check first tab
 				+ "WHERE xt.AD_Window_ID=w.AD_Window_ID)"
 			+ "AND tt.AccessLevel IN ";
 		
@@ -515,7 +501,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			+ "FROM AD_Process p LEFT JOIN AD_Process_Access pa ON "
 			+ "(pa.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND p.AD_Process_ID = pa.AD_Process_ID) "
-			+ "WHERE pa.AD_Process_ID IS NULL AND AccessLevel IN ";
+			+ "WHERE p.IsActive = 'Y' AND pa.AD_Process_ID IS NULL AND AccessLevel IN ";
 
 		String sqlForm = "INSERT INTO AD_Form_Access "
 			+ "(AD_Form_ID, AD_Role_ID," 
@@ -524,7 +510,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			+ "FROM AD_Form f LEFT JOIN AD_Form_Access fa ON "
 			+ "(fa.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND f.AD_Form_ID = fa.AD_Form_ID) "
-			+ "WHERE fa.AD_Form_ID IS NULL AND AccessLevel IN ";
+			+ "WHERE f.IsActive = 'Y' AND fa.AD_Form_ID IS NULL AND AccessLevel IN ";
 
 		String sqlWorkflow = "INSERT INTO AD_WorkFlow_Access "
 			+ "(AD_WorkFlow_ID, AD_Role_ID,"
@@ -533,7 +519,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			+ "FROM AD_WorkFlow w LEFT JOIN AD_WorkFlow_Access wa ON "
 			+ "(wa.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND w.AD_WorkFlow_ID = wa.AD_WorkFlow_ID) "
-			+ "WHERE w.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND wa.AD_WorkFlow_ID IS NULL AND AccessLevel IN ";
+			+ "WHERE w.IsActive = 'Y' AND w.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND wa.AD_WorkFlow_ID IS NULL AND AccessLevel IN ";
 
 		String sqlDocAction = "INSERT INTO AD_Document_Action_Access "
 			+ "(AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,"
@@ -550,7 +536,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			+ ") LEFT JOIN AD_Document_Action_Access da ON "
 			+ "(da.AD_Role_ID=" + getAD_Role_ID()
 			+ " AND da.C_DocType_ID=doctype.C_DocType_ID AND da.AD_Ref_List_ID=action.AD_Ref_List_ID) "
-			+ "WHERE (da.C_DocType_ID IS NULL AND da.AD_Ref_List_ID IS NULL)) ";
+			+ "WHERE doctype.IsActive = 'Y' AND  (da.C_DocType_ID IS NULL AND da.AD_Ref_List_ID IS NULL)) ";
 
 		String sqlInfo = "INSERT INTO AD_InfoWindow_Access "
 				+ "(AD_InfoWindow_ID, AD_Role_ID,"
@@ -562,7 +548,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 				+ "(ia.AD_Role_ID=" + getAD_Role_ID()
 				+ " AND i.AD_InfoWindow_ID = ia.AD_InfoWindow_ID) "
 				+ " INNER JOIN AD_Table tt ON (i.AD_Table_ID=tt.AD_Table_ID) "
-				+ "WHERE i.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND ia.AD_InfoWindow_ID IS NULL"
+				+ "WHERE i.IsActive = 'Y' AND i.AD_Client_ID IN (0," + getAD_Client_ID() + ") AND ia.AD_InfoWindow_ID IS NULL"
 				+ " AND tt.AccessLevel IN ";
 
 		/**
@@ -606,13 +592,29 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		int docact = DB.executeUpdateEx(sqlDocAction, get_TrxName());
 		int info = DB.executeUpdateEx(sqlInfo + roleAccessLevel, get_TrxName());
 
+		if (DB.isGenerateUUIDSupported()) {
+			DB.executeUpdateEx("UPDATE AD_Window_Access SET AD_Window_Access_UU=generate_uuid() WHERE AD_Window_Access_UU IS NULL", get_TrxName());
+			DB.executeUpdateEx("UPDATE AD_Process_Access SET AD_Process_Access_UU=generate_uuid() WHERE AD_Process_Access_UU IS NULL", get_TrxName());
+			DB.executeUpdateEx("UPDATE AD_Form_Access SET AD_Form_Access_UU=generate_uuid() WHERE AD_Form_Access_UU IS NULL", get_TrxName());
+			DB.executeUpdateEx("UPDATE AD_Workflow_Access SET AD_Workflow_Access_UU=generate_uuid() WHERE AD_Workflow_Access_UU IS NULL", get_TrxName());
+			DB.executeUpdateEx("UPDATE AD_Document_Action_Access SET AD_Document_Action_Access_UU=generate_uuid() WHERE AD_Document_Action_Access_UU IS NULL", get_TrxName());
+			DB.executeUpdateEx("UPDATE AD_InfoWindow_Access SET AD_InfoWindow_Access_UU=generate_uuid() WHERE AD_InfoWindow_Access_UU IS NULL", get_TrxName());
+		} else {
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MWindowAccess.Table_Name,         PO.getUUIDColumnName(MWindowAccess.Table_Name)),         get_TrxName());
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MProcessAccess.Table_Name,        PO.getUUIDColumnName(MProcessAccess.Table_Name)),        get_TrxName());
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MFormAccess.Table_Name,           PO.getUUIDColumnName(MFormAccess.Table_Name)),           get_TrxName());
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MWorkflowAccess.Table_Name,       PO.getUUIDColumnName(MWorkflowAccess.Table_Name)),       get_TrxName());
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MDocumentActionAccess.Table_Name, PO.getUUIDColumnName(MDocumentActionAccess.Table_Name)), get_TrxName());
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), MInfoWindowAccess.Table_Name,     PO.getUUIDColumnName(MInfoWindowAccess.Table_Name)),     get_TrxName());
+		}
+
 		loadAccess(true);
-		return "@AD_Window_ID@ #" + win 
+		return Msg.parseTranslation(getCtx(), "@AD_Window_ID@ #" + win 
 			+ " -  @AD_Process_ID@ #" + proc
 			+ " -  @AD_Form_ID@ #" + form
 			+ " -  @AD_Workflow_ID@ #" + wf
 			+ " -  @DocAction@ #" + docact
-			+ " -  @AD_InfoWindow_ID@ #" + info;
+			+ " -  @AD_InfoWindow_ID@ #" + info);
 		
 	}	//	createAccessRecords
 
@@ -809,7 +811,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	private void loadOrgAccessUser(ArrayList<OrgAccess> list)
 	{
 		if (getAD_User_ID() == -1) {
-			log.severe("Trying to load Org Access from User but user has not been set");
+			log.info("Trying to load Org Access from User but user has not been set");
 		}
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -968,7 +970,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = "SELECT AD_Table_ID, AccessLevel, TableName, IsView, "
-			+ "(SELECT ColumnName FROM AD_COLUMN WHERE AD_COLUMN.AD_TABLE_ID = AD_TABLE.AD_TABLE_ID AND AD_COLUMN.COLUMNNAME = AD_TABLE.TABLENAME || '_ID') "
+			+ "(SELECT ColumnName FROM AD_COLUMN WHERE AD_COLUMN.AD_TABLE_ID = AD_TABLE.AD_TABLE_ID AND UPPER(AD_COLUMN.COLUMNNAME) = UPPER(AD_TABLE.TABLENAME) || '_ID') "
 			+ "FROM AD_Table WHERE IsActive='Y'";
 		try
 		{
@@ -1453,7 +1455,6 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		return false;
 	}	//	isTableAccessLevel
 
-
 	/**
 	 * 	Access to Column
 	 *	@param AD_Table_ID table
@@ -1463,12 +1464,25 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	 */
 	public boolean isColumnAccess (int AD_Table_ID, int AD_Column_ID, boolean ro)
 	{
+		return isColumnAccess(AD_Table_ID, AD_Column_ID, ro, null);
+	}
+
+	/**
+	 * 	Access to Column
+	 *	@param AD_Table_ID table
+	 *	@param AD_Column_ID column
+	 *	@param ro read only
+	 *  @param trxName
+	 *	@return true if access
+	 */
+	public boolean isColumnAccess (int AD_Table_ID, int AD_Column_ID, boolean ro, String trxName)
+	{
 		if (!isTableAccess(AD_Table_ID, ro))		//	No Access to Table		
 			return false;
 		loadColumnAccess(false);
 
 		// Verify access to process for buttons
-		MColumn column = MColumn.get(Env.getCtx(), AD_Column_ID);
+		MColumn column = MColumn.get(Env.getCtx(), AD_Column_ID, trxName);
 		if (column.getAD_Reference_ID() == DisplayType.Button && column.getAD_Process_ID() > 0) {
 			Boolean access = MRole.getDefault().getProcessAccess(column.getAD_Process_ID());
 			if (access == null)
@@ -1531,8 +1545,6 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	 */
 	public boolean isRecordAccess (int AD_Table_ID, int Record_ID, boolean ro)
 	{
-	//	if (!isTableAccess(AD_Table_ID, ro))		//	No Access to Table
-	//		return false;
 		loadRecordAccess(false);
 		boolean negativeList = true;
 		for (int i = 0; i < m_recordAccess.length; i++)
@@ -2118,7 +2130,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 					keyColumnName = TableName;
 				keyColumnName += ".";
 			}
-			//keyColumnName += TableName + "_ID";	//	derived from table
+
 			if (getIdColumnName(TableName) == null) continue;
 			keyColumnName += getIdColumnName(TableName); 
 	
@@ -2410,19 +2422,10 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		if (retValue)
 			return retValue;
 
-		//  Notification
-		/**
-		if (forInsert)
-			log.saveWarning("AccessTableNoUpdate",
-				"(Required=" + TableLevel + "("
-				+ getTableLevelString(Env.getAD_Language(ctx), TableLevel)
-				+ ") != UserLevel=" + userLevel);
-		else
-		**/
-			log.saveWarning("AccessTableNoView",
-				"Required=" + TableLevel + "("
-				+ getTableLevelString(Env.getAD_Language(ctx), TableLevel)
-				+ ") != UserLevel=" + userLevel);
+		log.saveWarning("AccessTableNoView",
+			"Required=" + TableLevel + "("
+			+ getTableLevelString(Env.getAD_Language(ctx), TableLevel)
+			+ ") != UserLevel=" + userLevel);
 		if (log.isLoggable(Level.INFO)) log.info (toString());
 		return retValue;
 	}	//	canView
@@ -2464,7 +2467,6 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		Integer ii = (Integer)m_tableName.get(tableName);
 		if (ii != null)
 			return ii.intValue();
-	//	log.log(Level.WARNING,"getAD_Table_ID - not found (" + tableName + ")");
 		return 0;
 	}	//	getAD_Table_ID
 
@@ -2868,7 +2870,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		final int AD_User_ID = getAD_User_ID();
 		if (AD_User_ID < 0)
 		{
-			log.severe("Trying to load Child Roles but user has not been set");
+			log.info("Trying to load Child Roles but user has not been set");
 			//throw new IllegalStateException("AD_User_ID is not set");
 			return ;
 		}
@@ -2904,7 +2906,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		final int AD_User_ID = getAD_User_ID();
 		if (AD_User_ID < 0)
 		{
-			log.severe("Trying to load Substituted Roles but user has not been set");
+			log.info("Trying to load Substituted Roles but user has not been set");
 			//throw new IllegalStateException("AD_User_ID is not set");
 			return;
 		}
@@ -3216,39 +3218,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			mergeIncludedAccess("m_infoAccess"); 
 			// and now get the info access directly from this role			
 			String ASPFilter = "";
-			/*
-			MClient client = MClient.get(getCtx(), getAD_Client_ID());
-			if (client.isUseASP())
-				ASPFilter =
-					  "   AND (   AD_InfoWindow_ID IN ( "
-					// Just ASP subscribed forms for client "
-					+ "              SELECT f.AD_InfoWindow_ID "
-					+ "                FROM ASP_InfoWindow f, ASP_Level l, ASP_ClientLevel cl "
-					+ "               WHERE f.ASP_Level_ID = l.ASP_Level_ID "
-					+ "                 AND cl.AD_Client_ID = " + client.getAD_Client_ID()
-					+ "                 AND cl.ASP_Level_ID = l.ASP_Level_ID "
-					+ "                 AND f.IsActive = 'Y' "
-					+ "                 AND l.IsActive = 'Y' "
-					+ "                 AND cl.IsActive = 'Y' "
-					+ "                 AND f.ASP_Status = 'S') " // Show
-					+ "        OR AD_InfoWindow_ID IN ( "
-					// + show ASP exceptions for client
-					+ "              SELECT AD_InfoWindow_ID "
-					+ "                FROM ASP_ClientException ce "
-					+ "               WHERE ce.AD_Client_ID = " + client.getAD_Client_ID()
-					+ "                 AND ce.IsActive = 'Y' "
-					+ "                 AND ce.AD_InfoWindow_ID IS NOT NULL "
-					+ "                 AND ce.ASP_Status = 'S') " // Show
-					+ "       ) "
-					+ "   AND AD_InfoWindow_ID NOT IN ( "
-					// minus hide ASP exceptions for client
-					+ "          SELECT AD_InfoWindow_ID "
-					+ "            FROM ASP_ClientException ce "
-					+ "           WHERE ce.AD_Client_ID = " + client.getAD_Client_ID()
-					+ "             AND ce.IsActive = 'Y' "
-					+ "             AND ce.AD_InfoWindow_ID IS NOT NULL "
-					+ "             AND ce.ASP_Status = 'H')"; // Hide
-			*/
+
 			String sql = "SELECT AD_InfoWindow_ID, IsActive FROM AD_InfoWindow_Access WHERE AD_Role_ID=?" + ASPFilter;
 			PreparedStatement pstmt = null;
 			ResultSet rs = null;
@@ -3281,16 +3251,7 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			setAccessMap("m_infoAccess", mergeAccess(getAccessMap("m_infoAccess"), directAccess, true));
 		}	//	reload
 		Boolean retValue = m_infoAccess.get(AD_InfoWindow_ID);
-		/* Info Window doesn't have AccessLevel
-		if (retValue != null && retValue.booleanValue()) {
-			MInfoWindow infoWindow = new MInfoWindow(getCtx(), AD_InfoWindow_ID, get_TrxName());
-			if (! isAccessLevelCompatible(infoWindow.getAccessLevel())) {
-				log.warning("Role " + getName() + " has assigned access incompatible info window " + infoWindow.getName());
-				m_infoAccess.remove(AD_InfoWindow_ID);
-				retValue = null;
-			}
-		}
-		*/
+
 		return retValue;
 	}
 

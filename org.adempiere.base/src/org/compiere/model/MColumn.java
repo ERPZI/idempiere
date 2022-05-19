@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.exceptions.DBException;
 import org.compiere.db.AdempiereDatabase;
 import org.compiere.db.Database;
@@ -42,6 +43,7 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
+import org.idempiere.expression.logic.LogicEvaluator;
 
 /**
  *	Persistent Column Model
@@ -54,7 +56,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1841918268550762201L;
+	private static final long serialVersionUID = 4379933682905553553L;
 
 	/**
 	 * 	Get MColumn from Cache (immutable)
@@ -118,14 +120,28 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	/**
 	 * 	Get MColumn given TableName and ColumnName
 	 *	@param ctx context
-	 * 	@param TableName
-	 * 	@param ColumnName
+	 * 	@param tableName
+	 * 	@param columnName
 	 *	@return MColumn
 	 */
 	public static MColumn get (Properties ctx, String tableName, String columnName)
 	{
 		MTable table = MTable.get(ctx, tableName);
 		return  table.getColumn(columnName);
+	}	//	get
+
+	/**
+	 * 	Get MColumn given TableName and ColumnName
+	 *	@param ctx context
+	 *  @param tableName
+	 *  @param columnName
+	 *  @param trxName
+	 *	@return MColumn
+	 */
+	public static MColumn get (Properties ctx, String tableName, String columnName, String trxName)
+	{
+		MTable table = MTable.get(ctx, tableName, trxName);
+		return table.getColumn(columnName);
 	}	//	get
 
 	public static String getColumnName (Properties ctx, int AD_Column_ID)
@@ -165,11 +181,6 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		super (ctx, AD_Column_ID, trxName);
 		if (AD_Column_ID == 0)
 		{
-		//	setAD_Element_ID (0);
-		//	setAD_Reference_ID (0);
-		//	setColumnName (null);
-		//	setName (null);
-		//	setEntityType (null);	// U
 			setIsAlwaysUpdateable (false);	// N
 			setIsEncrypted (false);
 			setIsIdentifier (false);
@@ -350,7 +361,7 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			if (getFieldLength() != 0)
 				setFieldLength(0);
 		}
-		else if (getFieldLength() == 0) 
+		else if (getFieldLength() == 0 && displayType != DisplayType.Text) 
 		{
 			if (DisplayType.isID(displayType))
 				setFieldLength(10);
@@ -364,22 +375,6 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				return false;
 			}
 		}
-
-		/* IDEMPIERE-3509, IDEMPIERE-3902
-		 * removing this validation
-		 * it affects adversely PackIn process that can create the table later
-		if ( displayType == DisplayType.TableDir ||
-			(displayType == DisplayType.Search && getAD_Reference_Value_ID() <= 0))
-		{
-			// verify the foreign table exists
-			String foreignTableName = getReferenceTableName();
-			MTable foreignTable = MTable.get(getCtx(), foreignTableName);
-			if (foreignTable == null || foreignTable.getAD_Table_ID() <= 0) {
-				log.saveError("Error", Msg.getMsg(getCtx(), "NotReferenceTable", new Object[] {getColumnName()}));
-				return false;
-			}
-		}
-		*/
 
 		if (displayType == DisplayType.Table && getAD_Reference_Value_ID() <= 0)
 		{
@@ -408,13 +403,6 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			} catch (Exception e){}
 		}
 		
-		/** Views are not updateable
-		UPDATE AD_Column c
-		SET IsUpdateable='N', IsAlwaysUpdateable='N'
-		WHERE AD_Table_ID IN (SELECT AD_Table_ID FROM AD_Table WHERE IsView='Y')
-		**/
-		
-		/* Diego Ruiz - globalqss - BF [1651899] - AD_Column: Avoid dup. SeqNo for IsIdentifier='Y' */
 		if (isIdentifier())
 		{
 			int cnt = DB.getSQLValue(get_TrxName(),"SELECT COUNT(*) FROM AD_Column "+
@@ -507,6 +495,11 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			}
 		}
 
+		// IDEMPIERE-4714
+		if (isSecure() && isAllowLogging()) {
+			setIsAllowLogging(false);
+		}
+
 		// IDEMPIERE-1615 Multiple key columns lead to data corruption or data loss
 		if ((is_ValueChanged(COLUMNNAME_IsKey) || is_ValueChanged(COLUMNNAME_IsActive)) && isKey() && isActive()) {
 			int cnt = DB.getSQLValueEx(get_TrxName(),
@@ -525,6 +518,27 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 			setSeqNoSelection(next);
 		}
 
+		//validate readonly logic expression
+		if (newRecord || is_ValueChanged(COLUMNNAME_ReadOnlyLogic)) {
+			if (isActive() && !Util.isEmpty(getReadOnlyLogic(), true) && !getReadOnlyLogic().startsWith("@SQL=")) {
+				LogicEvaluator.validate(getReadOnlyLogic());
+			}
+		}
+
+		// IDEMPIERE-4911
+		MTable table = MTable.get(getCtx(), getAD_Table_ID(), get_TrxName());
+		String tableName = table.getTableName();
+		if (tableName.toLowerCase().endsWith("_trl")) {
+			String parentTable = tableName.substring(0, tableName.length()-4);
+			MColumn column = MColumn.get(getCtx(), parentTable, colname, get_TrxName());
+			if (column != null && column.isTranslated()) {
+				if (getFieldLength() < column.getFieldLength()) {
+					log.saveWarning("Warning", "Size increased to " + column.getFieldLength() + " in translated column " + tableName + "." + colname);
+					setFieldLength(column.getFieldLength());
+				}
+			}
+		}
+
 		return true;
 	}	//	beforeSave
 	
@@ -539,34 +553,31 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 		if (!success)
 			return success;
 
-		/* Fields must inherit translation from element, not from column
-		 * changing it here is useless as SynchronizeTerminology get trl from column */
-		/*
-		//	Update Fields
-		if (!newRecord)
-		{
-			if (   is_ValueChanged(MColumn.COLUMNNAME_Name)
-				|| is_ValueChanged(MColumn.COLUMNNAME_Description)
-				|| is_ValueChanged(MColumn.COLUMNNAME_Help)
-				) {
-				StringBuilder sql = new StringBuilder("UPDATE AD_Field SET Name=")
-					.append(DB.TO_STRING(getName()))
-					.append(", Description=").append(DB.TO_STRING(getDescription()))
-					.append(", Help=").append(DB.TO_STRING(getHelp()))
-					.append(" WHERE AD_Column_ID=").append(get_ID())
-					.append(" AND IsCentrallyMaintained='Y'");
-				int no = DB.executeUpdate(sql.toString(), get_TrxName());
-				if (log.isLoggable(Level.FINE)) log.fine("afterSave - Fields updated #" + no);
-			}
-		}
-		*/
-
 		if ((newRecord || is_ValueChanged(COLUMNNAME_ColumnName))
 			&& (   "EntityType".equals(getColumnName())
 				|| "EntityType".equals(get_ValueOld(COLUMNNAME_ColumnName).toString()))) {
 			MChangeLog.resetLoggedList();
 		}
-		
+
+		// IDEMPIERE-4911
+		if (isTranslated()) {
+			MTable table = MTable.get(getAD_Table_ID());
+			String trlTableName = table.getTableName() + "_Trl";
+			MTable trlTable = MTable.get(getCtx(), trlTableName);
+			if (trlTable == null) {
+				log.saveWarning("Warning", Msg.getMsg(getCtx(), "WarnCreateTrlTable", new Object[] {trlTableName, getColumnName()}));
+			} else {
+				MColumn trlColumn = MColumn.get(getCtx(), trlTableName, getColumnName());
+				if (trlColumn == null) {
+					log.saveWarning("Warning", Msg.getMsg(getCtx(), "WarnCreateTrlColumn", new Object[] {trlTableName, getColumnName()}));
+				} else {
+					if (trlColumn.getFieldLength() < getFieldLength()) {
+						log.saveWarning("Warning", Msg.getMsg(getCtx(), "WarnUpdateSizeTrlTable", new Object[] {trlTableName, getColumnName(), getFieldLength()}));
+					}
+				}
+			}
+		}
+
 		return success;
 	}	//	afterSave
 	
@@ -627,37 +638,6 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	}	//	getSQLDataType
 	
 	/**
-	 * 	Get SQL Data Type
-	 *	@return e.g. NVARCHAR2(60)
-	 */
-	/*
-	private String getSQLDataType()
-	{
-		int dt = getAD_Reference_ID();
-		if (DisplayType.isID(dt) || dt == DisplayType.Integer)
-			return "NUMBER(10)";
-		if (DisplayType.isDate(dt))
-			return "DATE";
-		if (DisplayType.isNumeric(dt))
-			return "NUMBER";
-		if (dt == DisplayType.Binary)
-			return "BLOB";
-		if (dt == DisplayType.TextLong)
-			return "CLOB";
-		if (dt == DisplayType.YesNo)
-			return "CHAR(1)";
-		if (dt == DisplayType.List)
-			return "NVARCHAR2(" + getFieldLength() + ")";
-		if (dt == DisplayType.Button)
-			return "CHAR(" + getFieldLength() + ")";
-		else if (!DisplayType.isText(dt))
-			log.severe("Unhandled Data Type = " + dt);
-			
-		return "NVARCHAR2(" + getFieldLength() + ")";
-	}	//	getSQLDataType
-	*/
-	
-	/**
 	 * 	Get Table Constraint
 	 *	@param tableName table name
 	 *	@return table constraint
@@ -708,8 +688,8 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 	//begin vpj-cd e-evolution
 	/**
 	 * 	get Column ID
-	 *  @param String windowName
-	 *	@param String columnName
+	 *  @param TableName
+	 *	@param columnName
 	 *	@return int retValue
 	 */
 	public static int getColumn_ID(String TableName,String columnName) {
@@ -790,8 +770,13 @@ public class MColumn extends X_AD_Column implements ImmutablePOSupport
 				int cnt = DB.getSQLValueEx(get_TrxName(), "SELECT COUNT(*) FROM AD_Ref_Table WHERE AD_Reference_ID=?", getAD_Reference_Value_ID());
 				if (cnt == 1) {
 					MRefTable rt = MRefTable.get(getCtx(), getAD_Reference_Value_ID(), get_TrxName());
-					if (rt != null)
-						foreignTable = rt.getAD_Table().getTableName();
+					if (rt != null) {
+						MTable table = MTable.get(getCtx(), rt.getAD_Table_ID(), get_TrxName());
+						if (table == null) {
+							throw new AdempiereException("Table " + rt.getAD_Table_ID() + " not found");
+						}
+						foreignTable = table.getTableName();
+					}
 				}
 			}
 		} else if (DisplayType.Button == refid) {

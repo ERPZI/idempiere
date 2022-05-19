@@ -61,6 +61,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VFactReconcile")
 public class WFactReconcile extends FactReconcile 
 implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener{
 	
@@ -165,7 +166,10 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		bZoomDoc.setId(bZoomDoc.getId() + "Doc"); // to avoid 'org.zkoss.zk.ui.UiException: Not unique in the ID space of <Grid null>: Zoom'
 		bZoomDoc.setLabel(Msg.translate(Env.getCtx(), "ZoomDocument"));
 		bSelect.setMode("toggle");
-		bSelect.setImage(ThemeManager.getThemeResource("images/SelectAll24.png"));
+		if (ThemeManager.isUseFontIconForImage())
+			bSelect.setIconSclass("z-icon-SelectAll");
+		else
+			bSelect.setImage(ThemeManager.getThemeResource("images/SelectAll24.png"));
 		bSelect.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "SelectAll"));
 		bSelect.addEventListener(Events.ON_CLICK, this);
 		
@@ -573,8 +577,7 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 	
 	/**
 	 *	Zoom to target
-	 *  @param AD_Window_ID window id
-	 *  @param zoomQuery zoom query
+	 *  @param tableID table id
 	 */
 	protected void zoom (int tableID)
 	{

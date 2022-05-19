@@ -61,7 +61,6 @@ public class SessionContextListener implements ExecutionInit,
     /**
      * get servlet thread local context from session
      * @param exec
-     * @param createNew
      */
     public static void setupExecutionContextFromSession(Execution exec) {
     	Session session = exec.getDesktop().getSession();
@@ -248,8 +247,12 @@ public class SessionContextListener implements ExecutionInit,
 			if (Env.getCtx().getProperty(SERVLET_SESSION_ID) == null)
 				return;
     	}
-		int AD_Session_ID = Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID");
+		int AD_Session_ID = Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID);
 		if (AD_Session_ID > 0) {
+			
+			//sleep 1s to avoid timing issue with login and logout (both uses redirect call)
+			Thread.sleep(1000);
+			
 			String key = getSessionDesktopListKey(AD_Session_ID);
 			@SuppressWarnings("unchecked")
 			List<String> list = (List<String>) Env.getCtx().get(key);
@@ -262,9 +265,9 @@ public class SessionContextListener implements ExecutionInit,
 				}
 			}
 		
-			MSession mSession = MSession.get(Env.getCtx(), false);
+			MSession mSession = MSession.get(Env.getCtx());
 			if(mSession!=null && !mSession.isProcessed()) {
-				
+				mSession = new MSession(Env.getCtx(), mSession.getAD_Session_ID(), null);
 		        mSession.setProcessed(true);
 		        mSession.saveEx();
 			}
@@ -315,9 +318,10 @@ public class SessionContextListener implements ExecutionInit,
     	{
 			setupExecutionContextFromSession(Executions.getCurrent());
     	}
-		MSession mSession = MSession.get(Env.getCtx(), false);
+		MSession mSession = MSession.get(Env.getCtx());
 		if(mSession!=null){
 			if (mSession.isProcessed()) {
+				mSession = new MSession(Env.getCtx(), mSession.getAD_Session_ID(), null);
 				mSession.setProcessed(false);
 				mSession.saveEx();
 			}

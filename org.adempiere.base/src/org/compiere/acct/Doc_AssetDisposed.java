@@ -21,10 +21,8 @@ import org.compiere.model.MAsset;
 public class Doc_AssetDisposed extends Doc
 {
 	/**
-	 * @param ass
-	 * @param clazz
+	 * @param as
 	 * @param rs
-	 * @param defaultDocumentType
 	 * @param trxName
 	 */
 	public Doc_AssetDisposed (MAcctSchema as, ResultSet rs, String trxName)

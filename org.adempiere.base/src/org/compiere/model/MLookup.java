@@ -71,6 +71,7 @@ public final class MLookup extends Lookup implements Serializable
 	{
 		super(info.DisplayType, info.WindowNo);
 		m_info = info;
+		m_tabNo = TabNo;
 		if (log.isLoggable(Level.FINE)) log.fine(m_info.KeyColumn);
 
 		//  load into local lookup, if already cached
@@ -90,12 +91,7 @@ public final class MLookup extends Lookup implements Serializable
 			m_hasInactive = true;		//	creates focus listener for dynamic loading
 			return;						//	required when parent needs to be selected (e.g. price from product)
 		}
-		//
-		//m_loader = new MLoader();
-	//	if (TabNo != 0)
-	//		m_loader.setPriority(Thread.NORM_PRIORITY - 1);
-		//m_loader.start();
-		//m_loader.run();		//	test sync call
+
 	}	//	MLookup
 
 	/** Inactive Marker Start       */
@@ -109,6 +105,8 @@ public final class MLookup extends Lookup implements Serializable
 
 	/** The Lookup Info Value Object        */
 	private MLookupInfo         m_info = null;
+
+	private int 				m_tabNo = 0;
 
 	/** Storage of data  Key-NamePair	*/
 	private volatile LinkedHashMap<Object,Object>	m_lookup = new LinkedHashMap<Object,Object>();
@@ -373,7 +371,6 @@ public final class MLookup extends Lookup implements Serializable
 	{
 		if (m_info == null)
 			return false;
-		//return m_info.IsValidated;
 		return isValidated(m_info);
 	}	//	isValidated
 
@@ -433,13 +430,10 @@ public final class MLookup extends Lookup implements Serializable
 			loadData (loadParent);
 
 		//	already validation included
-		//if (m_info.IsValidated)
 		boolean validated = this.isValidated(m_info);
 		if (validated)
 			return new ArrayList<Object>(m_lookup.values());
 		
-
-		//if (!m_info.IsValidated && onlyValidated)
 		if (!validated && onlyValidated)
 		{
 			loadData (loadParent);
@@ -455,7 +449,7 @@ public final class MLookup extends Lookup implements Serializable
 	 *  @param onlyValidated only validated
 	 *  @param onlyActive only active
 	 * 	@param temporary force load for temporary display
-	 *  @param isshortlist
+	 *  @param shortlist
 	 *  @return list
 	 */
 	public ArrayList<Object> getData (boolean mandatory, boolean onlyValidated, boolean onlyActive, boolean temporary, boolean shortlist) // idempiere 90
@@ -800,7 +794,7 @@ public final class MLookup extends Lookup implements Serializable
 	}	//	g2etColumnName
 
 	/**
-	 *	Refresh & return number of items read.
+	 *	Refresh and return number of items read.
 	 * 	Get get data of parent lookups
 	 *  @return no of items read
 	 */
@@ -825,7 +819,7 @@ public final class MLookup extends Lookup implements Serializable
 	}
 	
 	/**
-	 *	Refresh & return number of items read
+	 *	Refresh and return number of items read
 	 * 	@param loadParent get data of parent lookups
 	 *  @return no of items refresh
 	 */
@@ -897,7 +891,7 @@ public final class MLookup extends Lookup implements Serializable
 	{
 		if (info.IsValidated) return true;
 		if (info.ValidationCode.length() == 0) return true;
-		String validation = Env.parseContext(m_info.ctx, m_info.WindowNo, m_info.ValidationCode, false);
+		String validation = Env.parseContext(m_info.ctx, m_info.WindowNo, m_tabNo, m_info.ValidationCode, false);
 		if (validation.equals(info.parsedValidationCode)) return true;
 		return false;
 	}
@@ -912,18 +906,18 @@ public final class MLookup extends Lookup implements Serializable
 	
 	
 	
-	private final static CCache<String, CCache<String, List<KeyNamePair>>> s_keyNamePairCache = new CCache<String, CCache<String, List<KeyNamePair>>>(null, "MLookup.KeyNamePairCache", 100, 60, false, 500);
-	private final static CCache<String, CCache<String, List<ValueNamePair>>> s_valueNamePairCache = new CCache<String, CCache<String, List<ValueNamePair>>>(null, "MLookup.ValueNamePairCache", 100, 60, false, 500);
+	private final static CCache<String, CCache<String, List<KeyNamePair>>> s_keyNamePairCache = new CCache<String, CCache<String, List<KeyNamePair>>>(null, "MLookup.KeyNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
+	private final static CCache<String, CCache<String, List<ValueNamePair>>> s_valueNamePairCache = new CCache<String, CCache<String, List<ValueNamePair>>>(null, "MLookup.ValueNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
 	
-	private final static CCache<String, CCache<Integer, KeyNamePair>> s_directKeyNamePairCache = new CCache<String, CCache<Integer,KeyNamePair>>(null, "MLookup.DirectKeyNamePairCache", 100, 60, false, 500);
-	private final static CCache<String, CCache<String, ValueNamePair>> s_directValueNamePairCache = new CCache<String, CCache<String,ValueNamePair>>(null, "MLookup.DirectValueNamePairCache", 100, 60, false, 500);
+	private final static CCache<String, CCache<Integer, KeyNamePair>> s_directKeyNamePairCache = new CCache<String, CCache<Integer,KeyNamePair>>(null, "MLookup.DirectKeyNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
+	private final static CCache<String, CCache<String, ValueNamePair>> s_directValueNamePairCache = new CCache<String, CCache<String,ValueNamePair>>(null, "MLookup.DirectValueNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
 	
 	private synchronized static List<KeyNamePair> getKeyNamePairCache(MLookupInfo lookupInfo, String cacheKey) 
 	{
 		CCache<String, List<KeyNamePair>> knpCache = s_keyNamePairCache.get(lookupInfo.TableName);
 		if (knpCache == null)
 		{
-			knpCache = new CCache<String, List<KeyNamePair>>(lookupInfo.TableName, lookupInfo.TableName + " KeyNamePair Cache", 100, 60, false, 500);
+			knpCache = new CCache<String, List<KeyNamePair>>(lookupInfo.TableName, cacheKey + " KeyNamePair Cache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
 			s_keyNamePairCache.put(lookupInfo.TableName, knpCache);
 		}
 		List<KeyNamePair> list = knpCache.get(cacheKey);
@@ -940,7 +934,7 @@ public final class MLookup extends Lookup implements Serializable
 		CCache<String, List<ValueNamePair>> vnpCache = s_valueNamePairCache.get(lookupInfo.TableName);
 		if (vnpCache == null)
 		{
-			vnpCache = new CCache<String, List<ValueNamePair>>(lookupInfo.TableName, lookupInfo.TableName + " ValueNamePair Cache", 100, 60, false, 500);
+			vnpCache = new CCache<String, List<ValueNamePair>>(lookupInfo.TableName, cacheKey + " ValueNamePair Cache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, 500);
 			s_valueNamePairCache.put(lookupInfo.TableName, vnpCache);
 		}
 		List<ValueNamePair> list = vnpCache.get(cacheKey);
@@ -957,7 +951,7 @@ public final class MLookup extends Lookup implements Serializable
 		CCache<Integer, KeyNamePair> knpCache = s_directKeyNamePairCache.get(cacheKey);
 		if (knpCache == null)
 		{
-			knpCache = new CCache<Integer, KeyNamePair>(lookupInfo.TableName, lookupInfo.TableName + " DirectKeyNamePairCache", 100, 60, false, MAX_NAMEPAIR_CACHE_SIZE);
+			knpCache = new CCache<Integer, KeyNamePair>(lookupInfo.TableName, cacheKey + " DirectKeyNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, MAX_NAMEPAIR_CACHE_SIZE);
 			s_directKeyNamePairCache.put(cacheKey, knpCache);
 		}
 		return knpCache;
@@ -968,7 +962,7 @@ public final class MLookup extends Lookup implements Serializable
 		CCache<String, ValueNamePair> vnpCache = s_directValueNamePairCache.get(cacheKey);
 		if (vnpCache == null)
 		{
-			vnpCache = new CCache<String, ValueNamePair>(lookupInfo.TableName, lookupInfo.TableName + " DirectValueNamePairCache", 100, 60, false, MAX_NAMEPAIR_CACHE_SIZE);
+			vnpCache = new CCache<String, ValueNamePair>(lookupInfo.TableName, cacheKey + " DirectValueNamePairCache", 100, CCache.DEFAULT_EXPIRE_MINUTE, false, MAX_NAMEPAIR_CACHE_SIZE);
 			s_directValueNamePairCache.put(cacheKey, vnpCache);
 		}
 		return vnpCache;
@@ -1016,7 +1010,7 @@ public final class MLookup extends Lookup implements Serializable
 			//	not validated
 			if (!m_info.IsValidated)
 			{
-				String validation = Env.parseContext(m_info.ctx, m_info.WindowNo, m_info.tabNo, m_info.ValidationCode, false);
+				String validation = Env.parseContext(m_info.ctx, m_info.WindowNo, m_tabNo, m_info.ValidationCode, false);
 				m_info.parsedValidationCode = validation;
 				if (validation.length() == 0 && m_info.ValidationCode.length() > 0)
 				{
@@ -1177,7 +1171,6 @@ public final class MLookup extends Lookup implements Serializable
 						m_lookup.put(value, p);
 						vnpCache.add(p);
 					}
-				//	if (log.isLoggable(Level.FINE)) log.fine( m_info.KeyColumn + ": " + name);
 				}				
 			}
 			catch (SQLException e)
@@ -1191,7 +1184,6 @@ public final class MLookup extends Lookup implements Serializable
 			int size = m_lookup.size();
 			if (log.isLoggable(Level.FINER)) log.finer(m_info.KeyColumn
 					+ " (" + m_info.Column_ID + "):"
-				//	+ " ID=" + m_info.AD_Column_ID + " " +
 					+ " - Loader complete #" + size + " - all=" + m_allLoaded
 					+ " - ms=" + String.valueOf(System.currentTimeMillis()-m_startTime)
 					+ " (" + String.valueOf(System.currentTimeMillis()-startTime) + ")");

@@ -59,7 +59,7 @@ import org.idempiere.cache.ImmutablePOSupport;
  *  @author Jorg Janke
  *  @author Teo Sarca, teo.sarca@gmail.com
  *  		<li>BF [ 3017117 ] MTable.getClass returns bad class
- *  			https://sourceforge.net/tracker/?func=detail&aid=3017117&group_id=176962&atid=879332
+ *  			https://sourceforge.net/p/adempiere/bugs/2433/
  *  @version $Id: MTable.java,v 1.3 2006/07/30 00:58:04 jjanke Exp $
  */
 public class MTable extends X_AD_Table implements ImmutablePOSupport
@@ -67,7 +67,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4037560922339534982L;
+	private static final long serialVersionUID = -7981455044208282721L;
 
 	public final static int MAX_OFFICIAL_ID = 999999;
 
@@ -259,8 +259,6 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		super (ctx, AD_Table_ID, trxName);
 		if (AD_Table_ID == 0)
 		{
-		//	setName (null);
-		//	setTableName (null);
 			setAccessLevel (ACCESSLEVEL_SystemOnly);	// 4
 			setEntityType (ENTITYTYPE_UserMaintained);	// U
 			setIsChangeLog (false);
@@ -384,14 +382,10 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	{
 		if (columnName == null || columnName.length() == 0)
 			return null;
-		getColumns(false);
-		//
-		for (int i = 0; i < m_columns.length; i++)
-		{
-			if (columnName.equalsIgnoreCase(m_columns[i].getColumnName()))
-				return m_columns[i];
-		}
-		return null;
+		int idx = getColumnIndex(columnName);
+		if (idx < 0)
+			return null;
+		return m_columns[idx];
 	}	//	getColumn
 
 	/**
@@ -411,6 +405,27 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}   //  getColumnIndex
 
 	/**
+	 *  Column exists and is not virtual?
+	 *  @param ColumnName column name
+	 *  @return boolean - true indicating that the column exists in the table and is not virtual
+	 */
+	public synchronized boolean columnExistsInDB (String ColumnName)
+	{
+		MColumn column = getColumn(ColumnName);
+		return column != null && ! column.isVirtualColumn();
+	}   //  columnExistsInDB
+
+	/**
+	 *  Column exists?
+	 *  @param ColumnName column name
+	 *  @return boolean - true indicating that the column exists in dictionary
+	 */
+	public synchronized boolean columnExistsInDictionary (String ColumnName)
+	{
+		return getColumnIndex(ColumnName) >= 0;
+	}   //  columnExistsInDictionary
+
+	/**
 	 *  Get Column Index
 	 *  @param AD_Column_ID column
 	 *  @return index of column with ColumnName or -1 if not found
@@ -425,7 +440,7 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		
 		return -1;
 	}   //  getColumnIndex
-	
+
 	/**
 	 * 	Table has a single Key
 	 *	@return true if table has single key column
@@ -602,6 +617,21 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}	//	getPO
 
 	/**
+	 * Get PO Class Instance
+	 * 
+	 * @param  uuID    UUID
+	 * @param  trxName transaction
+	 * @return         PO for Record
+	 */
+	public PO getPOByUU (String uuID, String trxName)
+	{
+		PO po = getPO(0, trxName);
+		po.loadByUU(uuID, trxName);
+
+		return po;
+	} // getPOByUU
+
+	/**
 	 * 	Get PO Class Instance
 	 *	@param whereClause where clause
 	 *	@param trxName transaction
@@ -691,13 +721,15 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 		if (!success)
 			return success;
 		//	Sync Table ID
-		MSequence seq = MSequence.get(getCtx(), getTableName(), get_TrxName());
-		if (seq == null || seq.get_ID() == 0)
-			MSequence.createTableSequence(getCtx(), getTableName(), get_TrxName());
-		else if (!seq.getName().equals(getTableName()))
-		{
-			seq.setName(getTableName());
-			seq.saveEx();
+		if(!isView()) {
+			MSequence seq = MSequence.get(getCtx(), getTableName(), get_TrxName());
+			if (seq == null || seq.get_ID() == 0)
+				MSequence.createTableSequence(getCtx(), getTableName(), get_TrxName());
+			else if (!seq.getName().equals(getTableName()))
+			{
+				seq.setName(getTableName());
+				seq.saveEx();
+			}
 		}
 		if (newRecord || is_ValueChanged(COLUMNNAME_IsChangeLog)) {
 			MChangeLog.resetLoggedList();
@@ -725,7 +757,8 @@ public class MTable extends X_AD_Table implements ImmutablePOSupport
 	}
 	/**
 	 * 	Grant independence to GenerateModel from AD_Table_ID
-	 *	@param String tableName
+	 *	@param tableName String
+	 *  @param trxName
 	 *	@return int retValue
 	 */
 	public static int getTable_ID(String tableName, String trxName) {
