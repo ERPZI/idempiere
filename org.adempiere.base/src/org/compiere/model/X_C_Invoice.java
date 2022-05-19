@@ -1400,8 +1400,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
 	/** Check Outsourced (HSBC COS) = Z */
@@ -1410,10 +1408,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public static final String PAYMENTRULE_DirectDepositBBLDirectCredit = "Y";
 	/** Direct Deposit (BBL SMART) = X */
 	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
 	/** Direct Deposit = T */
 	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.

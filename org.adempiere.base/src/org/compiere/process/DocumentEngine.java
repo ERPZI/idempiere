@@ -1055,10 +1055,6 @@ public class DocumentEngine implements DocAction
 				|| docStatus.equals(DocumentEngine.STATUS_InProgress)
 				|| docStatus.equals(DocumentEngine.STATUS_Invalid))
 			{
-<<<<<<< HEAD
-				options[index++] = DocumentEngine.ACTION_Prepare;
-=======
->>>>>>> release-9
 				//	Draft Sales Order Quote/Proposal - Process
 				if ("Y".equals(isSOTrx)
 					&& ("OB".equals(orderType) || "ON".equals(orderType)))

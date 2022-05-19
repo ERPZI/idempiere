@@ -416,8 +416,6 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
 	/** Check HSBC COS = Z */
@@ -428,10 +426,6 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
 	/** Direct Deposit HSBC PromptPay = W */
 	public static final String PAYMENTRULE_DirectDepositHSBCPromptPay = "W";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
 	/** Direct Deposit = T */
 	public static final String PAYMENTRULE_DirectDeposit = "T";
 	/** Set Payment Rule.
