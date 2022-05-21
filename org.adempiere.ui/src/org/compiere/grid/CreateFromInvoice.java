@@ -167,12 +167,10 @@ public abstract class CreateFromInvoice extends CreateFrom
 				+ "INNER JOIN M_RMALine l ON (l.M_RMA_ID = r.M_RMA_ID) "
 				+ "WHERE ISSOTRX='N' AND r.DocStatus in ('CO', 'CL') "
 				+ "AND r.C_BPartner_ID=? "
+				+ "AND COALESCE(l.QtyInvoiced,0) < l.Qty "
 				//MPo, 23/9/19
-				+ "AND r.User1_ID=? "
+				+ "AND r.User1_ID=? ";
 				//eof
-				+ "AND NOT EXISTS (SELECT * FROM C_Invoice inv "
-				+ "WHERE inv.M_RMA_ID=r.M_RMA_ID AND inv.DocStatus IN ('CO', 'CL'))";
-				+ "AND COALESCE(l.QtyInvoiced,0) < l.Qty ";
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;

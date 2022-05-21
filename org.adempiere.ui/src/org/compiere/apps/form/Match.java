@@ -21,7 +21,11 @@ import java.sql.Timestamp;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.util.IReservationTracer;
+import org.adempiere.util.IReservationTracerFactory;
+import org.compiere.acct.Doc;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MClient;
@@ -32,6 +36,7 @@ import org.compiere.model.MMatchPO;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MRole;
 import org.compiere.model.MStorageReservation;
+import org.compiere.model.Query;
 import org.compiere.process.DocumentEngine;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -52,22 +57,22 @@ public class Match
 		Msg.getElement(Env.getCtx(), "C_Invoice_ID", false),
 		Msg.getElement(Env.getCtx(), "M_InOut_ID", false),
 		Msg.getElement(Env.getCtx(), "C_Order_ID", false) };
-	private static final int		MATCH_INVOICE = 0;
-	private static final int		MATCH_SHIPMENT = 1;
-	private static final int		MATCH_ORDER = 2;
+	
+	public static final int		MATCH_INVOICE = 0;
+	public static final int		MATCH_SHIPMENT = 1;
+	public static final int		MATCH_ORDER = 2;
 
-	private static final int		MODE_NOTMATCHED = 0;
+	public static final int		MODE_NOTMATCHED = 0;
 	//private static final int		MODE_MATCHED = 1;
 
 	/**	Indexes in Table			*/
-	private static final int		I_BPartner = 3;
-	private static final int		I_Line = 4;
-	private static final int		I_Product = 5;
-	private static final int		I_QTY = 6;
-	private static final int		I_MATCHED = 7;
-	//private static final int        I_Org = 8; //JAVIER 
+	public static final int		I_BPartner = 3;
+	public static final int		I_Line = 4;
+	public static final int		I_Product = 5;
+	public static final int		I_QTY = 6;
+	public static final int		I_MATCHED = 7;
 	//MPo, 22/7/2016 Add PrCtr
-	private static final int		I_PrCtr = 8;
+	public static final int    I_PrCtr = 8;
 	//
 
 
@@ -76,17 +81,14 @@ public class Match
 	private String          m_qtyColumn = "";
 	private String          m_groupBy = "";
 	private StringBuffer	m_linetype = null;
-	//private BigDecimal      m_xMatched = Env.ZERO;
-	//private BigDecimal      m_xMatchedTo = Env.ZERO;
-
+ 
+	private String 			m_trxName = null;
 	
 	/**
 	 *  Match From Changed - Fill Match To
 	 */
 	protected Vector<String> cmd_matchFrom(String selection)
 	{
-	//	if (log.isLoggable(Level.FINE)) log.fine( "VMatch.cmd_matchFrom");
-		//String selection = (String)matchFrom.getSelectedItem();
 		Vector<String> vector = new Vector<String>(2);
 		if (selection.equals(m_matchOptions[MATCH_INVOICE]))
 			vector.add(m_matchOptions[MATCH_SHIPMENT]);
@@ -102,15 +104,13 @@ public class Match
 
 	
 	/**
-	 *  Search Button Pressed - Fill xMatched
+	 *  Search Button Pressed - Fill match from
 	 */
 	//MPo, 21/7/2016 Add PrCtr
-	//protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
-	protected IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Integer PrCtr, Timestamp from, Timestamp to, boolean matched)
+//	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
+	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Integer PrCtr, Timestamp from, Timestamp to, boolean matched)
 	{
 		//  ** Create SQL **
-		//int display = matchFrom.getSelectedIndex();
-		//String matchToString = (String)matchTo.getSelectedItem();
 		int matchToType = MATCH_INVOICE;
 		if (matchToString.equals(m_matchOptions[MATCH_SHIPMENT]))
 			matchToType = MATCH_SHIPMENT;
@@ -138,11 +138,7 @@ public class Match
 			//Integer Vendor = (Integer)onlyVendor.getValue();
 			m_sql.append(" AND lin.User1_ID=").append(PrCtr);
 		}
-		//
-		
 		//  Date
-		//Timestamp from = (Timestamp)dateFrom.getValue();
-		//Timestamp to = (Timestamp)dateTo.getValue();
 		if (from != null && to != null)
 			m_sql.append(" AND ").append(m_dateColumn).append(" BETWEEN ")
 				.append(DB.TO_DATE(from)).append(" AND ").append(DB.TO_DATE(to));
@@ -161,14 +157,13 @@ public class Match
 	/**
 	 *  Process Button Pressed - Process Matching
 	 */
-	protected void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, Object matchTo, BigDecimal m_xMatched)
+	public void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, String matchTo, BigDecimal m_xMatched)
 	{
 		log.config("");
 		//  Matched From
 		int matchedRow = xMatchedTable.getSelectedRow();
 		if (matchedRow < 0)
 			return;
-	//	KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_BPartner);
 		KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Line);
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
 		//MPo, 22/7/2016
@@ -219,41 +214,47 @@ public class Match
 				}
 
 				//  Create it
-				String innerTrxName = Trx.createTrxName("Match");
-				Trx innerTrx = Trx.get(innerTrxName, true);
-				innerTrx.setDisplayName(getClass().getName()+"_cmd_process");
+				String innerTrxName = m_trxName == null ? Trx.createTrxName("Match") : null;
+				Trx innerTrx = innerTrxName != null ? Trx.get(innerTrxName, true) : null;
+				if (innerTrx != null)
+					innerTrx.setDisplayName(getClass().getName()+"_cmd_process");
 				
-				try{
-					if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty), innerTrxName))
-						innerTrx.commit();
-					else
+				try {
+					if (createMatchRecord(invoice, M_InOutLine_ID, Line_ID, BigDecimal.valueOf(qty),  m_trxName != null ? m_trxName : innerTrxName)) {
+						if (innerTrx != null)
+							innerTrx.commit();
+					} else {
+						if (innerTrx != null)
+							innerTrx.rollback();
+						else
+							Trx.get(m_trxName, false).rollback();
+					}
+				} catch(Exception ex) {
+					if (innerTrx != null)
 						innerTrx.rollback();
-				}catch(Exception ex){
-					innerTrx.rollback();
 					throw new AdempiereException(ex);
-				}finally{
-					innerTrx.close();
-					innerTrx = null;
+				} finally {
+					if (innerTrx != null) {
+						innerTrx.close();
+						innerTrx = null;
+					}
 				}
 			}
 		}
-		//  requery
-		//cmd_search();
 	}   //  cmd_process
-	
 
+	
 	/**
-	 *  Fill xMatchedTo
+	 *  Fill match to
 	 */
 	//MPo, 22/7/2016
-	//protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
-	protected IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean samePrCtr, boolean matched)
+//	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
+	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean samePrCtr, boolean matched)
 	{
 		int row = xMatchedTable.getSelectedRow();
 		if (log.isLoggable(Level.CONFIG)) log.config("Row=" + row);
 
 		//  ** Create SQL **
-		//String displayString = (String)matchTo.getSelectedItem();
 		int display = MATCH_INVOICE;
 		if (displayString.equals(m_matchOptions[MATCH_SHIPMENT]))
 			display = MATCH_SHIPMENT;
@@ -262,11 +263,9 @@ public class Match
 		
 		KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(row, I_Line);
 		
-		//int matchToType = matchFrom.getSelectedIndex();
 		tableInit (display, matchToType, matched, lineMatched);	//	sets m_sql
 		//  ** Add Where Clause **
 		KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(row, I_BPartner);
-		//KeyNamePair Org = (KeyNamePair)xMatchedTable.getValueAt(row, I_Org); //JAVIER
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(row, I_Product);
 		if (log.isLoggable(Level.FINE)) log.fine("BPartner=" + BPartner + " - Product=" + Product);
 		//
@@ -324,10 +323,9 @@ public class Match
 			m_qtyColumn = "lin.QtyInvoiced";
 			m_sql.append("SELECT hdr.C_Invoice_ID,hdr.DocumentNo, hdr.DateInvoiced, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_InvoiceLine_ID, p.Name,lin.M_Product_ID,"
-				//+ " lin.QtyInvoiced,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
 				+ " CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END,SUM(NVL(mi.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 25/9/2019 Add PrCtr
 				//+ " CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END,SUM(NVL(mi.Qty,0)), org.Name, hdr.AD_Org_ID "  //JAVIER
-				+ " FROM C_Invoice hdr"
+				+ "FROM C_Invoice hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN C_InvoiceLine lin ON (hdr.C_Invoice_ID=lin.C_Invoice_ID)"
@@ -340,13 +338,11 @@ public class Match
 				m_sql.append(" AND mi.M_InOutLine_ID  = ").append(Line_ID);
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID,hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
-				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr 
 				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
 				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 25/9/2019 Add PrCtr 
 				+ "HAVING "
 				+ (matched ? "0" : "CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END")
 				+ "<>SUM(NVL(mi.Qty,0))";
-				
 		}
 		else if (display == MATCH_ORDER)
 		{
@@ -354,8 +350,15 @@ public class Match
 			m_qtyColumn = "lin.QtyOrdered";
 			m_sql.append("SELECT hdr.C_Order_ID,hdr.DocumentNo, hdr.DateOrdered, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.C_OrderLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.QtyOrdered,SUM(COALESCE(mo.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
-				//+ "org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.QtyOrdered,");
+			if (matchToType == MATCH_SHIPMENT)
+				m_sql.append("SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END), ");
+			else if (matchToType == MATCH_INVOICE)
+				m_sql.append("SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END), ");
+			else
+				m_sql.append("SUM(COALESCE(mo.Qty,0)), ");
+			//m_sql.append("org.Name, hdr.AD_Org_ID " //JAVIER
+			m_sql.append("ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 20/5/22
 				+ "FROM C_Order hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
@@ -385,8 +388,14 @@ public class Match
 				+ " lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
 				//+ ",org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
-				+ (matched ? "0" : "lin.QtyOrdered")
-				+ "<>SUM(COALESCE(mo.Qty,0))";
+				+ (matched ? "0" : "lin.QtyOrdered");
+						
+			if (matchToType == MATCH_SHIPMENT)
+				m_groupBy = m_groupBy + "<>SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ";
+			else if (matchToType == MATCH_INVOICE)
+				m_groupBy = m_groupBy + "<>SUM(CASE WHEN (mo.C_InvoiceLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ";
+			else
+				m_groupBy = m_groupBy + "<>SUM(COALESCE(mo.Qty,0)) ";
 		}
 		else    //  Shipment
 		{
@@ -394,8 +403,14 @@ public class Match
 			m_qtyColumn = "lin.MovementQty";
 			m_sql.append("SELECT hdr.M_InOut_ID,hdr.DocumentNo, hdr.MovementDate, bp.Name,hdr.C_BPartner_ID,"
 				+ " lin.Line,lin.M_InOutLine_ID, p.Name,lin.M_Product_ID,"
-				+ " lin.MovementQty,SUM(NVL(m.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
-				//+ "org.Name, hdr.AD_Org_ID " //JAVIER
+				//+ " lin.MovementQty,SUM(NVL(m.Qty,0)), ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
+				+ " CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END,");
+			if (matchToType == MATCH_ORDER)
+				m_sql.append("SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END),");
+			else
+				m_sql.append("SUM(COALESCE(m.Qty,0)),");
+				//m_sql.append("org.Name, hdr.AD_Org_ID " //JAVIER
+				m_sql.append("ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 20/5/22
 				+ " FROM M_InOut hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
@@ -413,13 +428,14 @@ public class Match
 				m_sql.append(" AND m.C_OrderLine_ID  = ").append(Line_ID);
 
 			m_groupBy = " GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,"
-				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
-				//+ org.Name, hdr.AD_Org_ID " //JAVIER
+				+ " lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //MPo, 19/5/2022 Add PrCtr
 				+ "HAVING "
-				+ (matched ? "0" : "lin.MovementQty")
-				+ "<>SUM(NVL(m.Qty,0))";
+				+ (matched ? "0" : "CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END");
+			if (matchToType == MATCH_ORDER)
+				m_groupBy = m_groupBy + "<>SUM(CASE WHEN m.M_InOutLine_ID IS NOT NULL THEN COALESCE(m.Qty,0) ELSE 0 END)";
+			else
+				m_groupBy = m_groupBy + "<>SUM(COALESCE(m.Qty,0))";
 		}
-	//	Log.trace(7, "VMatch.tableInit", m_sql + "\n" + m_groupBy);
 	}   //  tableInit
 
 
@@ -429,7 +445,6 @@ public class Match
 	 */
 	protected void tableLoad (IMiniTable table)
 	{
-		//	log.finest(m_sql + " - " +  m_groupBy);
 		String sql = MRole.getDefault().addAccessSQL(
 			m_sql.toString(), "hdr", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO)
 			+ m_groupBy;
@@ -438,7 +453,7 @@ public class Match
 		ResultSet rs = null;
 		try
 		{
-			stmt = DB.createStatement();
+			stmt = DB.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, m_trxName);
 			rs = stmt.executeQuery(sql);
 			table.loadTable(rs);
 		}
@@ -520,14 +535,23 @@ public class Match
 		{
 			//	Update Order Line
 			MOrderLine oLine = new MOrderLine(Env.getCtx(), Line_ID, trxName);
+			BigDecimal storageReservationToUpdate = null;
 			if (oLine.get_ID() != 0)	//	other in MInOut.completeIt
 			{
+				storageReservationToUpdate = oLine.getQtyReserved();
 				oLine.setQtyReserved(oLine.getQtyReserved().subtract(qty));
+				if (oLine.getQtyReserved().signum() == -1)
+					oLine.setQtyReserved(Env.ZERO);
+				else if (oLine.getQtyDelivered().compareTo(oLine.getQtyOrdered()) > 0)
+					oLine.setQtyReserved(Env.ZERO);
 				oLine.saveEx();
+				storageReservationToUpdate = storageReservationToUpdate.subtract(oLine.getQtyReserved());
 			}
 
 			// Update Shipment Line
 			BigDecimal toDeliver = oLine.getQtyOrdered().subtract(oLine.getQtyDelivered());
+			if (toDeliver.signum() < 0)
+				toDeliver = Env.ZERO;
 			if (sLine.getMovementQty().compareTo(toDeliver) <= 0)
 			{
 				sLine.setC_OrderLine_ID(Line_ID);
@@ -542,7 +566,7 @@ public class Match
 			//	Create PO - Shipment Link
 			if (sLine.getM_Product_ID() != 0)
 			{
-				MMatchPO match = new MMatchPO (sLine, null, qty);
+				MMatchPO match = getOrCreate(Line_ID, qty, sLine, trxName);
 				match.setC_OrderLine_ID(Line_ID);
 				if (!match.save())
 				{
@@ -558,11 +582,20 @@ public class Match
 				{
 					success = true;
 					//	Correct Ordered Qty for Stocked Products (see MOrder.reserveStock / MInOut.processIt)
-					if (sLine.getProduct() != null && sLine.getProduct().isStocked())
-						success = MStorageReservation.add (Env.getCtx(), sLine.getM_Warehouse_ID(),
-							sLine.getM_Product_ID(),
-							sLine.getM_AttributeSetInstance_ID(),
-							qty.negate(), false, trxName);
+					if (oLine.get_ID() > 0 && oLine.getM_Product_ID() > 0 && oLine.getProduct().isStocked() && storageReservationToUpdate != null) {
+						IReservationTracer tracer = null;
+						IReservationTracerFactory factory = Core.getReservationTracerFactory();
+						if (factory != null) {
+							tracer = factory.newTracer(sLine.getParent().getC_DocType_ID(), sLine.getParent().getDocumentNo(), sLine.getLine(), 
+									sLine.get_Table_ID(), sLine.get_ID(), oLine.getM_Warehouse_ID(), 
+									oLine.getM_Product_ID(), oLine.getM_AttributeSetInstance_ID(), oLine.getParent().isSOTrx(), 
+									trxName);
+						}
+						success = MStorageReservation.add (Env.getCtx(), oLine.getM_Warehouse_ID(),
+							oLine.getM_Product_ID(),
+							oLine.getM_AttributeSetInstance_ID(),
+							storageReservationToUpdate.negate(), oLine.getParent().isSOTrx(), trxName, tracer);
+					}
 				}
 			}
 			else
@@ -570,4 +603,43 @@ public class Match
 		}
 		return success;
 	}   //  createMatchRecord
+
+
+	private MMatchPO getOrCreate(int C_OrderLine_ID, BigDecimal qty, MInOutLine sLine, String trxName) {
+		Query query = new Query(Env.getCtx(), MMatchPO.Table_Name, "C_OrderLine_ID=? AND Qty=? AND Posted IN (?,?) AND M_InOutLine_ID IS NULL", trxName);
+		MMatchPO matchPO = query.setParameters(C_OrderLine_ID, qty, Doc.STATUS_NotPosted, Doc.STATUS_Deferred).first();
+		if (matchPO != null) {
+			matchPO.setM_InOutLine_ID(sLine.getM_InOutLine_ID());
+			return matchPO;
+		} else {
+			return new MMatchPO (sLine, null, qty);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param trxName
+	 */
+	public void setTrxName(String trxName) {
+		m_trxName = trxName;
+	}
+
+	/**
+	 * 
+	 * @return trxName
+	 */
+	public String getTrxName() {
+		return m_trxName;
+	}
+	
+	/**
+	 * 
+	 * @param matchType MATCH_INVOICE, MATCH_SHIPMENT or MATCH_ORDER
+	 * @return display text for match type
+	 */
+	public String getMatchTypeText(int matchType) {
+		if (matchType >= 0 && matchType < m_matchOptions.length)
+			return m_matchOptions[matchType];
+		return null;
+	}
 }

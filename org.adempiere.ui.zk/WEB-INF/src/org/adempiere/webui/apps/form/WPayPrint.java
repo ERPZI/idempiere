@@ -76,7 +76,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.South;
 
-import com.itextpdf.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfReader;
 
 //MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
 import com.amazonaws.auth.AWSCredentials;

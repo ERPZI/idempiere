@@ -85,10 +85,7 @@ import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridTable;
-<<<<<<< HEAD
-=======
 import org.compiere.model.I_AD_Tab;
->>>>>>> release-9
 import org.compiere.model.Lookup;
 import org.compiere.model.MAttribute;
 import org.compiere.model.MAttributeValue;
@@ -100,15 +97,10 @@ import org.compiere.model.MProduct;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
-<<<<<<< HEAD
-import org.compiere.model.MTable;
-import org.compiere.model.MUserQuery;
-=======
 import org.compiere.model.MTab;
 import org.compiere.model.MTable;
 import org.compiere.model.MUserQuery;
 import org.compiere.model.Query;
->>>>>>> release-9
 import org.compiere.model.SystemIDs;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
@@ -1818,10 +1810,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
                 {
                     fQueryName.setSelectedIndex(0);
                     cmd_ok_Simple();
-<<<<<<< HEAD
-=======
                     fQueryName.setValue("");
->>>>>>> release-9
                 }
                 else if ("btnOkAdv".equals(btn.getName()))
                 {

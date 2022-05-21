@@ -126,7 +126,6 @@ public class WMatch extends Match
 			LayoutUtils.addSclass("status-border", statusBar);
 			//
 			
-			MMatchPO.consolidate(Env.getCtx());
 			cmd_matchTo();
 		}
 		catch(Exception e)
