@@ -59,7 +59,6 @@ import org.compiere.model.MLookupFactory;
 //
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.model.MMatchPO;
 //MPo, 28/5/18 
 import org.compiere.model.MTable;
 //

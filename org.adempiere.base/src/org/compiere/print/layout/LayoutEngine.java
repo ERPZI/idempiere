@@ -191,7 +191,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private int 				m_docSet = 1;
 	/** Page Info as x of Y*/
 	private int					ZI_pageNo = 1, ZI_totalPages =1;
-	private static String		ZI_pageInfo ="";
+	protected static String		ZI_pageInfo ="";
 	/**Krc-16/11/17 List contains all elements marked as a secondary header*/
 	private ArrayList<PrintElement> 	elementList = new ArrayList<PrintElement>();
 	/**Count for starting a new page from a table and a content*/

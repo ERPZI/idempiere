@@ -20,7 +20,6 @@ package org.adempiere.webui.grid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import org.adempiere.base.Core;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Label;

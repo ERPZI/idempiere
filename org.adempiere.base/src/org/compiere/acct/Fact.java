@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -544,6 +543,7 @@ public final class Fact
 	//	log.fine(result.toString());
 		return result;
 	}	//	getAcctBalance
+
 	/**
 	 *  Balance Accounting Currency.
 	 *  If the accounting currency is not balanced,
@@ -602,7 +602,7 @@ public final class Fact
 			line.setPostingType (m_postingType);
 			line.setAD_Org_ID(m_doc.getAD_Org_ID());
 			line.setAccount (m_acctSchema, m_acctSchema.getCurrencyBalancing_Acct());
-						
+			
 			//  Amount
 			line.setAmtSource(m_doc.getC_Currency_ID(), Env.ZERO, Env.ZERO);
 			line.convert();
