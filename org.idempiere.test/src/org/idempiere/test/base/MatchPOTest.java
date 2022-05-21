@@ -586,7 +586,9 @@ public class MatchPOTest extends AbstractTestCase {
 		toTable.prepareTable(layout, null, null, false, null);
 		Match match = new Match();
 		match.setTrxName(getTrxName());
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+//		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false); //MPo, 21/5/22 i9
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, null, false); //MPo, 21/5/22 i9
+
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -602,7 +604,8 @@ public class MatchPOTest extends AbstractTestCase {
 		}
 		assertTrue(selectedRow >= 0, "Can't find not matched Material Receipt line");
 		fromTable.setSelectedRow(selectedRow);
-		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false);
+		//match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false); //MPo, 21/5/22 i9
+		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, true, false, false);//MPo, 21/5/22 i9
 		assertTrue(toTable.getRowCount()>0, "Unexpected number of records for not matched Order Line: " + fromTable.getRowCount());
 		int selectedOrderRow = -1;
 		for(int i = 0; i < toTable.getRowCount(); i++) {
@@ -642,7 +645,8 @@ public class MatchPOTest extends AbstractTestCase {
 		
 		fromTable.prepareTable(layout, null, null, false, null);
 		toTable.prepareTable(layout, null, null, false, null);
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		//match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, null, false); //MPo, 21/5/22 i9
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -658,7 +662,8 @@ public class MatchPOTest extends AbstractTestCase {
 		}
 		assertTrue(selectedRow >= 0, "Can't find not matched Material Receipt line");
 		fromTable.setSelectedRow(selectedRow);
-		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false);
+		//match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false);
+		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, true, false, false); //MPo, 21/5/22
 		assertTrue(toTable.getRowCount()>0, "Unexpected number of records for not matched Order Line: " + fromTable.getRowCount());
 		selectedOrderRow = -1;
 		for(int i = 0; i < toTable.getRowCount(); i++) {
@@ -783,7 +788,8 @@ public class MatchPOTest extends AbstractTestCase {
 		toTable.prepareTable(layout, null, null, false, null);
 		Match match = new Match();
 		match.setTrxName(getTrxName());
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		//match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);//MPo, 21/5/22 i9
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, null, false); //MPo, 21/5/22 i9
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		int selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -799,7 +805,8 @@ public class MatchPOTest extends AbstractTestCase {
 		}
 		assertTrue(selectedRow >= 0, "Can't find not matched Material Receipt line");
 		fromTable.setSelectedRow(selectedRow);
-		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false);
+		//match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false); //MPo, 21/5/22 i9
+		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, true, false, false); //MPo, 21/5/22 i9
 		assertTrue(toTable.getRowCount()>0, "Unexpected number of records for not matched Order Line: " + fromTable.getRowCount());
 		int selectedOrderRow = -1;
 		for(int i = 0; i < toTable.getRowCount(); i++) {
@@ -837,7 +844,8 @@ public class MatchPOTest extends AbstractTestCase {
 		
 		fromTable.prepareTable(layout, null, null, false, null);
 		toTable.prepareTable(layout, null, null, false, null);
-		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false);
+		//match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, false); //MPo, 21/5/22 i9
+		match.cmd_search(fromTable, Match.MATCH_SHIPMENT, match.getMatchTypeText(Match.MATCH_ORDER), product.get_ID(), bpartner.get_ID(), null, null, null, false); //MPo, 21/5/22 i9
 		assertTrue(fromTable.getRowCount()>0, "Unexpected number of records for not matched Material Receipt: " + fromTable.getRowCount());
 		selectedRow = -1;
 		for(int i = 0; i < fromTable.getRowCount(); i++) {
@@ -853,7 +861,8 @@ public class MatchPOTest extends AbstractTestCase {
 		}
 		assertTrue(selectedRow >= 0, "Can't find not matched Material Receipt line");
 		fromTable.setSelectedRow(selectedRow);
-		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false);
+		//match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, false, false); //MPo, 21/5/22 i9
+		match.cmd_searchTo(fromTable, toTable, match.getMatchTypeText(Match.MATCH_ORDER), Match.MATCH_SHIPMENT, true, true, true, false, false); //MPo, 21/5/22 i9
 		assertTrue(toTable.getRowCount()>0, "Unexpected number of records for not matched Order Line: " + fromTable.getRowCount());
 		selectedOrderRow = -1;
 		for(int i = 0; i < toTable.getRowCount(); i++) {
