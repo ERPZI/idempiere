@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for ZI_Incoterm
  *  @author iDempiere (generated) 
- *  @version Release 3.1
+ *  @version Release 9
  */
 public interface I_ZI_Incoterm 
 {
