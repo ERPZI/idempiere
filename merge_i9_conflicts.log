@@ -1,0 +1,88 @@
+CONFLICT (content): Merge conflict in .gitignore
+CONFLICT (content): Merge conflict in Credits.html
+CONFLICT (rename/delete): db/ddlutils/postgresql/views/RV_PAYMENT.sql renamed to db/ddlutils/postgresql/views/C_PAYMENT_V.sql in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): db/ddlutils/postgresql/views/C_PAYMENT_V.sql deleted in release-9 and modified in HEAD.  Version HEAD of db/ddlutils/postgresql/views/C_PAYMENT_V.sql left in tree.
+CONFLICT (modify/delete): migration/i7.1/postgresql/202003021203_IDEMPIERE-3947.sql deleted in HEAD and modified in release-9.  Version release-9 of migration/i7.1/postgresql/202003021203_IDEMPIERE-3947.sql left in tree.
+CONFLICT (content): Merge conflict in migration/migration_script_3534515660714000163_postgresql.sql
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/packinfolder.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/sign.database.build.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/synchronize-terminology.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/translation.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base.callout/src/org/compiere/model/CalloutPayment.java
+CONFLICT (content): Merge conflict in org.adempiere.base.process/src/org/compiere/process/ExpenseAPInvoice.java
+CONFLICT (content): Merge conflict in org.adempiere.base.process/src/org/compiere/process/InOutGenerate.java
+CONFLICT (content): Merge conflict in org.adempiere.base/META-INF/MANIFEST.MF
+CONFLICT (content): Merge conflict in org.adempiere.base/build.properties
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/acct/Doc_AllocationHdr.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/acct/Doc_MatchInv.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridField.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridTab.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridTable.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MJournal.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MMatchInv.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MPInstance.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MPInstanceLog.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MProduction.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MProductionPlan.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MUserDefProc.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/PO.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/SystemIDs.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_AD_SysConfig.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_A_Asset.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Invoice.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_InvoiceBatchLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_InvoiceLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Order.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_OrderLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelection.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelectionCheck.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelectionLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Payment.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentAllocate.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentBatch.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentProcessor.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentTerm.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentTransaction.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_I_FixedAsset.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_M_MatchPO.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_M_Requisition.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_S_TimeExpense.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_S_TimeExpenseLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_T_Aging.java
+CONFLICT (rename/delete): org.adempiere.base/src/org/compiere/model/X_AD_Desktop.java renamed to org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java deleted in release-9 and modified in HEAD.  Version HEAD of org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java left in tree.
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/process/DocumentEngine.java
+CONFLICT (content): Merge conflict in org.adempiere.install/install.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.install/install.console.app.launch
+CONFLICT (add/add): Merge conflict in org.adempiere.install/install.silent.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.pipo/src/org/adempiere/pipo2/PoExporter.java
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/pom.xml
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/server.product.functionaltest.launch
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/setup/configuration/config.ini
+CONFLICT (add/add): Merge conflict in org.adempiere.server-feature/silent-setup-alt.sh
+CONFLICT (add/add): Merge conflict in org.adempiere.server-feature/silent-setup.sh
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/utils.unix/unix/DebianInstaller/DEBIAN/control
+CONFLICT (content): Merge conflict in org.adempiere.server/src/main/server/org/compiere/server/Scheduler.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/META-INF/MANIFEST.MF
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/fi/jawsy/jawwa/zk/atmosphere/AtmosphereServerPush.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/metainfo/zk/lang-addon.xml
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/AdempiereWebUI.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/ADWindowToolbar.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/AbstractADWindowContent.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WAllocation.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WInvoiceGen.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WMatch.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WPayPrint.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/HelpController.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/InfoPanel.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FDialog.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FindWindow.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/web/js/jawwa/atmosphere/serverpush.js
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/apps/form/InvoiceGen.java
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/apps/form/Match.java
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/grid/CreateFromInvoice.java
+CONFLICT (rename/delete): org.adempiere.eclipse.equinox.http.servlet/.classpath renamed to org.idempiere.jetty.osgi.boot.fragment/.classpath in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): org.idempiere.jetty.osgi.boot.fragment/.classpath deleted in release-9 and modified in HEAD.  Version HEAD of org.idempiere.jetty.osgi.boot.fragment/.classpath left in tree.
+CONFLICT (rename/delete): org.adempiere.pipo.handlers/.classpath renamed to org.idempiere.printformat.editor/.classpath in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): org.idempiere.printformat.editor/.classpath deleted in release-9 and modified in HEAD.  Version HEAD of org.idempiere.printformat.editor/.classpath left in tree.
+CONFLICT (content): Merge conflict in org.idempiere.test/src/org/idempiere/test/model/SalesOrderTest.java
