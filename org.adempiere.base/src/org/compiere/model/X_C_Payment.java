@@ -34,7 +34,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20220904L;
 
     /** Standard Constructor */
     public X_C_Payment (Properties ctx, int C_Payment_ID, String trxName)
@@ -126,6 +126,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 // K
 			setTrxType (null);
 // S
+			setUser1_ID (0);
         } */
     }
 
@@ -346,9 +347,8 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	}
 
 	/** Set Functional Area.
-		@param C_Activity_ID 
-		Business Activity
-	  */
+		@param C_Activity_ID Business Activity
+	*/
 	public void setC_Activity_ID (int C_Activity_ID)
 	{
 		if (C_Activity_ID < 1)
@@ -1254,9 +1254,8 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
     }
 
 	/** Set HasAllocations.
-		@param HasAllocations 
-		Indicates if the payment has allocations
-	  */
+		@param HasAllocations Indicates if the payment has allocations
+	*/
 	public void setHasAllocations (boolean HasAllocations)
 	{
 		throw new IllegalArgumentException ("HasAllocations is virtual column");	}
@@ -1264,7 +1263,7 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	/** Get HasAllocations.
 		@return Indicates if the payment has allocations
 	  */
-	public boolean isHasAllocations () 
+	public boolean isHasAllocations()
 	{
 		Object oo = get_Value(COLUMNNAME_HasAllocations);
 		if (oo != null) 
@@ -2065,18 +2064,20 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	public static final String TENDERTYPE_DirectDebit = "D";
 	/** Check = K */
 	public static final String TENDERTYPE_Check = "K";
+	/** [TH] Direct Deposit HSBC PromptPay = P */
+	public static final String TENDERTYPE_THDirectDepositHSBCPromptPay = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String TENDERTYPE_IDDirectDepositHSBCPriorityPayment = "R";
 	/** Account = T */
 	public static final String TENDERTYPE_Account = "T";
+	/** [TH] Direct Deposit BBL SMART = W */
+	public static final String TENDERTYPE_THDirectDepositBBLSMART = "W";
 	/** Cash = X */
 	public static final String TENDERTYPE_Cash = "X";
-	/** Check HSBC COS = Z */
-	public static final String TENDERTYPE_CheckHSBCCOS = "Z";
-	/** Direct Deposit BBL Direct Credit = Y */
-	public static final String TENDERTYPE_DirectDepositBBLDirectCredit = "Y";
-	/** Direct Deposit BBL SMART = W */
-	public static final String TENDERTYPE_DirectDepositBBLSMART = "W";
-	/** Direct Deposit HSBC PromptPay = P */
-	public static final String TENDERTYPE_DirectDepositHSBCPromptPay = "P";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String TENDERTYPE_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String TENDERTYPE_THCheckHSBCCOS = "Z";
 	/** Set Tender type.
 		@param TenderType Method of Payment
 	*/
@@ -2132,9 +2133,8 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	}
 
 	/** Set Profit Center.
-		@param User1_ID 
-		User defined list element #1
-	  */
+		@param User1_ID User defined list element #1
+	*/
 	public void setUser1_ID (int User1_ID)
 	{
 		if (User1_ID < 1)
@@ -2161,9 +2161,8 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	}
 
 	/** Set Cost Center.
-		@param User2_ID 
-		User defined list element #2
-	  */
+		@param User2_ID User defined list element #2
+	*/
 	public void setUser2_ID (int User2_ID)
 	{
 		if (User2_ID < 1)
@@ -2219,23 +2218,25 @@ public class X_C_Payment extends PO implements I_C_Payment, I_Persistent
 	}
 
 	public I_ZI_HedgeContract getZI_HedgeContract() throws RuntimeException
-    {
-		return (I_ZI_HedgeContract)MTable.get(getCtx(), I_ZI_HedgeContract.Table_Name)
-			.getPO(getZI_HedgeContract_ID(), get_TrxName());	}
+	{
+		return (I_ZI_HedgeContract)MTable.get(getCtx(), I_ZI_HedgeContract.Table_ID)
+			.getPO(getZI_HedgeContract_ID(), get_TrxName());
+	}
 
 	/** Set ZI_HedgeContract.
-		@param ZI_HedgeContract_ID ZI_HedgeContract	  */
+		@param ZI_HedgeContract_ID ZI_HedgeContract
+	*/
 	public void setZI_HedgeContract_ID (int ZI_HedgeContract_ID)
 	{
-		if (ZI_HedgeContract_ID < 1) 
+		if (ZI_HedgeContract_ID < 1)
 			set_Value (COLUMNNAME_ZI_HedgeContract_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_ZI_HedgeContract_ID, Integer.valueOf(ZI_HedgeContract_ID));
 	}
 
 	/** Get ZI_HedgeContract.
 		@return ZI_HedgeContract	  */
-	public int getZI_HedgeContract_ID () 
+	public int getZI_HedgeContract_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_HedgeContract_ID);
 		if (ii == null)

@@ -31,7 +31,7 @@ public class X_C_BPartner_Location extends PO implements I_C_BPartner_Location, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20220911L;
 
     /** Standard Constructor */
     public X_C_BPartner_Location (Properties ctx, int C_BPartner_Location_ID, String trxName)
@@ -445,5 +445,21 @@ public class X_C_BPartner_Location extends PO implements I_C_BPartner_Location, 
 	public String getPhone2()
 	{
 		return (String)get_Value(COLUMNNAME_Phone2);
+	}
+
+	/** Set Branch Code.
+		@param ZI_Branch Branch in an organization for Tax reporting purposes
+	*/
+	public void setZI_Branch (String ZI_Branch)
+	{
+		set_Value (COLUMNNAME_ZI_Branch, ZI_Branch);
+	}
+
+	/** Get Branch Code.
+		@return Branch in an organization for Tax reporting purposes
+	  */
+	public String getZI_Branch()
+	{
+		return (String)get_Value(COLUMNNAME_ZI_Branch);
 	}
 }

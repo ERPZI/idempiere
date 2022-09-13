@@ -310,4 +310,17 @@ ll send dunning letters there
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ZI_Branch */
+    public static final String COLUMNNAME_ZI_Branch = "ZI_Branch";
+
+	/** Set Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public void setZI_Branch (String ZI_Branch);
+
+	/** Get Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public String getZI_Branch();
 }

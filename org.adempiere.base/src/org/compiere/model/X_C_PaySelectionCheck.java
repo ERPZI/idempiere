@@ -32,7 +32,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20220904L;
 
     /** Standard Constructor */
     public X_C_PaySelectionCheck (Properties ctx, int C_PaySelectionCheck_ID, String trxName)
@@ -385,28 +385,28 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
 	public static final String PAYMENTRULE_Cash = "B";
-	/** Credit Card = K */
-	public static final String PAYMENTRULE_CreditCard = "K";
-	/** Direct Deposit AR and AP HSBC ACH = T */
-	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
-	/** Check = S */
-	public static final String PAYMENTRULE_Check = "S";
-	/** On Credit = P */
-	public static final String PAYMENTRULE_OnCredit = "P";
 	/** Direct Debit = D */
 	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
 	/** Mixed POS Payment = M */
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
-	/** Check HSBC COS = Z */
-	public static final String PAYMENTRULE_CheckHSBCCOS = "Z";
-	/** Direct Deposit BBL Direct Credit = Y */
-	public static final String PAYMENTRULE_DirectDepositBBLDirectCredit = "Y";
-	/** Direct Deposit BBL SMART = X */
-	public static final String PAYMENTRULE_DirectDepositBBLSMART = "X";
-	/** Direct Deposit HSBC PromptPay = W */
-	public static final String PAYMENTRULE_DirectDepositHSBCPromptPay = "W";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String PAYMENTRULE_IDDirectDepositHSBCPriorityPayment = "R";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
+	/** [TH] Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULE_THDirectDepositHSBCPromptPay = "W";
+	/** [TH] Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULE_THDirectDepositBBLSMART = "X";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULE_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String PAYMENTRULE_THCheckHSBCCOS = "Z";
 	/** Set Payment Rule.
 		@param PaymentRule How you pay the invoice
 	*/
@@ -467,26 +467,26 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser1_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
 
 	/** Set Profit Center.
-		@param User1_ID 
-		User defined list element #1
-	  */
+		@param User1_ID User defined list element #1
+	*/
 	public void setUser1_ID (int User1_ID)
 	{
-		if (User1_ID < 1) 
+		if (User1_ID < 1)
 			set_Value (COLUMNNAME_User1_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
 	/** Get Profit Center.
 		@return User defined list element #1
 	  */
-	public int getUser1_ID () 
+	public int getUser1_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
 		if (ii == null)
@@ -514,26 +514,26 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	}
 
 	public org.compiere.model.I_C_BPartner getZI_Pay_BPartner() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_Name)
-			.getPO(getZI_Pay_BPartner_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getZI_Pay_BPartner_ID(), get_TrxName());
+	}
 
 	/** Set Alternative Payee Partner.
-		@param ZI_Pay_BPartner_ID 
-		Business Partner responsible for the payment (Alternative payee)
-	  */
+		@param ZI_Pay_BPartner_ID Business Partner responsible for the payment (Alternative payee)
+	*/
 	public void setZI_Pay_BPartner_ID (int ZI_Pay_BPartner_ID)
 	{
-		if (ZI_Pay_BPartner_ID < 1) 
+		if (ZI_Pay_BPartner_ID < 1)
 			set_Value (COLUMNNAME_ZI_Pay_BPartner_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_ZI_Pay_BPartner_ID, Integer.valueOf(ZI_Pay_BPartner_ID));
 	}
 
 	/** Get Alternative Payee Partner.
 		@return Business Partner responsible for the payment (Alternative payee)
 	  */
-	public int getZI_Pay_BPartner_ID () 
+	public int getZI_Pay_BPartner_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Pay_BPartner_ID);
 		if (ii == null)
@@ -542,26 +542,26 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getZI_Pay_Location() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_Name)
-			.getPO(getZI_Pay_Location_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_BPartner_Location)MTable.get(getCtx(), org.compiere.model.I_C_BPartner_Location.Table_ID)
+			.getPO(getZI_Pay_Location_ID(), get_TrxName());
+	}
 
 	/** Set Payee Location.
-		@param ZI_Pay_Location_ID 
-		Business Partner Location for payment (Alternative Payee)
-	  */
+		@param ZI_Pay_Location_ID Business Partner Location for payment (Alternative Payee)
+	*/
 	public void setZI_Pay_Location_ID (int ZI_Pay_Location_ID)
 	{
-		if (ZI_Pay_Location_ID < 1) 
+		if (ZI_Pay_Location_ID < 1)
 			set_Value (COLUMNNAME_ZI_Pay_Location_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_ZI_Pay_Location_ID, Integer.valueOf(ZI_Pay_Location_ID));
 	}
 
 	/** Get Payee Location.
 		@return Business Partner Location for payment (Alternative Payee)
 	  */
-	public int getZI_Pay_Location_ID () 
+	public int getZI_Pay_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Pay_Location_ID);
 		if (ii == null)

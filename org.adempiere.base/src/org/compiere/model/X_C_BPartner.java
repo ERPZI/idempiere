@@ -34,7 +34,7 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20220911L;
 
     /** Standard Constructor */
     public X_C_BPartner (Properties ctx, int C_BPartner_ID, String trxName)
@@ -61,6 +61,9 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 			setSO_CreditLimit (Env.ZERO);
 			setSO_CreditUsed (Env.ZERO);
 			setValue (null);
+			setZI_CreditLimit (Env.ZERO);
+			setZI_HasReceiptOnDelivery (false);
+// N
         } */
     }
 
@@ -89,6 +92,9 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 			setSO_CreditLimit (Env.ZERO);
 			setSO_CreditUsed (Env.ZERO);
 			setValue (null);
+			setZI_CreditLimit (Env.ZERO);
+			setZI_HasReceiptOnDelivery (false);
+// N
         } */
     }
 
@@ -270,9 +276,9 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public void setC_BP_Group_ID (int C_BP_Group_ID)
 	{
 		if (C_BP_Group_ID < 1)
-			set_Value (COLUMNNAME_C_BP_Group_ID, null);
+			set_ValueNoCheck (COLUMNNAME_C_BP_Group_ID, null);
 		else
-			set_Value (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
+			set_ValueNoCheck (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
 	}
 
 	/** Get Business Partner Group.
@@ -980,6 +986,48 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 		return false;
 	}
 
+	/** Set ISIC.
+		@param LCO_ISIC_ID ISIC
+	*/
+	public void setLCO_ISIC_ID (int LCO_ISIC_ID)
+	{
+		if (LCO_ISIC_ID < 1)
+			set_Value (COLUMNNAME_LCO_ISIC_ID, null);
+		else
+			set_Value (COLUMNNAME_LCO_ISIC_ID, Integer.valueOf(LCO_ISIC_ID));
+	}
+
+	/** Get ISIC.
+		@return ISIC	  */
+	public int getLCO_ISIC_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_LCO_ISIC_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Tax Payer Type.
+		@param LCO_TaxPayerType_ID Tax Payer Type
+	*/
+	public void setLCO_TaxPayerType_ID (int LCO_TaxPayerType_ID)
+	{
+		if (LCO_TaxPayerType_ID < 1)
+			set_Value (COLUMNNAME_LCO_TaxPayerType_ID, null);
+		else
+			set_Value (COLUMNNAME_LCO_TaxPayerType_ID, Integer.valueOf(LCO_TaxPayerType_ID));
+	}
+
+	/** Get Tax Payer Type.
+		@return Tax Payer Type	  */
+	public int getLCO_TaxPayerType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_LCO_TaxPayerType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Logo.
 		@param Logo_ID Logo
 	*/
@@ -1057,11 +1105,30 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Customer: 010 Private Company = 010 */
+	public static final String NAICS_Customer010PrivateCompany = "010";
+	/** Customer: 030 State Owned Company = 030 */
+	public static final String NAICS_Customer030StateOwnedCompany = "030";
+	/** Customer: 070 Bonded Zone Company = 070 */
+	public static final String NAICS_Customer070BondedZoneCompany = "070";
+	/** Vendor: 11 Individual, Resident = /SKN/11 */
+	public static final String NAICS_Vendor11IndividualResident = "/SKN/11";
+	/** Vendor: 12 Individual, Non-Resident = /SKN/12 */
+	public static final String NAICS_Vendor12IndividualNon_Resident = "/SKN/12";
+	/** Vendor: 21 Corporate, Resident = /SKN/21 */
+	public static final String NAICS_Vendor21CorporateResident = "/SKN/21";
+	/** Vendor: 22 Corporate, Non-Resident = /SKN/22 */
+	public static final String NAICS_Vendor22CorporateNon_Resident = "/SKN/22";
+	/** Vendor: 31 Government Body , Resident = /SKN/31 */
+	public static final String NAICS_Vendor31GovernmentBodyResident = "/SKN/31";
+	/** Vendor: 32 Government Body , Non-Resident = /SKN/32 */
+	public static final String NAICS_Vendor32GovernmentBodyNon_Resident = "/SKN/32";
 	/** Set NAICS/SIC.
 		@param NAICS Standard Industry Code or its successor NAIC - http://www.osha.gov/oshstats/sicser.html
 	*/
 	public void setNAICS (String NAICS)
 	{
+
 		set_Value (COLUMNNAME_NAICS, NAICS);
 	}
 
@@ -1144,10 +1211,20 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public static final String PAYMENTRULE_MixedPOSPayment = "M";
 	/** On Credit = P */
 	public static final String PAYMENTRULE_OnCredit = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String PAYMENTRULE_IDDirectDepositHSBCPriorityPayment = "R";
 	/** Check = S */
 	public static final String PAYMENTRULE_Check = "S";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULE_DirectDeposit = "T";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
+	/** [TH] Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULE_THDirectDepositHSBCPromptPay = "W";
+	/** [TH] Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULE_THDirectDepositBBLSMART = "X";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULE_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String PAYMENTRULE_THCheckHSBCCOS = "Z";
 	/** Set Payment Rule.
 		@param PaymentRule How you pay the invoice
 	*/
@@ -1177,10 +1254,20 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public static final String PAYMENTRULEPO_MixedPOSPayment = "M";
 	/** On Credit = P */
 	public static final String PAYMENTRULEPO_OnCredit = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String PAYMENTRULEPO_IDDirectDepositHSBCPriorityPayment = "R";
 	/** Check = S */
 	public static final String PAYMENTRULEPO_Check = "S";
-	/** Direct Deposit = T */
-	public static final String PAYMENTRULEPO_DirectDeposit = "T";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULEPO_DirectDepositARAndAPHSBCACH = "T";
+	/** [TH] Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULEPO_THDirectDepositHSBCPromptPay = "W";
+	/** [TH] Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULEPO_THDirectDepositBBLSMART = "X";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULEPO_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String PAYMENTRULEPO_THCheckHSBCCOS = "Z";
 	/** Set Payment Rule.
 		@param PaymentRulePO Purchase payment option
 	*/
@@ -1591,6 +1678,34 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_URL);
 	}
 
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
+
+	/** Set Cost Center.
+		@param User2_ID User defined list element #2
+	*/
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1)
+			set_Value (COLUMNNAME_User2_ID, null);
+		else
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get Cost Center.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Search Key.
 		@param Value Search key for the record in the format required - must be unique
 	*/
@@ -1605,5 +1720,177 @@ public class X_C_BPartner extends PO implements I_C_BPartner, I_Persistent
 	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
+	}
+
+	/** Set Credit Limit LC.
+		@param ZI_CreditLimit Total outstanding invoice amounts allowed
+	*/
+	public void setZI_CreditLimit (BigDecimal ZI_CreditLimit)
+	{
+		set_Value (COLUMNNAME_ZI_CreditLimit, ZI_CreditLimit);
+	}
+
+	/** Get Credit Limit LC.
+		@return Total outstanding invoice amounts allowed
+	  */
+	public BigDecimal getZI_CreditLimit()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_CreditLimit);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	public org.compiere.model.I_C_Currency getZI_Currency() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getZI_Currency_ID(), get_TrxName());
+	}
+
+	/** Set Currency.
+		@param ZI_Currency_ID The Currency for this record
+	*/
+	public void setZI_Currency_ID (int ZI_Currency_ID)
+	{
+		if (ZI_Currency_ID < 1)
+			set_Value (COLUMNNAME_ZI_Currency_ID, null);
+		else
+			set_Value (COLUMNNAME_ZI_Currency_ID, Integer.valueOf(ZI_Currency_ID));
+	}
+
+	/** Get Currency.
+		@return The Currency for this record
+	  */
+	public int getZI_Currency_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set HasReceiptOnDelivery.
+		@param ZI_HasReceiptOnDelivery Indicates if the customer requires an invoice receipt to be printed and sent upon delivery.
+	*/
+	public void setZI_HasReceiptOnDelivery (boolean ZI_HasReceiptOnDelivery)
+	{
+		set_Value (COLUMNNAME_ZI_HasReceiptOnDelivery, Boolean.valueOf(ZI_HasReceiptOnDelivery));
+	}
+
+	/** Get HasReceiptOnDelivery.
+		@return Indicates if the customer requires an invoice receipt to be printed and sent upon delivery.
+	  */
+	public boolean isZI_HasReceiptOnDelivery()
+	{
+		Object oo = get_Value(COLUMNNAME_ZI_HasReceiptOnDelivery);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** P-Pick up = P */
+	public static final String ZI_HSBC_DELIVERYMODE_P_PickUp = "P";
+	/** R-Registered Mail = R */
+	public static final String ZI_HSBC_DELIVERYMODE_R_RegisteredMail = "R";
+	/** Set HSBC Delivery Mode.
+		@param ZI_HSBC_DeliveryMode HSBC Delivery Mode
+	*/
+	public void setZI_HSBC_DeliveryMode (String ZI_HSBC_DeliveryMode)
+	{
+
+		set_Value (COLUMNNAME_ZI_HSBC_DeliveryMode, ZI_HSBC_DeliveryMode);
+	}
+
+	/** Get HSBC Delivery Mode.
+		@return HSBC Delivery Mode	  */
+	public String getZI_HSBC_DeliveryMode()
+	{
+		return (String)get_Value(COLUMNNAME_ZI_HSBC_DeliveryMode);
+	}
+
+	/** B-Cheque Counter = B */
+	public static final String ZI_HSBC_DELIVERYTO_B_ChequeCounter = "B";
+	/** S-Cheque Return or Customer Pick up = S */
+	public static final String ZI_HSBC_DELIVERYTO_S_ChequeReturnOrCustomerPickUp = "S";
+	/** Set HSBC Delivery To.
+		@param ZI_HSBC_DeliveryTo HSBC Delivery To
+	*/
+	public void setZI_HSBC_DeliveryTo (String ZI_HSBC_DeliveryTo)
+	{
+
+		set_Value (COLUMNNAME_ZI_HSBC_DeliveryTo, ZI_HSBC_DeliveryTo);
+	}
+
+	/** Get HSBC Delivery To.
+		@return HSBC Delivery To	  */
+	public String getZI_HSBC_DeliveryTo()
+	{
+		return (String)get_Value(COLUMNNAME_ZI_HSBC_DeliveryTo);
+	}
+
+	/** ICO-In-country cashier order = ICO */
+	public static final String ZI_HSBC_PAYMENTTYPE_ICO_In_CountryCashierOrder = "ICO";
+	/** UCP-Up-country cheque = UCP */
+	public static final String ZI_HSBC_PAYMENTTYPE_UCP_Up_CountryCheque = "UCP";
+	/** Set HSBC Payment Type.
+		@param ZI_HSBC_PaymentType HSBC Payment Type
+	*/
+	public void setZI_HSBC_PaymentType (String ZI_HSBC_PaymentType)
+	{
+
+		set_Value (COLUMNNAME_ZI_HSBC_PaymentType, ZI_HSBC_PaymentType);
+	}
+
+	/** Get HSBC Payment Type.
+		@return HSBC Payment Type	  */
+	public String getZI_HSBC_PaymentType()
+	{
+		return (String)get_Value(COLUMNNAME_ZI_HSBC_PaymentType);
+	}
+
+	/** CHEQUE EXPRESS (Counter) = CHEQUE EXPRESS */
+	public static final String ZI_HSBC_PICKUPLOCATION_CHEQUEEXPRESSCounter = "CHEQUE EXPRESS";
+	/** CUST. MESSENGER (Customer Pick Up) = CUST. MESSENGER */
+	public static final String ZI_HSBC_PICKUPLOCATION_CUSTMESSENGERCustomerPickUp = "CUST. MESSENGER";
+	/** HSBC MESSENGER (Cheque Return To Company) = HSBC MESSENGER */
+	public static final String ZI_HSBC_PICKUPLOCATION_HSBCMESSENGERChequeReturnToCompany = "HSBC MESSENGER";
+	/** PROMPT CHEQUE (Counter) = PROMPT CHEQUE */
+	public static final String ZI_HSBC_PICKUPLOCATION_PROMPTCHEQUECounter = "PROMPT CHEQUE";
+	/** Set HSBC Pickup Location.
+		@param ZI_HSBC_PickupLocation HSBC Pickup Location
+	*/
+	public void setZI_HSBC_PickupLocation (String ZI_HSBC_PickupLocation)
+	{
+
+		set_Value (COLUMNNAME_ZI_HSBC_PickupLocation, ZI_HSBC_PickupLocation);
+	}
+
+	/** Get HSBC Pickup Location.
+		@return HSBC Pickup Location	  */
+	public String getZI_HSBC_PickupLocation()
+	{
+		return (String)get_Value(COLUMNNAME_ZI_HSBC_PickupLocation);
+	}
+
+	/** Set Open Balance LC.
+		@param ZI_TotalOpenBalance Total Open Balance Amount in local Currency
+	*/
+	public void setZI_TotalOpenBalance (BigDecimal ZI_TotalOpenBalance)
+	{
+		throw new IllegalArgumentException ("ZI_TotalOpenBalance is virtual column");	}
+
+	/** Get Open Balance LC.
+		@return Total Open Balance Amount in local Currency
+	  */
+	public BigDecimal getZI_TotalOpenBalance()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_TotalOpenBalance);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

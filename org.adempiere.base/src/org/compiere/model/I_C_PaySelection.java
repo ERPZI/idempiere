@@ -224,6 +224,15 @@ public interface I_C_PaySelection
 	/** Get Process Now	  */
 	public boolean isProcessing();
 
+    /** Column name ReversePreparePayment */
+    public static final String COLUMNNAME_ReversePreparePayment = "ReversePreparePayment";
+
+	/** Set Reverse Prepare Payment	  */
+	public void setReversePreparePayment (String ReversePreparePayment);
+
+	/** Get Reverse Prepare Payment	  */
+	public String getReversePreparePayment();
+
     /** Column name TotalAmt */
     public static final String COLUMNNAME_TotalAmt = "TotalAmt";
 

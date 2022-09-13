@@ -373,7 +373,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			fSumPayments.setValue(sumPayments);
 
 		//MPo, 15/11/2021 HSBC Host-to-Host and PromptPay
-		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
+		//MPo, 4/9/22 HSBC Host-to-Host Priority Payment Indonesia
+		//bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
+		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") || PaymentRule.equals("R"));
 
 		if(documentNo != null)
 			fDocumentNo.setValue(documentNo);
@@ -432,7 +434,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		{
 			//  Get File Info
 			//MPo, 15/11/21 HSBC Host-to-Host ACH, COS, PromptPay and BBL Smart, DirectCredit 
-			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+			//MPo, 4/9/22 HSBC H2H PP for Indonesia
+			//if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("R") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
 				java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
 				java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
 				java.util.Date now = new java.util.Date();
@@ -474,6 +478,10 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 					break;
 				  case "Y":
 					ziPaymentRule="BBL_DC";
+					break;
+				//MPo, 4/9/22 HSBC PP for Indonesia
+				  case "R":
+					ziPaymentRule="HSBC_PP";
 					break;
 				}
 				//
@@ -554,7 +562,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		try 
 		{	
 			//MPo, 15/11/21, Supports Host-to-Host for HSBC ACH/"T", HSBC COS/"Z" and HSCB PromptPay/"W"
-			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
+			//MPo, 4/9/22, Support for HSBC H2H Priority Payment Indonesia 
+			//if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
+			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") || PaymentRule.equals("R") )) return;
 			else {
 			FDialog.ask(m_WindowNo, form, "WPayTransferPayment?", new Callback<Boolean>() 
 			{

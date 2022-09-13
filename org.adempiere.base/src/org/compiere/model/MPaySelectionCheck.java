@@ -115,18 +115,20 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_Cash))
 			PaymentRule = PAYMENTRULE_Cash;
 		//MPo, 18/8/2016 Add Payment rule 'Z' Check Outsourcing 
-		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_CheckHSBCCOS))
-			PaymentRule = PAYMENTRULE_CheckHSBCCOS;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_THCheckHSBCCOS))
+			PaymentRule = PAYMENTRULE_THCheckHSBCCOS;
 		//MPo, 28/9/2020 Add BBL payment rules
-		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLSMART))
-			PaymentRule = PAYMENTRULE_DirectDepositBBLSMART;
-		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit))
-			PaymentRule = PAYMENTRULE_DirectDepositBBLDirectCredit;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_THDirectDepositBBLSMART))
+			PaymentRule = PAYMENTRULE_THDirectDepositBBLSMART;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_THDirectDepositBBLDirectCredit))
+			PaymentRule = PAYMENTRULE_THDirectDepositBBLDirectCredit;
 		//MPo, 15/11/21, HSBC Host-to-Host Add Payment Rule HSBC_PromptPay
-		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_DirectDepositHSBCPromptPay))
-			PaymentRule = PAYMENTRULE_DirectDepositHSBCPromptPay;
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_THDirectDepositHSBCPromptPay))
+			PaymentRule = PAYMENTRULE_THDirectDepositHSBCPromptPay;
 		//
-		
+		//MPo,4/9/22 Add HSBC payment rule Priority Payment for Indonesia
+		else if (payment.getTenderType().equals(X_C_Payment.TENDERTYPE_IDDirectDepositHSBCPriorityPayment))
+			PaymentRule = PAYMENTRULE_IDDirectDepositHSBCPriorityPayment;
 		//
 		//	Create new PaySelection
 		MPaySelection ps = new MPaySelection(ctx, 0, trxName);
@@ -326,17 +328,21 @@ public class MPaySelectionCheck extends X_C_PaySelectionCheck
 					|| check.getPaymentRule().equals(PAYMENTRULE_DirectDebit))
 					payment.setBankACH(check);
 				//MPo, 18/8/2016 Add Payment Rule 'Z' HSBC COS
-				else if (check.getPaymentRule().equals(PAYMENTRULE_CheckHSBCCOS))
-					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_CheckHSBCCOS);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_THCheckHSBCCOS))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_THCheckHSBCCOS);
 				//	payment.setTenderType(X_C_Payment.TENDERTYPE_CheckOutsourced);
 				//MPo, 28/9/2020 Add Payment Rule BBL_SMART and BBL_DirectCredit
-				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLSMART))
-					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLSMART);
-				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositBBLDirectCredit))
-					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositBBLDirectCredit);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_THDirectDepositBBLSMART))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_THDirectDepositBBLSMART);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_THDirectDepositBBLDirectCredit))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_THDirectDepositBBLDirectCredit);
 				//MPo, 14/11/21, HSBC Host-to-Host Add Payment Rule HSBC_PromptPay
-				else if (check.getPaymentRule().equals(PAYMENTRULE_DirectDepositHSBCPromptPay))
-					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_DirectDepositHSBCPromptPay);
+				else if (check.getPaymentRule().equals(PAYMENTRULE_THDirectDepositHSBCPromptPay))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_THDirectDepositHSBCPromptPay);
+				//
+				//MPo,4/9/22 Add HSBC payment rule Priority Payment for Indonesia
+				else if (check.getPaymentRule().equals(PAYMENTRULE_IDDirectDepositHSBCPriorityPayment))
+					payment.setBankCash(check.getParent().getC_BankAccount_ID(), false, X_C_Payment.TENDERTYPE_IDDirectDepositHSBCPriorityPayment);
 				//
 				else
 				{

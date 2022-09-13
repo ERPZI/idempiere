@@ -575,6 +575,24 @@ public interface I_C_BPartner
 	  */
 	public boolean isVendor();
 
+    /** Column name LCO_ISIC_ID */
+    public static final String COLUMNNAME_LCO_ISIC_ID = "LCO_ISIC_ID";
+
+	/** Set ISIC	  */
+	public void setLCO_ISIC_ID (int LCO_ISIC_ID);
+
+	/** Get ISIC	  */
+	public int getLCO_ISIC_ID();
+
+    /** Column name LCO_TaxPayerType_ID */
+    public static final String COLUMNNAME_LCO_TaxPayerType_ID = "LCO_TaxPayerType_ID";
+
+	/** Set Tax Payer Type	  */
+	public void setLCO_TaxPayerType_ID (int LCO_TaxPayerType_ID);
+
+	/** Get Tax Payer Type	  */
+	public int getLCO_TaxPayerType_ID();
+
     /** Column name Logo_ID */
     public static final String COLUMNNAME_Logo_ID = "Logo_ID";
 
@@ -967,6 +985,21 @@ s business as a percentage
 	  */
 	public String getURL();
 
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set Cost Center.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get Cost Center.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
     /** Column name Value */
     public static final String COLUMNNAME_Value = "Value";
 
@@ -979,4 +1012,94 @@ s business as a percentage
 	  * Search key for the record in the format required - must be unique
 	  */
 	public String getValue();
+
+    /** Column name ZI_CreditLimit */
+    public static final String COLUMNNAME_ZI_CreditLimit = "ZI_CreditLimit";
+
+	/** Set Credit Limit LC.
+	  * Total outstanding invoice amounts allowed
+	  */
+	public void setZI_CreditLimit (BigDecimal ZI_CreditLimit);
+
+	/** Get Credit Limit LC.
+	  * Total outstanding invoice amounts allowed
+	  */
+	public BigDecimal getZI_CreditLimit();
+
+    /** Column name ZI_Currency_ID */
+    public static final String COLUMNNAME_ZI_Currency_ID = "ZI_Currency_ID";
+
+	/** Set Currency.
+	  * The Currency for this record
+	  */
+	public void setZI_Currency_ID (int ZI_Currency_ID);
+
+	/** Get Currency.
+	  * The Currency for this record
+	  */
+	public int getZI_Currency_ID();
+
+	public org.compiere.model.I_C_Currency getZI_Currency() throws RuntimeException;
+
+    /** Column name ZI_HasReceiptOnDelivery */
+    public static final String COLUMNNAME_ZI_HasReceiptOnDelivery = "ZI_HasReceiptOnDelivery";
+
+	/** Set HasReceiptOnDelivery.
+	  * Indicates if the customer requires an invoice receipt to be printed and sent upon delivery.
+	  */
+	public void setZI_HasReceiptOnDelivery (boolean ZI_HasReceiptOnDelivery);
+
+	/** Get HasReceiptOnDelivery.
+	  * Indicates if the customer requires an invoice receipt to be printed and sent upon delivery.
+	  */
+	public boolean isZI_HasReceiptOnDelivery();
+
+    /** Column name ZI_HSBC_DeliveryMode */
+    public static final String COLUMNNAME_ZI_HSBC_DeliveryMode = "ZI_HSBC_DeliveryMode";
+
+	/** Set HSBC Delivery Mode	  */
+	public void setZI_HSBC_DeliveryMode (String ZI_HSBC_DeliveryMode);
+
+	/** Get HSBC Delivery Mode	  */
+	public String getZI_HSBC_DeliveryMode();
+
+    /** Column name ZI_HSBC_DeliveryTo */
+    public static final String COLUMNNAME_ZI_HSBC_DeliveryTo = "ZI_HSBC_DeliveryTo";
+
+	/** Set HSBC Delivery To	  */
+	public void setZI_HSBC_DeliveryTo (String ZI_HSBC_DeliveryTo);
+
+	/** Get HSBC Delivery To	  */
+	public String getZI_HSBC_DeliveryTo();
+
+    /** Column name ZI_HSBC_PaymentType */
+    public static final String COLUMNNAME_ZI_HSBC_PaymentType = "ZI_HSBC_PaymentType";
+
+	/** Set HSBC Payment Type	  */
+	public void setZI_HSBC_PaymentType (String ZI_HSBC_PaymentType);
+
+	/** Get HSBC Payment Type	  */
+	public String getZI_HSBC_PaymentType();
+
+    /** Column name ZI_HSBC_PickupLocation */
+    public static final String COLUMNNAME_ZI_HSBC_PickupLocation = "ZI_HSBC_PickupLocation";
+
+	/** Set HSBC Pickup Location	  */
+	public void setZI_HSBC_PickupLocation (String ZI_HSBC_PickupLocation);
+
+	/** Get HSBC Pickup Location	  */
+	public String getZI_HSBC_PickupLocation();
+
+    /** Column name ZI_TotalOpenBalance */
+    public static final String COLUMNNAME_ZI_TotalOpenBalance = "ZI_TotalOpenBalance";
+
+	/** Set Open Balance LC.
+	  * Total Open Balance Amount in local Currency
+	  */
+	public void setZI_TotalOpenBalance (BigDecimal ZI_TotalOpenBalance);
+
+	/** Get Open Balance LC.
+	  * Total Open Balance Amount in local Currency
+	  */
+	public BigDecimal getZI_TotalOpenBalance();
 }
