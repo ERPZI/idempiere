@@ -49,7 +49,7 @@ import org.idempiere.cache.ImmutablePOSupport;
  *
  *  @author victor.perez@e-evolution.com, e-Evolution http://www.e-evolution.com
  * 			<li> FR [ 2520591 ] Support multiples calendar for Org 
- *			@see http://sourceforge.net/tracker2/?func=detail&atid=879335&aid=2520591&group_id=176962 
+ *			@see https://sourceforge.net/p/adempiere/feature-requests/631/ 
  */
 public class MPeriod extends X_C_Period implements ImmutablePOSupport
 {
@@ -495,11 +495,6 @@ public class MPeriod extends X_C_Period implements ImmutablePOSupport
 		super (ctx, C_Period_ID, trxName);
 		if (C_Period_ID == 0)
 		{
-		//	setC_Period_ID (0);		//	PK
-		//  setC_Year_ID (0);		//	Parent
-		//  setName (null);
-		//  setPeriodNo (0);
-		//  setStartDate (new Timestamp(System.currentTimeMillis()));
 			setPeriodType (PERIODTYPE_StandardCalendarPeriod);
 		}
 	}	//	MPeriod
@@ -623,7 +618,6 @@ public class MPeriod extends X_C_Period implements ImmutablePOSupport
 		getPeriodControls(false);
 		for (int i = 0; i < m_controls.length; i++)
 		{
-		//	log.fine("getPeriodControl - " + 1 + " - " + m_controls[i]);
 			if (DocBaseType.equals(m_controls[i].getDocBaseType()))
 				return m_controls[i];
 		}

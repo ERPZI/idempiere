@@ -22,19 +22,34 @@ import java.util.Properties;
 
 /** Generated Model for ZI_Incoterm
  *  @author iDempiere (generated) 
- *  @version Release 3.1 - $Id$ */
+ *  @version Release 9 - $Id$ */
+@org.adempiere.base.Model(table="ZI_Incoterm")
 public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20160803L;
+	private static final long serialVersionUID = 20220529L;
 
     /** Standard Constructor */
     public X_ZI_Incoterm (Properties ctx, int ZI_Incoterm_ID, String trxName)
     {
       super (ctx, ZI_Incoterm_ID, trxName);
+      /** if (ZI_Incoterm_ID == 0)
+        {
+			setName (null);
+			setValue (null);
+			setZI_Incoterm_ID (0);
+			setZI_Usage (null);
+// B
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_ZI_Incoterm (Properties ctx, int ZI_Incoterm_ID, String trxName, String ... virtualColumns)
+    {
+      super (ctx, ZI_Incoterm_ID, trxName, virtualColumns);
       /** if (ZI_Incoterm_ID == 0)
         {
 			setName (null);
@@ -68,15 +83,14 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_ZI_Incoterm[")
-        .append(get_ID()).append("]");
+      StringBuilder sb = new StringBuilder ("X_ZI_Incoterm[")
+        .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
 	/** Set Description.
-		@param Description 
-		Optional short description of the record
-	  */
+		@param Description Optional short description of the record
+	*/
 	public void setDescription (String Description)
 	{
 		set_Value (COLUMNNAME_Description, Description);
@@ -85,15 +99,14 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	/** Get Description.
 		@return Optional short description of the record
 	  */
-	public String getDescription () 
+	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
 	/** Set Name.
-		@param Name 
-		Alphanumeric identifier of the entity
-	  */
+		@param Name Alphanumeric identifier of the entity
+	*/
 	public void setName (String Name)
 	{
 		set_Value (COLUMNNAME_Name, Name);
@@ -102,15 +115,14 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	/** Get Name.
 		@return Alphanumeric identifier of the entity
 	  */
-	public String getName () 
+	public String getName()
 	{
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
 	/** Set Search Key.
-		@param Value 
-		Search key for the record in the format required - must be unique
-	  */
+		@param Value Search key for the record in the format required - must be unique
+	*/
 	public void setValue (String Value)
 	{
 		set_Value (COLUMNNAME_Value, Value);
@@ -119,24 +131,25 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	/** Get Search Key.
 		@return Search key for the record in the format required - must be unique
 	  */
-	public String getValue () 
+	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
 	}
 
 	/** Set Incoterm.
-		@param ZI_Incoterm_ID Incoterm	  */
+		@param ZI_Incoterm_ID Incoterm
+	*/
 	public void setZI_Incoterm_ID (int ZI_Incoterm_ID)
 	{
-		if (ZI_Incoterm_ID < 1) 
+		if (ZI_Incoterm_ID < 1)
 			set_ValueNoCheck (COLUMNNAME_ZI_Incoterm_ID, null);
-		else 
+		else
 			set_ValueNoCheck (COLUMNNAME_ZI_Incoterm_ID, Integer.valueOf(ZI_Incoterm_ID));
 	}
 
 	/** Get Incoterm.
 		@return Incoterm	  */
-	public int getZI_Incoterm_ID () 
+	public int getZI_Incoterm_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Incoterm_ID);
 		if (ii == null)
@@ -145,7 +158,8 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	}
 
 	/** Set ZI_Incoterm_UU.
-		@param ZI_Incoterm_UU ZI_Incoterm_UU	  */
+		@param ZI_Incoterm_UU ZI_Incoterm_UU
+	*/
 	public void setZI_Incoterm_UU (String ZI_Incoterm_UU)
 	{
 		set_Value (COLUMNNAME_ZI_Incoterm_UU, ZI_Incoterm_UU);
@@ -153,7 +167,7 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 
 	/** Get ZI_Incoterm_UU.
 		@return ZI_Incoterm_UU	  */
-	public String getZI_Incoterm_UU () 
+	public String getZI_Incoterm_UU()
 	{
 		return (String)get_Value(COLUMNNAME_ZI_Incoterm_UU);
 	}
@@ -162,14 +176,13 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	public static final int ZI_USAGE_AD_Reference_ID=53382;
 	/** Both = B */
 	public static final String ZI_USAGE_Both = "B";
-	/** Sales = S */
-	public static final String ZI_USAGE_Sales = "S";
 	/** Purchases = P */
 	public static final String ZI_USAGE_Purchases = "P";
+	/** Sales = S */
+	public static final String ZI_USAGE_Sales = "S";
 	/** Set Usage.
-		@param ZI_Usage 
-		Usage indicates if this payment term is used for sales, purchases or both.
-	  */
+		@param ZI_Usage Usage indicates if this payment term is used for sales, purchases or both.
+	*/
 	public void setZI_Usage (String ZI_Usage)
 	{
 
@@ -179,7 +192,7 @@ public class X_ZI_Incoterm extends PO implements I_ZI_Incoterm, I_Persistent
 	/** Get Usage.
 		@return Usage indicates if this payment term is used for sales, purchases or both.
 	  */
-	public String getZI_Usage () 
+	public String getZI_Usage()
 	{
 		return (String)get_Value(COLUMNNAME_ZI_Usage);
 	}

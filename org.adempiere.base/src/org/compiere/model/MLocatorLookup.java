@@ -73,9 +73,6 @@ public final class MLocatorLookup extends Lookup implements Serializable
 		super (DisplayType.TableDir, WindowNo);
 		m_ctx = ctx;
 		m_validationCode = validationCode;
-		//
-		m_loader = new Loader();
-		m_loader.start();
 	}	//	MLocator
 
 	/**	Context						*/
@@ -183,7 +180,7 @@ public final class MLocatorLookup extends Lookup implements Serializable
 			return new KeyNamePair (loc.getM_Locator_ID(), loc.toString());
 
 		//	Not found and waiting for loader
-		if (m_loader.isAlive())
+		if (m_loader != null && m_loader.isAlive())
 		{
 			log.fine("Waiting for Loader");
 			loadComplete();
@@ -258,7 +255,6 @@ public final class MLocatorLookup extends Lookup implements Serializable
 	 */
 	public MLocator getMLocator (Object keyValue, String trxName)
 	{
-	//	log.fine( "MLocatorLookup.getDirect " + keyValue.getClass() + "=" + keyValue);
 		int M_Locator_ID = -1;
 		try
 		{
@@ -369,12 +365,11 @@ public final class MLocatorLookup extends Lookup implements Serializable
 		 */
 		public void run()
 		{
-		//	log.config("MLocatorLookup Loader.run " + m_AD_Column_ID);
 			//	Set Info	- see VLocator.actionText
 			int local_only_warehouse_id = getOnly_Warehouse_ID(); // [ 1674891 ] MLocatorLookup - weird error 
 			int local_only_product_id = getOnly_Product_ID();
 			
-			StringBuilder sql = new StringBuilder("SELECT M_Locator.M_Locator_ID FROM M_Locator ")
+			StringBuilder sql = new StringBuilder("SELECT M_Locator.* FROM M_Locator ")
 				.append(" INNER JOIN M_Warehouse wh ON (wh.M_Warehouse_ID=M_Locator.M_Warehouse_ID) ")
 				.append(" WHERE M_Locator.IsActive='Y' ")
 				.append(" AND wh.IsActive='Y'");
@@ -433,8 +428,8 @@ public final class MLocatorLookup extends Lookup implements Serializable
 				//
 				while (rs.next())
 				{
-					int M_Locator_ID = rs.getInt(1);
-					MLocator loc = MLocator.get(m_ctx, M_Locator_ID);
+					MLocator loc = new MLocator(Env.getCtx(), rs, null);
+					int M_Locator_ID = loc.getM_Locator_ID();
 					m_lookup.put(Integer.valueOf(M_Locator_ID), loc);
 				}
 			}
@@ -459,9 +454,13 @@ public final class MLocatorLookup extends Lookup implements Serializable
 	 */
 	public Collection<MLocator> getData ()
 	{
-		if (m_loader.isAlive())
+		if (m_loader == null)
 		{
-			log.fine("Waiting for Loader");
+			refresh();
+		}
+		else if (m_loader.isAlive())
+		{
+			if (log.isLoggable(Level.FINE)) log.fine("Waiting for Loader");
 			try
 			{
 				m_loader.join();
@@ -495,12 +494,6 @@ public final class MLocatorLookup extends Lookup implements Serializable
 				list.add(loc);
 		}
 
-		/**	Sort Data
-		MLocator l = new MLocator (m_ctx, 0);
-		if (!mandatory)
-			list.add (l);
-		Collections.sort (list, l);
-		**/
 		return list;
 	}	//	getArray
 
@@ -511,7 +504,7 @@ public final class MLocatorLookup extends Lookup implements Serializable
 	 */
 	public int refresh()
 	{
-		log.fine("start");
+		if (log.isLoggable(Level.FINE)) log.fine("start");
 		m_loader = new Loader();
 		m_loader.start();
 		try

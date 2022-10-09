@@ -23,6 +23,7 @@ import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
+import org.compiere.util.Util;
 
 /**
  *
@@ -110,23 +111,25 @@ public final class UserPreference implements Serializable {
 				String attribute = PROPERTIES[i];
 				String value = props.getProperty(attribute);
 
-				MPreference preference = query.setParameters(new Object[]{m_AD_User_ID, attribute}).firstOnly();
-				if (preference == null) {
-					preference = new MUserPreference(Env.getCtx(), 0, null);
-					preference.setAD_User_ID(m_AD_User_ID);
-					preference.setAttribute(attribute);
-				} else {
-					if (preference.getAD_Client_ID() > 0 || preference.getAD_Org_ID() > 0) {
-						preference = new MUserPreference(Env.getCtx(), preference.getAD_Preference_ID(), null);
+				if (!Util.isEmpty(value)) {
+					MPreference preference = query.setParameters(new Object[]{m_AD_User_ID, attribute}).firstOnly();
+					if (preference == null) {
+						preference = new MUserPreference(Env.getCtx(), 0, null);
+						preference.setAD_User_ID(m_AD_User_ID);
+						preference.setAttribute(attribute);
+					} else {
+						if (preference.getAD_Client_ID() > 0 || preference.getAD_Org_ID() > 0) {
+							preference = new MUserPreference(Env.getCtx(), preference.getAD_Preference_ID(), null);
+						}
 					}
-				}
-				
-				try {
-					PO.setCrossTenantSafe();
-					preference.setValue(value);
-					preference.saveEx();
-				} finally {
-					PO.clearCrossTenantSafe();
+
+					try {
+						PO.setCrossTenantSafe();
+						preference.setValue(value);
+						preference.saveEx();
+					} finally {
+						PO.clearCrossTenantSafe();
+					}
 				}
 			}
 		}
@@ -151,7 +154,6 @@ public final class UserPreference implements Serializable {
 				if (preference != null && preference.getValue() != null) {
 					value = preference.getValue();
 				}
-
 				props.setProperty(attribute, value);
 			}
 		}

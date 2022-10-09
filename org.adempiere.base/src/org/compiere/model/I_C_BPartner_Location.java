@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BPartner_Location
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 public interface I_C_BPartner_Location 
 {
@@ -65,12 +65,12 @@ public interface I_C_BPartner_Location
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
 
-	/** Set Business Partner .
+	/** Set Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public void setC_BPartner_ID (int C_BPartner_ID);
 
-	/** Get Business Partner .
+	/** Get Business Partner.
 	  * Identifies a Business Partner
 	  */
 	public int getC_BPartner_ID();
@@ -210,12 +210,14 @@ public interface I_C_BPartner_Location
     public static final String COLUMNNAME_IsPayFrom = "IsPayFrom";
 
 	/** Set Pay-From Address.
-	  * Business Partner pays from that address and we'll send dunning letters there
+	  * Business Partner pays from that address and we&#039;
+ll send dunning letters there
 	  */
 	public void setIsPayFrom (boolean IsPayFrom);
 
 	/** Get Pay-From Address.
-	  * Business Partner pays from that address and we'll send dunning letters there
+	  * Business Partner pays from that address and we&#039;
+ll send dunning letters there
 	  */
 	public boolean isPayFrom();
 
@@ -308,4 +310,17 @@ public interface I_C_BPartner_Location
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name ZI_Branch */
+    public static final String COLUMNNAME_ZI_Branch = "ZI_Branch";
+
+	/** Set Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public void setZI_Branch (String ZI_Branch);
+
+	/** Get Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public String getZI_Branch();
 }

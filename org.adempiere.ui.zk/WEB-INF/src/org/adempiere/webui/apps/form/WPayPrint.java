@@ -76,7 +76,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.South;
 
-import com.itextpdf.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfReader;
 
 //MPo, 29/08/21 HSBC Host-to-Host sent to Amazon S3
 import com.amazonaws.auth.AWSCredentials;
@@ -89,7 +89,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 //
 
 /**
- *  Payment Print & Export
+ *  Payment Print and Export
  *
  * 	@author 	Jorg Janke
  * 	@version 	$Id: VPayPrint.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
@@ -98,6 +98,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
  *    Carlos Ruiz - GlobalQSS - FR 3132033 - Make payment export class configurable per bank 
  *    Markus Bozem:  IDEMPIERE-1546 / IDEMPIERE-3286 
 */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VPayPrint")
 public class WPayPrint extends PayPrint implements IFormController, EventListener<Event>, ValueChangeListener
 {
 	private CustomForm form = new CustomForm();
@@ -372,7 +373,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			fSumPayments.setValue(sumPayments);
 
 		//MPo, 15/11/2021 HSBC Host-to-Host and PromptPay
-		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
+		//MPo, 4/9/22 HSBC Host-to-Host Priority Payment Indonesia
+		//bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W"));
+		bProcess.setEnabled(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") || PaymentRule.equals("R"));
 
 		if(documentNo != null)
 			fDocumentNo.setValue(documentNo);
@@ -431,7 +434,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		{
 			//  Get File Info
 			//MPo, 15/11/21 HSBC Host-to-Host ACH, COS, PromptPay and BBL Smart, DirectCredit 
-			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+			//MPo, 4/9/22 HSBC H2H PP for Indonesia
+			//if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
+			if (PaymentRule.equals("Z") || PaymentRule.equals("T") || PaymentRule.equals("W") || PaymentRule.equals("R") || PaymentRule.equals("X") || PaymentRule.equals("Y")) {
 				java.text.DateFormat dateFormatFile = new java.text.SimpleDateFormat("yyyyMMdd");
 				java.text.DateFormat timeFormatFile = new java.text.SimpleDateFormat("HHmmss");
 				java.util.Date now = new java.util.Date();
@@ -473,6 +478,10 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 					break;
 				  case "Y":
 					ziPaymentRule="BBL_DC";
+					break;
+				//MPo, 4/9/22 HSBC PP for Indonesia
+				  case "R":
+					ziPaymentRule="HSBC_PP";
 					break;
 				}
 				//
@@ -553,7 +562,9 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		try 
 		{	
 			//MPo, 15/11/21, Supports Host-to-Host for HSBC ACH/"T", HSBC COS/"Z" and HSCB PromptPay/"W"
-			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
+			//MPo, 4/9/22, Support for HSBC H2H Priority Payment Indonesia 
+			//if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") )) return;
+			if (!(PaymentRule.equals("T") || PaymentRule.equals("Z") || PaymentRule.equals("W") || PaymentRule.equals("R") )) return;
 			else {
 			FDialog.ask(m_WindowNo, form, "WPayTransferPayment?", new Callback<Boolean>() 
 			{

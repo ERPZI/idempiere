@@ -44,7 +44,7 @@ import org.compiere.util.Msg;
  * 
  * @author Teo Sarca, www.arhipac.ro
  * 			<li>BF [ 2804142 ] MInvoice.setRMALine should work only for CreditMemo invoices
- * 				https://sourceforge.net/tracker/?func=detail&aid=2804142&group_id=176962&atid=879332
+ * 				https://sourceforge.net/p/adempiere/bugs/1937/
  * @author red1 FR: [ 2214883 ] Remove SQL code and Replace for Query
  */
 public class MInvoiceLine extends X_C_InvoiceLine
@@ -118,7 +118,11 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	 */
 	public MInvoiceLine (Properties ctx, int C_InvoiceLine_ID, String trxName)
 	{
-		super (ctx, C_InvoiceLine_ID, trxName);
+		this (ctx, C_InvoiceLine_ID, trxName, (String[]) null);
+	}	//	MInvoiceLine
+
+	public MInvoiceLine(Properties ctx, int C_InvoiceLine_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_InvoiceLine_ID, trxName, virtualColumns);
 		if (C_InvoiceLine_ID == 0)
 		{
 			setIsDescription(false);
@@ -134,7 +138,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			setQtyEntered(Env.ZERO);
 			setQtyInvoiced(Env.ZERO);
 		}
-	}	//	MInvoiceLine
+	}
 
 	/**
 	 * 	Parent Constructor
@@ -318,7 +322,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 			// use product UOM if the shipment hasn't the same uom than the order
 			setC_UOM_ID(getProduct().getC_UOM_ID());
 		setM_AttributeSetInstance_ID(sLine.getM_AttributeSetInstance_ID());
-	//	setS_ResourceAssignment_ID(sLine.getS_ResourceAssignment_ID());
+
 		if(getM_Product_ID() == 0)
 		    setC_Charge_ID(sLine.getC_Charge_ID());
 		//
@@ -388,10 +392,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	 */
 	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
 	{
-		if (M_AttributeSetInstance_ID == 0)		//	 0 is valid ID
-			set_Value("M_AttributeSetInstance_ID", Integer.valueOf(0));
-		else
-			super.setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
+		super.setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
 	}	//	setM_AttributeSetInstance_ID
 
 
@@ -474,7 +475,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 		if (isDescription())
 			return true;
 		//
-		int M_Warehouse_ID = Env.getContextAsInt(getCtx(), "#M_Warehouse_ID");
+		int M_Warehouse_ID = Env.getContextAsInt(getCtx(), Env.M_WAREHOUSE_ID);
 		//
 		int C_Tax_ID = Tax.get(getCtx(), getM_Product_ID(), getC_Charge_ID() , m_DateInvoiced, m_DateInvoiced,
 			getAD_Org_ID(), M_Warehouse_ID,
@@ -843,10 +844,10 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
-		boolean parentComplete = getParent().isComplete();
+		boolean parentComplete = getParent().isProcessed();
 		boolean isReversal = getParent().isReversal();
 		if (newRecord && parentComplete) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_InvoiceLine"));
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_Invoice_ID"));
 			return false;
 		}
 		// Re-set invoice header (need to update m_IsSOTrx flag) - phib [ 1686773 ]
@@ -931,7 +932,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	 * @param oldTax true if the old C_Tax_ID should be used
 	 * @return true if success, false otherwise
 	 *
-	 * @author teo_sarca [ 1583825 ]
+	 * author teo_sarca [ 1583825 ]
 	 */
 	protected boolean updateInvoiceTax(boolean oldTax) {
 		MInvoiceTax tax = MInvoiceTax.get (this, getPrecision(), oldTax, get_TrxName());
@@ -940,14 +941,8 @@ public class MInvoiceLine extends X_C_InvoiceLine
 				return false;
 		
 			// red1 - solving BUGS #[ 1701331 ] , #[ 1786103 ]
-			if (tax.getTaxAmt().signum() != 0) {
-				if (!tax.save(get_TrxName()))
-					return false;
-			}
-			else {
-				if (!tax.is_new() && !tax.delete(false, get_TrxName()))
-					return false;
-			}
+			if (!tax.save(get_TrxName()))
+				return false;
 		}
 		return true;
 	}
@@ -992,7 +987,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	}	//	afterDelete
 
 	/**
-	 *	Update Tax & Header
+	 *	Update Tax and Header
 	 *	@return true if header updated with tax
 	 */
 	public boolean updateHeaderTax()
@@ -1328,7 +1323,7 @@ public class MInvoiceLine extends X_C_InvoiceLine
 	// end MZ
 
 	/**
-	 * @param rmaline
+	 * @param rmaLine
 	 */
 	public void setRMALine(MRMALine rmaLine)
 	{

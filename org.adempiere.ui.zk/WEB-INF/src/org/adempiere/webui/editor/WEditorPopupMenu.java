@@ -29,6 +29,7 @@ import org.compiere.model.Lookup;
 import org.compiere.model.MFieldSuggestion;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
+import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MZoomCondition;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -61,6 +62,8 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     public static final String SHOWLOCATION_EVENT = "SHOW_LOCATION";
     public static final String CHANGE_LOG_EVENT = "CHANGE_LOG";
     public static final String EDITOR_EVENT = "EDITOR";
+    public static final String RESET_EVENT = "RESET";
+    public static final String ASSISTANT_EVENT = "ASSISTANT";
    
     private boolean newEnabled = true;
     private boolean updateEnabled = true; // Elaine 2009/02/16 - update record
@@ -141,18 +144,25 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
     	    	for (MZoomCondition zoomCondition : MZoomCondition.getConditions(table.getAD_Table_ID())) {
     	    		Boolean canAccessZoom = MRole.getDefault().getWindowAccess(zoomCondition.getAD_Window_ID());
     	    		if (canAccessZoom != null && canAccessZoom) {
-    	    	    	this.zoomEnabled = true;
-    	    	    	    if (hasQuickEntryField(zoomCondition.getAD_Window_ID(), 0, tableName)) {
-    	    	    		this.newEnabled = true;
-    	    	    		this.updateEnabled = true;
-    	    	    	}
+    	    			this.zoomEnabled = true;
+    	    			if (hasQuickEntryField(zoomCondition.getAD_Window_ID(), 0, tableName)) {
+    	    				if (MToolBarButtonRestrict.isNewButtonRestricted(zoomCondition.getAD_Window_ID()))
+    	    					this.newEnabled = false;
+    	    				else
+    	    					this.newEnabled = true;
+    	    				this.updateEnabled = true;
+    	    			}
 
     	    			break;
     	    		}
     	    	}
     		} else {
     			if (hasQuickEntryField(winID,winIDPO,tableName)) {
-        	    	this.newEnabled = true;
+    				if (   !MToolBarButtonRestrict.isNewButtonRestricted(winID)
+    					|| (winIDPO > 0 && winIDPO != winID && !MToolBarButtonRestrict.isNewButtonRestricted(winIDPO)))
+            	    	this.newEnabled = true;
+    				else
+    					this.newEnabled = false;
         	    	this.updateEnabled = true;
     			} else {
         	    	this.newEnabled = false;

@@ -1,0 +1,29 @@
+Auto-merging org.adempiere.base/src/org/compiere/model/MArchive.java
+Merge made by the 'ort' strategy.
+ .../src/org/compiere/process/ImportInvoice.java    |  65 ++++++++--------
+ .../src/org/compiere/process/ImportOrder.java      |  85 +++++++++++----------
+ .../adempiere/model/MWlistboxCustomization.java    |   2 +-
+ .../src/org/compiere/model/MArchive.java           |   1 -
+ org.adempiere.base/src/org/compiere/model/PO.java  |  23 ++----
+ .../src/org/compiere/print/DataEngine.java         |  18 ++---
+ .../src/org/compiere/print/MPrintFormat.java       |   6 +-
+ .../src/org/compiere/print/PrintDataElement.java   |   6 +-
+ .../src/org/compiere/print/PrintDataFunction.java  |  68 ++++++++++++-----
+ .../src/org/compiere/print/PrintDataGroup.java     |   6 +-
+ .../src/org/adempiere/webui/ClientInfo.java        |  13 ++++
+ .../org/adempiere/webui/adwindow/ADTabpanel.java   |   1 -
+ .../src/org/adempiere/webui/adwindow/GridView.java |   2 +-
+ .../webui/apps/ProcessParameterPanel.java          |   9 ++-
+ .../adempiere/webui/apps/form/WArchiveViewer.java  |   5 +-
+ .../org/adempiere/webui/window/WEMailDialog.java   |  23 ++++--
+ .../src/org/adempiere/webui/window/WPostIt.java    |   3 +-
+ .../adempiere/webui/window/WTextEditorDialog.java  |   6 ++
+ .../src/web/theme/default/images/Detail16.png      | Bin 844 -> 600 bytes
+ .../src/web/theme/default/images/First16.png       | Bin 803 -> 451 bytes
+ .../src/web/theme/default/images/Last16.png        | Bin 827 -> 448 bytes
+ .../src/web/theme/default/images/Parent16.png      | Bin 823 -> 601 bytes
+ .../src/web/theme/default/images/Previous16.png    | Bin 820 -> 508 bytes
+ .../org.idempiere.p2.targetplatform.target         |  26 +++----
+ .../org.idempiere.p2.targetplatform.tpd            |   4 +-
+ org.idempiere.parent/pom.xml                       |  48 +++++++++++-
+ 26 files changed, 262 insertions(+), 158 deletions(-)

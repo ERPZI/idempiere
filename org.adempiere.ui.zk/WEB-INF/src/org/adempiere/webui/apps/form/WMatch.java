@@ -59,7 +59,6 @@ import org.compiere.model.MLookupFactory;
 //
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.model.MMatchPO;
 //MPo, 28/5/18 
 import org.compiere.model.MTable;
 //
@@ -88,6 +87,7 @@ import org.zkoss.zul.Vlayout;
  *  @author     Jorg Janke
  *  @version    $Id: VMatch.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VMatch")
 public class WMatch extends Match
 	implements IFormController, EventListener<Event>, WTableModelListener
 {
@@ -126,7 +126,6 @@ public class WMatch extends Match
 			LayoutUtils.addSclass("status-border", statusBar);
 			//
 			
-			MMatchPO.consolidate(Env.getCtx());
 			cmd_matchTo();
 		}
 		catch(Exception e)

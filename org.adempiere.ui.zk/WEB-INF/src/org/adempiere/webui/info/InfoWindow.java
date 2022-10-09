@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import org.adempiere.base.upload.IUploadService;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.impexp.AbstractExcelExporter;
 import org.adempiere.model.IInfoColumn;
@@ -24,6 +25,7 @@ import org.adempiere.model.MInfoProcess;
 import org.adempiere.model.MInfoRelated;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.ClientInfo;
+import org.adempiere.webui.Extensions;
 import org.adempiere.webui.ISupportMask;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.apps.AEnv;
@@ -48,6 +50,7 @@ import org.adempiere.webui.component.Tabpanels;
 import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.WInfoWindowListItemRenderer;
 import org.adempiere.webui.component.WListbox;
+import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
@@ -57,7 +60,7 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.factory.ButtonFactory;
-import org.adempiere.webui.grid.WQuickEntry;
+import org.adempiere.webui.grid.AbstractWQuickEntry;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
@@ -66,7 +69,6 @@ import org.adempiere.webui.window.FDialog;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.EmbedWinInfo;
 import org.compiere.minigrid.IDColumn;
-import org.compiere.model.AccessSqlParser;
 import org.compiere.model.AccessSqlParser.TableInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
@@ -74,6 +76,7 @@ import org.compiere.model.GridWindow;
 import org.compiere.model.InfoColumnVO;
 import org.compiere.model.InfoRelatedVO;
 import org.compiere.model.Lookup;
+import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MInfoColumn;
 import org.compiere.model.MInfoWindow;
 import org.compiere.model.MLookupFactory;
@@ -92,6 +95,9 @@ import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.idempiere.ui.zk.media.IMediaView;
+import org.idempiere.ui.zk.media.Medias;
+import org.idempiere.ui.zk.media.WMediaOptions;
 import org.zkoss.util.media.AMedia;
 import org.zkoss.zk.au.out.AuEcho;
 import org.zkoss.zk.ui.Component;
@@ -128,8 +134,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5041961608373943362L;
-
+	private static final long serialVersionUID = 1180753002653812499L;
+	
 	protected Grid parameterGrid;
 	private Borderlayout layout;
 	private Vbox southBody;
@@ -150,7 +156,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected TableInfo[] tableInfos;
 	protected InfoColumnVO[] infoColumns;	
 	
-	protected WQuickEntry vqe;
+	protected AbstractWQuickEntry vqe;
 	
 	private List<GridField> gridFields;
 	private TreeMap<Integer, List<Object[]>> parameterTree;
@@ -201,13 +207,32 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	 * @param WindowNo
 	 * @param tableName
 	 * @param keyColumn
+	 * @param queryValue
 	 * @param multipleSelection
 	 * @param whereClause
+	 * @param AD_InfoWindow_ID
 	 * @param lookup
-	 * @param gridfield
+	 * @param field
 	 */
 	public InfoWindow(int WindowNo, String tableName, String keyColumn, String queryValue, 
 			boolean multipleSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field) {
+		this(WindowNo, tableName, keyColumn, queryValue, multipleSelection, whereClause, AD_InfoWindow_ID, lookup, field, null);		
+	}
+
+	/**
+	 * @param WindowNo
+	 * @param tableName
+	 * @param keyColumn
+	 * @param queryValue
+	 * @param multipleSelection
+	 * @param whereClause
+	 * @param AD_InfoWindow_ID
+	 * @param lookup
+	 * @param field
+	 * @param predefinedContextVariables
+	 */
+	public InfoWindow(int WindowNo, String tableName, String keyColumn, String queryValue, 
+			boolean multipleSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, GridField field, String predefinedContextVariables) {
 		super(WindowNo, tableName, keyColumn, multipleSelection, whereClause,
 				lookup, AD_InfoWindow_ID, queryValue);		
 		this.m_gridfield = field;
@@ -233,6 +258,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    			}
    		}); //xolali --end-
 
+   		Env.setPredefinedVariables(Env.getCtx(), getWindowNo(), predefinedContextVariables);
 		infoContext = new Properties(Env.getCtx());
 		p_loadedOK = loadInfoDefinition(); 
 		
@@ -254,6 +280,8 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			}
 			
 			renderWindow();
+			prepareTable();
+			contentPanel.repaint();
 			
 			if (queryValue != null && queryValue.trim().length() > 0)
 			{
@@ -305,7 +333,6 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	 * separate by layout type
 	 * init drop list and menu control
 	 * set status of haveProcess flag 
-	 * @return true when have process, false when no process
 	 */
 	protected void initInfoProcess() {
 		if (infoWindow == null){
@@ -372,7 +399,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    					item.setValue(process);
    					item.setLabel(process.get_Translation(MProcess.COLUMNNAME_Name));
    					if (!Util.isEmpty(data.getImageURL(), true)) {
-   		   	   			item.setImage(ThemeManager.getThemeResource("images/" + data.getImageURL()));
+   						if (ThemeManager.isUseFontIconForImage())
+   		   	   				item.setIconSclass(ThemeManager.getIconSclass(data.getImageURL()));
+   						else
+   							item.setImage(ThemeManager.getThemeResource("images/" + data.getImageURL()));
    		   	   		}
    				}
 			});
@@ -495,7 +525,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    	   		Menuitem ipMenuItem = new Menuitem();
    	   		ipMenuItem.setLabel(process.get_Translation(MProcess.COLUMNNAME_Name));
    	   		if (!Util.isEmpty(infoProcess.getImageURL(), true)) {
-   	   			ipMenuItem.setImage(ThemeManager.getThemeResource("images/" + infoProcess.getImageURL()));
+   	   			if (ThemeManager.isUseFontIconForImage())
+   	   				ipMenuItem.setIconSclass(ThemeManager.getIconSclass(infoProcess.getImageURL()));
+   	   			else
+   	   				ipMenuItem.setImage(ThemeManager.getThemeResource("images/" + infoProcess.getImageURL()));
    	   		}   	   		
    	   		ipMenuItem.setAttribute(PROCESS_ID_KEY, infoProcess.getAD_Process_ID());
    	   		ipMenuItem.addEventListener(Events.ON_CLICK, this);
@@ -559,7 +592,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	@Override
 	protected void loadInfoWindowData (){
 		if (m_infoWindowID > 0) {
-			infoWindow = new MInfoWindow(Env.getCtx(), m_infoWindowID, null);
+			infoWindow = MInfoWindow.getInfoWindow(m_infoWindowID);
 		}else {
 			infoWindow = MInfoWindow.get(p_tableName, (String)null);			
 		}
@@ -581,8 +614,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			String tableName = null;
 				tableName = MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID());
 			
-			AccessSqlParser sqlParser = new AccessSqlParser("SELECT * FROM " + infoWindow.getFromClause());
-			tableInfos = sqlParser.getTableInfo(0);
+			tableInfos = infoWindow.getTableInfos();
 			if (tableInfos[0].getSynonym() != null && tableInfos[0].getSynonym().trim().length() > 0) {
 				p_tableName = tableInfos[0].getSynonym().trim();
 				if (p_whereClause != null && p_whereClause.trim().length() > 0) {
@@ -720,8 +752,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 
 			MInfoWindow embedInfo = new MInfoWindow(Env.getCtx(), infoRelatedID, null);
 
-			AccessSqlParser sqlParser = new AccessSqlParser("SELECT * FROM " + embedInfo.getFromClause());
-			TableInfo[] tableInfos = sqlParser.getTableInfo(0);
+			TableInfo[] tableInfos = embedInfo.getTableInfos();
 			if (tableInfos[0].getSynonym() != null && tableInfos[0].getSynonym().trim().length() > 0){
 				tableName = tableInfos[0].getSynonym().trim();
 			}
@@ -912,7 +943,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (! colSQL.toUpperCase().contains(" AS "))
 			colSQL += " AS " + infoColumn.getColumnName();
         editorMap.put(colSQL, editor);
-        Class<?> colClass = columnName.endsWith("_ID") ? KeyNamePair.class : String.class;
+        Class<?> colClass = columnName.endsWith("_ID") || columnName.equals("CreatedBy") || columnName.equals("UpdatedBy") ? KeyNamePair.class : String.class;
 		ColumnInfo columnInfo = new ColumnInfo(infoColumn.getNameTrl(), colSQL, colClass, (String)null, infoColumn.isReadOnly() || haveNotProcess);
 		return columnInfo;
 	}
@@ -1361,6 +1392,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected void renderFooter(South south) {		
 		southBody = new Vbox();
 		ZKUpdateUtil.setHflex(southBody, "1");
+		southBody.setClass("info");
 		south.appendChild(southBody);
 		southBody.appendChild(new Separator());
 		southBody.appendChild(confirmPanel);
@@ -1890,10 +1922,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		
 		if (paging != null)
 			paging.setParent(null);
-		
 		layout.invalidate();
-		
-		contentPanel.getListHead().detach();
 	}
 	
 	@Override
@@ -2020,13 +2049,14 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	}
 
 	/**
-	 * @author xolali IDEMPIERE-1045
+	 * author xolali IDEMPIERE-1045
 	 * getInfoColumnslayout(MInfoWindow info)
+	 * @param info
+	 * @return
 	 */
 	public ArrayList<ColumnInfo> getInfoColumnslayout(MInfoWindow info){
 
-		AccessSqlParser sqlParser = new AccessSqlParser("SELECT * FROM " + info.getFromClause());
-		TableInfo[] tableInfos = sqlParser.getTableInfo(0);
+		TableInfo[] tableInfos = info.getTableInfos();
 
 		MInfoColumn[] p_infoColumns = info.getInfoColumns(tableInfos);
 		InfoColumnVO[] infoColumns = InfoColumnVO.create(Env.getCtx(), p_infoColumns);
@@ -2076,6 +2106,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 						}
 						columnInfo.setColDescription(infoColumn.getDescriptionTrl());
 						columnInfo.setGridField(getGridField(infoColumn));
+						columnInfo.setAD_Reference_ID(infoColumn.getAD_Reference_ID());
 						list.add(columnInfo);
 					}
 
@@ -2098,8 +2129,10 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	}
 
 	/**
-	 * @author xolali IDEMPIERE-1045
+	 * author xolali IDEMPIERE-1045
 	 * GridField getGridField(InfoColumnVO infoColumn)
+	 * @param infoColumn
+	 * @return
 	 */
 	protected GridField getGridField(InfoColumnVO infoColumn){
 		String columnName = infoColumn.getColumnName();
@@ -2181,7 +2214,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			GridWindow gridwindow = GridWindow.get(Env.getCtx(), 0, getADWindowID());
 			hasRightQuickEntry = gridwindow != null;
 			if (hasRightQuickEntry)
-				vqe = new WQuickEntry (0, getADWindowID());
+				vqe = Extensions.getQuickEntry(0, 0, getADWindowID());
 		}
 			
 		return hasNew && vqe != null && vqe.isAvailableQuickEdit();
@@ -2189,7 +2222,6 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	
 	/**	
 	 * Get id of window link with main table of this info window
-	 * @param tableName
 	 * @return
 	 */
 	protected int getADWindowID() {
@@ -2199,7 +2231,24 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		if (!isLookup() && Util.isEmpty(isSOTrx)) {
 			isSOTrx = "Y";
 		}
-		
+
+		if (infoWindow != null) {
+
+			MUserDefInfo userDef = MUserDefInfo.getBestMatch(Env.getCtx(), infoWindow.getAD_InfoWindow_ID());
+
+			if (userDef != null) {
+				if (isSOTrx.equals("N") && userDef.getPO_Window_ID() > 0)
+					return userDef.getPO_Window_ID();
+				if (userDef.getAD_Window_ID() > 0)
+					return userDef.getAD_Window_ID();
+			}
+
+			if (isSOTrx.equals("N") && infoWindow.getPO_Window_ID() > 0)
+				return infoWindow.getPO_Window_ID();
+			if (infoWindow.getAD_Window_ID() > 0)
+				return infoWindow.getAD_Window_ID();
+		}
+
 		return super.getAD_Window_ID(MTable.getTableName(Env.getCtx(), infoWindow.getAD_Table_ID()), isSOTrx.equalsIgnoreCase("Y"));
 	}
 	
@@ -2208,7 +2257,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		// each time close WQuickEntry dialog, 
 		// window is  un-registry, variable environment of this window as _QUICK_ENTRY_MODE_ is removed
 		// so if reuse WQuickEntry will let some field in child tab init at read only state
-		WQuickEntry vqe = new WQuickEntry (0, getADWindowID());
+		AbstractWQuickEntry vqe = Extensions.getQuickEntry(0, 0, getADWindowID());
 		
 		vqe.loadRecord (0);								
 		
@@ -2602,7 +2651,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			
 			String dataSql = buildDataSQL(0, 0);
 			
-			File file = File.createTempFile("Export", ".xls");
+			File file = File.createTempFile(infoWindow.get_Translation("Name")+"_", ".xls");
 			
 			testCount();
 			
@@ -2640,9 +2689,24 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 					currentRow = -1;
 				}
 				
-				AMedia media = null;
-				media = new AMedia(file.getName(), null, "application/vnd.ms-excel", file, true);
-				Filedownload.save(media);
+				AMedia media = new AMedia(file.getName(), null, Medias.EXCEL_MIME_TYPE, file, true);
+				IMediaView view = Extensions.getMediaView(Medias.EXCEL_MIME_TYPE, Medias.EXCEL_FILE_EXT, ClientInfo.isMobile());
+				Map<MAuthorizationAccount, IUploadService> uploadServicesMap = MAuthorizationAccount.getUserUploadServices();
+				if (view != null || uploadServicesMap.size() > 0) {				
+					WMediaOptions options = new WMediaOptions(media, view != null ? () -> {
+						Window viewWindow = new Window();
+						viewWindow.setWidth("100%");
+						viewWindow.setHeight("100%");
+						viewWindow.setTitle(media.getName());
+						viewWindow.setAttribute(Window.MODE_KEY, Mode.EMBEDDED);
+						AEnv.showWindow(viewWindow);
+						view.renderMediaView(viewWindow, media, false);
+					} : null, uploadServicesMap);
+					options.setPage(getPage());
+					options.doHighlighted();
+				} else {
+					Filedownload.save(media);
+				}
 			}			
 		}
 

@@ -55,6 +55,7 @@ import org.compiere.model.MTable;
  * Generate Invoice (manual) view class
  *
  */
+@org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VInvoiceGen")
 public class WInvoiceGen extends InvoiceGen implements IFormController, EventListener<Event>, ValueChangeListener
 {
 	private WGenForm form;
@@ -268,7 +269,6 @@ public class WInvoiceGen extends InvoiceGen implements IFormController, EventLis
 				((North)comp).setOpen(false);
 		}
 		form.getMiniTable().repaint();
-		form.invalidate();
 	}   //  executeQuery
 
 	protected void onClientInfo()

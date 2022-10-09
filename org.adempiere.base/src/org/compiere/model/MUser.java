@@ -53,7 +53,7 @@ import org.idempiere.cache.ImmutablePOSupport;
  * 
  * @author Teo Sarca, www.arhipac.ro
  * 			<li>FR [ 2788430 ] MUser.getOfBPartner add trxName parameter
- * 				https://sourceforge.net/tracker/index.php?func=detail&aid=2788430&group_id=176962&atid=879335
+ * 				https://sourceforge.net/p/adempiere/feature-requests/714/
  */
 public class MUser extends X_AD_User implements ImmutablePOSupport
 {
@@ -210,7 +210,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		}
 		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
 		boolean email_login = MSysConfig.getBooleanValue(MSysConfig.USE_EMAIL_FOR_LOGIN, false);
-//		ArrayList<KeyNamePair> clientList = new ArrayList<KeyNamePair>();
+
 		ArrayList<Integer> clientsValidated = new ArrayList<Integer>();
 		MUser retValue = null;
 		
@@ -663,34 +663,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	{
 		if (ia == null)
 			return "NoEmail";
-                else return ia.getAddress();
-		/*
-                if (true)
-			return null;
-		
-		Hashtable<String,String> env = new Hashtable<String,String>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");
-	//	env.put(Context.PROVIDER_URL, "dns://admin.adempiere.org");
-		try
-		{
-			DirContext ctx = new InitialDirContext(env);
-		//	Attributes atts = ctx.getAttributes("admin");
-			Attributes atts = ctx.getAttributes("dns://admin.adempiere.org", new String[] {"MX"});
-			NamingEnumeration en = atts.getAll();
-	//		NamingEnumeration en = ctx.list("adempiere.org");
-			while (en.hasMore())
-			{
-				System.out.println(en.next());
-			}
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return e.getLocalizedMessage();
-		}
-		return null;
-                */
+        else 
+        	return ia.getAddress();
+
 	}	//	validateEmail
 	
 	/**
@@ -730,7 +705,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getEMailValidationCode
 	
 	/**
-	 * 	Check & Set EMail Validation Code.
+	 * 	Check and Set EMail Validation Code.
 	 *	@param code code
 	 *	@param info info
 	 *	@return true if valid
@@ -1109,25 +1084,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return retValue;
 	}
 	
-	/**
-	 * 	Test
-	 *	@param args ignored
-	 *
-	public static void main (String[] args)
-	{
-		try
-		{
-			validateEmail(new InternetAddress("jjanke@adempiere.org"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-	//	org.compiere.Adempiere.startupClient();
-	//	System.out.println ( MUser.get(Env.getCtx(), "SuperUser", "22") );
-	}	//	main	/* */
-
 	@Override
 	public String getEMailUser() {
 		// IDEMPIERE-722

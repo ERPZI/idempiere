@@ -19,12 +19,10 @@ package org.adempiere.webui.apps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -74,12 +72,7 @@ import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.DocumentException;
 
 /**
  *  ZK Application Environment and utilities
@@ -87,7 +80,7 @@ import com.itextpdf.text.pdf.PdfWriter;
  *  @author 	Jorg Janke
  *  @version 	$Id: AEnv.java,v 1.2 2006/07/30 00:51:27 jjanke Exp $
  *
- *  Colin Rooney (croo) & kstan_79 RFE#1670185
+ *  Colin Rooney (croo) and kstan_79 RFE#1670185
  */
 public final class AEnv
 {
@@ -140,7 +133,7 @@ public final class AEnv
 
 	/**
 	 *  Get Mnemonic character from text.
-	 *  @param text text with '&'
+	 *  @param text text with '&amp;'
 	 *  @return Mnemonic or 0
 	 */
 	public static char getMnemonic (String text)
@@ -206,7 +199,7 @@ public final class AEnv
 	 */
 	public static void logout()
 	{
-		String sessionID = Env.getContext(Env.getCtx(), "#AD_Session_ID");
+		String sessionID = Env.getContext(Env.getCtx(), Env.AD_SESSION_ID);
 		synchronized (windowCache)
 		{
 			CCache<Integer,GridWindowVO> cache = windowCache.get(sessionID);
@@ -218,11 +211,12 @@ public final class AEnv
 		}
 		windowCache.remove(sessionID);
 		//	End Session
-		MSession session = MSession.get(Env.getCtx(), false);	//	finish
+		int ad_Session_ID = Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID);
+		MSession session = ad_Session_ID > 0 ? new MSession(Env.getCtx(), ad_Session_ID, null) : null;	//	finish
 		if (session != null)
 			session.logout();
 		
-		Env.setContext(Env.getCtx(), "#AD_Session_ID", (String)null);
+		Env.setContext(Env.getCtx(), Env.AD_SESSION_ID, (String)null);
 		//
 	}
 
@@ -272,7 +266,7 @@ public final class AEnv
 
 		if (log.isLoggable(Level.CONFIG)) log.config("Window=" + WindowNo + ", AD_Window_ID=" + AD_Window_ID);
 		GridWindowVO mWindowVO = null;
-		String sessionID = Env.getContext(Env.getCtx(), "#AD_Session_ID");
+		String sessionID = Env.getContext(Env.getCtx(), Env.AD_SESSION_ID);
 		if (AD_Window_ID != 0 && Ini.isCacheWindow())	//	try cache
 		{
 			synchronized (windowCache)
@@ -615,44 +609,7 @@ public final class AEnv
      */
     public static void mergePdf(List<File> pdfList, File outFile) throws IOException,
 			DocumentException, FileNotFoundException {
-		Document document = null;
-		PdfWriter copy = null;
-		
-		List<PdfReader> pdfReaders = new ArrayList<PdfReader>();
-		
-		try
-		{		
-			for (File f : pdfList)
-			{
-				PdfReader reader = new PdfReader(f.getAbsolutePath());
-				
-				pdfReaders.add(reader);
-				
-				if (document == null)
-				{
-					document = new Document(reader.getPageSizeWithRotation(1));
-					copy = PdfWriter.getInstance(document, new FileOutputStream(outFile));
-					document.open();
-				}
-				int pages = reader.getNumberOfPages();
-				PdfContentByte cb = copy.getDirectContent();
-				for (int i = 1; i <= pages; i++) {
-					document.newPage();
-					copy.newPage();
-					PdfImportedPage page = copy.getImportedPage(reader, i);
-					cb.addTemplate(page, 0, 0);
-					copy.releaseTemplate(page);
-				}
-			}
-			document.close();
-		}
-		finally
-		{
-			for(PdfReader reader:pdfReaders)
-			{
-				reader.close();
-			}
-		}
+		Util.mergePdf(pdfList, outFile);
    }
 
     /**
@@ -799,7 +756,7 @@ public final class AEnv
 	 * when field lie in window, it's id of this window
 	 * when field lie in process parameter dialog it's ad_window_id of window open this process
 	 * when field lie in process parameter open in a standalone window (run process from menu) return id of dummy window
-	 * @param mField
+	 * @param windowNo
 	 * @return
 	 */
 	public static int getADWindowID (int windowNo){
@@ -860,4 +817,17 @@ public final class AEnv
 		return getApplicationUrl() + "?Action=Zoom&TableName" + po.get_TableName() + "&Record_ID=" + po.get_ID();
 	}
 
+	/**
+	 * 
+	 * @param attribute
+	 * @return true if attribute have been set for current executions
+	 */
+	public static boolean getOrSetExecutionAttribute(String attribute) {
+		if (Executions.getCurrent() != null) {
+    		if (Executions.getCurrent().getAttribute(attribute) != null)
+    			return true;
+    		Executions.getCurrent().setAttribute(attribute, Boolean.TRUE);
+    	}
+    	return false;
+	}
 }	//	AEnv

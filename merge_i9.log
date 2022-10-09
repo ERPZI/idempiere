@@ -1,0 +1,297 @@
+Auto-merging .gitignore
+CONFLICT (content): Merge conflict in .gitignore
+Auto-merging Credits.html
+CONFLICT (content): Merge conflict in Credits.html
+CONFLICT (rename/delete): db/ddlutils/postgresql/views/RV_PAYMENT.sql renamed to db/ddlutils/postgresql/views/C_PAYMENT_V.sql in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): db/ddlutils/postgresql/views/C_PAYMENT_V.sql deleted in release-9 and modified in HEAD.  Version HEAD of db/ddlutils/postgresql/views/C_PAYMENT_V.sql left in tree.
+CONFLICT (modify/delete): migration/i7.1/postgresql/202003021203_IDEMPIERE-3947.sql deleted in HEAD and modified in release-9.  Version release-9 of migration/i7.1/postgresql/202003021203_IDEMPIERE-3947.sql left in tree.
+Auto-merging migration/migration_script_3534515660714000163_postgresql.sql
+CONFLICT (content): Merge conflict in migration/migration_script_3534515660714000163_postgresql.sql
+Auto-merging org.adempiere.base-feature/model.generator.launch
+Auto-merging org.adempiere.base-feature/packinfolder.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/packinfolder.app.launch
+Auto-merging org.adempiere.base-feature/sign.database.build.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/sign.database.build.launch
+Auto-merging org.adempiere.base-feature/synchronize-terminology.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/synchronize-terminology.app.launch
+Auto-merging org.adempiere.base-feature/translation.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.base-feature/translation.app.launch
+Auto-merging org.adempiere.base.callout/src/org/compiere/model/CalloutInvoice.java
+Auto-merging org.adempiere.base.callout/src/org/compiere/model/CalloutOrder.java
+Auto-merging org.adempiere.base.callout/src/org/compiere/model/CalloutPayment.java
+CONFLICT (content): Merge conflict in org.adempiere.base.callout/src/org/compiere/model/CalloutPayment.java
+Auto-merging org.adempiere.base.process/src/org/adempiere/process/ClientAcctProcessor.java
+Auto-merging org.adempiere.base.process/src/org/adempiere/process/InvoiceGenerateRMA.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/Aging.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/CommissionCalc.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/ExpenseAPInvoice.java
+CONFLICT (content): Merge conflict in org.adempiere.base.process/src/org/compiere/process/ExpenseAPInvoice.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/ImportInventory.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/ImportPayment.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/InOutGenerate.java
+CONFLICT (content): Merge conflict in org.adempiere.base.process/src/org/compiere/process/InOutGenerate.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/InvoiceGenerate.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/OrderPOCreate.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/PaySelectionCreateCheck.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/PaySelectionCreateFrom.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/RequisitionPOCreate.java
+Auto-merging org.adempiere.base.process/src/org/compiere/process/SequenceCheck.java
+Auto-merging org.adempiere.base/META-INF/MANIFEST.MF
+CONFLICT (content): Merge conflict in org.adempiere.base/META-INF/MANIFEST.MF
+Auto-merging org.adempiere.base/build.properties
+CONFLICT (content): Merge conflict in org.adempiere.base/build.properties
+Auto-merging org.adempiere.base/pom.xml
+Auto-merging org.adempiere.base/src/org/adempiere/exceptions/DBException.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc_AllocationHdr.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/acct/Doc_AllocationHdr.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc_AssetDisposed.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc_DepreciationEntry.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc_InOut.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Doc_MatchInv.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/acct/Doc_MatchInv.java
+Auto-merging org.adempiere.base/src/org/compiere/acct/Fact.java
+Auto-merging org.adempiere.base/src/org/compiere/db/AdempiereDatabase.java
+Auto-merging org.adempiere.base/src/org/compiere/db/CConnection.java
+Auto-merging org.adempiere.base/src/org/compiere/model/AttachmentFileSystem.java
+Auto-merging org.adempiere.base/src/org/compiere/model/GridField.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridField.java
+Auto-merging org.adempiere.base/src/org/compiere/model/GridTab.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridTab.java
+Auto-merging org.adempiere.base/src/org/compiere/model/GridTable.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/GridTable.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_AD_PrintFormatItem.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_A_Asset.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_A_Asset_Addition.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_BankStatementLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_Invoice.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_InvoiceBatchLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_InvoiceLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_Order.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_OrderLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_PaySelectionCheck.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_PaySelectionLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_Payment.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_C_PaymentTransaction.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_GL_Journal.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_I_FixedAsset.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_M_RMA.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_M_Requisition.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_M_RequisitionLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_S_TimeExpense.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_S_TimeExpenseLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/I_T_Aging.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MAging.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MArchive.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MAsset.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MAssetAddition.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MAssetDisposed.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MClient.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MColumn.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MDepreciationExp.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MDepreciationWorkfile.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MInventoryLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MInvoice.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MJournal.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MJournal.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MLookupFactory.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MMatchInv.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MMatchInv.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MOrder.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MPInstance.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MPInstance.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MPInstanceLog.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MPInstanceLog.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MPaySelectionCheck.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MPayment.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MProcessPara.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MProduction.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MProduction.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MProductionPlan.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MProductionPlan.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MQuery.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MRole.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MSysConfig.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MSystem.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MTax.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MTimeExpenseLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/MUserDefProc.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/MUserDefProc.java
+Auto-merging org.adempiere.base/src/org/compiere/model/PO.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/PO.java
+Auto-merging org.adempiere.base/src/org/compiere/model/SystemIDs.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/SystemIDs.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_AD_InfoColumn.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_AD_PrintFormatItem.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_AD_SysConfig.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_AD_SysConfig.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_AD_UserPreference.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_A_Asset.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_A_Asset.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_A_Asset_Addition.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_A_Depreciation_Exp.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_A_Depreciation_Workfile.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_BankStatementLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_Invoice.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Invoice.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_InvoiceBatchLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_InvoiceBatchLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_InvoiceLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_InvoiceLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_Order.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Order.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_OrderLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_OrderLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaySelection.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelection.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaySelectionCheck.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelectionCheck.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaySelectionLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaySelectionLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_Payment.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_Payment.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaymentAllocate.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentAllocate.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaymentBatch.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentBatch.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaymentProcessor.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentProcessor.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaymentTerm.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentTerm.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_C_PaymentTransaction.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_C_PaymentTransaction.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_GL_Journal.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_I_FixedAsset.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_I_FixedAsset.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_M_MatchInv.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_M_MatchPO.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_M_MatchPO.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_M_RMA.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_M_Requisition.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_M_Requisition.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_M_RequisitionLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_S_TimeExpense.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_S_TimeExpense.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_S_TimeExpenseLine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_S_TimeExpenseLine.java
+Auto-merging org.adempiere.base/src/org/compiere/model/X_T_Aging.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/model/X_T_Aging.java
+CONFLICT (rename/delete): org.adempiere.base/src/org/compiere/model/X_AD_Desktop.java renamed to org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java in HEAD, but deleted in release-9.
+CONFLICT (modify/delete): org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java deleted in release-9 and modified in HEAD.  Version HEAD of org.adempiere.base/src/org/compiere/model/X_ZI_Incoterm.java left in tree.
+Auto-merging org.adempiere.base/src/org/compiere/print/DataEngine.java
+Auto-merging org.adempiere.base/src/org/compiere/print/ReportEngine.java
+Auto-merging org.adempiere.base/src/org/compiere/print/layout/HTMLElement.java
+Auto-merging org.adempiere.base/src/org/compiere/print/layout/HTMLRenderer.java
+Auto-merging org.adempiere.base/src/org/compiere/print/layout/LayoutEngine.java
+Auto-merging org.adempiere.base/src/org/compiere/process/DocumentEngine.java
+CONFLICT (content): Merge conflict in org.adempiere.base/src/org/compiere/process/DocumentEngine.java
+Auto-merging org.adempiere.base/src/org/compiere/process/ServerProcessCtl.java
+Auto-merging org.adempiere.base/src/org/compiere/report/core/RColumn.java
+Auto-merging org.adempiere.base/src/org/compiere/util/DB.java
+Auto-merging org.adempiere.base/src/org/compiere/util/DisplayType.java
+Auto-merging org.adempiere.base/src/org/compiere/util/Ini.java
+Auto-merging org.adempiere.base/src/org/compiere/wf/MWFNode.java
+Auto-merging org.adempiere.base/src/org/compiere/wf/MWorkflow.java
+Auto-merging org.adempiere.base/src/org/eevolution/process/BankTransfer.java
+Auto-merging org.adempiere.base/src/org/globalqss/process/CashFlow.java
+Auto-merging org.adempiere.base/src/org/idempiere/fa/process/ImportFixedAsset.java
+Auto-merging org.adempiere.eclipse.equinox.http.servlet/src/org/adempiere/eclipse/equinox/http/servlet/ServletContextAdaptor.java
+Auto-merging org.adempiere.install/META-INF/MANIFEST.MF
+Auto-merging org.adempiere.install/install.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.install/install.app.launch
+Auto-merging org.adempiere.install/install.console.app.launch
+CONFLICT (content): Merge conflict in org.adempiere.install/install.console.app.launch
+Auto-merging org.adempiere.install/install.silent.app.launch
+CONFLICT (add/add): Merge conflict in org.adempiere.install/install.silent.app.launch
+Auto-merging org.adempiere.install/src/org/compiere/install/ConfigurationData.java
+Auto-merging org.adempiere.pipo.handlers/src/org/adempiere/pipo2/handler/GenericPOElementHandler.java
+Auto-merging org.adempiere.pipo/src/org/adempiere/pipo2/PackInProcess.java
+Auto-merging org.adempiere.pipo/src/org/adempiere/pipo2/PackRollProcess.java
+Auto-merging org.adempiere.pipo/src/org/adempiere/pipo2/PoExporter.java
+CONFLICT (content): Merge conflict in org.adempiere.pipo/src/org/adempiere/pipo2/PoExporter.java
+Auto-merging org.adempiere.pipo/src/org/adempiere/pipo2/PoFiller.java
+Auto-merging org.adempiere.plugin.utils/META-INF/MANIFEST.MF
+Auto-merging org.adempiere.server-feature/console-setup-alt.sh
+Auto-merging org.adempiere.server-feature/console-setup.sh
+Auto-merging org.adempiere.server-feature/pom.xml
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/pom.xml
+Auto-merging org.adempiere.server-feature/server.product.functionaltest.launch
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/server.product.functionaltest.launch
+Auto-merging org.adempiere.server-feature/server.product.launch
+Auto-merging org.adempiere.server-feature/setup-alt.sh
+Auto-merging org.adempiere.server-feature/setup.sh
+Auto-merging org.adempiere.server-feature/setup/configuration/config.ini
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/setup/configuration/config.ini
+Auto-merging org.adempiere.server-feature/silent-setup-alt.sh
+CONFLICT (add/add): Merge conflict in org.adempiere.server-feature/silent-setup-alt.sh
+Auto-merging org.adempiere.server-feature/silent-setup.sh
+CONFLICT (add/add): Merge conflict in org.adempiere.server-feature/silent-setup.sh
+Auto-merging org.adempiere.server-feature/utils.unix/unix/DebianInstaller/DEBIAN/control
+CONFLICT (content): Merge conflict in org.adempiere.server-feature/utils.unix/unix/DebianInstaller/DEBIAN/control
+Auto-merging org.adempiere.server-feature/utils.unix/unix/DebianInstaller/etc/init.d/idempiere
+Auto-merging org.adempiere.server/WEB-INF/web.xml
+Auto-merging org.adempiere.server/src/main/server/org/compiere/server/AcctProcessor.java
+Auto-merging org.adempiere.server/src/main/server/org/compiere/server/Scheduler.java
+CONFLICT (content): Merge conflict in org.adempiere.server/src/main/server/org/compiere/server/Scheduler.java
+Auto-merging org.adempiere.ui.zk/META-INF/MANIFEST.MF
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/META-INF/MANIFEST.MF
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/fi/jawsy/jawwa/zk/atmosphere/AtmosphereServerPush.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/fi/jawsy/jawwa/zk/atmosphere/AtmosphereServerPush.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/metainfo/zk/lang-addon.xml
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/metainfo/zk/lang-addon.xml
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/AdempiereWebUI.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/AdempiereWebUI.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/ADTabpanel.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/ADWindowToolbar.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/ADWindowToolbar.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/AbstractADWindowContent.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/adwindow/AbstractADWindowContent.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/AbstractProcessDialog.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/DocumentSearchController.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WAllocation.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WAllocation.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WCreateFromShipmentUI.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WFactReconcile.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WInvoiceGen.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WInvoiceGen.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WMatch.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WMatch.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WPayPrint.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/form/WPayPrint.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/apps/wf/WWFActivity.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/grid/WQuickEntry.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/info/InfoWindow.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/HelpController.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/HelpController.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/InfoGeneralPanel.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/InfoPanel.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/panel/InfoPanel.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/process/InvoicePrint.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FDialog.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FDialog.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FindWindow.java
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/FindWindow.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/org/adempiere/webui/window/WCtxHelpSuggestion.java
+Auto-merging org.adempiere.ui.zk/WEB-INF/src/web/js/jawwa/atmosphere/serverpush.js
+CONFLICT (content): Merge conflict in org.adempiere.ui.zk/WEB-INF/src/web/js/jawwa/atmosphere/serverpush.js
+Auto-merging org.adempiere.ui/src/org/compiere/apps/form/Allocation.java
+Auto-merging org.adempiere.ui/src/org/compiere/apps/form/FactReconcile.java
+Auto-merging org.adempiere.ui/src/org/compiere/apps/form/InvoiceGen.java
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/apps/form/InvoiceGen.java
+Auto-merging org.adempiere.ui/src/org/compiere/apps/form/Match.java
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/apps/form/Match.java
+Auto-merging org.adempiere.ui/src/org/compiere/grid/CreateFromInvoice.java
+CONFLICT (content): Merge conflict in org.adempiere.ui/src/org/compiere/grid/CreateFromInvoice.java
+Auto-merging org.adempiere.ui/src/org/compiere/grid/CreateFromShipment.java
+Auto-merging org.compiere.db.oracle.provider/META-INF/MANIFEST.MF
+Auto-merging org.compiere.db.oracle.provider/src/org/compiere/db/DB_Oracle.java
+Auto-merging org.compiere.db.postgresql.provider/META-INF/MANIFEST.MF
+Auto-merging org.compiere.db.postgresql.provider/src/org/compiere/db/DB_PostgreSQL.java
+Auto-merging org.idempiere.felix.webconsole/META-INF/MANIFEST.MF
+Auto-merging org.idempiere.hazelcast.service/META-INF/MANIFEST.MF
+Auto-merging org.idempiere.test/src/org/idempiere/test/model/SalesOrderTest.java
+CONFLICT (content): Merge conflict in org.idempiere.test/src/org/idempiere/test/model/SalesOrderTest.java
+Auto-merging org.idempiere.webservices/WEB-INF/src/org/idempiere/adinterface/ModelADServiceImpl.java
+Auto-merging org.idempiere.webservices/WEB-INF/src/org/idempiere/adinterface/Process.java
+Auto-merging org.idempiere.webservices/WEB-INF/web.xml
+Automatic merge failed; fix conflicts and then commit the result.

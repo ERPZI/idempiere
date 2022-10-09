@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.adempiere.base.IGridTabExporter;
 import org.adempiere.base.equinox.EquinoxExtensionLocator;
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.adwindow.AbstractADWindowContent;
@@ -167,6 +166,7 @@ public class ExportAction implements EventListener<Event>
 			LayoutUtils.addSclass("dialog-footer", confirmPanel);
 			vb.appendChild(confirmPanel);
 			confirmPanel.addActionListener(this);
+			winExportFile.addEventListener(Events.ON_CANCEL, e -> onCancel());
 		}
 		displayExportTabSelection();
 		panel.getComponent().getParent().appendChild(winExportFile);
@@ -230,7 +230,7 @@ public class ExportAction implements EventListener<Event>
 	@Override
 	public void onEvent(Event event) throws Exception {
 		if(event.getTarget().getId().equals(ConfirmPanel.A_CANCEL))
-			winExportFile.onClose();
+			onCancel();
 		else if(event.getTarget().getId().equals(ConfirmPanel.A_OK))
 			exportFile();
 		else if (event.getName().equals(DialogEvents.ON_WINDOW_CLOSE)) {
@@ -261,6 +261,10 @@ public class ExportAction implements EventListener<Event>
 			FDialog.error(0, winExportFile, "FileInvalidExtension");
 			winExportFile.onClose();
 		}
+	}
+
+	private void onCancel() {
+		winExportFile.onClose();
 	}
 	
 	/**
@@ -337,7 +341,7 @@ public class ExportAction implements EventListener<Event>
 			media = new AMedia(exporter.getSuggestedFileName(panel.getActiveGridTab()), null, exporter.getContentType(), file, true);
 			Filedownload.save(media);
 		} catch (Exception e) {
-			throw new AdempiereException(e);
+			FDialog.error(0, winExportFile, e.getLocalizedMessage());
 		} finally {
 			if (winExportFile != null)
 				winExportFile.onClose();

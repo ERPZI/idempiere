@@ -65,6 +65,7 @@ import org.compiere.model.MPreference;
 import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MTable;
+import org.compiere.model.MTreeFavorite;
 import org.compiere.model.Query;
 import org.compiere.model.SystemIDs;
 import org.compiere.model.X_AD_CtxHelp;
@@ -173,6 +174,12 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	private Popup westPopup;
 	
 	private ToolBarButton westBtn;
+	
+    // For quick info optimization
+    private GridTab    gridTab;
+
+    // Right side Quick info is visible
+    private boolean    isQuickInfoOpen    = true;
 
     public DefaultDesktop()
     {
@@ -258,6 +265,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 			@Override
 			public void onEvent(Event event) throws Exception {
 				OpenEvent oe = (OpenEvent) event;
+                isQuickInfoOpen = oe.isOpen();
 				updateHelpCollapsedPreference(!oe.isOpen());
 				HtmlBasedComponent comp = windowContainer.getComponent();
 				if (comp != null) {
@@ -330,7 +338,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	eastPopup = new Popup();
         	ToolBarButton btn = new ToolBarButton();
         	btn.setIconSclass("z-icon-remove");
-        	btn.addEventListener(Events.ON_CLICK, evt -> eastPopup.close());
+        	btn.addEventListener(Events.ON_CLICK, evt -> {
+				eastPopup.close();
+				isQuickInfoOpen = false;
+			});
         	eastPopup.appendChild(btn);
         	btn.setStyle("position: absolute; top: 20px; right: 0px; padding: 2px 0px;");
         	eastPopup.setStyle("padding-top: 20px;");
@@ -338,6 +349,9 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	eastPopup.setPage(getComponent().getPage());
         	eastPopup.setHeight("100%");        	
         	helpController.setupFieldTooltip();
+        	eastPopup.addEventListener(Events.ON_OPEN, (OpenEvent oe) -> {
+				isQuickInfoOpen = oe.isOpen();
+			});
         	
         	westPopup = new Popup();        	
         	westPopup.setStyle("padding-top: 10px;");
@@ -395,14 +409,20 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        	
 	        };
 	        toolbar.appendChild(showHeader);
-	        showHeader.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
+	        if (ThemeManager.isUseFontIconForImage())
+	        	showHeader.setIconSclass("z-icon-ThreeLineMenu");
+			else
+				showHeader.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        showHeader.addEventListener(Events.ON_CLICK, this);
 	        showHeader.setSclass("window-container-toolbar-btn");
 	        showHeader.setVisible(false);
 	        
 	        max = new ToolBarButton();
 	        toolbar.appendChild(max);
-	        max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
+	        if (ThemeManager.isUseFontIconForImage())
+	        	max.setIconSclass("z-icon-Collapsing");
+			else
+				max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 	        max.addEventListener(Events.ON_CLICK, this);
 	        max.setSclass("window-container-toolbar-btn");
 		}
@@ -417,6 +437,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         contextHelp.setSclass("window-container-toolbar-btn context-help-btn");
         contextHelp.setTooltiptext(Util.cleanAmp(Msg.getElement(Env.getCtx(), "AD_CtxHelp_ID")));
         contextHelp.setVisible(!e.isVisible());
+        isQuickInfoOpen = e.isVisible();
         
         if (!mobile) {
 	        boolean headerCollapsed= pref.isPropertyBool(UserPreference.P_HEADER_COLLAPSED);
@@ -427,7 +448,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         
         if (mobile) {
 	        westBtn = new ToolBarButton();
-	        westBtn.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
+	        if (ThemeManager.isUseFontIconForImage())
+	        	westBtn.setIconSclass("z-icon-ThreeLineMenu");
+			else
+				westBtn.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        westBtn.addEventListener(Events.ON_CLICK, this);
 	        westBtn.setSclass("window-container-toolbar-btn");
 	        westBtn.setStyle("cursor: pointer; padding: 0px; margin: 0px;");
@@ -595,6 +619,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		{
 			pnlHead.invalidate();
 		}
+		
+		homeTab.invalidate();	
 	}
 
 	protected void setSidePopupWidth(Popup popup) {
@@ -642,6 +668,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         		if (mobile && eastPopup != null)
         		{
         			eastPopup.open(layout.getCenter(), "overlap_end");
+        			isQuickInfoOpen = true;
+            		updateHelpQuickInfo(gridTab);
         		}
         		else
         		{
@@ -650,6 +678,8 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        		LayoutUtils.removeSclass("slide", layout.getEast());
 	        		contextHelp.setVisible(false);
 	        		updateHelpCollapsedPreference(false);
+	        		isQuickInfoOpen = true;
+	        		updateHelpQuickInfo(gridTab);
         		}
         	}
         	else if (comp == westBtn)
@@ -718,7 +748,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	protected void restoreHeader() {
 		layout.getNorth().setVisible(true);
-		max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
+		if (ThemeManager.isUseFontIconForImage())
+        	max.setIconSclass("z-icon-Collapsing");
+		else
+			max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 		showHeader.setVisible(false);
 		pnlHead.detach();
 		headerContainer.appendChild(pnlHead);
@@ -728,7 +761,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	protected void collapseHeader() {
 		layout.getNorth().setVisible(false);
-		max.setImage(ThemeManager.getThemeResource(IMAGES_DOWNARROW_PNG));
+		if (ThemeManager.isUseFontIconForImage())
+        	max.setIconSclass("z-icon-Expanding");
+		else
+			max.setImage(ThemeManager.getThemeResource(IMAGES_DOWNARROW_PNG));
 		showHeader.setVisible(true);
 		pnlHead.detach();
 		if (headerPopup == null) 
@@ -805,7 +841,9 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 			sideController.onLogOut();
 			sideController = null;
 		}
-		layout.detach();
+		if (layout != null) {
+			layout.detach();
+		}
 		layout = null;
 		pnlHead = null;
 		max = null;
@@ -857,14 +895,12 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	//Implementation for Broadcast message
 	/**
-	 * @param eventManager
 	 */
 	public void bindEventManager() {
 		EventManager.getInstance().register(IEventTopics.BROADCAST_MESSAGE, this);
 	}
 
 	/**
-	 * @param eventManager
 	 */
 	public void unbindEventManager() {
 		EventManager.getInstance().unregister(this);
@@ -953,7 +989,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		Component window = getActiveWindow();
 		ADWindow adwindow = ADWindow.findADWindow(window);
 		if (adwindow != null) {
-			gridTab = adwindow.getADWindowContent().getActiveGridTab();
+            gridTab = adwindow.getADWindowContent().getActiveGridTab();
 		}
 		updateHelpQuickInfo(gridTab);
 	}
@@ -970,7 +1006,9 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	@Override
 	public void updateHelpQuickInfo(GridTab gridTab) {
-		helpController.renderQuickInfo(gridTab);
+        this.gridTab = gridTab;
+        if (isQuickInfoOpen)
+            helpController.renderQuickInfo(gridTab);
 	}
 
 	@Override
@@ -1048,13 +1086,13 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		if (isActionURL())  // IDEMPIERE-2334 vs IDEMPIERE-3000 - do not open windows when coming from an action URL
 			return;
 
-		StringBuilder sql = new StringBuilder("SELECT m.Action, COALESCE(m.AD_Window_ID, m.AD_Process_ID, m.AD_Form_ID, m.AD_Workflow_ID, m.AD_Task_ID, AD_InfoWindow_ID) ")
-		.append(" FROM AD_TreeBar tb")
-		.append(" INNER JOIN AD_Menu m ON (tb.Node_ID = m.AD_Menu_ID)")
-		.append(" WHERE tb.AD_Tree_ID = ").append(getMenuID())
-		.append(" AND tb.AD_User_ID = ").append(Env.getAD_User_ID(ctx))
-		.append(" AND tb.IsActive = 'Y' AND tb.LoginOpenSeqNo > 0")
-		.append(" ORDER BY tb.LoginOpenSeqNo");
+		StringBuilder sql = new StringBuilder("SELECT m.Action, COALESCE(m.AD_Window_ID, m.AD_Process_ID, m.AD_Form_ID, m.AD_Workflow_ID, m.AD_Task_ID, m.AD_InfoWindow_ID), m.AD_Menu_ID ")
+		.append(" FROM AD_Tree_Favorite_Node tfn ")
+		.append(" INNER JOIN AD_Menu m ON (tfn.AD_Menu_ID = m.AD_Menu_ID) ")
+		.append(" WHERE tfn.AD_Tree_Favorite_ID = ")
+		.append(MTreeFavorite.getFavoriteTreeID(Env.getAD_User_ID(Env.getCtx())))
+		.append(" AND tfn.IsActive = 'Y' AND tfn.LoginOpenSeqNo >= 0 ")
+		.append(" ORDER BY tfn.LoginOpenSeqNo ");
 
 		List<List<Object>> rows = DB.getSQLArrayObjectsEx(null, sql.toString());
 		if (rows != null && rows.size() > 0) {
@@ -1062,6 +1100,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 				String action = (String) row.get(0);
 				int recordID = ((BigDecimal) row.get(1)).intValue();
+				int menuID = ((BigDecimal) row.get(2)).intValue();
 
 				if (action.equals(MMenu.ACTION_Form)) {
 					Boolean access = MRole.getDefault().getFormAccess(recordID);
@@ -1076,7 +1115,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 				else if (action.equals(MMenu.ACTION_Process) || action.equals(MMenu.ACTION_Report)) {
 					Boolean access = MRole.getDefault().getProcessAccess(recordID);
 					if (access != null && access)
-						SessionManager.getAppDesktop().openProcessDialog(recordID, DB.getSQLValueStringEx(null, "SELECT IsSOTrx FROM AD_Menu WHERE AD_Menu_ID = ?", recordID).equals("Y"));
+						SessionManager.getAppDesktop().openProcessDialog(recordID, DB.getSQLValueStringEx(null, "SELECT IsSOTrx FROM AD_Menu WHERE AD_Menu_ID = ?", menuID).equals("Y"));
 				}
 				else if (action.equals(MMenu.ACTION_Task)) {
 					Boolean access = MRole.getDefault().getTaskAccess(recordID);

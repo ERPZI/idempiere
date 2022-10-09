@@ -96,11 +96,20 @@ public class PackInApplicationActivator extends AbstractActivator{
 			return;
 		}
 
+		MSession localSession = null;
 		try {
 			if (getDBLock()) {
 				//Create Session to be able to create records in AD_ChangeLog
-				if (Env.getContextAsInt(Env.getCtx(), "#AD_Session_ID") <= 0)
-					MSession.get(Env.getCtx(), true);
+				if (Env.getContextAsInt(Env.getCtx(), Env.AD_SESSION_ID) <= 0) {
+					localSession = MSession.get(Env.getCtx());
+					if(localSession == null) {
+						localSession = MSession.create(Env.getCtx());
+					} else {
+						localSession = new MSession(Env.getCtx(), localSession.getAD_Session_ID(), null);
+					}
+					localSession.setWebSession("PackInApplicationActivator");
+					localSession.saveEx();
+				}
 				for(File zipFile : fileArray) {
 					currentFile = zipFile;
 					if (!packIn(zipFile)) {
@@ -125,6 +134,8 @@ public class PackInApplicationActivator extends AbstractActivator{
 			addLog(Level.WARNING, e.getLocalizedMessage());
 		} finally {
 			releaseLock();
+			if (localSession != null)
+				localSession.logout();
 		}
 		
 		if (filesToProcess.size() > 0) {
@@ -188,7 +199,7 @@ public class PackInApplicationActivator extends AbstractActivator{
 					String message = "Installing " + fileName + " in client " + client.getValue() + "/" + client.getName();
 					statusUpdate(message);
 				}
-				Env.setContext(Env.getCtx(), "#AD_Client_ID", client.getAD_Client_ID());
+				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, client.getAD_Client_ID());
 				try {
 				    // call 2pack
 					if (service != null) {
@@ -204,7 +215,7 @@ public class PackInApplicationActivator extends AbstractActivator{
 					logger.log(Level.WARNING, "Pack in failed.", e);
 					return false;
 				} finally {
-					Env.setContext(Env.getCtx(), "#AD_Client_ID", 0);
+					Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, 0);
 				}
 				logger.warning(packinFile.getPath() + " installed");
 			}
@@ -335,7 +346,7 @@ public class PackInApplicationActivator extends AbstractActivator{
 	
 	protected void setupPackInContext() {
 		Properties serverContext = new Properties();
-		serverContext.setProperty("#AD_Client_ID", "0");
+		serverContext.setProperty(Env.AD_CLIENT_ID, "0");
 		ServerContext.setCurrentInstance(serverContext);
 	}
 

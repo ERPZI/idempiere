@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -404,7 +403,7 @@ public final class Fact
 	 *  Balance all segments.
 	 *  - For all balancing segments
 	 *      - For all segment values
-	 *          - If balance <> 0 create dueTo/dueFrom line
+	 *          - If balance &lt;&gt; 0 create dueTo/dueFrom line
 	 *              overwriting the segment value
 	 */
 	public void balanceSegments()
@@ -440,7 +439,6 @@ public final class Fact
 			{
 				FactLine line = (FactLine)m_lines.get(i);
 				Integer key = Integer.valueOf(line.getAD_Org_ID());
-			//	BigDecimal balance = line.getSourceBalance();
 				Balance oldBalance = (Balance)map.get(key);
 				if (oldBalance == null)
 				{
@@ -449,7 +447,6 @@ public final class Fact
 				}
 				else
 					oldBalance.add(line.getAmtSourceDr(), line.getAmtSourceCr());
-			//	log.info ("Key=" + key + ", Balance=" + balance + " - " + line);
 			}
 
 			//  Create entry for non-zero element
@@ -546,6 +543,7 @@ public final class Fact
 	//	log.fine(result.toString());
 		return result;
 	}	//	getAcctBalance
+
 	/**
 	 *  Balance Accounting Currency.
 	 *  If the accounting currency is not balanced,
@@ -604,7 +602,7 @@ public final class Fact
 			line.setPostingType (m_postingType);
 			line.setAD_Org_ID(m_doc.getAD_Org_ID());
 			line.setAccount (m_acctSchema, m_acctSchema.getCurrencyBalancing_Acct());
-						
+			
 			//  Amount
 			line.setAmtSource(m_doc.getC_Currency_ID(), Env.ZERO, Env.ZERO);
 			line.convert();
@@ -728,11 +726,6 @@ public final class Fact
 			//	No Distribution for this line
 			//AZ Goodwill
 			//The above "get" only work in GL Journal because it's using ValidCombination Account
-			//Old:
-			//if (distributions == null || distributions.length == 0)
-			//	continue;
-			//For other document, we try the followings (from FactLine):
-			//New:	
 			if (distributions == null || distributions.length == 0)
 			{
 				distributions = MDistribution.get (dLine.getCtx(), dLine.getC_AcctSchema_ID(),
@@ -868,7 +861,6 @@ public final class Fact
 		for (int i = 0; i < m_lines.size(); i++)
 		{
 			FactLine fl = (FactLine)m_lines.get(i);
-		//	log.fine("save - " + fl);
 			if (!fl.save(trxName))  //  abort on first error
 				return false;
 		}

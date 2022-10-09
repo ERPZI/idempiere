@@ -83,7 +83,7 @@ public class MSystem extends X_AD_System
 	}	//	get
 	
 	/** System - cached					*/
-	private static CCache<Integer,MSystem>	s_system = new CCache<Integer,MSystem>(Table_Name, 1, -1, true);
+	private static CCache<Integer,MSystem>	s_system = new CCache<Integer,MSystem>(Table_Name, 1, -1);
 	
 	/**************************************************************************
 	 * 	Default Constructor
@@ -352,9 +352,9 @@ public class MSystem extends X_AD_System
 		try
 		{
 			setDBInfo();
-			setInternalUsers();
 			if (isAllowStatistics())
 			{
+				setInternalUsers();
 				setStatisticsInfo(getStatisticsInfo(true));
 				setProfileInfo(getProfileInfo(true));
 			}
@@ -377,7 +377,7 @@ public class MSystem extends X_AD_System
 			+ "FROM AD_User u"
 			+ " INNER JOIN AD_User_Roles ur ON (u.AD_User_ID=ur.AD_User_ID) "
 			+ "WHERE u.AD_Client_ID<>11"			//	no Demo
-			+ " AND u.AD_User_ID NOT IN (0,100)";	//	no System/SuperUser
+			+ " AND u.AD_User_ID NOT IN (0,10,100)";	//	no System/SuperUser
 		int internalUsers = DB.getSQLValue(null, sql);
 		setSupportUnits(internalUsers);
 	}	//	setInternalUsers
@@ -437,7 +437,7 @@ public class MSystem extends X_AD_System
 				+ " || '.' || SYS_CONTEXT('USERENV','DB_DOMAIN') AS DBName "
 				+ "FROM DUAL";
 		//
-		return "SELECT NULL,NULL FROM AD_System WHERE AD_System_ID=-1";
+		return "SELECT NULL,NULL FROM DUAL WHERE 1=0";
 	}	//	getDBInfoSQL
 	
 	
@@ -448,15 +448,11 @@ public class MSystem extends X_AD_System
 	{
 		if (!CLogMgt.isLevelFine())
 			return;
-		//	OS
-	//	OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-	//	log.fine(os.getName() + " " + os.getVersion() + " " + os.getArch() 
-	//		+ " Processors=" + os.getAvailableProcessors());
+
 		//	Runtime
 		@SuppressWarnings("unused")
 		RuntimeMXBean rt = ManagementFactory.getRuntimeMXBean();
-		// log.fine(rt.getName() + " (" + rt.getVmVersion() + ") Up=" + TimeUtil.formatElapsed(rt.getUptime()));
-		//	Memory
+		
 		if (CLogMgt.isLevelFiner())
 		{
 			List<MemoryPoolMXBean> list = ManagementFactory.getMemoryPoolMXBeans();
@@ -465,29 +461,16 @@ public class MSystem extends X_AD_System
 			{
 				@SuppressWarnings("unused")
 				MemoryPoolMXBean pool = (MemoryPoolMXBean)it.next();
-				/*
-				log.finer(pool.getName() + " " + pool.getType() 
-					+ ": " + new CMemoryUsage(pool.getUsage()));
-				*/
 			}
 		}
 		else
 		{
 			@SuppressWarnings("unused")
 			MemoryMXBean memory = ManagementFactory.getMemoryMXBean();
-			// log.fine("VM: " + new CMemoryUsage(memory.getNonHeapMemoryUsage()));
-			// log.fine("Heap: " + new CMemoryUsage(memory.getHeapMemoryUsage()));
 		}
 		//	Thread
 		@SuppressWarnings("unused")
 		ThreadMXBean th = ManagementFactory.getThreadMXBean();
-		/*
-		log.fine("Threads=" + th.getThreadCount()
-			+ ", Peak=" + th.getPeakThreadCount()
-			+ ", Demons=" + th.getDaemonThreadCount()
-			+ ", Total=" + th.getTotalStartedThreadCount()
-		);
-		*/
 	}	//	info
 	
 	/*

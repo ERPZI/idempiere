@@ -146,8 +146,6 @@ public class MProductCategory extends X_M_Product_Category implements ImmutableP
 		super(ctx, M_Product_Category_ID, trxName);
 		if (M_Product_Category_ID == 0)
 		{
-		//	setName (null);
-		//	setValue (null);
 			setMMPolicy (MMPOLICY_FiFo);	// F
 			setPlannedMargin (Env.ZERO);
 			setIsDefault (false);
@@ -238,11 +236,7 @@ public class MProductCategory extends X_M_Product_Category implements ImmutableP
 	
 	/**
 	 *	Loop detection of product category tree.
-	 * @param productCategoryId 
-	 * @param newParentCategoryId 
-	 *
-	 *  @param newParentCategoryId New Parent Category
-	 *  @return "" or error message
+	 *  @return boolean
 	 */
 	public boolean hasLoopInTree ()
 	{

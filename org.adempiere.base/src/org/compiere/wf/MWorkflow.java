@@ -48,6 +48,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutablePOSupport;
 import org.idempiere.cache.ImmutablePOCache;
 
@@ -769,16 +770,28 @@ public class MWorkflow extends X_AD_Workflow implements ImmutablePOSupport
 			retValue = new MWFProcess (this, pi, trxName != null ? trxName : localTrx.getTrxName());
 			retValue.saveEx();
 			pi.setSummary(Msg.getMsg(getCtx(), "Processing"));
-			retValue.startWork();			
+			retValue.startWork();
 			if (localTrx != null)
 				localTrx.commit(true);
+			retValue.checkCloseActivities(trxName != null ? trxName : localTrx.getTrxName());
 		}
 		catch (Exception e)
 		{
 			if (localTrx != null)
 				localTrx.rollback();
 			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			pi.setSummary(e.getMessage(), true);
+			StringBuilder msg = new StringBuilder();
+			if (retValue != null)
+			{
+				StateEngine state = retValue.getState();
+				if (!Util.isEmpty(retValue.getProcessMsg()) && (state.isTerminated() || state.isAborted()))
+				{
+					msg.append(retValue.getProcessMsg());
+					msg.append("\n");
+				}				
+			}
+			msg.append(e.getMessage());
+			pi.setSummary(msg.toString(), true);
 			retValue = null;
 		}
 		finally 
@@ -995,9 +1008,9 @@ public class MWorkflow extends X_AD_Workflow implements ImmutablePOSupport
 		
 		
 		/**
-		Env.setContext(Env.getCtx(), "#AD_Client_ID ", "11");
-		Env.setContext(Env.getCtx(), "#AD_Org_ID ", "11");
-		Env.setContext(Env.getCtx(), "#AD_User_ID ", "100");
+		Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, "11");
+		Env.setContext(Env.getCtx(), Env.AD_ORG_ID, "11");
+		Env.setContext(Env.getCtx(), Env.AD_USER_ID, "100");
 		//
 		int AD_Workflow_ID = 115;			//	Requisition WF
 		int M_Requsition_ID = 100;
@@ -1014,7 +1027,7 @@ public class MWorkflow extends X_AD_Workflow implements ImmutablePOSupport
 	
 	/**
 	 * Get AD_Workflow_ID for given M_Product_ID
-	 * @param M_Product_ID
+	 * @param product
 	 * @return AD_Workflow_ID
 	 */
 	public static int getWorkflowSearchKey(MProduct product)

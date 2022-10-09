@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Field
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 public interface I_AD_Field 
 {
@@ -231,6 +231,19 @@ public interface I_AD_Field
 	  * Number of column for a box of field
 	  */
 	public int getColumnSpan();
+
+    /** Column name ColumnSQL */
+    public static final String COLUMNNAME_ColumnSQL = "ColumnSQL";
+
+	/** Set Column SQL.
+	  * Virtual Column (r/o)
+	  */
+	public void setColumnSQL (String ColumnSQL);
+
+	/** Get Column SQL.
+	  * Virtual Column (r/o)
+	  */
+	public String getColumnSQL();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -704,13 +717,17 @@ public interface I_AD_Field
 
 	/** Set Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public void setVFormat (String VFormat);
 
 	/** Get Value Format.
 	  * Format of the value;
- Can contain fixed format elements, Variables: "_lLoOaAcCa09"
+ Can contain fixed format elements, Variables: &quot;
+_lLoOaAcCa09&quot;
+
 	  */
 	public String getVFormat();
 

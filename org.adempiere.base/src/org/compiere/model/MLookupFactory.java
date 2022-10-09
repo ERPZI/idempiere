@@ -39,14 +39,14 @@ import org.compiere.util.Language;
  *
  * @author Teo Sarca, SC ARHIPAC SERVICE SRL
  *		<li>BF [ 1734394 ] MLookupFactory.getLookup_TableDirEmbed is not translated
- *		<li>BF [ 1714261 ] MLookupFactory: TableDirEmbed -> TableEmbed not supported
+ *		<li>BF [ 1714261 ] MLookupFactory: TableDirEmbed -&gt; TableEmbed not supported
  *		<li>BF [ 1672820 ] Sorting should be language-sensitive
  *		<li>BF [ 1739530 ] getLookup_TableDirEmbed error when BaseColumn is sql query
  *		<li>BF [ 1739544 ] getLookup_TableEmbed error for self referencing references
  *		<li>BF [ 1817768 ] Isolate hardcoded table direct columns
  * @author Teo Sarca
  * 		<li>BF [ 2933367 ] Virtual Column Identifiers are not working
- * 			https://sourceforge.net/tracker/?func=detail&aid=2933367&group_id=176962&atid=879332
+ * 			https://sourceforge.net/p/adempiere/bugs/2291/
  * @author Carlos Ruiz, GlobalQSS
  *		<li>BF [ 2561593 ] Multi-tenant problem with webui
  */
@@ -55,9 +55,9 @@ public class MLookupFactory
 	/**	Logging								*/
 	private static CLogger		s_log = CLogger.getCLogger(MLookupFactory.class);
 	/** Table Reference Cache				*/
-	private static CCache<String,MLookupInfo> s_cacheRefTable = new CCache<String,MLookupInfo>(I_AD_Ref_Table.Table_Name, 30, 60);	//	1h
+	private static CCache<String,MLookupInfo> s_cacheRefTable = new CCache<String,MLookupInfo>(I_AD_Ref_Table.Table_Name, 30, CCache.DEFAULT_EXPIRE_MINUTE);	//	1h
 	/** List Reference Cache				*/
-	private static CCache<String,MLookupInfo> s_cacheRefList = new CCache<String,MLookupInfo>(I_AD_Ref_List.Table_Name, 30, 60);	//	1h
+	private static CCache<String,MLookupInfo> s_cacheRefList = new CCache<String,MLookupInfo>(I_AD_Ref_List.Table_Name, 30, CCache.DEFAULT_EXPIRE_MINUTE);	//	1h
 
 
 	/**
@@ -256,36 +256,14 @@ public class MLookupFactory
 
 		else
 		{
-			/*
-			local_validationCode = Env.parseContext (ctx, WindowNo, info.ValidationCode, true);
-			if (local_validationCode.length() == 0)   //  returns "" if not all variables were parsed
-				info.IsValidated = false;
-			else
-				info.IsValidated = true;
-			*/
 			info.IsValidated = false;
 		}
-		/*
-		//	Add Local Validation
-		if (local_validationCode.length() != 0)
-		{
-			//jz handle no posOrder case
-			if (posOrder > 0)
-				info.Query = info.Query.substring(0, posOrder)
-					+ (hasWhere ? " AND " : " WHERE ") + local_validationCode
-					+ info.Query.substring(posOrder);
-			else
-				info.Query = info.Query
-				+ (hasWhere ? " AND " : " WHERE ") + local_validationCode;
-		}*/
 
 		//	Add Security
 		if (needToAddSecurity)
 			info.Query = MRole.getDefault(ctx, false).addAccessSQL(info.Query,
 				info.TableName, MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
-		//
-	//	s_log.finest("Query:  " + info.Query);
-	//	s_log.finest("Direct: " + info.QueryDirect);
+
 		return info;
 	}	//	getLookupInfo
 
@@ -314,8 +292,9 @@ public class MLookupFactory
 			if (s_log.isLoggable(Level.FINEST)) s_log.finest("Cache: " + retValue);
 			return retValue.cloneIt();
 		}
+
+		boolean orderByValue = MReference.get(AD_Reference_Value_ID).isOrderByValue();
 		
-		String byValue = DB.getSQLValueString(null, "SELECT IsOrderByValue FROM AD_Reference WHERE AD_Reference_ID = ? ", AD_Reference_Value_ID);
 		StringBuilder realSQL = new StringBuilder ("SELECT NULL, AD_Ref_List.Value,");
 		MClient client = MClient.get(Env.getCtx());
 		StringBuilder AspFilter = new StringBuilder();
@@ -344,7 +323,7 @@ public class MLookupFactory
 		String directSql = realSQL.toString() + " AND AD_Ref_List.Value=?";
 				
 		realSQL.append(AspFilter.toString());
-		if ("Y".equals(byValue))
+		if (orderByValue)
 			realSQL.append(" ORDER BY 2");
 		else
 			realSQL.append(" ORDER BY 3"); // sort by name/translated name - teo_sarca, [ 1672820 ]
@@ -429,12 +408,11 @@ public class MLookupFactory
 		String	KeyColumn = null, DisplayColumn = null, TableName = null, WhereClause = null, OrderByClause = null;
 		String displayColumnSQL = null;
 		boolean IsTranslated = false, isValueDisplayed = false;
-		//boolean isSOTrx = !"N".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
+
 		int ZoomWindow = 0;
 		int ZoomWindowPO = 0;
 		int overrideZoomWindow = 0;
 		int infoWindowId = 0;
-		//int AD_Table_ID = 0;
 		boolean loaded = false;
 
 		PreparedStatement pstmt = null;
@@ -455,7 +433,6 @@ public class MLookupFactory
 				OrderByClause = rs.getString(7);
 				ZoomWindow = rs.getInt(8);
 				ZoomWindowPO = rs.getInt(9);
-				//AD_Table_ID = rs.getInt(10);
 				displayColumnSQL = rs.getString(11);
 				if (displayColumnSQL != null && displayColumnSQL.length() > 0 && (displayColumnSQL.startsWith("@SQL=") || displayColumnSQL.startsWith("@SQLFIND=")))
 					displayColumnSQL = "NULL";
@@ -514,6 +491,7 @@ public class MLookupFactory
 			}
 		}
 
+		String separator = MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, "_", Env.getAD_Client_ID(Env.getCtx()));
 		String lookupDisplayColumn = null;
 		//	Translated
 		if (IsTranslated && !Env.isBaseLanguage(language, TableName))
@@ -522,7 +500,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID"))
 				realSQL.append("NULL,");
 			if (isValueDisplayed)
-				realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '-' || ");
+				realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
 			if (displayColumnSQL != null && displayColumnSQL.trim().length() > 0)
 				realSQL.append("NVL(").append(displayColumnSQL).append(",'-1')");
 			else {
@@ -550,7 +528,7 @@ public class MLookupFactory
 			if (KeyColumn.endsWith("_ID"))
 				realSQL.append("NULL,");
 			if (isValueDisplayed)
-				realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '-' || ");
+				realSQL.append("NVL(").append(TableName).append(".Value,'-1') || '").append(separator).append("' || ");
 			if (displayColumnSQL != null && displayColumnSQL.trim().length() > 0)
 				realSQL.append("NVL(").append(displayColumnSQL).append(",'-1')");
 			else {
@@ -686,6 +664,11 @@ public class MLookupFactory
 			pstmt = null;
 		}
 
+		boolean showID = DisplayColumn.equals(TableName+"_ID");
+		if (showID) {
+			return getLookup_TableDirEmbed(language, DisplayColumn, BaseTable, BaseColumn);
+		}
+
 		// If it's self referencing then use other alias - teo_sarca [ 1739544 ]
 		if (TableName.equals(BaseTable)) {
 			TableNameAlias = TableName + "1";
@@ -696,10 +679,12 @@ public class MLookupFactory
 
 		StringBuilder embedSQL = new StringBuilder("SELECT ");
 
-		if (isValueDisplayed)
-			embedSQL.append(TableNameAlias).append(".Value||'-'||");
+		if (isValueDisplayed) {
+			String separator = MSysConfig.getValue(MSysConfig.IDENTIFIER_SEPARATOR, "_", Env.getAD_Client_ID(Env.getCtx()));
+			embedSQL.append(TableNameAlias).append(".Value||'").append(separator).append("'||");
+		}
 
-		MColumn columnDisplay = new MColumn(Env.getCtx(), columnDisplay_ID, null);
+		MColumn columnDisplay = MColumn.get(Env.getCtx(), columnDisplay_ID);
 		if (columnDisplay.isVirtualUIColumn() || columnDisplay.isVirtualSearchColumn())
 		{
 			s_log.warning("Virtual UI Column must not be used as display");
@@ -777,7 +762,6 @@ public class MLookupFactory
 
 		String KeyColumn = MQuery.getZoomColumnName(ColumnName);
 		String TableName = MQuery.getZoomTableName(ColumnName);
-		//boolean isSOTrx = !"N".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));
 		int ZoomWindow = 0;
 		int ZoomWindowPO = 0;
 
@@ -928,9 +912,16 @@ public class MLookupFactory
 			//  List
 			else if (DisplayType.isList(ldc.DisplayType))
 			{
-				String embeddedSQL = getLookup_ListEmbed(language, ldc.AD_Reference_ID, ldc.ColumnName);
-				if (embeddedSQL != null)
-					displayColumn.append("(").append(embeddedSQL).append(")");
+				if (ldc.DisplayType == DisplayType.ChosenMultipleSelectionList)
+				{
+					displayColumn.append(columnSQL);
+				}
+				else
+				{
+					String embeddedSQL = getLookup_ListEmbed(language, ldc.AD_Reference_ID, ldc.ColumnName);
+					if (embeddedSQL != null)
+						displayColumn.append("(").append(embeddedSQL).append(")");
+				}
 			}
 			//	ID
 			else if (DisplayType.isID(ldc.DisplayType))

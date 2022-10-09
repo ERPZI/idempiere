@@ -24,7 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -36,6 +36,7 @@ import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * Archive Model
@@ -59,28 +60,15 @@ public class MArchive extends X_AD_Archive {
 	 * @return archives
 	 */
 	public static MArchive[] get(Properties ctx, String whereClause) {
-		ArrayList<MArchive> list = new ArrayList<MArchive>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM AD_Archive WHERE AD_Client_ID=?");
-		if (whereClause != null && whereClause.length() > 0)
+		StringBuilder sql = new StringBuilder("AD_Client_ID=?");
+		if (!Util.isEmpty(whereClause))
 			sql.append(whereClause);
-		sql.append(" ORDER BY Created");
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, Env.getAD_Client_ID(ctx));
-			rs = pstmt.executeQuery();
-			while (rs.next())
-				list.add(new MArchive(ctx, rs, null));
-		} catch (Exception e) {
-			s_log.log(Level.SEVERE, sql.toString(), e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+
+		List<MArchive> list = new Query(ctx, Table_Name, sql.toString(),null)
+				.setParameters(Env.getAD_Client_ID(ctx))
+				.setOrderBy(COLUMNNAME_Created)
+				.list();
+
 		if (list.size() == 0)
 			s_log.fine(sql.toString());
 		else
@@ -153,8 +141,12 @@ public class MArchive extends X_AD_Archive {
 	 * @param trxName
 	 */
 	private void initArchiveStoreDetails(Properties ctx, String trxName) {
-		MClientInfo clientInfo = MClientInfo.get(ctx, getAD_Client_ID());
-		provider=new MStorageProvider(ctx, clientInfo.getStorageArchive_ID(), trxName);		
+		if (is_new()) {
+			MClientInfo clientInfo = MClientInfo.get(ctx, getAD_Client_ID());
+			setStorageProvider(MStorageProvider.get(ctx, clientInfo.getStorageArchive_ID()));
+		} else {
+			setStorageProvider(MStorageProvider.get(ctx, getAD_StorageProvider_ID()));
+		}
 	}
 
 	/**
@@ -248,7 +240,7 @@ public class MArchive extends X_AD_Archive {
 		if (this.getRecord_ID() > 0) {
 			path.append(this.getRecord_ID()).append(File.separator);
 		}
-		// path = path + this.get_ID() + ".pdf";
+
 		return path.toString();
 	}
 
@@ -298,10 +290,11 @@ public class MArchive extends X_AD_Archive {
 	/**
 	 * Set Storage Provider
 	 * Used temporarily for the process to migrate storage provider
-	 * @param Storage provider
+	 * @param p Storage provider
 	 */
 	public void setStorageProvider(MStorageProvider p) {
 		provider = p;
+		setAD_StorageProvider_ID(p.getAD_StorageProvider_ID());
 	}
 
 	/**
@@ -361,5 +354,4 @@ public class MArchive extends X_AD_Archive {
 		
 		return destZipFile;
 	}
-
 } // MArchive

@@ -59,7 +59,7 @@ public class HTMLElement extends PrintElement
 	
 	/**************************************************************************
 	 * 	Layout and Calculate Size.
-	 * 	Set p_width & p_height
+	 * 	Set p_width and p_height
 	 * 	@return Size
 	 */
 	protected boolean calculateSize()

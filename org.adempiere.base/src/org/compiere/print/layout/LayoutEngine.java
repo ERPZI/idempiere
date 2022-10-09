@@ -37,7 +37,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +48,8 @@ import javax.print.Doc;
 import javax.print.DocFlavor;
 import javax.print.attribute.DocAttributeSet;
 
-import org.compiere.model.MClientInfo;
+import org.adempiere.base.Core;
 import org.compiere.model.MQuery;
-import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.PrintInfo;
@@ -80,6 +78,8 @@ import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.idempiere.print.IPrintHeaderFooter;
+import org.idempiere.print.StandardHeaderFooter;
 
 /**
  *	Adempiere Print Engine.
@@ -98,10 +98,10 @@ import org.compiere.util.ValueNamePair;
  *				<li>FR [ 1966406 ] Report Engine: AD_PInstance_Logs should be displayed
  *				<li>BF [ 2487307 ] LayoutEngine: NPE when Barcode field is null
  *				<li>BF [ 2828893 ] Problem with NextPage in Print Format
- *					https://sourceforge.net/tracker/?func=detail&atid=879332&aid=2828893&group_id=176962
+ *					https://sourceforge.net/p/adempiere/bugs/2001/
  * @author victor.perez@e-evolution.com, e-Evolution
  * 				<li>BF [ 2011567 ] Implement Background Image for Document printed 
- * 				<li>http://sourceforge.net/tracker/index.php?func=detail&aid=2011567&group_id=176962&atid=879335
+ * 				<li>https://sourceforge.net/p/adempiere/feature-requests/477/
  * @author Michael Judd (Akuna Ltd)
  * 				<li>BF [ 2695078 ] Country is not translated on invoice
  * 
@@ -191,7 +191,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private int 				m_docSet = 1;
 	/** Page Info as x of Y*/
 	private int					ZI_pageNo = 1, ZI_totalPages =1;
-	private static String		ZI_pageInfo ="";
+	protected static String		ZI_pageInfo ="";
 	/**Krc-16/11/17 List contains all elements marked as a secondary header*/
 	private ArrayList<PrintElement> 	elementList = new ArrayList<PrintElement>();
 	/**Count for starting a new page from a table and a content*/
@@ -286,11 +286,24 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		boolean tempHasLayout = m_hasLayout;
 		m_hasLayout = false;	//	do not start re-calculation
 		MPrintPaper mPaper = MPrintPaper.get(format.getAD_PrintPaper_ID());
-		if (m_format.isStandardHeaderFooter())
-			setPaper(mPaper.getCPaper());
-		else
+		if (m_format.isStandardHeaderFooter()) {
+			StandardHeaderFooter headerFooter = new StandardHeaderFooter();
+			setPaper(mPaper.getCPaper(), 
+					headerFooter.getHeaderHeight(), headerFooter.getFooterHeight());
+		}
+		else if (m_format.getAD_PrintHeaderFooter_ID() > 0) {
+			IPrintHeaderFooter printHeaderFooter = Core.getPrintHeaderFooter(m_format.getAD_PrintHeaderFooter());
+			if (printHeaderFooter != null) {
+				setPaper(mPaper.getCPaper(), 
+						printHeaderFooter.getHeaderHeight(), printHeaderFooter.getFooterHeight());
+			} else {
+				setPaper(mPaper.getCPaper(),
+						m_format.getHeaderMargin(), m_format.getFooterMargin());
+			}
+		} else {
 			setPaper(mPaper.getCPaper(),
-				m_format.getHeaderMargin(), m_format.getFooterMargin());
+					m_format.getHeaderMargin(), m_format.getFooterMargin());
+		}
 		m_hasLayout = tempHasLayout;
 		//
 		m_printColor = MPrintColor.get(getCtx(), format.getAD_PrintColor_ID());
@@ -465,8 +478,20 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	{
 		//	Header/Footer
 		m_headerFooter = new HeaderFooter(m_printCtx);
-		if (!m_format.isForm() && m_format.isStandardHeaderFooter())
-			createStandardHeaderFooter();
+		if (!m_format.isForm()) {
+			if (m_format.isStandardHeaderFooter()) {
+				StandardHeaderFooter headerFooter = new StandardHeaderFooter();
+				headerFooter.createHeaderFooter(m_format, m_headerFooter, m_header, m_footer, m_query);
+			} else if (m_format.getAD_PrintHeaderFooter_ID() > 0) {
+				IPrintHeaderFooter printHeaderFooter = Core.getPrintHeaderFooter(m_format.getAD_PrintHeaderFooter());
+				if (printHeaderFooter != null) {
+					printHeaderFooter.createHeaderFooter(m_format, m_headerFooter, m_header, m_footer, m_query);
+				} else {
+					if (log.isLoggable(Level.WARNING)) 
+						log.warning("Print Header/Footer not found, AD_PrintHeaderFooter_ID="+m_format.getAD_PrintHeaderFooter_ID());
+				}
+			}
+		}
 		//
 		m_pageNo = 0;
 		m_pages.clear();
@@ -727,8 +752,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	}	//	getPages
 
 	/**
-	 * 	Get Header & Footer info
-	 * 	@return Header&Footer
+	 * 	Get Header and Footer info
+	 * 	@return Header and Footer
 	 */
 	public HeaderFooter getHeaderFooter()
 	{
@@ -1025,77 +1050,6 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	}	//	isYspaceFor
 	
 	/**************************************************************************
-	 *	Create Standard Header/Footer
-	 *  <pre>
-	 *  title           C        Page x of x
-	 *  Copyright      who         date&time
-	 *  </pre>
-	 */
-	private void createStandardHeaderFooter()
-	{
-		MClientInfo ci = MClientInfo.get(Env.getCtx());
-		PrintElement element = null;
-		if (ci.getLogoReport_ID() > 0) {
-			element = new ImageElement(ci.getLogoReport_ID(), false);
-		} else {
-			element = new ImageElement(org.compiere.Adempiere.getImageLogoSmall(true));	//	48x15
-		}
-	//	element = new ImageElement(org.compiere.Adempiere.getImageLogo());	//	100x30
-		element.layout(48, 15, false, MPrintFormatItem.FIELDALIGNMENTTYPE_LeadingLeft);
-		element.setLocation(m_header.getLocation());
-		m_headerFooter.addElement(element);
-		//
-		MPrintTableFormat tf = m_format.getTableFormat();
-		Font font = tf.getPageHeader_Font();
-		Color color = tf.getPageHeaderFG_Color();
-		//
-		element = new StringElement("@*ReportName@", font, color, null, true);
-		element.layout (m_header.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_Center);
-		element.setLocation(m_header.getLocation());
-		m_headerFooter.addElement(element);
-		//
-		//
-		element = new StringElement("@Page@ @*Page@ @of@ @*PageCount@", font, color, null, true);
-		element.layout (m_header.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_TrailingRight);
-		element.setLocation(m_header.getLocation());
-		m_headerFooter.addElement(element);
-
-		//	Footer
-		font = tf.getPageFooter_Font();
-		color = tf.getPageFooterFG_Color();
-		//
-		element = new StringElement(Env.getStandardReportFooterTrademarkText(), font, color, null, true);
-		/** You can use the following to customize reports for your product name  */
-	//	element = new StringElement(Adempiere.NAME, font, color, null, true);
-		element.layout (m_footer.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_LeadingLeft);
-		Point ft = m_footer.getLocation();
-		ft.y += m_footer.height - element.getHeight() - 2;	//	2pt above min
-		element.setLocation(ft);
-		m_headerFooter.addElement(element);
-		//
-		String s = MSysConfig.getValue(MSysConfig.ZK_FOOTER_SERVER_MSG, "", Env.getAD_Client_ID(Env.getCtx()));
-		if (Util.isEmpty(s, true))
-			s = "@*Header@";
-		element = new StringElement(s, font, color, null, true);
-		element.layout (m_footer.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_Center);
-		element.setLocation(ft);
-		m_headerFooter.addElement(element);
-		//
-		String timestamp = "";
-		s = MSysConfig.getValue(MSysConfig.ZK_FOOTER_SERVER_DATETIME_FORMAT, Env.getAD_Client_ID(Env.getCtx()));
-		if (!Util.isEmpty(s, true))
-			timestamp = new SimpleDateFormat(s).format(System.currentTimeMillis());
-		else
-			timestamp = "@*CurrentDateTime@";
-		element = new StringElement(timestamp, font, color, null, true);
-		element.layout (m_footer.width, 0, true, MPrintFormatItem.FIELDALIGNMENTTYPE_TrailingRight);
-		element.setLocation(ft);
-		m_headerFooter.addElement(element);
-	}	//	createStandardHeaderFooter
-
-
-	
-	/**************************************************************************
 	 * 	Layout Form.
 	 *  For every Row, loop through the Format
 	 *  and calculate element size and position.
@@ -1248,6 +1202,13 @@ public class LayoutEngine implements Pageable, Printable, Doc
 						element.setMaxWidth(maxWidth);
 					}
 				}
+				/** START DEVCOFFEE: Script print format type **/
+				else if (item.getPrintFormatType().equals(MPrintFormatItem.PRINTFORMATTYPE_Script))
+				{
+					element = createStringElement (item.getName(),
+							item.getAD_PrintColor_ID (), item.getAD_PrintFont_ID (),
+							maxWidth, item.getMaxHeight (), item.isHeightOneLine (), alignment, true);
+				}
 				else	//	(item.isTypeText())		//**	Text
 				{
 					String printName = item.getPrintName (m_format.getLanguage ());
@@ -1377,6 +1338,13 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//initial
 		isShSet = false;
 		//
+		// COF #10540 - avoid error when generating PDF due to inconsistency in the configuration
+		if (item.getAD_PrintFormatChild_ID() <= 0)
+		{
+			log.log(Level.SEVERE, "Included format not configured. AD_PrintFormat_ID = " + item.getAD_PrintFormat_ID() + ", AD_PrintFormatItem_ID=" + item.getAD_PrintFormatItem_ID());
+			return element;
+		}
+
 		MPrintFormat format = MPrintFormat.get (getCtx(), item.getAD_PrintFormatChild_ID(), false);
 		format.setLanguage(m_format.getLanguage());
 		if (m_format.isTranslationView())
@@ -1384,7 +1352,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		int AD_Column_ID = item.getAD_Column_ID();
 		if (log.isLoggable(Level.INFO)) log.info(format + " - Item=" + item.getName() + " (" + AD_Column_ID + ")");
 		//
-		Object obj = data.getNode(Integer.valueOf(AD_Column_ID));
+		Object obj = data.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
 		//	Object obj = data.getNode(item.getColumnName());	//	slower
 		if (obj == null)
 		{
@@ -1550,7 +1518,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		String FieldAlignmentType, boolean isForm)
 	{
 		//	Get Data
-		Object obj = m_data.getNode(Integer.valueOf(item.getAD_Column_ID()));
+		Object obj = m_data.getNodeByPrintFormatItemId(item.getAD_PrintFormatItem_ID());
 		if (obj == null)
 			return null;
 		else if (obj instanceof PrintDataElement)
@@ -1666,7 +1634,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 */
 	private PrintElement createImageElement (MPrintFormatItem item, PrintData printData)
 	{
-		Object obj = printData.getNode(Integer.valueOf(item.getAD_Column_ID())); 
+		Object obj = printData.getNodeByPrintFormatItem(item); 
 		if (obj == null)
 			return null;
 		else if (obj instanceof PrintDataElement)
@@ -1705,7 +1673,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	private PrintElement createBarcodeElement (MPrintFormatItem item, PrintData printData)
 	{
 		//	Get Data
-		Object obj = printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
+		Object obj = printData.getNodeByPrintFormatItem(item);
 		if (obj == null)
 			return null;
 		else if (obj instanceof PrintDataElement)
@@ -1787,11 +1755,24 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		nextPages.x += xOffset;
 		nextPages.width -= xOffset;
 		//	Column count
+		List<Integer> instanceAttributeList = new ArrayList<>();
+		List<MPrintFormatItem> instanceAttributeItems = new ArrayList<>();
 		int columnCount = 0;
 		for (int c = 0; c < format.getItemCount(); c++)
 		{
 			if (format.getItem(c).isPrinted())
+			{
+				if (format.getItem(c).isTypeField())
+				{
+					if(format.getItem(c).isPrintInstanceAttributes())
+					{
+						instanceAttributeList.add(columnCount);
+						instanceAttributeItems.add(format.getItem(c));
+						continue;
+					}
+				}
 				columnCount++;
+			}
 		}
 		//	System.out.println("Cols=" + cols);
 
@@ -1810,6 +1791,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		for (int c = 0; c < format.getItemCount(); c++)
 		{
 			MPrintFormatItem item = format.getItem(c);
+			if (instanceAttributeItems.contains(item))
+				continue;
 			if (item.isPrinted())
 			{
 				if (item.isNextLine() && item.getBelowColumn() != 0)
@@ -1935,6 +1918,8 @@ public class LayoutEngine implements Pageable, Printable, Doc
 			{
 				Serializable columnElement = null;
 				MPrintFormatItem item = format.getItem(c);
+				if (instanceAttributeItems.contains(item))
+					continue;
 				Serializable dataElement = null;
 				if (item.isPrinted())	//	Text Columns
 				{
@@ -1966,11 +1951,9 @@ public class LayoutEngine implements Pageable, Printable, Doc
 					{
 						columnElement = item.getPrintName(format.getLanguage());	
 					}
-					else if (item.isTypeField())
+					else if (item.isTypeField() || item.getPrintFormatType().equals(MPrintFormatItem.PRINTFORMATTYPE_Script))
 					{
-						Object obj = null;
-						if (item.getAD_Column_ID() > 0) // teo_sarca, [ 1673542 ]
-							obj = printData.getNode(Integer.valueOf(item.getAD_Column_ID()));
+						Object obj = printData.getNodeByPrintFormatItem(item);
 						if (obj == null)
 							;
 						else if (obj instanceof PrintDataElement)
@@ -2005,6 +1988,33 @@ public class LayoutEngine implements Pageable, Printable, Doc
 		//		System.out.println("No PK " + printData);
 		}	//	for all rows
 
+		//add asi attributes columns
+		List<InstanceAttributeData> asiElements = new ArrayList<>();
+		if (instanceAttributeList.size() > 0) {
+			for(int i = 0;  i < instanceAttributeItems.size(); i ++) {
+				MPrintFormatItem item = instanceAttributeItems.get(i);
+				int columnIndex = instanceAttributeList.get(i);
+				InstanceAttributeData asiElement = new InstanceAttributeData(item, columnIndex);
+				asiElement.readAttributesData(printData);
+				asiElements.add(asiElement);
+			}
+			
+			int columnOffset = 0;
+			for (InstanceAttributeData element : asiElements) {
+				TableProperties tableProperties = new TableProperties(columnHeader, columnMaxWidth, columnMaxHeight, fixedWidth, colSuppressRepeats, 
+						columnJustification);
+				int currentCount = columnHeader.length;
+				element.updateTable(elements, tableProperties, columnOffset);
+				columnHeader = tableProperties.getColumnHeader();
+				columnMaxWidth = tableProperties.getColumnMaxWidth();
+				columnMaxHeight = tableProperties.getColumnMaxHeight();
+				fixedWidth = tableProperties.getFixedWidth();
+				colSuppressRepeats = tableProperties.getColSuppressRepeats();
+				columnJustification = tableProperties.getColumnJustification();
+				columnOffset += columnHeader.length - currentCount;
+			}
+		}
+		
 		//
 		TableElement table = new TableElement(columnHeader,
 			columnMaxWidth, columnMaxHeight, columnJustification,
@@ -2035,7 +2045,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	 */
 	private PrintElement layoutParameter ()
 	{
-		if (m_query == null || !m_query.isActive())
+		if (m_query == null || !m_query.isActive() || (m_query.getReportProcessQuery() != null && !m_query.getReportProcessQuery().isActive()))
 			return null;
 		//
 		ParameterElement pe = new ParameterElement(m_query, m_printCtx, m_format.getTableFormat());
@@ -2205,7 +2215,7 @@ public class LayoutEngine implements Pageable, Printable, Doc
 	
 	/**
 	 * 
-	 * @param PrintInfo info
+	 * @param info PrintInfo
 	 */
 	public void setPrintInfo(PrintInfo info)
 	{

@@ -36,7 +36,8 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 	/**
 	 * 	Default Constructor
 	 *	@param ctx context
-	 *	@param M_InventoryLine_ID line
+	 *	@param A_Depreciation_Workfile_ID line
+	 *  @param trxName
 	 */
 	public MDepreciationWorkfile (Properties ctx, int A_Depreciation_Workfile_ID, String trxName)
 	{
@@ -106,21 +107,6 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		}
 		return asset.getAssetServiceDate();
 	}
-	
-	
-	/**	Gets asset's class
-	 *	@return asset class id
-	 */
-	/* commented out by @win
-	public int getA_Asset_Class_ID()
-	{
-		MAsset asset = getAsset();
-		if (asset == null) {
-			return 0;
-		}
-		return asset.getA_Asset_Class_ID();
-	}
-	*/ // end comment by @win
 	
 	/**	After save
 	 *	@param	newRecord
@@ -340,7 +326,7 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 	 * @param A_Asset_ID
 	 * @param postingType
 	 * @param trxName
-	 * @param Account Schema
+	 * @param C_AcctSchema_ID Account Schema
 	 * @return workfile
 	 * @see #get(Properties, int, String, String)
 	 */
@@ -435,32 +421,6 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		}
 		newCost = newCost.add(deltaAmt);
 		newQty = newQty.add(deltaQty);
-		
-		// TODO: crashes if I cancel an Issue:
-//		if (newQty.signum() < 0) {
-//			throw new ArhRuntimeException(getCtx(), "@A_QTY_Current@ < 0");
-//		}
-
-		//
-		// There must be verified that the remaining value to be greater than the amount diminished
-		// total devaluation because if the entire asset value (A_Asset_Cost) must be brought to 0. 
-//		if (deltaAmt.signum() < 0)
-//		{
-//			BigDecimal remainingAmt_C = getRemainingCost(null, false);
-//			if (remainingAmt_C.compareTo(deltaAmt.negate()) < 0)
-//			{
-//				throw new ArhRuntimeException(getCtx(), "@A_Asset_Remaining@ < @DeltaAmt@")
-//					.addInfo("@A_Asset_Cost@=", getA_Asset_Cost())
-//					.addInfo("@A_Accumulated_Depr@=", getA_Accumulated_Depr());
-//			}
-//			BigDecimal remainingAmt_F = getRemainingCost(null, true);
-//			if (remainingAmt_F.compareTo(deltaAmt.negate()) < 0)
-//			{
-//				throw new ArhRuntimeException(getCtx(), "@A_Asset_Remaining_F@ < @DeltaAmt@")
-//					.addInfo("@A_Asset_Cost=@", getA_Asset_Cost())
-//					.addInfo("@A_Accumulated_Depr@=", getA_Accumulated_Depr_F());
-//			}
-//		}
 		
 		setA_Asset_Cost(newCost);
 		setA_QTY_Current(newQty);
@@ -644,8 +604,6 @@ public class MDepreciationWorkfile extends X_A_Depreciation_Workfile
 		// TODO: teo_sarca: need to evaluate what happens when we change Depreciation method !!!
 		MDepreciation depreciation_C = MDepreciation.get(getCtx(), assetacct.getA_Depreciation_ID());
 		MDepreciation depreciation_F = MDepreciation.get(getCtx(), assetacct.getA_Depreciation_F_ID());
-		//~ int offset_C = depreciation_C.getFixMonthOffset();
-		//~ int offset_F = depreciation_F.getFixMonthOffset();
 		int offset_C = 0, offset_F = 0;
 		
 		BigDecimal assetCost = getActualCost();

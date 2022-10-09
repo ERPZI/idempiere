@@ -20,11 +20,14 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.process.UUIDGenerator;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
+import org.idempiere.expression.logic.LogicEvaluator;
 
 
 /**
@@ -87,13 +90,8 @@ public class MProcessPara extends X_AD_Process_Para implements ImmutablePOSuppor
 		super (ctx, AD_Process_Para_ID, trxName);
 		if (AD_Process_Para_ID == 0)
 		{
-		//	setAD_Process_ID (0);	Parent
-		//	setName (null);
-		//	setColumnName (null);
-			
 			setFieldLength (0);
 			setSeqNo (0);
-		//	setAD_Reference_ID (0);
 			setIsCentrallyMaintained (true);
 			setIsRange (false);
 			setIsMandatory (false);
@@ -309,6 +307,10 @@ public class MProcessPara extends X_AD_Process_Para implements ImmutablePOSuppor
 				" FROM AD_Process_Para_Trl WHERE AD_Process_Para_ID = ? ";
 		count = DB.executeUpdateEx(sql, new Object[] { getAD_Process_Para_ID(), source.getAD_Process_Para_ID() }, get_TrxName());
 		if (log.isLoggable(Level.FINE))log.log(Level.FINE, "AD_Process_Para_Trl inserted: " + count);
+		if (DB.isGenerateUUIDSupported())
+			DB.executeUpdateEx("UPDATE AD_Process_Para_Trl SET AD_Process_Para_Trl_UU=generate_uuid() WHERE AD_Process_Para_Trl_UU IS NULL", get_TrxName());
+		else
+			UUIDGenerator.updateUUID(MColumn.get(getCtx(), "AD_Process_Para_Trl", "AD_Process_Para_Trl_UU"), get_TrxName());		
 		
 	}
 
@@ -333,6 +335,18 @@ public class MProcessPara extends X_AD_Process_Para implements ImmutablePOSuppor
 			setHelp (element.getHelp());
 		}
 
+		//validate logic expression
+		if (newRecord || is_ValueChanged(COLUMNNAME_ReadOnlyLogic)) {
+			if (isActive() && !Util.isEmpty(getReadOnlyLogic(), true) && !getReadOnlyLogic().startsWith("@SQL=")) {
+				LogicEvaluator.validate(getReadOnlyLogic());
+			}
+		}
+		if (newRecord || is_ValueChanged(COLUMNNAME_DisplayLogic)) {
+			if (isActive() && !Util.isEmpty(getDisplayLogic(), true) && !getDisplayLogic().startsWith("@SQL=")) {
+				LogicEvaluator.validate(getDisplayLogic());
+			}
+		}
+		
 		return true;
 	}	//	beforeSave
 

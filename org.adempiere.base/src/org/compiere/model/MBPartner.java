@@ -78,7 +78,6 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 			template.setSO_CreditLimit (Env.ZERO);
 			template.setSO_CreditUsed (Env.ZERO);
 			template.setTotalOpenBalance (Env.ZERO);
-		//	s_template.setRating(null);
 			//
 			template.setActualLifeTimeValue(Env.ZERO);
 			template.setPotentialLifeTimeValue(Env.ZERO);
@@ -158,7 +157,7 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 	/**
 	 * 	Get BPartner with Value
 	 *	@param ctx context 
-	 *	@param Value value
+	 *  @param C_BPartner_ID
 	 *	@return BPartner or null
 	 */
 	public static MBPartner get (Properties ctx, int C_BPartner_ID)
@@ -170,7 +169,7 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 	/**
 	 * 	Get BPartner with Value in a transaction
 	 *	@param ctx context 
-	 *	@param Value value
+	 *  @param C_BPartner_ID
 	 * 	@param trxName transaction
 	 *	@return BPartner or null
 	 */
@@ -261,10 +260,6 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 		}
 		if (C_BPartner_ID == 0)
 		{
-		//	setValue ("");
-		//	setName ("");
-		//	setName2 (null);
-		//	setDUNS("");
 			//
 			setIsCustomer (true);
 			setIsProspect (true);
@@ -362,6 +357,11 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 		this.m_group = copy.m_group != null ? new MBPGroup(ctx, copy.m_group, trxName) : null;
 	}
 
+	public MBPartner(Properties ctx, int C_BPartner_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_BPartner_ID, trxName, virtualColumns);
+	}
+
+
 	/** Users							*/
 	protected MUser[]				m_contacts = null;
 	/** Addressed						*/
@@ -438,7 +438,7 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 			return m_contacts;
 		//
 		ArrayList<MUser> list = new ArrayList<MUser>();
-		final String sql = "SELECT * FROM AD_User WHERE C_BPartner_ID=? ORDER BY AD_User_ID";
+		final String sql = "SELECT * FROM AD_User WHERE C_BPartner_ID=? AND IsActive = 'Y' ORDER BY AD_User_ID";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try
@@ -674,9 +674,6 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 		if (m_primaryAD_User_ID == null)
 		{
 			MUser[] users = getContacts(false);
-		//	for (int i = 0; i < users.length; i++)
-		//	{
-		//	}
 			if (m_primaryAD_User_ID == null && users.length > 0)
 				setPrimaryAD_User_ID(users[0].getAD_User_ID());
 		}
@@ -995,7 +992,6 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 			StringBuilder msgacc = new StringBuilder("p.C_BP_Group_ID=").append(getC_BP_Group_ID());
 			insert_Accounting("C_BP_Customer_Acct", "C_BP_Group_Acct", msgacc.toString());
 			insert_Accounting("C_BP_Vendor_Acct", "C_BP_Group_Acct",msgacc.toString());
-			// insert_Accounting("C_BP_Employee_Acct", "C_AcctSchema_Default", null);
 		}
 		if (newRecord || is_ValueChanged(COLUMNNAME_Value))
 			update_Tree(MTree_Base.TREETYPE_BPartner);

@@ -283,9 +283,9 @@ public class CalloutPayment extends CalloutEngine
 	} // docType
 
 	/**
-	 * Payment_Amounts. Change of: - IsOverUnderPayment -> set OverUnderAmt to 0 -
-	 * C_Currency_ID, C_ConvesionRate_ID -> convert all - PayAmt, DiscountAmt,
-	 * WriteOffAmt, OverUnderAmt -> PayAmt make sure that add up to
+	 * Payment_Amounts. Change of: - IsOverUnderPayment -&gt; set OverUnderAmt to 0 -
+	 * C_Currency_ID, C_ConvesionRate_ID -&gt; convert all - PayAmt, DiscountAmt,
+	 * WriteOffAmt, OverUnderAmt -&gt; PayAmt make sure that add up to
 	 * InvoiceOpenAmt
 	 * @param ctx context
 	 * @param WindowNo current Window No
@@ -350,7 +350,7 @@ public class CalloutPayment extends CalloutEngine
 				}
 				else if (baseCurrencyRate.signum() == 0)
 				{
-					int baseCurrencyId = Env.getContextAsInt(ctx, "$C_Currency_ID");
+					int baseCurrencyId = Env.getContextAsInt(ctx, Env.C_CURRENCY_ID);
 					Timestamp dateAcct = (Timestamp) mTab.getValue(I_C_Payment.COLUMNNAME_DateAcct);
 					baseCurrencyRate = MConversionRate.getRate(C_Currency_ID, baseCurrencyId, dateAcct, C_ConversionType_ID, AD_Client_ID, AD_Org_ID);
 					if (baseCurrencyRate == null) 
@@ -595,7 +595,7 @@ public class CalloutPayment extends CalloutEngine
 
 		if (colName.equals(I_C_Payment.COLUMNNAME_C_Currency_ID) || colName.equals(I_C_Payment.COLUMNNAME_PayAmt) 
 				|| colName.equals(I_C_Payment.COLUMNNAME_IsOverrideCurrencyRate) ) {
-			int baseCurrencyId = Env.getContextAsInt(ctx, "$C_Currency_ID");
+			int baseCurrencyId = Env.getContextAsInt(ctx, Env.C_CURRENCY_ID);
 			if (baseCurrencyId == C_Currency_ID) {
 				mTab.setValue(I_C_Payment.COLUMNNAME_IsOverrideCurrencyRate, false);
 				mTab.setValue(I_C_Payment.COLUMNNAME_CurrencyRate, null);

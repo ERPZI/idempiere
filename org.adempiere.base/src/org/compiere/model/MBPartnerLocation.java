@@ -29,9 +29,7 @@ import org.compiere.util.Env;
  * @version $Id: MBPartnerLocation.java,v 1.3 2006/07/30 00:51:03 jjanke Exp $
  * @author Teo Sarca, www.arhipac.ro <li>FR [ 2788465 ]
  *         MBPartnerLocation.getForBPartner method add trxName
- *         https://sourceforge
- *         .net/tracker/index.php?func=detail&aid=2788465&group_id
- *         =176962&atid=879335
+ *         https://sourceforge.net/p/adempiere/feature-requests/715/
  */
 public class MBPartnerLocation extends X_C_BPartner_Location {
 	/**
@@ -158,6 +156,10 @@ public class MBPartnerLocation extends X_C_BPartner_Location {
 		this.m_unique = copy.m_unique;
 	}
 
+	public MBPartnerLocation(Properties ctx, int C_BPartner_Location_ID, String trxName, String... virtualColumns) {
+		super(ctx, C_BPartner_Location_ID, trxName, virtualColumns);
+	}
+
 	/** Cached Location */
 	private MLocation m_location = null;
 	/** Unique Name */
@@ -269,7 +271,7 @@ public class MBPartnerLocation extends X_C_BPartner_Location {
 				getAD_Client_ID(), getAD_Org_ID());
 		if (m_unique < 0 || m_unique > 4)
 			m_unique = 0;
-		if (m_uniqueName != null) { // && m_uniqueName.equals(".")) {
+		if (m_uniqueName != null) { 
 			// default
 			m_uniqueName = null;
 			makeUnique(address);
@@ -286,7 +288,6 @@ public class MBPartnerLocation extends X_C_BPartner_Location {
 				if (location.getC_BPartner_Location_ID() == get_ID())
 					continue;
 				if (m_uniqueName.equals(location.getName())) {
-					// m_uniqueName = null;
 					m_unique++;
 					makeUnique(address);
 					unique = false;

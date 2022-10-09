@@ -35,21 +35,19 @@
       this.timeout = timeout;
       this.ajaxOptions.data = { dtid: this.desktop.id };
       this.ajaxOptions.timeout = this.timeout;
-      this.ajaxOptions.url = zk.ajaxURI("/comet", {au: true,desktop:this.desktop.id,ignoreSession:false}),
+      this.ajaxOptions.url = zk.ajaxURI("/comet", {au: true,desktop:this.desktop.id,ignoreSession:true}),
       this.trace = trace;
       var me = this;
       this.ajaxOptions.error = function(jqxhr, textStatus, errorThrown) {
     	  if (me.trace)
-    		  console.log("error: " + textStatus + " dtid: " + me.desktop.id + " errorThrown: " + errorThrown);
+
+    		  console.log("error: " + textStatus + " dtid: " + me.desktop.id + " errorThrown: " + errorThrown + " status: " + jqxhr.status);
     	  if (textStatus != "timeout" && textStatus != "abort" && errorThrown != "SessionNotFound") {
-	          if (typeof console == "object") {
-	        	  console.error(textStatus);
-	              console.error(errorThrown);
-	          }
+	          console.error("error: " + textStatus + " errorThrown: " + errorThrown + " status: " + jqxhr.status);
 	          me.failures += 1;
     	  }
       };
-      this.ajaxOptions.success = function(data) {
+      this.ajaxOptions.success = function() {
     	  if (me.trace)
     		  console.log("success" + " dtid: " + me.desktop.id);
           zAu.cmd0.echo(this.desktop);
@@ -69,9 +67,12 @@
       };
     },
     _schedule: function() {
-      if (this.failures < 20) {
+      if (this.failures < 3) {
+		var d = this.delay;
+		if (this._req && (this._req.status == 0 || this._req.status == 400))
+			d = 500;
     	this._req = null;
-        setTimeout(this.proxy(this._send), this.delay);
+        setTimeout(this.proxy(this._send), d);
       } else {
         this.stop();
         jawwa.atmosphere.serverNotAvailable();

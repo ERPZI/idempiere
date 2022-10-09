@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_PaySelection
  *  @author iDempiere (generated) 
- *  @version Release 8.2
+ *  @version Release 9
  */
 public interface I_C_PaySelection 
 {
@@ -223,6 +223,15 @@ public interface I_C_PaySelection
 
 	/** Get Process Now	  */
 	public boolean isProcessing();
+
+    /** Column name ReversePreparePayment */
+    public static final String COLUMNNAME_ReversePreparePayment = "ReversePreparePayment";
+
+	/** Set Reverse Prepare Payment	  */
+	public void setReversePreparePayment (String ReversePreparePayment);
+
+	/** Get Reverse Prepare Payment	  */
+	public String getReversePreparePayment();
 
     /** Column name TotalAmt */
     public static final String COLUMNNAME_TotalAmt = "TotalAmt";
