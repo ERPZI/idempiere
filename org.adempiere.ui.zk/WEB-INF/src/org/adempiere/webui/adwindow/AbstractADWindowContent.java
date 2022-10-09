@@ -67,6 +67,8 @@ import org.adempiere.webui.event.ActionListener;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ToolbarListener;
 import org.adempiere.webui.exception.ApplicationException;
+import org.adempiere.webui.factory.InfoManager;
+import org.adempiere.webui.info.InfoWindow;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.panel.WAttachment;
@@ -357,8 +359,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         /**
          * Window Tabs
          */
-    	if (query != null && query.getZoomTableName() != null && query.getZoomColumnName() != null
-				&& query.getZoomValue() instanceof Integer && (Integer)query.getZoomValue() > 0)
+        if (query != null && query.getZoomTableName() != null && query.getZoomColumnName() != null)
     	{
     		if (!query.getZoomTableName().equalsIgnoreCase(gridWindow.getTab(0).getTableName()))
     		{
@@ -2214,9 +2215,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	private void doOnFind() {
 		//  Gets Fields from AD_Field_v
         GridField[] findFields = adTabbox.getSelectedGridTab().getFields();
-        if (getCurrentFindWindow() == null || !getCurrentFindWindow().validate(adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getName(),
-            adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getTableName(),
-            adTabbox.getSelectedGridTab().getWhereExtended(), findFields, 1, adTabbox.getSelectedGridTab().getAD_Tab_ID())) {
+        if (!isCurrentFindWindowValid()) {
         	if (!getFindWindow(findFields))
         		return;
         }
@@ -2276,6 +2275,22 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
         getComponent().getParent().appendChild(getCurrentFindWindow());
         showBusyMask(getCurrentFindWindow());                
         LayoutUtils.openEmbeddedWindow(toolbar, getCurrentFindWindow(), "after_start");
+	}
+	
+	/**
+	 * Validates if the current FindWindow corresponds to the actve tab and record  
+	 * @return true if the current find window is good to use
+	 */
+	private boolean isCurrentFindWindowValid() {
+        GridField[] findFields = adTabbox.getSelectedGridTab().getFields();
+		return getCurrentFindWindow() != null && getCurrentFindWindow().validate(adTabbox.getSelectedGridTab().getWindowNo(), 
+				adTabbox.getSelectedGridTab().getName(),
+	            adTabbox.getSelectedGridTab().getAD_Table_ID(), 
+	            adTabbox.getSelectedGridTab().getTableName(),
+	            adTabbox.getSelectedGridTab().getWhereExtended(), 
+	            findFields, 
+	            1, 
+	            adTabbox.getSelectedGridTab().getAD_Tab_ID());
 	}
 
 	@Override
@@ -2484,6 +2499,10 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 
 		if (!retValue)
 		{
+			if (CLogger.peekError() == null && ! wasChanged && callback != null) {
+				callback.onCallback(true);
+				return;
+			}
 			showLastError();
 			if (callback != null)
 				callback.onCallback(false);
@@ -3019,10 +3038,7 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	public void doOnQueryChange() {
 		//  Gets Fields from AD_Field_v
 		GridField[] findFields = adTabbox.getSelectedGridTab().getFields();
-		if (getCurrentFindWindow() == null || !getCurrentFindWindow().validate(adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getName(),
-				adTabbox.getSelectedGridTab().getAD_Table_ID(), adTabbox.getSelectedGridTab().getTableName(),
-				adTabbox.getSelectedGridTab().getWhereExtended(), findFields, 1, adTabbox.getSelectedGridTab().getAD_Tab_ID())) {
-
+		if (!isCurrentFindWindowValid()) {
         	if (!getFindWindow(findFields))
         		return;
 		}
@@ -3392,13 +3408,13 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		 *  Start Process ----
 		 */
 
-		if (logger.isLoggable(Level.CONFIG)) logger.config("Process_ID=" + wButton.getProcess_ID() + ", Record_ID=" + record_ID);
+		if (logger.isLoggable(Level.CONFIG)) logger.config("Process_ID=" + wButton.getProcess_ID() + ", InfoWindow_ID=" + wButton.getInfoWindow_ID() + ", Record_ID=" + record_ID);
 
-		if (wButton.getProcess_ID() == 0)
+		if (wButton.getProcess_ID() == 0 && wButton.getInfoWindow_ID() == 0)
 		{
 			if (isProcessMandatory)
 			{
-				FDialog.error(curWindowNo, null, null, Msg.parseTranslation(ctx, "@NotFound@ @AD_Process_ID@"));
+				FDialog.error(curWindowNo, null, null, Msg.parseTranslation(ctx, "@NotFound@ @AD_Process_ID@ @AD_InfoWindow_ID@"));
 			}
 			return;
 		}
@@ -3412,14 +3428,20 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 				@Override
 				public void onCallback(Boolean result) {
 					if (result) {
-						executeButtonProcess0(wButton, startWOasking, table_ID, record_ID);
+						if (wButton.getInfoWindow_ID() > 0)
+							executionButtonInfoWindow0(wButton);
+						else
+							executeButtonProcess0(wButton, startWOasking, table_ID, record_ID);
 					}
 				}
 			});
 		}
 		else
 		{
-			executeButtonProcess0(wButton, startWOasking, table_ID, record_ID);
+			if (wButton.getInfoWindow_ID() > 0)
+				executionButtonInfoWindow0(wButton);
+			else
+				executeButtonProcess0(wButton, startWOasking, table_ID, record_ID);
 		}
 	}
 
@@ -3525,6 +3547,63 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 		}
 	}
 
+	private void executionButtonInfoWindow0(final IProcessButton wButton) {
+		IADTabpanel adtabPanel = null;
+		if (adTabbox.getSelectedGridTab().isQuickForm())
+		{
+			adtabPanel = this.getADTab().getSelectedTabpanel();
+		}
+		else
+		{
+			adtabPanel = findADTabpanel(wButton);
+		}
+		if (adtabPanel == null)
+			return;
+			
+		GridTab gridTab = adtabPanel.getGridTab();		
+		if (gridTab == null)
+			return;
+		
+		InfoWindow infoWindow = InfoManager.create(gridTab.getWindowNo(), wButton.getInfoWindow_ID(), (String)null);
+		infoWindow.setAttribute(Window.MODE_KEY, Mode.OVERLAPPED);
+		infoWindow.setCloseAfterExecutionOfProcess(true);		
+		infoWindow.setBorder("normal");
+		infoWindow.setClosable(true);
+		infoWindow.moveProcessButtonsToBeforeRight();
+		int height = ClientInfo.get().desktopHeight;
+		int width = ClientInfo.get().desktopWidth;
+		if (width <= ClientInfo.MEDIUM_WIDTH)
+		{
+			ZKUpdateUtil.setWidth(infoWindow, "100%");
+			ZKUpdateUtil.setHeight(infoWindow, "100%");
+		}
+		else
+		{
+			height = height * 85 / 100;
+    		width = width * 80 / 100;
+    		ZKUpdateUtil.setWidth(infoWindow, width + "px");
+    		ZKUpdateUtil.setHeight(infoWindow, height + "px");
+		}
+		infoWindow.setContentStyle("overflow: auto");
+		
+		infoWindow.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, AdempiereIdGenerator.escapeId(infoWindow.getTitle()));
+		infoWindow.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				hideBusyMask();
+				if (!infoWindow.isCancelled())
+					onRefresh(true, false);
+			}
+		});
+		infoWindow.setZindex(1000);
+		infoWindow.setMaximizable(true);
+		infoWindow.setSizable(true);
+		getComponent().getParent().appendChild(infoWindow);
+		showBusyMask(infoWindow);
+		LayoutUtils.openOverlappedWindow(getComponent(), infoWindow, "middle_center");	
+		infoWindow.focusToFirstEditor();
+	}
+	
 	/**
 	 * @param event
 	 * @see ActionListener#actionPerformed(ActionEvent)
@@ -3753,9 +3832,8 @@ public abstract class AbstractADWindowContent extends AbstractUIPart implements 
 	}
 	
 	public boolean getFindWindow(GridField[] findFields) {
-		FindWindow findWindow;
-		if (tabFindWindowHashMap.get(adTabbox.getSelectedGridTab()) != null) {
-			findWindow = tabFindWindowHashMap.get(adTabbox.getSelectedGridTab());
+		FindWindow findWindow = getCurrentFindWindow();
+		if (findWindow != null && isCurrentFindWindowValid()) {
 			toolbar.setSelectedUserQuery(findWindow.getAD_UserQuery_ID());
 		} else {
 			findWindow = new FindWindow (adTabbox.getSelectedGridTab().getWindowNo(), adTabbox.getSelectedGridTab().getTabNo(), adTabbox.getSelectedGridTab().getName(),

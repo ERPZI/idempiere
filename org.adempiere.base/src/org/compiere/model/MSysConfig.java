@@ -44,7 +44,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3851200335563922376L;
+	private static final long serialVersionUID = 8498064757856658699L;
 
 	public static final String ADDRESS_VALIDATION = "ADDRESS_VALIDATION";
     public static final String ALERT_SEND_ATTACHMENT_AS_XLS = "ALERT_SEND_ATTACHMENT_AS_XLS";
@@ -119,7 +119,9 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String LOCATION_MAPS_URL_PREFIX = "LOCATION_MAPS_URL_PREFIX";
     public static final String LOCATION_MAX_CITY_ROWS = "LOCATION_MAX_CITY_ROWS";
     public static final String LOGIN_HELP_URL = "LOGIN_HELP_URL";
+	public static final String LOGIN_PREFIX_SEPARATOR = "LOGIN_PREFIX_SEPARATOR";
     public static final String LOGIN_SHOW_RESETPASSWORD = "LOGIN_SHOW_RESETPASSWORD";
+    public static final String LOGIN_WITH_TENANT_PREFIX = "LOGIN_WITH_TENANT_PREFIX";
     public static final String MAIL_DONT_SEND_TO_ADDRESS = "MAIL_DONT_SEND_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_ADDRESS = "MAIL_SEND_BCC_TO_ADDRESS";
     public static final String MAIL_SEND_BCC_TO_FROM = "MAIL_SEND_BCC_TO_FROM";
@@ -162,6 +164,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String SYSTEM_NATIVE_SEQUENCE = "SYSTEM_NATIVE_SEQUENCE";
     public static final String TOP_MARGIN_PIXELS_FOR_HEADER = "TOP_MARGIN_PIXELS_FOR_HEADER";
     public static final String TRACE_ALL_TRX_CONNECTION_GET = "TRACE_ALL_TRX_CONNECTION_GET";
+	public static final String TRX_AUTOSET_DISPLAY_NAME = "TRX_AUTOSET_DISPLAY_NAME";
     public static final String TWOPACK_COMMIT_DDL = "2PACK_COMMIT_DDL";
     public static final String TWOPACK_HANDLE_TRANSLATIONS = "2PACK_HANDLE_TRANSLATIONS";
     public static final String USE_EMAIL_FOR_LOGIN = "USE_EMAIL_FOR_LOGIN";
