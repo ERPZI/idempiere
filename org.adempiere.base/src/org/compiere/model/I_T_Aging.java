@@ -107,6 +107,21 @@ public interface I_T_Aging
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
+    /** Column name C_BPartner_Location_ID */
+    public static final String COLUMNNAME_C_BPartner_Location_ID = "C_BPartner_Location_ID";
+
+	/** Set Partner Location.
+	  * Identifies the (ship to) address for this Business Partner
+	  */
+	public void setC_BPartner_Location_ID (int C_BPartner_Location_ID);
+
+	/** Get Partner Location.
+	  * Identifies the (ship to) address for this Business Partner
+	  */
+	public int getC_BPartner_Location_ID();
+
+	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
+
     /** Column name C_BP_Group_ID */
     public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
 
@@ -596,10 +611,12 @@ public interface I_T_Aging
     /** Column name ZI_Due361_Plus */
     public static final String COLUMNNAME_ZI_Due361_Plus = "ZI_Due361_Plus";
 
-	/** Set Due > 361	  */
+	/** Set Due &gt;
+ 361	  */
 	public void setZI_Due361_Plus (BigDecimal ZI_Due361_Plus);
 
-	/** Get Due > 361	  */
+	/** Get Due &gt;
+ 361	  */
 	public BigDecimal getZI_Due361_Plus();
 
     /** Column name ZI_Due91_120 */
@@ -641,10 +658,12 @@ public interface I_T_Aging
     /** Column name ZI_PastDue361_Plus */
     public static final String COLUMNNAME_ZI_PastDue361_Plus = "ZI_PastDue361_Plus";
 
-	/** Set Past Due > 361	  */
+	/** Set Past Due &gt;
+ 361	  */
 	public void setZI_PastDue361_Plus (BigDecimal ZI_PastDue361_Plus);
 
-	/** Get Past Due > 361	  */
+	/** Get Past Due &gt;
+ 361	  */
 	public BigDecimal getZI_PastDue361_Plus();
 
     /** Column name ZI_PastDue91_120 */
