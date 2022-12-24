@@ -228,8 +228,10 @@ public class MElementValue extends X_C_ElementValue implements ImmutablePOSuppor
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		if (getAD_Org_ID() != 0)
-			setAD_Org_ID(0);
+		//MPo, 24/12/2022
+		//Remove Org=* force to allow chart of accounts by organization
+		//if (getAD_Org_ID() != 0)
+		//	setAD_Org_ID(0);
 		//
 		// Transform to summary level account
 		if (!newRecord && isSummary() && is_ValueChanged(COLUMNNAME_IsSummary))
