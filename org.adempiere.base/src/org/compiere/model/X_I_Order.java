@@ -33,7 +33,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220116L;
+	private static final long serialVersionUID = 20230611L;
 
     /** Standard Constructor */
     public X_I_Order (Properties ctx, int I_Order_ID, String trxName)
@@ -211,13 +211,59 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_BPartnerValue);
 	}
 
+	/** Set BP Name.
+		@param BPName BP Name
+	*/
+	public void setBPName (String BPName)
+	{
+		set_Value (COLUMNNAME_BPName, BPName);
+	}
+
+	/** Get BP Name.
+		@return BP Name	  */
+	public String getBPName()
+	{
+		return (String)get_Value(COLUMNNAME_BPName);
+	}
+
+	/** Set BP Name2.
+		@param BPName2 BP Name2
+	*/
+	public void setBPName2 (String BPName2)
+	{
+		set_Value (COLUMNNAME_BPName2, BPName2);
+	}
+
+	/** Get BP Name2.
+		@return BP Name2	  */
+	public String getBPName2()
+	{
+		return (String)get_Value(COLUMNNAME_BPName2);
+	}
+
+	/** Set Branch Key.
+		@param BranchValue Key of the Branch
+	*/
+	public void setBranchValue (String BranchValue)
+	{
+		set_Value (COLUMNNAME_BranchValue, BranchValue);
+	}
+
+	/** Get Branch Key.
+		@return Key of the Branch
+	  */
+	public String getBranchValue()
+	{
+		return (String)get_Value(COLUMNNAME_BranchValue);
+	}
+
 	public org.compiere.model.I_C_Activity getC_Activity() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Activity)MTable.get(getCtx(), org.compiere.model.I_C_Activity.Table_ID)
 			.getPO(getC_Activity_ID(), get_TrxName());
 	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID Business Activity
 	*/
 	public void setC_Activity_ID (int C_Activity_ID)
@@ -228,7 +274,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID()
@@ -876,6 +922,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
+	/** Set Element Value Key.
+		@param ElementValueValue Key of the Element Value
+	*/
+	public void setElementValueValue (String ElementValueValue)
+	{
+		set_Value (COLUMNNAME_ElementValueValue, ElementValueValue);
+	}
+
+	/** Get Element Value Key.
+		@return Key of the Element Value
+	  */
+	public String getElementValueValue()
+	{
+		return (String)get_Value(COLUMNNAME_ElementValueValue);
+	}
+
 	/** Set EMail Address.
 		@param EMail Electronic Mail Address
 	*/
@@ -985,6 +1047,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	public String getI_Order_UU()
 	{
 		return (String)get_Value(COLUMNNAME_I_Order_UU);
+	}
+
+	/** Set ISO Currency Code.
+		@param ISO_Code Three letter ISO 4217 Code of the Currency
+	*/
+	public void setISO_Code (String ISO_Code)
+	{
+		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
+	}
+
+	/** Get ISO Currency Code.
+		@return Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code()
+	{
+		return (String)get_Value(COLUMNNAME_ISO_Code);
 	}
 
 	/** Set Sales Transaction.
@@ -1154,6 +1232,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** Set Org Key.
+		@param OrgValue Key of the Organization
+	*/
+	public void setOrgValue (String OrgValue)
+	{
+		set_Value (COLUMNNAME_OrgValue, OrgValue);
+	}
+
+	/** Get Org Key.
+		@return Key of the Organization
+	  */
+	public String getOrgValue()
+	{
+		return (String)get_Value(COLUMNNAME_OrgValue);
+	}
+
 	/** Set Payment Term Key.
 		@param PaymentTermValue Key of the Payment Term
 	*/
@@ -1221,6 +1315,25 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return bd;
 	}
 
+	/** Set Price.
+		@param PriceEntered Price Entered - the price based on the selected/base UoM
+	*/
+	public void setPriceEntered (BigDecimal PriceEntered)
+	{
+		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
+	}
+
+	/** Get Price.
+		@return Price Entered - the price based on the selected/base UoM
+	  */
+	public BigDecimal getPriceEntered()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Processed.
 		@param Processed The document has been processed
 	*/
@@ -1282,6 +1395,25 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_ProductValue);
 	}
 
+	/** Set Quantity.
+		@param QtyEntered The Quantity Entered is based on the selected UoM
+	*/
+	public void setQtyEntered (BigDecimal QtyEntered)
+	{
+		set_Value (COLUMNNAME_QtyEntered, QtyEntered);
+	}
+
+	/** Get Quantity.
+		@return The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_QtyEntered);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Ordered Quantity.
 		@param QtyOrdered Ordered Quantity
 	*/
@@ -1317,6 +1449,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_RegionName);
 	}
 
+	/** Set Sales Rep Name.
+		@param RepName Name of the Sales Representative
+	*/
+	public void setRepName (String RepName)
+	{
+		set_Value (COLUMNNAME_RepName, RepName);
+	}
+
+	/** Get Sales Rep Name.
+		@return Name of the Sales Representative
+	  */
+	public String getRepName()
+	{
+		return (String)get_Value(COLUMNNAME_RepName);
+	}
+
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
@@ -1343,6 +1491,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set ShipperName.
+		@param ShipperName Name of the Shipper
+	*/
+	public void setShipperName (String ShipperName)
+	{
+		set_Value (COLUMNNAME_ShipperName, ShipperName);
+	}
+
+	/** Get ShipperName.
+		@return Name of the Shipper
+	  */
+	public String getShipperName()
+	{
+		return (String)get_Value(COLUMNNAME_ShipperName);
 	}
 
 	/** Set SKU.
@@ -1396,6 +1560,21 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_TaxIndicator);
 	}
 
+	/** Set UOM Name.
+		@param UOMName UOM Name
+	*/
+	public void setUOMName (String UOMName)
+	{
+		set_Value (COLUMNNAME_UOMName, UOMName);
+	}
+
+	/** Get UOM Name.
+		@return UOM Name	  */
+	public String getUOMName()
+	{
+		return (String)get_Value(COLUMNNAME_UOMName);
+	}
+
 	/** Set UPC/EAN.
 		@param UPC Bar Code (Universal Product Code or its superset European Article Number)
 	*/
@@ -1410,5 +1589,76 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	public String getUPC()
 	{
 		return (String)get_Value(COLUMNNAME_UPC);
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
+
+	/** Set Profit Center.
+		@param User1_ID User defined list element #1
+	*/
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1)
+			set_Value (COLUMNNAME_User1_ID, null);
+		else
+			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Warehouse Key.
+		@param WarehouseValue Key of the Warehouse
+	*/
+	public void setWarehouseValue (String WarehouseValue)
+	{
+		set_Value (COLUMNNAME_WarehouseValue, WarehouseValue);
+	}
+
+	/** Get Warehouse Key.
+		@return Key of the Warehouse
+	  */
+	public String getWarehouseValue()
+	{
+		return (String)get_Value(COLUMNNAME_WarehouseValue);
+	}
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException
+	{
+		return (I_ZI_Branch)MTable.get(getCtx(), I_ZI_Branch.Table_ID)
+			.getPO(getZI_Branch_ID(), get_TrxName());
+	}
+
+	/** Set Branch.
+		@param ZI_Branch_ID Branch
+	*/
+	public void setZI_Branch_ID (int ZI_Branch_ID)
+	{
+		if (ZI_Branch_ID < 1)
+			set_Value (COLUMNNAME_ZI_Branch_ID, null);
+		else
+			set_Value (COLUMNNAME_ZI_Branch_ID, Integer.valueOf(ZI_Branch_ID));
+	}
+
+	/** Get Branch.
+		@return Branch	  */
+	public int getZI_Branch_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Branch_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

@@ -144,15 +144,46 @@ public interface I_I_Order
 	  */
 	public String getBPartnerValue();
 
+    /** Column name BPName */
+    public static final String COLUMNNAME_BPName = "BPName";
+
+	/** Set BP Name	  */
+	public void setBPName (String BPName);
+
+	/** Get BP Name	  */
+	public String getBPName();
+
+    /** Column name BPName2 */
+    public static final String COLUMNNAME_BPName2 = "BPName2";
+
+	/** Set BP Name2	  */
+	public void setBPName2 (String BPName2);
+
+	/** Get BP Name2	  */
+	public String getBPName2();
+
+    /** Column name BranchValue */
+    public static final String COLUMNNAME_BranchValue = "BranchValue";
+
+	/** Set Branch Key.
+	  * Key of the Branch
+	  */
+	public void setBranchValue (String BranchValue);
+
+	/** Get Branch Key.
+	  * Key of the Branch
+	  */
+	public String getBranchValue();
+
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -550,6 +581,19 @@ public interface I_I_Order
 	  */
 	public String getDocumentNo();
 
+    /** Column name ElementValueValue */
+    public static final String COLUMNNAME_ElementValueValue = "ElementValueValue";
+
+	/** Set Element Value Key.
+	  * Key of the Element Value
+	  */
+	public void setElementValueValue (String ElementValueValue);
+
+	/** Get Element Value Key.
+	  * Key of the Element Value
+	  */
+	public String getElementValueValue();
+
     /** Column name EMail */
     public static final String COLUMNNAME_EMail = "EMail";
 
@@ -636,6 +680,19 @@ public interface I_I_Order
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name ISO_Code */
+    public static final String COLUMNNAME_ISO_Code = "ISO_Code";
+
+	/** Set ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public void setISO_Code (String ISO_Code);
+
+	/** Get ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code();
 
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
@@ -736,6 +793,19 @@ public interface I_I_Order
 	  */
 	public String getName();
 
+    /** Column name OrgValue */
+    public static final String COLUMNNAME_OrgValue = "OrgValue";
+
+	/** Set Org Key.
+	  * Key of the Organization
+	  */
+	public void setOrgValue (String OrgValue);
+
+	/** Get Org Key.
+	  * Key of the Organization
+	  */
+	public String getOrgValue();
+
     /** Column name PaymentTermValue */
     public static final String COLUMNNAME_PaymentTermValue = "PaymentTermValue";
 
@@ -788,6 +858,19 @@ public interface I_I_Order
 	  */
 	public BigDecimal getPriceActual();
 
+    /** Column name PriceEntered */
+    public static final String COLUMNNAME_PriceEntered = "PriceEntered";
+
+	/** Set Price.
+	  * Price Entered - the price based on the selected/base UoM
+	  */
+	public void setPriceEntered (BigDecimal PriceEntered);
+
+	/** Get Price.
+	  * Price Entered - the price based on the selected/base UoM
+	  */
+	public BigDecimal getPriceEntered();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -823,6 +906,19 @@ public interface I_I_Order
 	  */
 	public String getProductValue();
 
+    /** Column name QtyEntered */
+    public static final String COLUMNNAME_QtyEntered = "QtyEntered";
+
+	/** Set Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public void setQtyEntered (BigDecimal QtyEntered);
+
+	/** Get Quantity.
+	  * The Quantity Entered is based on the selected UoM
+	  */
+	public BigDecimal getQtyEntered();
+
     /** Column name QtyOrdered */
     public static final String COLUMNNAME_QtyOrdered = "QtyOrdered";
 
@@ -849,6 +945,19 @@ public interface I_I_Order
 	  */
 	public String getRegionName();
 
+    /** Column name RepName */
+    public static final String COLUMNNAME_RepName = "RepName";
+
+	/** Set Sales Rep Name.
+	  * Name of the Sales Representative
+	  */
+	public void setRepName (String RepName);
+
+	/** Get Sales Rep Name.
+	  * Name of the Sales Representative
+	  */
+	public String getRepName();
+
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";
 
@@ -863,6 +972,19 @@ public interface I_I_Order
 	public int getSalesRep_ID();
 
 	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException;
+
+    /** Column name ShipperName */
+    public static final String COLUMNNAME_ShipperName = "ShipperName";
+
+	/** Set ShipperName.
+	  * Name of the Shipper
+	  */
+	public void setShipperName (String ShipperName);
+
+	/** Get ShipperName.
+	  * Name of the Shipper
+	  */
+	public String getShipperName();
 
     /** Column name SKU */
     public static final String COLUMNNAME_SKU = "SKU";
@@ -903,6 +1025,15 @@ public interface I_I_Order
 	  */
 	public String getTaxIndicator();
 
+    /** Column name UOMName */
+    public static final String COLUMNNAME_UOMName = "UOMName";
+
+	/** Set UOM Name	  */
+	public void setUOMName (String UOMName);
+
+	/** Get UOM Name	  */
+	public String getUOMName();
+
     /** Column name UPC */
     public static final String COLUMNNAME_UPC = "UPC";
 
@@ -931,4 +1062,43 @@ public interface I_I_Order
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
+    /** Column name WarehouseValue */
+    public static final String COLUMNNAME_WarehouseValue = "WarehouseValue";
+
+	/** Set Warehouse Key.
+	  * Key of the Warehouse
+	  */
+	public void setWarehouseValue (String WarehouseValue);
+
+	/** Get Warehouse Key.
+	  * Key of the Warehouse
+	  */
+	public String getWarehouseValue();
+
+    /** Column name ZI_Branch_ID */
+    public static final String COLUMNNAME_ZI_Branch_ID = "ZI_Branch_ID";
+
+	/** Set Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID);
+
+	/** Get Branch	  */
+	public int getZI_Branch_ID();
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException;
 }
