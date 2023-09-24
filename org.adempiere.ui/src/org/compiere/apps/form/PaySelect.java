@@ -68,8 +68,10 @@ public class PaySelect
 	public boolean         m_isLocked = false;
 	/** Payment Selection		*/
 	public MPaySelection	m_ps = null;
+	/** one-To-one payment per invoice */
+	public boolean			m_isOnePaymentPerInvoice	= false;
 	/**	Logger			*/
-	public static CLogger log = CLogger.getCLogger(PaySelect.class);
+	public static final CLogger log = CLogger.getCLogger(PaySelect.class);
 
 	public ArrayList<BankInfo> getBankAccountData()
 	{
@@ -241,13 +243,13 @@ public class PaySelect
 			+ " INNER JOIN C_PaymentTerm p ON (i.C_PaymentTerm_ID=p.C_PaymentTerm_ID)",
 			//	WHERE
 			"i.IsSOTrx=? AND IsPaid='N'"
-			+ " AND invoiceOpen(i.C_Invoice_ID, i.C_InvoicePaySchedule_ID) != 0" //Check that AmountDue <> 0
+			+ " AND invoiceOpenToDate(i.C_Invoice_ID, i.C_InvoicePaySchedule_ID, SysDate) != 0" //Check that AmountDue <> 0
 			//	Different Payment Selection
-			+ " AND NOT EXISTS (SELECT * FROM C_PaySelectionLine psl"
+			+ " AND (i.C_InvoicePaySchedule_ID > 0 OR NOT EXISTS (SELECT * FROM C_PaySelectionLine psl"
 			+                 " INNER JOIN C_PaySelectionCheck psc ON (psl.C_PaySelectionCheck_ID=psc.C_PaySelectionCheck_ID)"
 			+                 " LEFT OUTER JOIN C_Payment pmt ON (pmt.C_Payment_ID=psc.C_Payment_ID)"
 			+                 " WHERE i.C_Invoice_ID=psl.C_Invoice_ID AND psl.IsActive='Y'"
-			+				  " AND (pmt.DocStatus IS NULL OR pmt.DocStatus NOT IN ('VO','RE')) )"
+			+				  " AND (pmt.DocStatus IS NULL OR pmt.DocStatus NOT IN ('VO','RE')) ))"
 			+ " AND i.DocStatus IN ('CO','CL')"
 			+ " AND i.AD_Client_ID=?",	//	additional where & order in loadTableInfo()
 			true, "i");
@@ -466,6 +468,7 @@ public class PaySelect
 			m_ps.setPayDate (payDate);
 			m_ps.setC_BankAccount_ID(bi.C_BankAccount_ID);
 			m_ps.setIsApproved(true);
+			m_ps.setIsOnePaymentPerInvoice(m_isOnePaymentPerInvoice);
 			m_ps.saveEx();
 			if (log.isLoggable(Level.CONFIG)) log.config(m_ps.toString());
 

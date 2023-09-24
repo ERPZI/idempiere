@@ -63,6 +63,7 @@ import org.compiere.model.MPaySelection;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.X_C_PaySelection;
 import org.compiere.process.ProcessInfo;
+import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
@@ -123,6 +124,7 @@ public class WPaySelect extends PaySelect
 	private Label labelDtype = new Label();
 	private Listbox fieldDtype = ListboxFactory.newDropdownListbox();
 	private Panel southPanel;
+	private Checkbox chkOnePaymentPerInv = new Checkbox();
 	@SuppressWarnings("unused")
 	private ProcessInfo m_pi;
 	private boolean m_isLock;
@@ -185,6 +187,9 @@ public class WPaySelect extends PaySelect
 		fieldPayDate.addValueChangeListener(this);
 		ZKUpdateUtil.setHflex(fieldPayDate.getComponent(), "1");
 		
+		chkOnePaymentPerInv.setText(Msg.translate(Env.getCtx(), MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice));
+		chkOnePaymentPerInv.addActionListener(this);
+
 		onlyPositiveBalance.setText(Msg.getMsg(Env.getCtx(), "PositiveBalance"));
 		onlyPositiveBalance.addActionListener(this);
 		onlyPositiveBalance.setChecked(true);
@@ -262,6 +267,7 @@ public class WPaySelect extends PaySelect
 		}
 		row.appendChild(new Space());
 		row.appendChild(onlyPositiveBalance);
+		row.appendCellChild(chkOnePaymentPerInv);
 		row.appendChild(new Space());
 		
 		row = rows.newRow();
@@ -440,6 +446,10 @@ public class WPaySelect extends PaySelect
 				}
 			});
 		}
+		else if (e.getTarget().equals(chkOnePaymentPerInv))
+		{
+			m_isOnePaymentPerInvoice = chkOnePaymentPerInv.isChecked();
+		}
 	}   //  actionPerformed
 
 	@Override
@@ -513,6 +523,9 @@ public class WPaySelect extends PaySelect
 							dialog.setVisible(true);
 							dialog.setPage(form.getPage());
 							dialog.doHighlighted();
+							// Create instance parameters. Parameters you want to send to the process.
+							ProcessInfoParameter piParam = new ProcessInfoParameter(MPaySelection.COLUMNNAME_IsOnePaymentPerInvoice, m_isOnePaymentPerInvoice, "", "", "");
+							dialog.getProcessInfo().setParameter(new ProcessInfoParameter[] {piParam});
 						} catch (SuspendNotAllowedException e) {
 							log.log(Level.SEVERE, e.getLocalizedMessage(), e);
 						}

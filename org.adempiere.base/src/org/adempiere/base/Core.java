@@ -48,6 +48,9 @@ import org.compiere.process.ProcessCall;
 import org.compiere.util.CLogger;
 import org.compiere.util.PaymentExport;
 import org.compiere.util.ReplenishInterface;
+import org.idempiere.fa.service.api.DepreciationFactoryLookupDTO;
+import org.idempiere.fa.service.api.IDepreciationMethod;
+import org.idempiere.fa.service.api.IDepreciationMethodFactory;
 
 /**
  * This is a facade class for the Service Locator.
@@ -316,7 +319,7 @@ public class Core {
 		String className = sf.getShippingProcessorClass();
 		if (className == null || className.length() == 0) 
 		{
-			s_log.log(Level.SEVERE, "Shipment processor class not define for shipper " + sf);
+			s_log.log(Level.SEVERE, "Shipment processor or class not defined for shipper " + sf);
 			return null;
 		}
 		
@@ -510,6 +513,27 @@ public class Core {
 				IProductPricing myProductPricing = factory.newProductPricingInstance();
 				if (myProductPricing != null) {
 					return myProductPricing;
+				}
+			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * lookup implement {@link IDepreciationMethod}
+	 * @param factoryLookupDTO
+	 * @return
+	 */
+	public static IDepreciationMethod getDepreciationMethod(DepreciationFactoryLookupDTO factoryLookupDTO) {
+
+		List<IDepreciationMethodFactory> factoryList = 
+				Service.locator().list(IDepreciationMethodFactory.class).getServices();
+		if (factoryList != null) {
+			for(IDepreciationMethodFactory factory : factoryList) {
+				IDepreciationMethod depreciationMethod = factory.getDepreciationMethod(factoryLookupDTO);
+				if (depreciationMethod != null) {
+					return depreciationMethod;
 				}
 			}
 		}

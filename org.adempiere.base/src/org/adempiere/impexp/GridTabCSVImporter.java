@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.adempiere.base.IGridTabImporter;
@@ -128,7 +127,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 	private boolean isSingleTrx = false;
 
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(GridTabCSVImporter.class);
+	private static final CLogger log = CLogger.getCLogger(GridTabCSVImporter.class);
 	
 	public File fileImport(GridTab gridTab, List<GridTab> childs, InputStream filestream, Charset charset , String importMode) {		
 		return fileImport(gridTab, childs, filestream, charset, importMode, null);
@@ -242,6 +241,8 @@ public class GridTabCSVImporter implements IGridTabImporter
 						manageMasterTrx(gridTab, null);
 						createTrx(gridTab);
 					}
+					if (trx != null)
+						trx.setDisplayName(GridTabCSVImporter.class.getName()+"_fileImport_" + gridTab.getTableName());
 
 					String recordResult = processRecord(importMode, gridTab, indxDetail, isDetail, idx, rowResult, childs);
 					rowResult.append(recordResult);
@@ -594,8 +595,7 @@ public class GridTabCSVImporter implements IGridTabImporter
 	 * @param gridTab
 	 */
 	private void createTrx(GridTab gridTab){
-
-		trxName = getTrxName(gridTab.getTableName());
+		trxName = Trx.createTrxName("CSVImport");
 		gridTab.getTableModel().setImportingMode(true,trxName);	
 		trx = Trx.get(trxName,true);
 		masterRecord = null;
@@ -776,10 +776,6 @@ public class GridTabCSVImporter implements IGridTabImporter
 		return rowResult.toString();
 
 	}//processRecord
-	
-	private String getTrxName(String gritTabName){
-		return "Import_" + gritTabName + "_" + UUID.randomUUID();
-	}
 	
 	private void throwAdempiereException(String msg){
 	    throw new AdempiereException(msg);
@@ -1074,9 +1070,13 @@ public class GridTabCSVImporter implements IGridTabImporter
 			
 			if(isForeing) 
 			   foreignColumn = header.get(i).substring(header.get(i).indexOf("[")+1,header.get(i).indexOf("]"));
-			if(!isForeing && !isKeyColumn && ("AD_Language".equals(columnName) || "EntityType".equals(columnName)))
+			if(!isForeing && !isKeyColumn && ("AD_Language".equals(columnName) || "EntityType".equals(columnName))) {
 				setValue = value;
-			else if(!"C_Location".equals(gridTab.getTableName()) && header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))){
+				GridField field = gridTab.getField(columnName);
+			    logMsg = gridTab.setValue(field,setValue);
+			    if(logMsg!=null && logMsg.equals(""))
+			    	logMsg= null;
+			}else if(!"C_Location".equals(gridTab.getTableName()) && header.get(i).contains(MTable.getTableName(Env.getCtx(),MLocation.Table_ID))){
 		    
 				if(address == null){
 				    if(isInsertMode()){

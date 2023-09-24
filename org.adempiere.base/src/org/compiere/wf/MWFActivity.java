@@ -74,6 +74,8 @@ import org.compiere.util.Util;
  *		set Node - startWork
  *
  *  @author Jorg Janke
+ *  @author Silvano Trinchero, www.freepath.it
+ *  		<li>IDEMPIERE-3209 added process-aware resultset-based constructor
  *  @version $Id: MWFActivity.java,v 1.4 2006/07/30 00:51:05 jjanke Exp $
  */
 public class MWFActivity extends X_AD_WF_Activity implements Runnable
@@ -199,11 +201,25 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		saveEx();
 		//
 		m_audit = new MWFEventAudit(this);
+		m_audit.setAD_Org_ID(getAD_Org_ID());//Add by Hideaki Hagiwara
 		m_audit.saveEx();
 		//
 		m_process = process;
 	}	//	MWFActivity
-
+	
+	/**
+	 * 	Process-aware Parent Contructor
+	 *	@param process process
+	 *	@param ctx context
+	 *	@param rs record to load
+	 *  @param trx transaction name
+	 */
+	public MWFActivity (MWFProcess process, Properties ctx, ResultSet rs, String trxName)
+	{
+		super(ctx, rs, trxName);
+		m_process = process;
+	}
+	
 	/**
 	 * 	Parent Contructor
 	 *	@param process process
@@ -270,7 +286,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (log.isLoggable(Level.FINE)) log.fine(oldState + "->"+ WFState + ", Msg=" + getTextMsg());
 			super.setWFState (WFState);
 			m_state = new StateEngine (getWFState());
-			saveEx();			//	closed in MWFProcess.checkActivities()
+			boolean valid = save();
+			if (! valid) {
+				// the activity could not be updated, probably it was deleted by the rollback to savepoint
+				// so, set the ID to zero and save it again (insert)
+				setAD_WF_Activity_ID(0);
+				saveEx();
+			}
 			updateEventAudit();
 
 			//	Inform Process
@@ -320,7 +342,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		}
 		else
 			m_audit.setEventType(MWFEventAudit.EVENTTYPE_StateChanged);
-		m_audit.saveEx();
+		boolean valid = m_audit.save();
+		if (! valid) {
+			// the event audit could not be updated, probably it was deleted by the rollback to savepoint
+			// so, set the ID to zero and save it again (insert)
+			m_audit.setAD_WF_EventAudit_ID(0);
+			m_audit.saveEx();
+		}
 	}	//	updateEventAudit
 
 	/**
@@ -855,8 +883,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		//
 		try
 		{
-			if (!localTrx)
-				savepoint = trx.setSavepoint(null);
+			if (!localTrx) {
+				// when cascade workflows, avoid setting a savepoint for each workflow
+				// use the same first savepoint from the transaction
+				savepoint = trx.getLastWFSavepoint();
+				if (savepoint == null) {
+					savepoint = trx.setSavepoint(null);
+					trx.setLastWFSavepoint(savepoint);
+				}
+			}
 
 			if (!m_state.isValidAction(StateEngine.ACTION_Start))
 			{
@@ -909,6 +944,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 				try
 				{
 					trx.rollback(savepoint);
+					trx.setLastWFSavepoint(null);
 				} catch (SQLException e1) {}
 			}
 
@@ -1214,7 +1250,7 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 						MUserRoles[] urs = MUserRoles.getOfRole(getCtx(), resp.getAD_Role_ID());
 						for (int i = 0; i < urs.length; i++)
 						{
-							if(urs[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()))
+							if(urs[i].getAD_User_ID() == Env.getAD_User_ID(getCtx()) && urs[i].isActive())
 							{
 								autoApproval = true;
 								break;

@@ -439,6 +439,16 @@ public abstract class SvrProcess implements ProcessCall
 	}   //  getRecord_ID
 
 	/**
+	 * Get Record_IDs
+	 * 
+	 * @return Record_IDs
+	 */
+	protected List<Integer> getRecord_IDs() 
+	{
+		return m_pi.getRecord_IDs();
+	} // getRecord_IDs
+
+	/**
 	 *  Get AD_User_ID
 	 *  @return AD_User_ID of Process owner or -1 if not found
 	 */
@@ -610,7 +620,11 @@ public abstract class SvrProcess implements ProcessCall
 			//save logging info even if context is lost
 			if (noContext)
 				Env.getCtx().put("#AD_Client_ID", m_pi.getAD_Client_ID());
-			
+
+			//clear interrupt signal so that we can unlock the ad_pinstance record
+			if (Thread.currentThread().isInterrupted())
+				Thread.interrupted();
+				
 			MPInstance mpi = new MPInstance (getCtx(), m_pi.getAD_PInstance_ID(), null);
 			if (mpi.get_ID() == 0)
 			{

@@ -313,11 +313,12 @@ public class FinReport extends SvrProcess
 		int PA_ReportLineSet_ID = m_report.getLineSet().getPA_ReportLineSet_ID();
 		StringBuffer sql = new StringBuffer ("INSERT INTO T_Report "
 			+ "(AD_PInstance_ID, PA_ReportLine_ID, Record_ID,Fact_Acct_ID, SeqNo,LevelNo, Name,Description) "
-			+ "SELECT ").append(getAD_PInstance_ID()).append(", PA_ReportLine_ID, 0,0, SeqNo,0, Name,Description "
-			+ "FROM PA_ReportLine "
-			+ "WHERE IsActive='Y' AND PA_ReportLineSet_ID=").append(PA_ReportLineSet_ID);
+			+ "SELECT ").append(getAD_PInstance_ID()).append(", rl.PA_ReportLine_ID, 0,0, rl.SeqNo,0, NVL(trl.Name, rl.Name) as Name, NVL(trl.Description,rl.Description) as Description "
+			+ "FROM PA_ReportLine rl "
+			+ "LEFT JOIN PA_ReportLine_Trl trl ON trl.PA_ReportLine_ID = rl.PA_ReportLine_ID AND trl.AD_Language = '" + Env.getAD_Language(Env.getCtx()) + "' "
+			+ "WHERE rl.IsActive='Y' AND rl.PA_ReportLineSet_ID=").append(PA_ReportLineSet_ID);
 
-		int no = DB.executeUpdate(sql.toString(), get_TrxName());
+		int no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Report Lines = " + no);
 
 		//	** Get Data	** Segment Values
@@ -889,9 +890,10 @@ public class FinReport extends SvrProcess
 						continue;
 					String colsql = "SELECT a." + oper2col + " FROM T_Report a " +
 							" INNER JOIN PA_ReportLine b ON a.PA_ReportLine_ID = b.PA_ReportLine_ID " +
+							" LEFT JOIN PA_ReportLine_Trl trlb ON trlb.PA_ReportLine_ID = b.PA_ReportLine_ID AND trlb.AD_Language = ? " +
 							" WHERE a.AD_PInstance_ID = " + getAD_PInstance_ID() +
-							" AND b.Name = ?";
-					BigDecimal value2 = DB.getSQLValueBD(get_TrxName(), colsql, oper2Line);
+							" AND (trlb.Name = ? OR b.Name = ?)";
+					BigDecimal value2 = DB.getSQLValueBDEx(get_TrxName(), colsql, Env.getAD_Language(Env.getCtx()), oper2Line, oper2Line);
 					if (value2 != null && value2.signum() != 0)
 						oper2 = value2.toPlainString();
 
@@ -995,15 +997,16 @@ public class FinReport extends SvrProcess
 			boolean lteq = true; //less than or equal to
 			String seqsql = "SELECT b.seqNo FROM T_Report a " +
 			" INNER JOIN PA_ReportLine b ON a.PA_ReportLine_ID = b.PA_ReportLine_ID " +
+			" LEFT JOIN PA_ReportLine_Trl trlb ON trlb.PA_ReportLine_ID = b.PA_ReportLine_ID AND trlb.AD_Language = ? " +
 			" WHERE a.AD_PInstance_ID = " + getAD_PInstance_ID() +
-			" AND b.Name = ?";
+			" AND (trlb.Name = ? OR b.Name = ?)";
 			int seqNo = -1;
 			try {
 				seqNo = Integer.parseInt(multi[0].trim());
 			} catch (Exception e) {}
 			if (seqNo == -1)
 			{
-				seqNo = DB.getSQLValue(get_TrxName(), seqsql, multi[0].trim());
+				seqNo = DB.getSQLValueEx(get_TrxName(), seqsql, Env.getAD_Language(Env.getCtx()), multi[0].trim(), multi[0].trim());
 			}
 			if (seqNo < 0)
 				continue;
@@ -1027,7 +1030,7 @@ public class FinReport extends SvrProcess
 				} catch (Exception e) {}
 				if (seqNo == -1)
 				{
-					seqNo = DB.getSQLValue(get_TrxName(), seqsql, multi[i].trim());
+					seqNo = DB.getSQLValueEx(get_TrxName(), seqsql, Env.getAD_Language(Env.getCtx()), multi[i].trim(), multi[i].trim());
 				}
 				if (seqNo < 0)
 					continue;
@@ -1107,6 +1110,9 @@ public class FinReport extends SvrProcess
 	private String getLineIDs (int fromID, int toID)
 	{
 		if (log.isLoggable(Level.FINEST)) log.finest("From=" + fromID + " To=" + toID);
+		if (fromID == toID) {
+			return String.valueOf(fromID);
+		}
 		int firstPA_ReportLine_ID = 0;
 		int lastPA_ReportLine_ID = 0;
 		
@@ -1740,7 +1746,7 @@ public class FinReport extends SvrProcess
 				if (index < m_columns.length)
 				{
 					pfi.setIsPrinted(m_columns[index].isPrinted());
-					String s = m_columns[index].getName();
+					String s = m_columns[index].get_Translation(MReportColumn.COLUMNNAME_Name);
 					
 					if (m_columns[index].isColumnTypeRelativePeriod())
 					{

@@ -40,6 +40,8 @@ import org.compiere.util.Util;
  *	Workflow Process
  *	
  *  @author Jorg Janke
+ *  @author Silvano Trinchero, www.freepath.it
+ *  			<li>IDEMPIERE-3209 changed fucntions to public to improve integration support
  *  @version $Id: MWFProcess.java,v 1.2 2006/07/30 00:51:05 jjanke Exp $
  */
 public class MWFProcess extends X_AD_WF_Process
@@ -129,6 +131,7 @@ public class MWFProcess extends X_AD_WF_Process
 		setProcessed (false);
 		//	Lock Entity
 		getPO();
+		setAD_Org_ID(m_po.getAD_Org_ID());//Add by Hideaki Hagiwara
 		//hengsin: remove lock/unlock which is causing deadlock
 		//if (m_po != null)
 			//m_po.lock();
@@ -488,7 +491,7 @@ public class MWFProcess extends X_AD_WF_Process
 	 * 	Get Workflow
 	 *	@return workflow
 	 */
-	private MWorkflow getWorkflow()
+	public MWorkflow getWorkflow()
 	{
 		if (m_wf == null)
 			m_wf = MWorkflow.get (getCtx(), getAD_Workflow_ID());

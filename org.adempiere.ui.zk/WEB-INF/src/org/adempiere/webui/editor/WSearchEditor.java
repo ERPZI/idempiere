@@ -29,7 +29,6 @@ import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.ValuePreference;
 import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.adwindow.ADWindowContent;
-import org.adempiere.webui.adwindow.IFieldEditorContainer;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Searchbox;
 import org.adempiere.webui.event.ContextMenuEvent;
@@ -50,11 +49,13 @@ import org.compiere.model.Lookup;
 import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
+import org.compiere.model.MRole;
 import org.compiere.model.MTable;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
+import org.compiere.util.NamePair;
 import org.zkoss.zk.au.out.AuScript;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -82,7 +83,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
     private InfoPanel			infoPanel = null;
 	private String imageUrl;
 
-	private static CLogger log = CLogger.getCLogger(WSearchEditor.class);
+	private static final CLogger log = CLogger.getCLogger(WSearchEditor.class);
 
 	private static final String IN_PROGRESS_IMAGE = "~./zk/img/progress3.gif";
 	
@@ -206,17 +207,55 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	@Override
 	public void setValue(Object value)
 	{
+		Object curValue = this.value;
         this.value = value;
 		if (value != null && !"".equals(String.valueOf(value)))
-		{
-		    String text = lookup.getDisplay(value);
+		{		
+			NamePair namePair = lookup.get(value);
+			if (namePair != null)
+			{
+				String text = namePair.toString();
 
-            if (text.startsWith("_"))
+	            if (text.startsWith("_"))
+	            {
+	                text = text.substring(1);
+	            }
+	            getComponent().setText(text);
+			}
+			else
             {
-                text = text.substring(1);
-            }
-
-            getComponent().setText(text);
+				if (value instanceof Integer && gridField != null && gridField.getDisplayType() != DisplayType.ID && 
+						(gridTab==null || !gridTab.getTableModel().isImporting())) // for IDs is ok to be out of the list
+				{
+					//if it is problem with record lock, just keep value (no trigger change) and set field readonly
+					MRole role = MRole.getDefault(Env.getCtx(), false);
+					int refTableID = -1;
+					if (gridTab != null) // fields process para don't represent a column ID
+					{
+						MColumn col = MColumn.get(Env.getCtx(), gridField.getAD_Column_ID());
+						if (col.get_ID() > 0) {
+							String refTable = col.getReferenceTableName();
+							if (refTable != null) {
+								MTable table = MTable.get(Env.getCtx(), refTable);
+								refTableID = table.getAD_Table_ID();
+							}
+						}
+					}
+					if (refTableID > 0 && ! role.isRecordAccess(refTableID, (int)value, false))
+					{
+						setReadWrite(false);
+					}
+					else
+					{
+						getComponent().setText("");
+						if (curValue == null)
+							curValue = value;
+						ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), curValue, null);
+						super.fireValueChange(changeEvent);
+						this.value = null;
+					}
+				}
+			}
 		}
 		else
 		{
@@ -286,7 +325,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 	}
 
-	private void actionRefresh(Object value)
+	protected void actionRefresh(Object value)
 	{
 //		boolean mandatory = isMandatory();
 //		AEnv.actionRefresh(lookup, value, mandatory);
@@ -345,7 +384,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		//
 	}
 
-	private void actionText(String text)
+	protected void actionText(String text)
 	{
 		//	Nothing entered
 		if (text == null || text.length() == 0 || text.equals("%"))
@@ -390,17 +429,8 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 			log.fine(getColumnName() + " - Unique ID=" + id);
 
 		actionCombo(Integer.valueOf(id));          //  data binding
-		
-		Searchbox comp = getComponent();
-		Component parent = comp.getParent();
-		while (parent != null) {
-			if (parent instanceof IFieldEditorContainer) {
-				((IFieldEditorContainer) parent).focusToNextEditor(this);
-				break;
-			}
-			parent = parent.getParent();
-		}
-		
+		focusNext();
+
 		//safety check: if focus is going no where, focus back to self
 		String uid = getComponent().getTextbox().getUuid();
 		String script = "setTimeout(function(){try{var e = zk.Widget.$('#" + uid +
@@ -411,7 +441,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	}	//	actionText
 
 
-	private void resetButtonState() {
+	protected void resetButtonState() {
 		getComponent().getButton().setEnabled(true);
 		if (ThemeManager.isUseFontIconForImage())
 			getComponent().getButton().setIconSclass(imageUrl);
@@ -421,7 +451,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	}
 
 
-	private void actionCombo (Object value)
+	protected void actionCombo (Object value)
 	{
 		if (log.isLoggable(Level.FINE))
 			log.fine("Value=" + value);
@@ -465,7 +495,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 	 *	Action - Special Quick Entry Screen
 	 *  @param newRecord true if new record should be created
 	 */
-	private void actionQuickEntry (boolean newRecord)
+	protected void actionQuickEntry (boolean newRecord)
 	{
 		if(!getComponent().isEnabled())
 			return;
@@ -538,7 +568,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 		}
 	}	//	actionQuickEntry
 
-	private void actionButton(String queryValue)
+	protected  void actionButton(String queryValue)
 	{
 		if (lookup == null)
 			return;		//	leave button disabled
@@ -599,6 +629,7 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 						actionCombo (result);
 					else
 						actionCombo (result[0]);
+					focusNext();
 				}
 				else if (cancelled)
 				{
@@ -612,13 +643,14 @@ public class WSearchEditor extends WEditor implements ContextMenuListener, Value
 					}else{
 						getComponent().setText("");
 						actionCombo(null);
-					}						
+					}
+					getComponent().getTextbox().focus();
 				}
 				else
 				{
 					if (log.isLoggable(Level.CONFIG)) log.config(getColumnName() + " - Result = null (not cancelled)");
+					getComponent().getTextbox().focus();
 				}
-				getComponent().getTextbox().focus();
 			}
 		});
 		ip.setId(ip.getTitle()+"_"+ip.getWindowNo());

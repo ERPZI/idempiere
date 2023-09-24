@@ -182,14 +182,50 @@ public class PoFiller{
 				}
 			}
 			if (po.get_ColumnIndex(columnName) >= 0) {
-				if (id > 0) {
+				MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName);
+				MTable foreignTable = null;
+				String refTableName = col.getReferenceTableName();
+				if (refTableName != null) {
+					foreignTable = MTable.get(Env.getCtx(), refTableName);
+				} else {
+					if ("Record_ID".equalsIgnoreCase(columnName)) {
+						// special case - get the foreign table using AD_Table_ID
+						int tableID = 0;
+						try {
+							// try it first from the XML element, is possible that the table is still not filled in the po object
+							tableID = Integer.parseInt(e.parent.properties.get("AD_Table_ID").contents.toString());
+						} catch (Exception e1) {}
+						if (tableID == 0) {
+							// XML didn't work, try the po object
+							int idxTableID = po.get_ColumnIndex("AD_Table_ID");
+							if (idxTableID >= 0) {
+								tableID = po.get_ValueAsInt(idxTableID);
+							}
+						}
+						if (tableID > 0) {
+							foreignTable = MTable.get(Env.getCtx(), tableID);
+							refTableName = foreignTable.getTableName();
+						}
+					}
+				}
+				if (id > 0 && refTableName != null) {
+					if (foreignTable != null) {
+						PO subPo = foreignTable.getPO(id, po.get_TrxName());
+						if (subPo != null && subPo.getAD_Client_ID() != Env.getAD_Client_ID(ctx.ctx)) {
+							String accessLevel = foreignTable.getAccessLevel();
+							if ((MTable.ACCESSLEVEL_All.equals(accessLevel)
+									|| MTable.ACCESSLEVEL_SystemOnly.equals(accessLevel)
+									|| MTable.ACCESSLEVEL_SystemPlusClient.equals(accessLevel)) && 
+									subPo.getAD_Client_ID() != 0)
+								return -1;
+						}
+					}
+
 					if (po.get_ValueAsInt(columnName) != id) {
 						po.set_ValueNoCheck(columnName, id);
 					}
 					return id;
 				} else if (id == 0) {
-					MColumn col = MColumn.get(ctx.ctx, po.get_TableName(), columnName);
-					String refTableName = col.getReferenceTableName();
 					if (refTableName != null && MTable.isZeroIDTable(refTableName)) {
 						po.set_ValueNoCheck(columnName, id);
 						return id;

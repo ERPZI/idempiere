@@ -94,7 +94,7 @@ public class WRequest implements EventListener<Event>
 	StringBuffer 		m_where = null;
 	
 	/**	Logger	*/
-	private static CLogger	log	= CLogger.getCLogger (WRequest.class);
+	private static final CLogger	log	= CLogger.getCLogger (WRequest.class);
 
 	/**
 	 * 	Display Request Options - New/Existing.
@@ -182,7 +182,7 @@ public class WRequest implements EventListener<Event>
 		}
 		
 		m_popup.setPage(invoker.getPage());
-		m_popup.open(invoker);
+		m_popup.open(invoker, "after_start");
 	}	//	getZoomTargets
 	
 	public void onEvent(final Event e) throws Exception 

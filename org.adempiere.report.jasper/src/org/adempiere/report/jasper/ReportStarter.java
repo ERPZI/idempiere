@@ -136,7 +136,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 {
 	private static final int DEFAULT_SWAP_MAX_PAGES = 100;
 	/** Logger */
-	private static CLogger log = CLogger.getCLogger(ReportStarter.class);
+	private static final CLogger log = CLogger.getCLogger(ReportStarter.class);
 	private static File REPORT_HOME = null;
     public static final JasperReportsContext jasperReportStartContext;
 	
@@ -340,7 +340,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
      */
     protected Connection getConnection()
     {
-    	return DB.getConnectionRW();
+    	return DB.getReportingConnectionRO();
     }
 
     /**
@@ -460,7 +460,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
         	params.put("RESOURCE_DIR", resourcePath);
         }
 
-        if (jasperReport != null && pi.getTable_ID() > 0 && Record_ID <= 0 && pi.getRecord_IDs() != null && pi.getRecord_IDs().length > 0)
+        if (jasperReport != null && pi.getTable_ID() > 0 && Record_ID <= 0 && pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
         {
         	try
             {        		
@@ -581,6 +581,12 @@ public class ReportStarter implements ProcessCall, ClientProcess
         	//params.put("LoginLogo", reportPath);
         	
         	Language currLang = Env.getLanguage(Env.getCtx());
+        	if ((params.containsKey("AD_Language") && params.get("AD_Language") != null) || 
+        			(params.containsKey("CURRENT_LANG") && params.get("CURRENT_LANG") != null)) {
+        		String langInfo = params.get("AD_Language") != null ? params.get("AD_Language").toString() : 
+        			params.get("CURRENT_LANG").toString();
+        		currLang = Language.getLanguage(langInfo);
+        	}
         	String printerName = null;
         	MPrintFormat printFormat = null;
         	PrintInfo printInfo = null;
@@ -645,7 +651,10 @@ public class ReportStarter implements ProcessCall, ClientProcess
             JRSwapFileVirtualizer virtualizer = null;
             int maxPages = MSysConfig.getIntValue(MSysConfig.JASPER_SWAP_MAX_PAGES, DEFAULT_SWAP_MAX_PAGES);
             try {
-            	conn = getConnection();
+            	if (trx != null)
+            		conn = trx.getConnection();
+            	else
+            		conn = getConnection();
 
             	String swapPath = System.getProperty("java.io.tmpdir");
 				JRSwapFile swapFile = new JRSwapFile(swapPath, 1024, 1024);
@@ -722,13 +731,15 @@ public class ReportStarter implements ProcessCall, ClientProcess
 	                    	}
 	                    }	
 	                } else {
-	                	if (reportPathList.length == 1) {
+						if (printInfo == null)
+							printInfo = new PrintInfo(pi);
+						if (reportPathList.length == 1) {
 		                    if (log.isLoggable(Level.INFO)) log.info( "ReportStarter.startProcess run report -"+jasperPrint.getName());
 		                    JRViewerProvider viewerLauncher = Service.locator().locate(JRViewerProvider.class).getService();
 		                    if (!Util.isEmpty(processInfo.getReportType())) {
 		                    	jasperPrint.setProperty("IDEMPIERE_REPORT_TYPE", processInfo.getReportType());
 		                    }
-		                    viewerLauncher.openViewer(jasperPrint, pi.getTitle());
+		                    viewerLauncher.openViewer(jasperPrint, pi.getTitle(), printInfo);
 	                	} else {
 	                		jasperPrintList.add(jasperPrint);
 	                		if (idx+1 == reportPathList.length) {
@@ -736,7 +747,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 			                    if (viewerLauncher == null) {
 			                    	throw new AdempiereException("Can not find a viewer provider for multiple jaspers");
 			                    }
-			                    viewerLauncher.openViewer(jasperPrintList, pi.getTitle());
+			                    viewerLauncher.openViewer(jasperPrintList, pi.getTitle(), printInfo);
 	                		}
 	                	}
 	                }

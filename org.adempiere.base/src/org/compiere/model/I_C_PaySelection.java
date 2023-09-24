@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_PaySelection
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_C_PaySelection 
 {
@@ -166,6 +166,15 @@ public interface I_C_PaySelection
 	  * Indicates if this document requires approval
 	  */
 	public boolean isApproved();
+
+    /** Column name IsOnePaymentPerInvoice */
+    public static final String COLUMNNAME_IsOnePaymentPerInvoice = "IsOnePaymentPerInvoice";
+
+	/** Set One Payment Per Invoice	  */
+	public void setIsOnePaymentPerInvoice (boolean IsOnePaymentPerInvoice);
+
+	/** Get One Payment Per Invoice	  */
+	public boolean isOnePaymentPerInvoice();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

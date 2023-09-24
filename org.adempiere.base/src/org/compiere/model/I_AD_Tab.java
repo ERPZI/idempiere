@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Tab
  *  @author iDempiere (generated) 
- *  @version Release 6.2
+ *  @version Release 7.1
  */
 public interface I_AD_Tab 
 {
@@ -427,6 +427,19 @@ public interface I_AD_Tab
 	  * This Tab contains translation information
 	  */
 	public boolean isTranslationTab();
+
+    /** Column name MaxQueryRecords */
+    public static final String COLUMNNAME_MaxQueryRecords = "MaxQueryRecords";
+
+	/** Set Max Query Records.
+	  * If defined, you cannot query more records as defined - the query criteria needs to be changed to query less records
+	  */
+	public void setMaxQueryRecords (int MaxQueryRecords);
+
+	/** Get Max Query Records.
+	  * If defined, you cannot query more records as defined - the query criteria needs to be changed to query less records
+	  */
+	public int getMaxQueryRecords();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";

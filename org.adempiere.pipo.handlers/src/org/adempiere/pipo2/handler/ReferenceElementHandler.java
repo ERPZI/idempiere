@@ -16,9 +16,6 @@
  *****************************************************************************/
 package org.adempiere.pipo2.handler;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -26,19 +23,18 @@ import java.util.logging.Level;
 import javax.xml.transform.sax.TransformerHandler;
 
 import org.adempiere.pipo2.AbstractElementHandler;
-import org.adempiere.pipo2.PIPOContext;
-import org.adempiere.pipo2.PoExporter;
 import org.adempiere.pipo2.Element;
+import org.adempiere.pipo2.PIPOContext;
 import org.adempiere.pipo2.PackOut;
+import org.adempiere.pipo2.PoExporter;
 import org.adempiere.pipo2.PoFiller;
-import org.adempiere.pipo2.exception.DatabaseAccessException;
 import org.adempiere.pipo2.exception.POSaveFailedException;
 import org.compiere.model.I_AD_Reference;
+import org.compiere.model.MReference;
 import org.compiere.model.X_AD_Package_Exp_Detail;
 import org.compiere.model.X_AD_Package_Imp_Detail;
 import org.compiere.model.X_AD_Ref_List;
 import org.compiere.model.X_AD_Ref_Table;
-import org.compiere.model.X_AD_Reference;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.xml.sax.SAXException;
@@ -57,11 +53,11 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 
 		if (isProcessElement(ctx.ctx, entitytype)) {
 
-			X_AD_Reference mReference = findPO(ctx, element);
+			MReference mReference = findPO(ctx, element);
 			if (mReference == null) {
-				mReference = new X_AD_Reference(ctx.ctx, 0, getTrxName(ctx));
+				mReference = new MReference(ctx.ctx, 0, getTrxName(ctx));
 			}
-			List<String> excludes = defaultExcludeList(X_AD_Reference.Table_Name);
+			List<String> excludes = defaultExcludeList(MReference.Table_Name);
 			PoFiller filler = new PoFiller(ctx, mReference, element, this);
 			List<String> notfounds = filler.autoFill(excludes);
 			if (notfounds.size() > 0) {
@@ -71,15 +67,15 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 			}
 			element.recordId = mReference.getAD_Reference_ID();
 			if (mReference.is_new() || mReference.is_Changed()) {
-				X_AD_Package_Imp_Detail impDetail = createImportDetail(ctx, element.qName, X_AD_Reference.Table_Name,
-						X_AD_Reference.Table_ID);
+				X_AD_Package_Imp_Detail impDetail = createImportDetail(ctx, element.qName, MReference.Table_Name,
+						MReference.Table_ID);
 				String action = null;
 				if (!mReference.is_new()) {
 					if (references.contains(mReference.getAD_Reference_ID())) {
 						element.skip = true;
 						return;
 					}
-					backupRecord(ctx, impDetail.getAD_Package_Imp_ID(), X_AD_Reference.Table_Name, mReference);
+					backupRecord(ctx, impDetail.getAD_Package_Imp_ID(), MReference.Table_Name, mReference);
 					action = "Update";				
 				} else {
 					action = "New";
@@ -106,18 +102,18 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 	public void create(PIPOContext ctx, TransformerHandler document)
 			throws SAXException {
 		int Reference_id = Env.getContextAsInt(ctx.ctx,
-				X_AD_Reference.COLUMNNAME_AD_Reference_ID);
-		if (ctx.packOut.isExported(X_AD_Reference.COLUMNNAME_AD_Reference_ID+"|"+Reference_id))
+				MReference.COLUMNNAME_AD_Reference_ID);
+		if (ctx.packOut.isExported(MReference.COLUMNNAME_AD_Reference_ID+"|"+Reference_id))
 			return;
 
 		AttributesImpl atts = new AttributesImpl();
 
-		X_AD_Reference m_Reference = new X_AD_Reference(ctx.ctx, Reference_id, getTrxName(ctx));
+		MReference m_Reference = MReference.get(ctx.ctx, Reference_id);
 
 		boolean createElement = isPackOutElement(ctx, m_Reference);
 
 		PackOut packOut = ctx.packOut;
-		packOut.getCtx().ctx.put("Table_Name",X_AD_Reference.Table_Name);
+		packOut.getCtx().ctx.put("Table_Name",MReference.Table_Name);
 		if (createElement) {
 			verifyPackOutRequirement(m_Reference);
 			addTypeName(atts, "table");
@@ -130,41 +126,18 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 			}
 		}
 
-		if (m_Reference.getValidationType().compareTo("L") == 0) {
-			String sql1 = "SELECT AD_REF_LIST_ID FROM AD_Ref_List WHERE AD_Reference_ID= "
-					+ Reference_id;
-
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-
-			try {
-				pstmt = DB.prepareStatement(sql1, getTrxName(ctx));
-				rs = pstmt.executeQuery();
-
-				while (rs.next()) {
-					createReferenceList(ctx, document, rs.getInt("AD_REF_LIST_ID"));
-				}
-			}
-			catch (Exception e) {
-				log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-				if (e instanceof SAXException)
-					throw (SAXException) e;
-				else if (e instanceof SQLException)
-					throw new DatabaseAccessException("Failed to export Reference.", e);
-				else if (e instanceof RuntimeException)
-					throw (RuntimeException) e;
-				else
-					throw new RuntimeException("Failed to export Reference.", e);
-			} finally {
-				DB.close(rs, pstmt);
+		if (MReference.VALIDATIONTYPE_ListValidation.equals(m_Reference.getValidationType())) {
+			int[] rls = DB.getIDsEx(getTrxName(ctx), "SELECT AD_Ref_List_ID FROM AD_Ref_List WHERE AD_Reference_ID=?", Reference_id);
+			for (int rl : rls) {
+				createReferenceList(ctx, document, rl);
 			}
 
-		} else if (m_Reference.getValidationType().compareTo("T") == 0) {
+		} else if (MReference.VALIDATIONTYPE_TableValidation.equals(m_Reference.getValidationType())) {
 			createReferenceTable(ctx, document, Reference_id);
 		}
 
 		if (createElement) {
-			document.endElement("", "", X_AD_Reference.Table_Name);
+			document.endElement("", "", MReference.Table_Name);
 		}
 	}
 
@@ -185,8 +158,8 @@ public class ReferenceElementHandler extends AbstractElementHandler {
 	}
 
 	private void createReferenceBinding(PIPOContext ctx, TransformerHandler document,
-			X_AD_Reference m_Reference) {
-		List<String> excludes = defaultExcludeList(X_AD_Reference.Table_Name);
+			MReference m_Reference) {
+		List<String> excludes = defaultExcludeList(MReference.Table_Name);
 		PoExporter filler = new PoExporter(ctx, document, m_Reference);
 		if (m_Reference.getAD_Reference_ID() <= PackOut.MAX_OFFICIAL_ID)
 			filler.add("AD_Reference_ID", new AttributesImpl());

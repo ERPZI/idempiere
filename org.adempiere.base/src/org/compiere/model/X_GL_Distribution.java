@@ -25,14 +25,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for GL_Distribution
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_GL_Distribution extends PO implements I_GL_Distribution, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20200820L;
 
     /** Standard Constructor */
     public X_GL_Distribution (Properties ctx, int GL_Distribution_ID, String trxName)
@@ -74,6 +74,8 @@ public class X_GL_Distribution extends PO implements I_GL_Distribution, I_Persis
 // N
 			setName (null);
 			setPercentTotal (Env.ZERO);
+			setSeqNo (0);
+// 0
         } */
     }
 
@@ -984,6 +986,26 @@ public class X_GL_Distribution extends PO implements I_GL_Distribution, I_Persis
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Sequence.
+		@param SeqNo 
+		Method of ordering records; lowest number comes first
+	  */
+	public void setSeqNo (int SeqNo)
+	{
+		set_Value (COLUMNNAME_SeqNo, Integer.valueOf(SeqNo));
+	}
+
+	/** Get Sequence.
+		@return Method of ordering records; lowest number comes first
+	  */
+	public int getSeqNo () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SeqNo);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException

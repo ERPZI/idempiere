@@ -26,14 +26,14 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Project
  *  @author iDempiere (generated) 
- *  @version Release 6.2 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_C_Project extends PO implements I_C_Project, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190106L;
+	private static final long serialVersionUID = 20200327L;
 
     /** Standard Constructor */
     public X_C_Project (Properties ctx, int C_Project_ID, String trxName)
@@ -451,17 +451,23 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 		@param C_ProjectType_ID 
 		Type of the project
 	  */
-	public void setC_ProjectType_ID (String C_ProjectType_ID)
+	public void setC_ProjectType_ID (int C_ProjectType_ID)
 	{
-		set_Value (COLUMNNAME_C_ProjectType_ID, C_ProjectType_ID);
+		if (C_ProjectType_ID < 1) 
+			set_Value (COLUMNNAME_C_ProjectType_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_ProjectType_ID, Integer.valueOf(C_ProjectType_ID));
 	}
 
 	/** Get Project Type.
 		@return Type of the project
 	  */
-	public String getC_ProjectType_ID () 
+	public int getC_ProjectType_ID () 
 	{
-		return (String)get_Value(COLUMNNAME_C_ProjectType_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set C_Project_UU.

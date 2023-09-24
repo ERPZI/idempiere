@@ -58,7 +58,7 @@ public class BroadcastMessageWindow extends Window implements IBroadcastMsgPopup
 	 */
 	private static final long serialVersionUID = 1849434312706721390L;
 
-	private static CLogger log = CLogger.getCLogger(BroadcastMessageWindow.class);
+	private static final CLogger log = CLogger.getCLogger(BroadcastMessageWindow.class);
 	public static final int PRESSED_PREV = 1;
 	public static final int PRESSED_NEXT = 2;
 	public static final int UPDATE_CurrMsg = 0;
@@ -113,6 +113,7 @@ public class BroadcastMessageWindow extends Window implements IBroadcastMsgPopup
 		Div htmlDiv = new Div();
 		//textMsgContent = new Label();
 		htmlDiv.appendChild(textMsgContent);
+		center.setAutoscroll(true);
 		textMsgContent.setContent(mbMessages.get(0).get_Translation(MBroadcastMessage.COLUMNNAME_BroadcastMessage));
 		htmlDiv.setFocus(true);
 		htmlDiv.setStyle("display: table-cell; vertical-align: middle; text-align: center;");

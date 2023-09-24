@@ -104,7 +104,7 @@ public class ModelInterfaceGenerator
 		+" *****************************************************************************/\n";
 
 	/** Logger */
-	private static CLogger log = CLogger.getCLogger(ModelInterfaceGenerator.class);
+	private static final CLogger log = CLogger.getCLogger(ModelInterfaceGenerator.class);
 
 	public ModelInterfaceGenerator(int AD_Table_ID, String directory, String packageName) {
 		this.packageName = packageName;
@@ -532,6 +532,10 @@ public class ModelInterfaceGenerator
 			}
 			//
 			return getClass(columnName, displayType, AD_Reference_ID); // recursive call with new parameters
+		}
+		else if (displayType == DisplayType.Button && columnName.endsWith("_ID"))
+		{
+			return Integer.class;
 		}
 		else
 		{

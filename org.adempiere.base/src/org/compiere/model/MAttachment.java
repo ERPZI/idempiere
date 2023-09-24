@@ -20,12 +20,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Target;
+import org.apache.tools.ant.taskdefs.Zip;
+import org.compiere.tools.FileUtil;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -50,7 +57,7 @@ public class MAttachment extends X_AD_Attachment
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8261865873158774665L;
+	private static final long serialVersionUID = -1685512419870004665L;
 
 	/**
 	 * 
@@ -496,27 +503,19 @@ public class MAttachment extends X_AD_Attachment
 	}	//	beforeSave
 
 	/**
-	 * 	Executed before Delete operation.
-	 *	@return true if record can be deleted
-	 */
-	protected boolean beforeDelete ()
-	{
-		return deleteLOBData();
-	}
-	
-	/**
 	 * 	Delete Entry Data in Zip File format
 	 *	@return true if saved
 	 */
-	private boolean deleteLOBData()
+	@Override
+	protected boolean postDelete()
 	{
 		if (m_items == null)
 			loadLOBData();
 		IAttachmentStore prov = provider.getAttachmentStore();
 		if (prov != null)
 			return prov.delete(this,provider);
-		return false;
-	} 	//	beforeDelete
+		return true;
+	} 	//	postDelete
 	
 	/**************************************************************************
 	 * 	Test
@@ -631,6 +630,69 @@ public class MAttachment extends X_AD_Attachment
 		String sql="SELECT AD_Attachment_ID FROM AD_Attachment WHERE AD_Table_ID=? AND Record_ID=?";
 		int attachid = DB.getSQLValue(null, sql, Table_ID, Record_ID);
 		return attachid;
+	}
+
+	public File saveAsZip() {
+		if (getEntryCount() < 1) {
+			return null;
+		}
+
+		String name = MTable.get(Env.getCtx(), getAD_Table_ID()).getTableName() + "_" + getRecord_ID();
+
+		File tempfolder = null; 
+		try {
+			Path tempPath = Files.createTempDirectory(name);
+			tempfolder = tempPath.toFile();
+		} catch (IOException e1) {
+			throw new AdempiereException("Unable to create temp folder", e1);
+		}
+
+		File destZipFile = null;
+		try {
+			destZipFile = File.createTempFile(name, ".zip");
+		} catch (Throwable e) {
+			throw new AdempiereException("Unable to create temp file", e);
+		}
+		destZipFile.delete();
+
+		MAttachmentEntry[] entries = getEntries();
+		MAttachmentEntry entry = null;
+		int index = 0;
+
+		for (int i = 0; i < entries.length; i++) {
+			entry = entries[i];
+			index = i;
+			File destinationFile = new File(tempfolder, entry.getName());
+			FileUtil.copy(this, destinationFile, index);
+		}	
+
+		Zip zipper = new Zip();
+		zipper.setDestFile(destZipFile);
+		zipper.setBasedir(tempfolder);
+		zipper.setUpdate(true);
+		zipper.setCompress(true);
+		zipper.setCaseSensitive(false);
+		zipper.setFilesonly(true);
+		zipper.setTaskName("zip");
+		zipper.setTaskType("zip");
+		zipper.setProject(new Project());
+		zipper.setOwningTarget(new Target());
+		zipper.execute();
+
+		try {
+			FileUtil.deleteDirectory(tempfolder);
+		} catch (IOException e) {}
+		
+		return destZipFile;
+	}
+
+	/**
+	 * Set Storage Provider
+	 * Used temporarily for the process to migrate storage provider
+	 * @param Storage provider
+	 */
+	public void setStorageProvider(MStorageProvider p) {
+		provider = p;
 	}
 
 }	//	MAttachment

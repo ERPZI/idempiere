@@ -1117,7 +1117,12 @@ public class MInvoice extends X_C_Invoice implements DocAction
 	 */
 	public String getDocumentInfo()
 	{
-		MDocType dt = MDocType.get(getCtx(), getC_DocType_ID());
+		MDocType dt;
+		if (getC_DocType_ID() == 0) {
+			dt = MDocType.get(getCtx(), getC_DocTypeTarget_ID());
+		} else {
+			dt = MDocType.get(getCtx(), getC_DocType_ID());
+		}
 		StringBuilder msgreturn = new StringBuilder().append(dt.getNameTrl()).append(" ").append(getDocumentNo());
 		return msgreturn.toString();
 	}	//	getDocumentInfo
@@ -1832,20 +1837,25 @@ public class MInvoice extends X_C_Invoice implements DocAction
 				&& !isReversal())
 			{
 				MInOutLine receiptLine = new MInOutLine (getCtx(),line.getM_InOutLine_ID(), get_TrxName());
-				BigDecimal movementQty = receiptLine.getM_InOut().getMovementType().charAt(1) == '-' ? receiptLine.getMovementQty().negate() : receiptLine.getMovementQty();
-				BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();
+				MInOut receipt = receiptLine.getParent();
 
-				if (movementQty.compareTo(matchQty) < 0)
-					matchQty = movementQty;
+				if (receipt.isProcessed()){
 
-				MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
-				if (!inv.save(get_TrxName()))
-				{
-					m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
-					return DocAction.STATUS_Invalid;
+					BigDecimal movementQty = receiptLine.getM_InOut().getMovementType().charAt(1) == '-' ? receiptLine.getMovementQty().negate() : receiptLine.getMovementQty();
+					BigDecimal matchQty = isCreditMemo() ? line.getQtyInvoiced().negate() : line.getQtyInvoiced();
+
+					if (movementQty.compareTo(matchQty) < 0)
+						matchQty = movementQty;
+
+					MMatchInv inv = new MMatchInv(line, getDateInvoiced(), matchQty);
+					if (!inv.save(get_TrxName()))
+					{
+						m_processMsg = CLogger.retrieveErrorString("Could not create Invoice Matching");
+						return DocAction.STATUS_Invalid;
+					}
+					matchInv++;
+					addDocsPostProcess(inv);
 				}
-				matchInv++;
-				addDocsPostProcess(inv);
 			}
 					
 			//	Update Order Line
@@ -2205,7 +2215,7 @@ public class MInvoice extends X_C_Invoice implements DocAction
 			return null;
 		//	Business Partner needs to be linked to Org
 		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), null);
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID();
 		if (counterAD_Org_ID == 0)
 			return null;
 

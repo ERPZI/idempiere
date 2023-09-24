@@ -40,7 +40,7 @@ import org.compiere.util.Env;
  */
 public class GridTabWrapper implements InvocationHandler
 {
-	private CLogger log = CLogger.getCLogger(getClass());
+	private static final CLogger log = CLogger.getCLogger(GridTabWrapper.class);
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T create(GridTab gridTab, Class<T> cl)
@@ -133,7 +133,7 @@ public class GridTabWrapper implements InvocationHandler
 	
 	private final String getTrxName()
 	{
-		return null;
+		return getGridTab().getTableModel().get_TrxName();
 	}
 	
 	/**

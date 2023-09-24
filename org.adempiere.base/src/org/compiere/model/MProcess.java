@@ -106,7 +106,7 @@ public class MProcess extends X_AD_Process
 	/**	Cache ID						*/
 	private static CCache<Integer,MProcess>	s_cache	= new CCache<Integer,MProcess>(Table_Name, 20);
 	/**	Cache UUID						*/
-	private static CCache<String,MProcess>	s_cacheUU	= new CCache<String,MProcess>(Table_Name, 20);
+	private static CCache<String,MProcess>	s_cacheUU	= new CCache<String,MProcess>(Table_Name, Table_Name+"|AD_Process_UU", 20);
 	
 	
 	/**************************************************************************
@@ -157,6 +157,7 @@ public class MProcess extends X_AD_Process
 		final String whereClause = MProcessPara.COLUMNNAME_AD_Process_ID+"=?";
 		List<MProcessPara> list = new Query(getCtx(), I_AD_Process_Para.Table_Name, whereClause, get_TrxName())
 			.setParameters(get_ID())
+			.setOnlyActiveRecords(true)
 			.setOrderBy(MProcessPara.COLUMNNAME_SeqNo)
 			.list();
 		//

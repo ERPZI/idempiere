@@ -112,7 +112,7 @@ public class DB_PostgreSQL implements AdempiereDatabase
 	private String          		m_connectionURL;
 
 	/**	Logger			*/
-	private static CLogger			log	= CLogger.getCLogger (DB_PostgreSQL.class);
+	private static final CLogger			log	= CLogger.getCLogger (DB_PostgreSQL.class);
 
     private static int              m_maxbusyconnections = 0;
 
@@ -1144,5 +1144,33 @@ public class DB_PostgreSQL implements AdempiereDatabase
 		if (toIndex == -1)
 			return info;
 		return info.substring(fromIndex + 1, toIndex);
+	}
+
+	@Override
+	public String subsetClauseForCSV(String columnName, String csv) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("string_to_array(")
+			.append(columnName)
+			.append(",',')");
+		builder.append(" <@ "); //is contained by
+		builder.append("string_to_array('")
+			.append(csv)
+			.append("',',')");
+
+		return builder.toString();
+	}
+
+	@Override
+	public String intersectClauseForCSV(String columnName, String csv) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("string_to_array(")
+			.append(columnName)
+			.append(",',')");
+		builder.append(" && "); //is contained by
+		builder.append("string_to_array('")
+			.append(csv)
+			.append("',',')");
+
+		return builder.toString();
 	}
 }   //  DB_PostgreSQL

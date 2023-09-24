@@ -19,7 +19,6 @@ package org.adempiere.webui.panel;
 
 import org.adempiere.webui.AdempiereWebUI;
 import org.adempiere.webui.LayoutUtils;
-import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.session.SessionManager;
@@ -208,7 +207,7 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
     		statusLine.setStyle("color: black");
     	statusLine.setTooltiptext(text);
 
-    	if (showPopup && AEnv.isBrowserSupported())
+    	if (showPopup)
     	{
 	    	Text t = new Text(text);
 	    	popupContent.getChildren().clear();
@@ -322,7 +321,7 @@ public class StatusBarPanel extends Panel implements EventListener<Event>, IStat
 				return;
 
 			String title = Msg.getMsg(Env.getCtx(), "Who") + m_text;
-			new WRecordInfo (title, m_dse);
+			new WRecordInfo (title, m_dse, null);
 		}
 		else if (Events.ON_CLICK.equals(event.getName()) && event.getTarget() == popup)
 		{

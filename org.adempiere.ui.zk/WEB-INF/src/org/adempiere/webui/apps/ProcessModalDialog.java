@@ -54,7 +54,7 @@ public class ProcessModalDialog extends AbstractProcessDialog implements EventLi
 	private static final String ON_OK_ECHO = "onOkEcho";
 	
 	/**	Logger			*/
-	private static CLogger log = CLogger.getCLogger(ProcessModalDialog.class);
+	private static final CLogger log = CLogger.getCLogger(ProcessModalDialog.class);
 	//
 	private String orientation;
 
@@ -176,6 +176,15 @@ public class ProcessModalDialog extends AbstractProcessDialog implements EventLi
 		getParameterPanel().restoreContext();
 		this.detach();
 	}	//	dispose
+	
+	@Override
+	public void autoStart() 	
+	{	
+		this.setBorder("none");	
+		this.setTitle(null);
+		this.getFirstChild().setVisible(false);	
+		super.autoStart();	
+	}	
 
 	@Override
 	public void showBusyDialog() {

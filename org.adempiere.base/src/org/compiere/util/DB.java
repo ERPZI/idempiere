@@ -402,6 +402,18 @@ public final class DB
 	}	//	getConnectionRO
 
 	/**
+	 *	Return a replica connection if possible, otherwise read committed, read/only from pool.
+	 *  @return Connection (r/o)
+	 */
+	public static Connection getReportingConnectionRO ()
+	{
+		Connection conn = DBReadReplica.getConnectionRO();
+		if (conn == null)
+			conn = getConnectionRO();
+        return conn;
+	}	//	getReportingConnectionRO
+
+	/**
 	 *	Create new Connection.
 	 *  The connection must be closed explicitly by the application
 	 *
@@ -1811,33 +1823,8 @@ public final class DB
 	 * 	@param trxName optional Transaction Name
 	 *  @return next no
 	 */
-	@SuppressWarnings("deprecation")
 	public static int getNextID (int AD_Client_ID, String TableName, String trxName)
 	{
-		boolean SYSTEM_NATIVE_SEQUENCE = MSysConfig.getBooleanValue(MSysConfig.SYSTEM_NATIVE_SEQUENCE,false);
-		//	Check AdempiereSys
-		boolean adempiereSys = false;
-		if (Ini.isClient()) 
-		{
-			adempiereSys = Ini.isPropertyBool(Ini.P_ADEMPIERESYS);
-		} 
-		else
-		{
-			String sysProperty = Env.getCtx().getProperty("AdempiereSys", "N");
-			adempiereSys = "y".equalsIgnoreCase(sysProperty) || "true".equalsIgnoreCase(sysProperty);
-		}
-
-		if(SYSTEM_NATIVE_SEQUENCE && !adempiereSys)
-		{
-			int m_sequence_id = CConnection.get().getDatabase().getNextID(TableName+"_SQ", trxName);
-			if (m_sequence_id == -1) {
-				// try to create the sequence and try again
-				MSequence.createTableSequence(Env.getCtx(), TableName, trxName, true);
-				m_sequence_id = CConnection.get().getDatabase().getNextID(TableName+"_SQ", trxName);
-			}
-			return m_sequence_id;
-		}
-
 		return MSequence.getNextID (AD_Client_ID, TableName, trxName); // it is ok to call deprecated method here
 	}	//	getNextID
 
@@ -2578,4 +2565,57 @@ public final class DB
 		return ProxyFactory.newCPreparedStatement(resultSetType, resultSetConcurrency, sql, trxName);
 	}
 
+	/**
+	 * @param columnName
+	 * @param csv comma separated value
+	 * @return IN clause
+	 */
+	public static String inClauseForCSV(String columnName, String csv) 
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(columnName).append(" IN (");
+		String[] values = csv.split("[,]");
+		for(int i = 0; i < values.length; i++)
+		{
+			if (i > 0)
+				builder.append(",");
+			String key = values[i];
+			if (columnName.endsWith("_ID")) 
+			{
+				builder.append(key);
+			}
+			else
+			{
+				if (key.startsWith("\"") && key.endsWith("\"")) 
+				{
+					key = key.substring(1, key.length()-1);
+				}
+				builder.append(TO_STRING(key));
+			}
+		}
+		builder.append(")");
+		return builder.toString();
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param csv
+	 * @return subset sql clause
+	 */
+	public static String subsetClauseForCSV(String columnName, String csv)
+	{
+		return getDatabase().subsetClauseForCSV(columnName, csv);
+	}
+	
+	/**
+	 * 
+	 * @param columnName
+	 * @param csv
+	 * @return intersect sql clause
+	 */
+	public static String intersectClauseForCSV(String columnName, String csv)
+	{
+		return getDatabase().intersectClauseForCSV(columnName, csv);
+	}
 }	//	DB

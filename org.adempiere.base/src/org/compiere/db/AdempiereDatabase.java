@@ -339,5 +339,26 @@ public interface AdempiereDatabase
 	
 	public String getNameOfUniqueConstraintError(Exception e);
 
+	/**
+	 * @param columnName
+	 * @param csv comma separated value
+	 * @return subset sql clause
+	 */
+	public String subsetClauseForCSV(String columnName, String csv);
+	
+	/**
+	 * @param columnName
+	 * @param csv comma separated value
+	 * @return subset sql clause
+	 */
+	public String intersectClauseForCSV(String columnName, String csv);
+
+	/**
+	 * @return variable length character data type suffix
+	 */
+	public default String getVarcharLengthSuffix() {
+		return "";
+	};
+
 }   //  AdempiereDatabase
 

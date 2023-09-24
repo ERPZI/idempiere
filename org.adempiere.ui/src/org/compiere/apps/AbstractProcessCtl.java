@@ -82,7 +82,7 @@ public abstract class AbstractProcessCtl implements Runnable
 	private boolean 		m_IsServerProcess = false;
 	
 	/**	Static Logger	*/
-	private static CLogger	log	= CLogger.getCLogger (AbstractProcessCtl.class);
+	private static final CLogger	log	= CLogger.getCLogger (AbstractProcessCtl.class);
 	
 	/**
 	 * Run this process in a new thread
@@ -208,6 +208,11 @@ public abstract class AbstractProcessCtl implements Runnable
 		if (AD_Workflow_ID > 0)	
 		{
 			startWorkflow (AD_Workflow_ID);
+			MPInstance pinstance = new MPInstance(Env.getCtx(), m_pi.getAD_PInstance_ID(), null);
+			String errmsg = m_pi.getSummary();
+			pinstance.setResult(m_pi.isError());
+			pinstance.setErrorMsg(errmsg);
+			pinstance.saveEx();
 			unlock();
 			return;
 		}

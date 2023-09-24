@@ -110,7 +110,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 	/**  Image Model            */
 	private MImage      m_mImage = null;
 	/**	Logger					*/
-	private static CLogger log = CLogger.getCLogger(WImageDialog.class);
+	private static final CLogger log = CLogger.getCLogger(WImageDialog.class);
 
 	/** */
 	private Borderlayout mainLayout = new Borderlayout();
@@ -205,6 +205,7 @@ public class WImageDialog extends Window implements EventListener<Event>
 		ZKUpdateUtil.setHflex(image, "true");
 		ZKUpdateUtil.setVflex(image, "true");
 		center.setParent(mainLayout);
+		image.setSclass("image-fit-contain");
 		center.appendChild(image);
 		
 		South south = new South();
