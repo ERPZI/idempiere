@@ -152,7 +152,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return getQty().multiply(getConvertedAmt());
+		return getConvertedAmt();
 	}	//	getApprovalAmt
 	
 	
@@ -192,6 +192,20 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			log.saveError("ParentComplete", Msg.translate(getCtx(), "S_TimeExpense_ID"));
 			return false;
 		}
+		
+		//calculate expense amount
+		if(newRecord || is_ValueChanged(COLUMNNAME_Qty) || is_ValueChanged(COLUMNNAME_PriceEntered))
+		{
+			BigDecimal price = getPriceEntered();
+			if(price == null)
+			{
+				price = Env.ZERO;
+			}
+			
+			BigDecimal expenseAmt = price.multiply(getQty());
+			setExpenseAmt(expenseAmt);
+		}
+		
 		//	Calculate Converted Amount
 
 		//  MPo, 11/4/2015
@@ -319,7 +333,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	{
 		String sql = "UPDATE S_TimeExpense te"
 			+ " SET ApprovalAmt = "
-				+ "(SELECT SUM(Qty*ConvertedAmt) FROM S_TimeExpenseLine tel "
+				+ "(SELECT SUM(ConvertedAmt) FROM S_TimeExpenseLine tel "
 				+ "WHERE te.S_TimeExpense_ID=tel.S_TimeExpense_ID) "
 			+ "WHERE S_TimeExpense_ID=" + getS_TimeExpense_ID();
 		@SuppressWarnings("unused")

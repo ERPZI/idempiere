@@ -103,9 +103,22 @@ public class WColorEditor extends WEditor implements ContextMenuListener
 				+ "border:none !important;margin:0 !important;padding:0 !important;visibility:hidden;");
 		getComponent().appendChild(colorbox);
 
-		colorbox.addEventListener(Events.ON_CHANGE, e -> {
-			processNewValue(colorbox.getValue());
+		colorbox.addEventListener("onInput", e -> {
+			processNewValue((String)e.getData());
 		});
+		
+		colorbox.setWidgetOverride("__doOnInput", "function(evt) {"
+				+ "  let v=this.$n().value;"
+				+ "  this.fire('onInput',v,{toServer:true});"
+				+ "}");
+		colorbox.setWidgetOverride("bind_", "function() {"
+				+ "  this.$supers('bind_',arguments);"
+				+ "  this.domListen_(this.$n(),'oninput','__doOnInput');"
+				+ "}");
+		colorbox.setWidgetOverride("unbind_", "function() {"
+				+ "  this.domUnlisten_(this.$n(),'oninput','__doOnInput');"
+				+ "  this.$supers('unbind_',arguments);"
+				+ "}");
 	}
 
 	private void init()
@@ -225,7 +238,7 @@ public class WColorEditor extends WEditor implements ContextMenuListener
 
 	public void openColorPicker() { // TODO color picker is opening at upper left ; better to open it at center of screen
 		String uid = colorbox.getUuid();
-		String script = "var wgt = zk.Widget.$('#"+uid+"');wgt.$n().click();";
+		String script = "(function(){let wgt = zk.Widget.$('#"+uid+"');wgt.$n().click();})()";
 		Clients.response(new AuScript(script));		
 	}
 

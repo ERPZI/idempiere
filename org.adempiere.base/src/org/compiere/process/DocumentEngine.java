@@ -36,6 +36,7 @@ import org.compiere.acct.Doc;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MBankStatement;
+import org.compiere.model.MBankTransfer;
 import org.compiere.model.MCash;
 import org.compiere.model.MClient;
 import org.compiere.model.MColumn;
@@ -1254,6 +1255,16 @@ public class DocumentEngine implements DocAction
 			if(docStatus.equals(DocumentEngine.STATUS_Completed))
 			{
 				// IDEMPIERE-98 - Implement void for completed RMAs - Diego Ruiz - globalqss
+				options[index++] = DocumentEngine.ACTION_Void;
+			}
+		}
+		/********************
+		 *  Bank Transfer Process
+		 */
+		else if (AD_Table_ID == MBankTransfer.Table_ID)
+		{
+			if(docStatus.equals(DocumentEngine.STATUS_Completed))
+			{
 				options[index++] = DocumentEngine.ACTION_Void;
 			}
 		}

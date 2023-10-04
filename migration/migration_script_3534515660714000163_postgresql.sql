@@ -89,4 +89,3 @@ UPDATE AD_Column SET IsActive='N', IsToolbarButton='N',Updated=TO_TIMESTAMP('201
 
 SELECT register_migration_script('201904101655_IDEMPIERE-3947.sql') FROM dual
 ;
->>>>>>> release-9:migration/i6.2z/postgresql/201904101655_IDEMPIERE-3947.sql

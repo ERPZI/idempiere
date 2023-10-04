@@ -26,7 +26,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelection
  *  @author iDempiere (generated) 
- *  @version Release 9 - $Id$ */
+ *  @version Release 10 - $Id$ */
 @org.adempiere.base.Model(table="C_PaySelection")
 public class X_C_PaySelection extends PO implements I_C_PaySelection, I_Persistent 
 {
@@ -34,7 +34,7 @@ public class X_C_PaySelection extends PO implements I_C_PaySelection, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220904L;
+	private static final long serialVersionUID = 20221224L;
 
     /** Standard Constructor */
     public X_C_PaySelection (Properties ctx, int C_PaySelection_ID, String trxName)

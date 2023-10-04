@@ -47,19 +47,26 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Div;
 
 /**
- * 	Document Status Indicator
+ * 	Document Status ({@link MDocumentStatus}) Indicator
  */
 public class WDocumentStatusIndicator extends Panel implements EventListener<Event> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 794746556509546913L;
+	private static final long serialVersionUID = -9076405331101242792L;
 
 	/**
 	 * 	Constructor
 	 *	@param documentStatus
 	 */
 	public WDocumentStatusIndicator(MDocumentStatus documentStatus)
+	{
+		this(documentStatus, false);
+	}
+	
+	/**
+	 * 	Constructor
+	 *	@param documentStatus
+	 *  @param lazy
+	 */
+	public WDocumentStatusIndicator(MDocumentStatus documentStatus, boolean lazy)
 	{
 		super();
 
@@ -68,8 +75,11 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		init();
 		this.setSclass("activities-box");
 		
-		refresh();
-		updateUI();
+		if (!lazy) 
+		{
+			refresh();
+			updateUI();
+		}
 	}	//	WDocumentStatusIndicator
 
 	private MDocumentStatus		m_documentStatus = null;
@@ -86,7 +96,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 	}	//	getGoal
 
      /**
-	 * 	Init Graph Display
+	 * 	Init Document Status Display
 	 */
 	private void init()
 	{
@@ -140,7 +150,7 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		this.addEventListener(Events.ON_CLICK, this);
 	}
 
-
+	@Override
 	public void onEvent(Event event) throws Exception
 	{
 		int AD_Window_ID = m_documentStatus.getAD_Window_ID();
@@ -161,6 +171,9 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		
 	}
 
+	/**
+	 * Load {@link #m_documentStatus}
+	 */
 	public void refresh() {
 		MDocumentStatus refresh_documentStatus = MDocumentStatus.get(Env.getCtx(), m_documentStatus.getPA_DocumentStatus_ID());
 		if(refresh_documentStatus != null) {
@@ -169,8 +182,19 @@ public class WDocumentStatusIndicator extends Panel implements EventListener<Eve
 		statusCount = MDocumentStatus.evaluate(m_documentStatus);		
 	}
 
+	/**
+	 * Update UI with data loaded in {@link #refresh()}
+	 */
 	public void updateUI() {
 		statusLabel.setText(Integer.toString(statusCount));		
+	}
+
+	/**
+	 * Return the count for this indicator
+	 * @return status count
+	 */
+	public int getStatusCount() {
+		return statusCount;
 	}
 
 }

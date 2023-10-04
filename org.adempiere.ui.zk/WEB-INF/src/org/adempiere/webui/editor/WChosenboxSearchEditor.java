@@ -212,6 +212,10 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
     		return;
     	}
 		
+		if (value != null && value instanceof Integer) {
+			value = value.toString();
+		}
+
     	if (value != null && value instanceof String && !Util.isEmpty((String) value, true))
         {
     		String[] values = ((String)value).split("[,]");
@@ -452,7 +456,7 @@ public class WChosenboxSearchEditor extends WEditor implements ContextMenuListen
 		if (m_tableName == null)	//	sets table name & key column
 			setTableAndKeyColumn();
 
-		final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, null, false, whereClause);
+		final InfoPanel ip = InfoManager.create(lookup, gridField, m_tableName, m_keyColumnName, null, true, whereClause);
 		if (ip != null)
 			showInfoPanel(ip);
 	}
