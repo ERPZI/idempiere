@@ -456,23 +456,8 @@ public class WMatch extends Match
 	 */
 	private void dynInit()
 	{
-		ColumnInfo[] layout = getColumnLayout(); //MERGE CONFLICT
-		/*ColumnInfo[] layout = new ColumnInfo[] {
-			new ColumnInfo(" ",                                         ".", IDColumn.class, false, false, ""),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "DocumentNo"),   ".", String.class),             //  1
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Date"),         ".", Timestamp.class),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "C_BPartner_ID"),".", KeyNamePair.class, "."),   //  3
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
-			//MPo, 26/5/18 add original change: 22/7/2016 Add PrCtr
-			//new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class)
-			new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
-			new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),    //  8
-			new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")   	//  9
-			//
-		};*/
-
+		ColumnInfo[] layout = getColumnLayout(); //MPo, 5/10/23 Move pre-i10 code from here to Match.java MERGE CONFLICT
+		
 		xMatchedTable.prepareTable(layout, "", "", false, "");
 		xMatchedToTable.prepareTable(layout, "", "", true, "");
 

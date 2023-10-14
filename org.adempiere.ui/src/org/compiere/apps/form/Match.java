@@ -336,8 +336,8 @@ public class Match
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID,hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
 				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER
-				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID dt.DocBaseType" //MPo, 25/9/2019 Add PrCtr 
-				+ "HAVING "
+				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID, dt.DocBaseType" //MPo, 25/9/2019 Add PrCtr 
+				+ " HAVING "
 				+ (matched ? "0" : "CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END")
 				+ "<>SUM(NVL(mi.Qty,0))";
 		}
@@ -653,7 +653,10 @@ public class Match
 				new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),
 				new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
 				new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
-				new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class)
+				new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
+				//MPo, 5/10/23 move code from WMatch.java to here 
+				new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),    //  8
+				new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")   	//  9
 			};
 		return layout;
 	}	

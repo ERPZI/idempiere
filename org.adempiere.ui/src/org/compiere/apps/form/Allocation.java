@@ -139,14 +139,10 @@ public class Allocation
 	 */
 	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Timestamp date, String trxName)
 	{		
-		return MPayment.getUnAllocatedPaymentData(m_C_BPartner_ID, m_C_Currency_ID, isMultiCurrency, date, m_AD_Org_ID, trxName);
-		//MPo 2/10/23, MERGE CONFLICT
-		/*
-		//MPo, 19/7/2016 Add PrCtr
-		//if (m_User1_ID != 0) MPo, 17/7/2017
-			sql.append(" AND p.User1_ID=" + m_User1_ID);
+		//MPo, 5/10/23 Add PrCtr
+		//return MPayment.getUnAllocatedPaymentData(m_C_BPartner_ID, m_C_Currency_ID, isMultiCurrency, date, m_AD_Org_ID, trxName);
+		return MPayment.getUnAllocatedPaymentData(m_C_BPartner_ID, m_C_Currency_ID, isMultiCurrency, date, m_AD_Org_ID, m_User1_ID, trxName);
 		//
-		*/
 	}
 	
 	/**
@@ -221,14 +217,10 @@ public class Allocation
 	 */
 	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Timestamp date, String trxName)
 	{
-		return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, trxName);
-		//MPo 2/10/23, MERGE CONFLICT
-		/*
-		//MPo, 19/7/2016
-		//if (m_User1_ID != 0 ) MPo, 17/7/17 
-			sql.append(" AND i.User1_ID=" + m_User1_ID);
+		//MPo, 5/10/23 Add PrCtr Selection
+		//return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, trxName);
+		return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, m_User1_ID, trxName);
 		//
-		*/
 	}
 
 	/**

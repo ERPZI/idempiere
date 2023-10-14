@@ -3181,8 +3181,12 @@ public class MPayment extends X_C_Payment
 	 * @param trxName optional transaction name
 	 * @return list of unallocated payment records
 	 */
-	public static Vector<Vector<Object>> getUnAllocatedPaymentData(int C_BPartner_ID, int C_Currency_ID, boolean isMultiCurrency, 
-			Timestamp date, int AD_Org_ID, String trxName)
+	
+	public static Vector<Vector<Object>> getUnAllocatedPaymentData(int C_BPartner_ID, int C_Currency_ID, boolean isMultiCurrency,
+			//MPo, 5/10/23 Add PrCtr
+			//Timestamp date, int AD_Org_ID, String trxName)
+			Timestamp date, int AD_Org_ID, int User1_ID, String trxName)
+			//
 	{
 		if (C_Currency_ID==0)
 			C_Currency_ID = Env.getContextAsInt(Env.getCtx(), Env.C_CURRENCY_ID);   //  default
@@ -3207,6 +3211,10 @@ public class MPayment extends X_C_Payment
 			sql.append(" AND p.C_Currency_ID=?");				//      #6
 		if (AD_Org_ID != 0 )
 			sql.append(" AND p.AD_Org_ID=" + AD_Org_ID);
+		//MPo, 5/10/23 Add PrCtr
+		if (User1_ID != 0 )
+			sql.append(" AND p.User1_ID=" + User1_ID);
+		//
 		sql.append(" ORDER BY p.DateTrx,p.DocumentNo");
 		
 		// role security

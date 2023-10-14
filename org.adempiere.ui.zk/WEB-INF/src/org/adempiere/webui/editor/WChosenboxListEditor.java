@@ -45,7 +45,6 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
-import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MRefList;
 import org.compiere.util.CCache;

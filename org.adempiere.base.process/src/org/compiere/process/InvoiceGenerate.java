@@ -127,8 +127,8 @@ public class InvoiceGenerate extends SvrProcess
 				p_docAction = (String)para[i].getParameter();
 			else if (name.equals("MinimumAmt"))
 				p_MinimumAmt = para[i].getParameterAsBigDecimal();
-			//MPo, 4/8/2016 Add Document Type
-			else if (name.equals("DocType"))
+			//MPo, 11/10/23
+			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			//
 			else
@@ -404,8 +404,6 @@ public class InvoiceGenerate extends SvrProcess
 				throw new AdempiereException(e);
 			}
 			//MPo, 4/8/2016
-			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
-			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
 			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
 			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
 			//
@@ -441,8 +439,6 @@ public class InvoiceGenerate extends SvrProcess
 				throw new AdempiereException(e);
 			}
 			//MPo, 4/8/2016
-			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
-			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
 			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
 			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
 			//

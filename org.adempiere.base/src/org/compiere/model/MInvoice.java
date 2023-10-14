@@ -2952,8 +2952,12 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 	 * @param trxName optional trx name
 	 * @return list of unpaid invoice data
 	 */
+	
 	public static Vector<Vector<Object>> getUnpaidInvoiceData(boolean isMultiCurrency, Timestamp date, int AD_Org_ID, int C_Currency_ID, 
-			int C_BPartner_ID, String trxName)
+			//MPo, 5/10/23
+			//		int C_BPartner_ID, String trxName)
+			int C_BPartner_ID, int User1_ID, String trxName)
+	//
 	{
 		/********************************
 		 *  Load unpaid Invoices
@@ -2987,6 +2991,10 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 			sql.append(" AND i.C_Currency_ID=?");                                   //  #8
 		if (AD_Org_ID != 0 ) 
 			sql.append(" AND i.AD_Org_ID=" + AD_Org_ID);
+		//MPo, 5/10/23 Add PrCtr
+		if (User1_ID != 0 )
+			sql.append(" AND i.User1_ID=" + User1_ID);
+		//
 		sql.append(" ORDER BY i.DateInvoiced, i.DocumentNo");
 		if (s_log.isLoggable(Level.FINE)) s_log.fine("InvSQL=" + sql.toString());
 		
