@@ -74,8 +74,8 @@ public class InvoiceGenerateRMA extends SvrProcess
                 p_Selection = "Y".equals(para[i].getParameter());
             else if (name.equals("DocAction"))
                 p_docAction = (String)para[i].getParameter();
-            //MPo, 8/8/2016 Add Document Type
-			else if (name.equals("DocType"))
+            //MPo, 25/10/23 Add Document Type
+			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			//
             else
@@ -152,7 +152,7 @@ public class InvoiceGenerateRMA extends SvrProcess
         MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
         invoice.setRMA(rma);
         
-        //MPo, 8/8/2016 Overwrite document from selected DocType
+        //MPo, 25/10/23 Overwrite document from selected DocType
         //invoice.setC_DocTypeTarget_ID(docTypeId);
         invoice.setC_DocTypeTarget_ID(p_C_DocType_ID);
         invoice.setZI_Branch_ID(rma.getZI_Branch_ID());
