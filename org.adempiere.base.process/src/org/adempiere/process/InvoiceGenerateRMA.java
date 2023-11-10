@@ -72,6 +72,8 @@ public class InvoiceGenerateRMA extends SvrProcess
                 ;
             else if (name.equals("Selection"))
                 p_Selection = "Y".equals(para[i].getParameter());
+            else if (name.equals("DateInvoiced"))
+            	m_dateinvoiced = (Timestamp)para[i].getParameter();
             else if (name.equals("DocAction"))
                 p_docAction = (String)para[i].getParameter();
             //MPo, 25/10/23 Add Document Type
@@ -82,10 +84,12 @@ public class InvoiceGenerateRMA extends SvrProcess
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
         }
         
-    	m_dateinvoiced = Env.getContextAsDate(getCtx(), Env.DATE);
-        if (m_dateinvoiced == null)
-        {
-        	m_dateinvoiced = new Timestamp(System.currentTimeMillis());
+        if (m_dateinvoiced == null) {
+	    	m_dateinvoiced = Env.getContextAsDate(getCtx(), Env.DATE);
+	        if (m_dateinvoiced == null)
+	        {
+	        	m_dateinvoiced = new Timestamp(System.currentTimeMillis());
+	        }
         }
         if (getProcessInfo().getAD_InfoWindow_ID() > 0) p_Selection=true;
     }
@@ -157,6 +161,8 @@ public class InvoiceGenerateRMA extends SvrProcess
         invoice.setC_DocTypeTarget_ID(p_C_DocType_ID);
         invoice.setZI_Branch_ID(rma.getZI_Branch_ID());
         //
+        invoice.setDateInvoiced(m_dateinvoiced);
+        invoice.setDateAcct(m_dateinvoiced);
         if (!invoice.save())
         {
             throw new IllegalStateException("Could not create invoice");
