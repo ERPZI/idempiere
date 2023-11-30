@@ -152,7 +152,9 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	 */
 	public BigDecimal getApprovalAmt()
 	{
-		return getConvertedAmt();
+		//MPo, 30/11/23
+		//return getConvertedAmt();
+		return getLineNetAmt();
 	}	//	getApprovalAmt
 	
 	
