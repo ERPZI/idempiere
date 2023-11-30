@@ -39,7 +39,10 @@ public class CalloutTimeExpense extends CalloutEngine
 	/**
 	 *	Expense Report Line
 	 *		- called from M_Product_ID, S_ResourceAssignment_ID
-	 *		- set Price
+	 //MPo, 30/11/23 revert trunk change
+	 //		- set Price
+	 *		- set ExpenseAmt
+	 //
 	 *  @param ctx context
 	 *  @param WindowNo current Window No
 	 *  @param mTab Grid Tab
@@ -165,7 +168,9 @@ public class CalloutTimeExpense extends CalloutEngine
 		//	finish
 		if (priceActual == null)
 			priceActual = Env.ZERO;
-		mTab.setValue("PriceEntered", priceActual);
+		//MPo, 30/11/23
+		//mTab.setValue("PriceEntered", priceActual);
+		mTab.setValue("ExpenseAmt", priceActual);
 		return "";
 	}	//	Expense_Product
 
@@ -208,7 +213,7 @@ public class CalloutTimeExpense extends CalloutEngine
 
 		return "";
 	}	//	Expense_Amount
-	
+	//MPo, 30/11/23 revert trunk changes
 	/**
 	 *	Price or Quantity.
 	 *		- called from Price, Quantity
@@ -219,7 +224,7 @@ public class CalloutTimeExpense extends CalloutEngine
 	 *  @param mField Grid Field
 	 *  @param value New Value
 	 *  @return null or error message
-	 */
+	 
 	public String priceOrQty(Properties ctx, int WindowNo, GridTab mTab, GridField mField, Object value)
 	{
 		BigDecimal qty = Env.ZERO;
@@ -252,5 +257,5 @@ public class CalloutTimeExpense extends CalloutEngine
 
 		return "";
 	} // Price or Quantity
-
+	*/
 }	//	CalloutTimeExpense
