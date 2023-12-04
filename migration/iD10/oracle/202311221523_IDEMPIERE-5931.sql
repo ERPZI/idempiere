@@ -143,4 +143,3 @@ AND NOT EXISTS (SELECT 1
 	WHERE RL.m_rma_id = rma.m_rma_id
     AND OIO.docstatus IN ('IP', 'CO', 'CL'))
 ;
-
