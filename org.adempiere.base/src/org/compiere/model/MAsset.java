@@ -395,8 +395,8 @@ public class MAsset extends X_A_Asset {
 			DB.executeUpdateEx("UPDATE A_Asset SET IsDepreciated='" + isDepreciated + "', isOwned ='" + isOwned + "' WHERE A_Asset_ID=" + getA_Asset_ID(), get_TrxName());
 			//end @win
 			
-			// for each asset group acounting create an asset accounting and a workfile too
-			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID()))
+			// for each asset group accounting create an asset accounting and a workfile too
+			for (MAssetGroupAcct assetgrpacct :  MAssetGroupAcct.forA_Asset_Group_ID(getCtx(), getA_Asset_Group_ID(), null, get_TrxName()))
 			{			
 				if (assetgrpacct.getAD_Org_ID() == 0 || assetgrpacct.getAD_Org_ID() == getAD_Org_ID()) 
 				{
@@ -411,11 +411,11 @@ public class MAsset extends X_A_Asset {
 					// Asset Depreciation Workfile
 					MDepreciationWorkfile assetwk = new MDepreciationWorkfile(this, assetacct.getPostingType(), assetgrpacct);
 					assetwk.setAD_Org_ID(getAD_Org_ID()); //added by @win
-					//MPo, 1/12/18
+					//MPo, 3/10/23 i10, change Integer to BigDecimal
 					if (this.getUseLifeMonths() > 0) {
-						assetwk.setUseLifeYears(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeYears(BigDecimal.valueOf(this.getUseLifeMonths()/12));
 						assetwk.setUseLifeMonths(this.getUseLifeMonths());
-						assetwk.setUseLifeYears_F(Integer.valueOf(this.getUseLifeMonths()/12));
+						assetwk.setUseLifeYears_F(BigDecimal.valueOf(this.getUseLifeMonths()/12));
 						assetwk.setUseLifeMonths_F(this.getUseLifeMonths_F());
 					} else {
 					//

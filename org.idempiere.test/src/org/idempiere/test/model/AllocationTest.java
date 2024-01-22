@@ -43,6 +43,7 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAllocationLine;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MBankAccount;
+import org.compiere.model.MClient;
 import org.compiere.model.MConversionRate;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MDocType;
@@ -56,16 +57,22 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogErrorBuffer;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 import org.compiere.wf.MWorkflow;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.ConversionRateHelper;
+import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 /**
  * @author Carlos Ruiz - globalqss
  *
  */
+@Isolated
 public class AllocationTest extends AbstractTestCase {
 
 	/**
@@ -73,15 +80,7 @@ public class AllocationTest extends AbstractTestCase {
 	 */
 	public AllocationTest() {
 	}
-
-	final static int BP_C_AND_W = 117;
-	final static int BP_TREEFARM = 114;
 	
-	final static int PAYMENT_TERM_IMMEDIATE = 105;
-	final static int CHARGE_FREIGHT = 200000;
-	final static int CURRENCY_USD = 100;
-	final static int BANK_ACCOUNT_1234 = 100;
-
 	/**
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4567
 	 */
@@ -96,19 +95,19 @@ public class AllocationTest extends AbstractTestCase {
 		String trxName = getTrxName();
 
 		// Get the OpenBalance of C&W
-		MBPartner bpartner = new MBPartner(ctx, BP_C_AND_W, trxName);
+		MBPartner bpartner = new MBPartner(ctx, DictionaryIDs.C_BPartner.C_AND_W.id, trxName);
 		BigDecimal initialBalance = bpartner.getTotalOpenBalance();
 
 		// Pay $100
 		MPayment payment1 = new MPayment(ctx, 0, trxName);
-		payment1.setC_BPartner_ID(BP_C_AND_W);
+		payment1.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id);
 		payment1.setC_DocType_ID(true); // Receipt
 		payment1.setDocStatus(DocAction.STATUS_Drafted);
 		payment1.setDocAction(DocAction.ACTION_Complete);
 		payment1.setPayAmt(Env.ONEHUNDRED);
 		payment1.setTenderType(MPayment.TENDERTYPE_Check);
-		payment1.setC_BankAccount_ID(BANK_ACCOUNT_1234);
-		payment1.setC_Currency_ID(CURRENCY_USD);
+		payment1.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
+		payment1.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 		payment1.setDateTrx(TimeUtil.getDay(null));
 		payment1.setDateAcct(TimeUtil.getDay(null));
 		payment1.saveEx();
@@ -125,7 +124,7 @@ public class AllocationTest extends AbstractTestCase {
 
 		// Create allocation to allocate payment to charge
 		MAllocationHdr alloc = new MAllocationHdr (Env.getCtx(), true,	//	manual
-				payment1.getDateTrx(), CURRENCY_USD, Env.getContext(Env.getCtx(), Env.AD_USER_NAME), trxName);
+				payment1.getDateTrx(), DictionaryIDs.C_Currency.USD.id, Env.getContext(Env.getCtx(), Env.AD_USER_NAME), trxName);
 		alloc.setAD_Org_ID(payment1.getAD_Org_ID());
 		int doctypeAlloc  = MDocType.getDocType("CMA");
 		alloc.setC_DocType_ID(doctypeAlloc);
@@ -134,14 +133,14 @@ public class AllocationTest extends AbstractTestCase {
 
 		MAllocationLine aLine1 = new MAllocationLine (alloc, Env.ONEHUNDRED, 
 				Env.ZERO, Env.ZERO, Env.ZERO);
-		aLine1.setDocInfo(BP_C_AND_W, 0, 0);
+		aLine1.setDocInfo(DictionaryIDs.C_BPartner.C_AND_W.id, 0, 0);
 		aLine1.setPaymentInfo(payment1.getC_Payment_ID(), 0);
 		aLine1.saveEx();
 
 		MAllocationLine aLine2 = new MAllocationLine (alloc, Env.ONEHUNDRED.negate(),
 				Env.ZERO, Env.ZERO, Env.ZERO);
-		aLine2.setC_Charge_ID(CHARGE_FREIGHT);
-		aLine2.setC_BPartner_ID(BP_C_AND_W);
+		aLine2.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
+		aLine2.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id);
 		aLine2.saveEx();
 
 		assertTrue(alloc.processIt(DocAction.ACTION_Complete));
@@ -183,16 +182,17 @@ public class AllocationTest extends AbstractTestCase {
 		String trxName = getTrxName();
 
 		// Get the OpenBalance of C&W
-		MBPartner bpartner = new MBPartner(ctx, BP_C_AND_W, trxName);
+		MBPartner bpartner = new MBPartner(ctx, DictionaryIDs.C_BPartner.PATIO.id, trxName);
+		DB.getDatabase().forUpdate(bpartner, 0);
 		BigDecimal initialBalance = bpartner.getTotalOpenBalance();
 
 		// Create Invoice $100
 		MInvoice invoice = new MInvoice(ctx, 0, trxName);
-		invoice.setBPartner(MBPartner.get(ctx, BP_C_AND_W));
+		invoice.setBPartner(MBPartner.get(ctx, DictionaryIDs.C_BPartner.PATIO.id));
 		invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
 		invoice.setC_DocType_ID(invoice.getC_DocTypeTarget_ID()); // required to avoid runDocumentActionWorkflow exception
 		invoice.setPaymentRule(MInvoice.PAYMENTRULE_Check);
-		invoice.setC_PaymentTerm_ID(PAYMENT_TERM_IMMEDIATE);  // Immediate
+		invoice.setC_PaymentTerm_ID(DictionaryIDs.C_PaymentTerm.IMMEDIATE.id);  // Immediate
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
 		invoice.setDateInvoiced(today);
 		invoice.setDateAcct(today);
@@ -202,7 +202,7 @@ public class AllocationTest extends AbstractTestCase {
 
 		MInvoiceLine line1 = new MInvoiceLine(invoice);
 		line1.setLine(10);
-		line1.setC_Charge_ID(CHARGE_FREIGHT);
+		line1.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
 		line1.setQty(new BigDecimal("1"));
 		line1.setPrice(Env.ONEHUNDRED);
 		line1.saveEx();
@@ -227,8 +227,8 @@ public class AllocationTest extends AbstractTestCase {
 		payment1.setDocAction(DocAction.ACTION_Complete);
 		payment1.setPayAmt(Env.ONEHUNDRED);
 		payment1.setTenderType(MPayment.TENDERTYPE_Check);
-		payment1.setC_BankAccount_ID(BANK_ACCOUNT_1234);
-		payment1.setC_Currency_ID(CURRENCY_USD);
+		payment1.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
+		payment1.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 		payment1.setDateTrx(invoice.getDateInvoiced());
 		payment1.setDateAcct(invoice.getDateInvoiced());
 		payment1.saveEx();
@@ -270,16 +270,16 @@ public class AllocationTest extends AbstractTestCase {
 		String trxName = getTrxName();
 
 		// Get the OpenBalance of C&W
-		MBPartner bpartner = new MBPartner(ctx, BP_TREEFARM, trxName);
+		MBPartner bpartner = new MBPartner(ctx, DictionaryIDs.C_BPartner.TREE_FARM.id, trxName);
 		BigDecimal initialBalance = bpartner.getTotalOpenBalance();
 
 		// Create Invoice $100
 		MInvoice invoice = new MInvoice(ctx, 0, trxName);
-		invoice.setBPartner(MBPartner.get(ctx, BP_TREEFARM));
+		invoice.setBPartner(MBPartner.get(ctx, DictionaryIDs.C_BPartner.TREE_FARM.id));
 		invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_APInvoice);
 		invoice.setC_DocType_ID(invoice.getC_DocTypeTarget_ID()); // required to avoid runDocumentActionWorkflow exception
 		invoice.setPaymentRule(MInvoice.PAYMENTRULE_Check);
-		invoice.setC_PaymentTerm_ID(PAYMENT_TERM_IMMEDIATE);  // Immediate
+		invoice.setC_PaymentTerm_ID(DictionaryIDs.C_PaymentTerm.IMMEDIATE.id);  // Immediate
 		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
 		invoice.setDateInvoiced(today);
 		invoice.setDateAcct(today);
@@ -289,7 +289,7 @@ public class AllocationTest extends AbstractTestCase {
 
 		MInvoiceLine line1 = new MInvoiceLine(invoice);
 		line1.setLine(10);
-		line1.setC_Charge_ID(CHARGE_FREIGHT);
+		line1.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
 		line1.setQty(new BigDecimal("1"));
 		line1.setPrice(Env.ONEHUNDRED);
 		line1.saveEx();
@@ -314,8 +314,8 @@ public class AllocationTest extends AbstractTestCase {
 		payment1.setDocAction(DocAction.ACTION_Complete);
 		payment1.setPayAmt(Env.ONEHUNDRED);
 		payment1.setTenderType(MPayment.TENDERTYPE_Check);
-		payment1.setC_BankAccount_ID(BANK_ACCOUNT_1234);
-		payment1.setC_Currency_ID(CURRENCY_USD);
+		payment1.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
+		payment1.setC_Currency_ID(DictionaryIDs.C_Currency.USD.id);
 		payment1.setDateTrx(invoice.getDateInvoiced());
 		payment1.setDateAcct(invoice.getDateInvoiced());
 		payment1.saveEx();
@@ -347,11 +347,12 @@ public class AllocationTest extends AbstractTestCase {
 	}
 
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testPaymentReversePosting() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.COLOR_INC.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -360,10 +361,10 @@ public class AllocationTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
@@ -426,16 +427,159 @@ public class AllocationTest extends AbstractTestCase {
 			}
 			
 		} finally {
+			rollback();
+
 			deleteConversionRate(cr1);
-			deleteConversionRate(cr2);
+			deleteConversionRate(cr2);			
+		}
+	}
+	
+	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
+	/**
+	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5757
+	 */
+	public void testPaymentReverseImmediatePosting() {
+		try {
+			boolean isImmediate = MClient.isClientAccountingImmediate();
+			if (!isImmediate)
+				return;
 			
+			MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
+			
+			Timestamp date = TimeUtil.getDay(null);
+			MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+			
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; // Immediate
+			int taxid = DictionaryIDs.C_Tax.EXEMPT.id; // Exempt
+			
+			MInvoice invoice = createInvoice(false, false, date,  date, bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
+			completeDocument(invoice);
+			assertTrue(invoice.isPosted(), "Invoice not posted");
+			
+			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
+			MBankAccount ba = new Query(Env.getCtx(),MBankAccount.Table_Name, whereClause, getTrxName())
+					.setParameters(Env.getAD_Org_ID(Env.getCtx()), usd.getC_Currency_ID())
+					.setOrderBy("IsDefault DESC")
+					.first();
+			assertTrue(ba != null, "@NoAccountOrgCurrency@");
+			
+			MPayment payment = createPayment(bpartner.getC_BPartner_ID(), ba.getC_BankAccount_ID(), date, usd.getC_Currency_ID(), 0, Env.ONEHUNDRED);
+			payment.setC_Invoice_ID(invoice.getC_Invoice_ID());
+			payment.saveEx();
+			completeDocument(payment);
+			assertTrue(payment.isPosted(), "Payment not posted");
+			
+			MAllocationHdr[] allocations = MAllocationHdr.getOfPayment(Env.getCtx(), payment.getC_Payment_ID(), getTrxName());
+			for (MAllocationHdr allocation : allocations) {
+				assertTrue(allocation.isPosted(), "Allocation not posted");
+			}
+			
+			reverseCorrectDocument(payment);
+			MPayment reversalPayment = new MPayment(Env.getCtx(), payment.getReversal_ID(), getTrxName());
+			assertTrue(reversalPayment.isPosted(), "Reversal payment not posted");
+			
+			allocations = MAllocationHdr.getOfPayment(Env.getCtx(), reversalPayment.getC_Payment_ID(), getTrxName());
+			for (MAllocationHdr allocation : allocations) {
+				assertTrue(allocation.isPosted(), "Allocation not posted");
+			}
+		} finally {
 			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
+	/**
+	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5591
+	 */
+	public void testInvoiceReversePostingWithDiffCurrency() {
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id); // C&W Construction
+		Timestamp date = Env.getContextAsDate(Env.getCtx(), "#Date");
+		
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
+		
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
+		BigDecimal eurToUsd = new BigDecimal(0.000063836578);
+		MConversionRate cr = createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
+		
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
+		BigDecimal totalLines = new BigDecimal(33300);
+		
+		try {
+			MInvoice invoice = new MInvoice(Env.getCtx(), 0, getTrxName());
+			invoice.setBPartner(bpartner);
+			invoice.setIsSOTrx(false);
+			invoice.setC_DocTypeTarget_ID();
+			invoice.setDateInvoiced(date);
+			invoice.setDateAcct(date);
+			invoice.setM_PriceList_ID(M_PriceList_ID);
+			invoice.setC_ConversionType_ID(C_ConversionType_ID);
+			invoice.setC_PaymentTerm_ID(DictionaryIDs.C_PaymentTerm.IMMEDIATE.id); // Immediate
+			invoice.setDocStatus(DocAction.STATUS_Drafted);
+			invoice.setDocAction(DocAction.ACTION_Complete);
+			invoice.saveEx();
+			
+			MInvoiceLine invoiceLine = new MInvoiceLine(invoice);
+			invoiceLine.setLine(10);
+			invoiceLine.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
+			invoiceLine.setC_Tax_ID(DictionaryIDs.C_Tax.EXEMPT.id);
+			invoiceLine.setQty(BigDecimal.ONE);
+			invoiceLine.setPrice(totalLines);
+			invoiceLine.saveEx();
+			
+			completeDocument(invoice);
+			postDocument(invoice);
+			
+			reverseAccrualDocument(invoice);
+			MInvoice reversalInvoice = new MInvoice(Env.getCtx(), invoice.getReversal_ID(), getTrxName());
+			postDocument(reversalInvoice);
+			
+			MAllocationHdr[] allocations = MAllocationHdr.getOfInvoice(Env.getCtx(), invoice.getC_Invoice_ID(), getTrxName());
+			assertTrue(allocations.length == 1);
+			
+			MAllocationHdr allocation = allocations[0];
+			postDocument(allocation);
+			
+			MAcctSchema[] ass = MAcctSchema.getClientAcctSchema(Env.getCtx(), Env.getAD_Client_ID(Env.getCtx()));
+			for (MAcctSchema as : ass) {
+				if (as.getC_Currency_ID() != usd.getC_Currency_ID())
+					continue;
+				
+				Doc doc = DocManager.getDocument(as, MAllocationHdr.Table_ID, allocation.get_ID(), getTrxName());
+				doc.setC_BPartner_ID(invoice.getC_BPartner_ID());
+				
+				MAccount acctLiability = doc.getAccount(Doc.ACCTTYPE_V_Liability, as);
+				BigDecimal tradeAmtAcct = new BigDecimal(2.13).setScale(usd.getStdPrecision(), RoundingMode.HALF_UP);;
+				
+				String whereClause = MFactAcct.COLUMNNAME_AD_Table_ID + "=" + MAllocationHdr.Table_ID 
+						+ " AND " + MFactAcct.COLUMNNAME_Record_ID + "=" + allocation.get_ID()
+						+ " AND " + MFactAcct.COLUMNNAME_C_AcctSchema_ID + "=" + as.getC_AcctSchema_ID();
+				int[] ids = MFactAcct.getAllIDs(MFactAcct.Table_Name, whereClause, getTrxName());
+				for (int id : ids) {
+					MFactAcct fa = new MFactAcct(Env.getCtx(), id, getTrxName());
+					if (acctLiability.getAccount_ID() == fa.getAccount_ID()) {
+						if (fa.getAmtAcctDr().signum() > 0)
+							assertTrue(fa.getAmtAcctDr().compareTo(tradeAmtAcct) == 0, fa.getAmtAcctDr().toPlainString() + "!=" + tradeAmtAcct.toPlainString());						
+						else if (fa.getAmtAcctDr().signum() < 0)
+							assertTrue(fa.getAmtAcctDr().compareTo(tradeAmtAcct.negate()) == 0, fa.getAmtAcctDr().toPlainString() + "!=" + tradeAmtAcct.negate().toPlainString());						
+						else if (fa.getAmtAcctCr().signum() > 0)
+							assertTrue(fa.getAmtAcctCr().compareTo(tradeAmtAcct) == 0, fa.getAmtAcctCr().toPlainString() + "!=" + tradeAmtAcct.toPlainString());													
+					}				
+				}
+			}
+			
+		} finally {
+			rollback();
+			deleteConversionRate(cr);		
+		}
+	}
+	
+	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	public void testAllocatePaymentPosting() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.CHROME_INC.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -444,10 +588,10 @@ public class AllocationTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
@@ -473,7 +617,7 @@ public class AllocationTest extends AbstractTestCase {
 			
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date2, euro.getC_Currency_ID(), Env.getContext(Env.getCtx(), Env.AD_USER_NAME), getTrxName());
 			alloc.setAD_Org_ID(payment2.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(payment2.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -530,43 +674,20 @@ public class AllocationTest extends AbstractTestCase {
 			}
 			
 		} finally {
-			deleteConversionRate(cr1);
-			deleteConversionRate(cr2);
-			
 			rollback();
+
+			deleteConversionRate(cr1);
+			deleteConversionRate(cr2);			
 		}
 	}
 	
 	private MConversionRate createConversionRate(int C_Currency_ID, int C_Currency_ID_To, int C_ConversionType_ID, 
 			Timestamp date, BigDecimal rate, boolean isMultiplyRate) {
-		MConversionRate cr = new MConversionRate(Env.getCtx(), 0, null);
-		cr.setC_Currency_ID(C_Currency_ID);
-		cr.setC_Currency_ID_To(C_Currency_ID_To);
-		cr.setC_ConversionType_ID(C_ConversionType_ID);
-		cr.setValidFrom(date);
-		cr.setValidTo(date);
-		if (isMultiplyRate)
-			cr.setMultiplyRate(rate);
-		else
-			cr.setDivideRate(rate);
-		cr.saveEx();
-		return cr;
+		return ConversionRateHelper.createConversionRate(C_Currency_ID, C_Currency_ID_To, C_ConversionType_ID, date, rate, isMultiplyRate);
 	}
 	
 	private void deleteConversionRate(MConversionRate cr) {
-		String whereClause = "ValidFrom=? AND ValidTo=? "
-				+ "AND C_Currency_ID=? AND C_Currency_ID_To=? "
-				+ "AND C_ConversionType_ID=? "
-				+ "AND AD_Client_ID=? AND AD_Org_ID=?";
-		MConversionRate reciprocal = new Query(Env.getCtx(), MConversionRate.Table_Name, whereClause, null)
-				.setParameters(cr.getValidFrom(), cr.getValidTo(), 
-						cr.getC_Currency_ID_To(), cr.getC_Currency_ID(),
-						cr.getC_ConversionType_ID(),
-						cr.getAD_Client_ID(), cr.getAD_Org_ID())
-				.firstOnly();
-		if (reciprocal != null)
-			reciprocal.deleteEx(true);
-		cr.deleteEx(true);
+		ConversionRateHelper.deleteConversionRate(cr);
 	}
 	
 	private MPayment createReceiptPayment(int C_BPartner_ID, int C_BankAccount_ID, Timestamp date, int C_Currency_ID, int C_ConversionType_ID, BigDecimal payAmt) {
@@ -621,6 +742,14 @@ public class AllocationTest extends AbstractTestCase {
 		assertEquals(DocAction.STATUS_Reversed, docStatus, DocAction.STATUS_Reversed + " != " + docStatus);
 	}
 	
+	private void reverseCorrectDocument(PO po) {
+		ProcessInfo info = MWorkflow.runDocumentActionWorkflow(po, DocAction.ACTION_Reverse_Correct);
+		po.load(getTrxName());
+		assertFalse(info.isError(), info.getSummary());
+		String docStatus = (String) po.get_Value("DocStatus");
+		assertEquals(DocAction.STATUS_Reversed, docStatus, DocAction.STATUS_Reversed + " != " + docStatus);
+	}
+	
 	private void postDocument(PO po) {
 		if (!po.get_ValueAsBoolean("Posted")) {
 			String error = DocumentEngine.postImmediate(Env.getCtx(), po.getAD_Client_ID(), po.get_Table_ID(), po.get_ID(), false, getTrxName());
@@ -639,14 +768,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 Check accounts
 	public void testAllocatePaymentPostingWithWriteOffandDiscountARInv() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 118); // Joe Block
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -657,12 +786,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 106; //(2%10 Net 30)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.TWO_PERCENT_10_NET_30.id; //(2%10 Net 30)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(true,false, date,  date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102");
@@ -673,7 +802,7 @@ public class AllocationTest extends AbstractTestCase {
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(payment.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(payment.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -770,14 +899,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testAllocatePaymentPostingWithWriteOffandDiscountARCredMemo() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 118); // Joe Block
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -788,12 +917,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 106; //(2%10 Net 30)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.TWO_PERCENT_10_NET_30.id; //(2%10 Net 30)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(true, true, date,  date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102");
@@ -804,7 +933,7 @@ public class AllocationTest extends AbstractTestCase {
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(payment.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(payment.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -900,14 +1029,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testAllocatePaymentPostingWithWriteOffandDiscountAPInv() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 121); // Patio
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.PATIO.id); // Patio
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -918,12 +1047,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 105; //(Immediate)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; //(Immediate)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(false, false, date, date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102");
@@ -934,7 +1063,7 @@ public class AllocationTest extends AbstractTestCase {
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(payment.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(payment.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -1030,14 +1159,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testAllocatePaymentPostingWithWriteOffandDiscountAPCrMe() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 121); // Patio
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.PATIO.id); // Patio
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1048,12 +1177,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 105; //(Immediate)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; //(Immediate)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(false, true, date, date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102");
@@ -1064,7 +1193,7 @@ public class AllocationTest extends AbstractTestCase {
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(payment.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(payment.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -1160,14 +1289,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testPaymentPostingWithWriteOffandDiscountARInv() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 118); // Joe Block
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1178,12 +1307,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 106; //(2%10 Net 30)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.TWO_PERCENT_10_NET_30.id; //(2%10 Net 30)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(true,false, date,  date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102");
@@ -1292,14 +1421,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testPaymentPostingWithWriteOffandDiscountARCredMemo() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 118); // Joe Block
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1310,12 +1439,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 106; //(2%10 Net 30)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.TWO_PERCENT_10_NET_30.id; //(2%10 Net 30)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(true, true, date,  date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102").negate();
@@ -1423,14 +1552,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testPaymentPostingWithWriteOffandDiscountAPInv() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 121); // Patio
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.AGRI_TECH.id);
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1441,12 +1570,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 105; //(Immediate)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; 
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(false, false, date, date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 
 			BigDecimal payAmt = new BigDecimal("102");
@@ -1554,14 +1683,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 check accounts
 	public void testPaymentPostingWithWriteOffandDiscountAPCrMe() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 121); // Patio
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id);
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1572,12 +1701,12 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 105; //(Immediate)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; 
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(false, true, date, date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
 			// Payamt with discount
 			BigDecimal payAmt = new BigDecimal("102").negate();
@@ -1685,14 +1814,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 Check accounts
 	public void testAllocatePostingWithWriteOffandDiscountARInvARCrMe() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 118); // Joe Block
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1703,18 +1832,18 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 106; //(2%10 Net 30)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.TWO_PERCENT_10_NET_30.id; //(2%10 Net 30)
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(true,false, date,  date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
-			Integer paytermcm = 105; //(Immediate)
+			int paytermcm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; 
 			MInvoice creditmemo = createInvoice(true,true, date,  date,
 					bpartner.getC_BPartner_ID(), paytermcm, taxid, new BigDecimal("96.23"));
-			assertEquals(creditmemo.getTotalLines(), new BigDecimal("96.23"));
-			assertEquals(creditmemo.getGrandTotal(), new BigDecimal("102.00"));
+			assertEquals(creditmemo.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("96.23"));
+			assertEquals(creditmemo.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("102.00"));
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(invoice.getAD_Org_ID());
@@ -1822,14 +1951,14 @@ public class AllocationTest extends AbstractTestCase {
 	// #4 Check accounts
 	public void testAllocatePostingWithWriteOffandDiscountAPInvAPCrMe() {
 
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 121); // Patio
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		Timestamp date = new Timestamp(cal.getTimeInMillis());
 
-		MCurrency usd = MCurrency.get(100); // USD
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
 
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1840,23 +1969,23 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 
 			// Invoice (totallines 100, grandtotal 106)
-			Integer payterm = 105; //(Immediate)
-			Integer taxid = 105; // (CT Sales, Rate 6)
+			int payterm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id; 
+			int taxid = DictionaryIDs.C_Tax.CT_SALES.id; // (CT Sales, Rate 6)
 			MInvoice invoice = createInvoice(false, false, date, date,
 					bpartner.getC_BPartner_ID(), payterm, taxid, Env.ONEHUNDRED);
-			assertEquals(invoice.getTotalLines(), new BigDecimal("100.0"));
-			assertEquals(invoice.getGrandTotal(), new BigDecimal("106.00"));
+			assertEquals(invoice.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("100.00"));
+			assertEquals(invoice.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("106.00"));
 
-			Integer paytermcm = 105; //(Immediate)
+			int paytermcm = DictionaryIDs.C_PaymentTerm.IMMEDIATE.id;
 			MInvoice creditmemo = createInvoice(false,true, date,  date,
 					bpartner.getC_BPartner_ID(), paytermcm, taxid, new BigDecimal("96.23"));
-			assertEquals(creditmemo.getTotalLines(), new BigDecimal("96.23"));
-			assertEquals(creditmemo.getGrandTotal(), new BigDecimal("102.00"));
+			assertEquals(creditmemo.getTotalLines().setScale(2, RoundingMode.HALF_UP), new BigDecimal("96.23"));
+			assertEquals(creditmemo.getGrandTotal().setScale(2, RoundingMode.HALF_UP), new BigDecimal("102.00"));
 
 
 			MAllocationHdr alloc = new MAllocationHdr(Env.getCtx(), true, date, usd.getC_Currency_ID(), Env.getContext(Env.getCtx(), "#AD_User_Name"), getTrxName());
 			alloc.setAD_Org_ID(invoice.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc.setC_DocType_ID(doctypeAlloc);
 			alloc.setDescription(alloc.getDescriptionForManualAllocation(invoice.getC_BPartner_ID(), getTrxName()));
 			alloc.saveEx();
@@ -1950,6 +2079,7 @@ public class AllocationTest extends AbstractTestCase {
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Invoice Total=12,587.48, Period 1
@@ -1970,11 +2100,15 @@ public class AllocationTest extends AbstractTestCase {
 		Timestamp date2 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date3 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(32.458922422202);
+		
+		MBPartner bp = new MBPartner (Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id, getTrxName());
+		DB.getDatabase().forUpdate(bp, 0);
+		
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(33.93972535567);
@@ -1983,7 +2117,7 @@ public class AllocationTest extends AbstractTestCase {
 		BigDecimal eurToUsd3 = new BigDecimal(33.27812049435);
 		MConversionRate cr3 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date3, eurToUsd3, false);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			String whereClause = "AD_Org_ID=? AND C_Currency_ID=?";
@@ -1994,11 +2128,11 @@ public class AllocationTest extends AbstractTestCase {
 			assertTrue(ba != null, "@NoAccountOrgCurrency@");
 			
 			MInvoice invoice1 = new MInvoice(Env.getCtx(), 0, getTrxName());			
-			invoice1.setC_BPartner_ID(BP_C_AND_W);
+			invoice1.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id);
 			invoice1.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
 			invoice1.setC_DocType_ID(invoice1.getC_DocTypeTarget_ID());
 			invoice1.setPaymentRule(MInvoice.PAYMENTRULE_OnCredit);
-			invoice1.setC_PaymentTerm_ID(PAYMENT_TERM_IMMEDIATE);
+			invoice1.setC_PaymentTerm_ID(DictionaryIDs.C_PaymentTerm.IMMEDIATE.id);
 			invoice1.setDateInvoiced(date1);
 			invoice1.setDateAcct(date1);
 			invoice1.setM_PriceList_ID(M_PriceList_ID);
@@ -2009,24 +2143,24 @@ public class AllocationTest extends AbstractTestCase {
 
 			MInvoiceLine line = new MInvoiceLine(invoice1);
 			line.setLine(10);
-			line.setC_Charge_ID(CHARGE_FREIGHT);
+			line.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
 			line.setQty(BigDecimal.ONE);
 			BigDecimal invAmt = new BigDecimal(12587.48);
 			line.setPrice(invAmt);
-			line.setC_Tax_ID(104); // Standard
+			line.setC_Tax_ID(DictionaryIDs.C_Tax.STANDARD.id); // Standard
 			line.saveEx();
 			
 			completeDocument(invoice1);
 			postDocument(invoice1);
 			
 			BigDecimal payAmt = new BigDecimal(18549.52);
-			MPayment payment = createReceiptPayment(BP_C_AND_W, ba.getC_BankAccount_ID(), date2, euro.getC_Currency_ID(), C_ConversionType_ID, payAmt);
+			MPayment payment = createReceiptPayment(DictionaryIDs.C_BPartner.C_AND_W.id, ba.getC_BankAccount_ID(), date2, euro.getC_Currency_ID(), C_ConversionType_ID, payAmt);
 			completeDocument(payment);
 			postDocument(payment);
 			
 			MAllocationHdr alloc1 = new MAllocationHdr(Env.getCtx(), true, date2, euro.getC_Currency_ID(), Env.getContext(Env.getCtx(), Env.AD_USER_NAME), getTrxName());
 			alloc1.setAD_Org_ID(payment.getAD_Org_ID());
-			int doctypeAlloc = MDocType.getDocType("CMA");
+			int doctypeAlloc = MDocType.getDocType(MDocType.DOCBASETYPE_PaymentAllocation);
 			alloc1.setC_DocType_ID(doctypeAlloc);
 			alloc1.saveEx();
 			
@@ -2071,11 +2205,11 @@ public class AllocationTest extends AbstractTestCase {
 			}
 			
 			MInvoice invoice2 = new MInvoice(Env.getCtx(), 0, getTrxName());			
-			invoice2.setC_BPartner_ID(BP_C_AND_W);
+			invoice2.setC_BPartner_ID(DictionaryIDs.C_BPartner.C_AND_W.id);
 			invoice2.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
 			invoice2.setC_DocType_ID(invoice2.getC_DocTypeTarget_ID());
 			invoice2.setPaymentRule(MInvoice.PAYMENTRULE_OnCredit);
-			invoice2.setC_PaymentTerm_ID(PAYMENT_TERM_IMMEDIATE);
+			invoice2.setC_PaymentTerm_ID(DictionaryIDs.C_PaymentTerm.IMMEDIATE.id);
 			invoice2.setDateInvoiced(date3);
 			invoice2.setDateAcct(date3);
 			invoice2.setM_PriceList_ID(M_PriceList_ID);
@@ -2086,11 +2220,11 @@ public class AllocationTest extends AbstractTestCase {
 
 			line = new MInvoiceLine(invoice2);
 			line.setLine(10);
-			line.setC_Charge_ID(CHARGE_FREIGHT);
+			line.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
 			line.setQty(BigDecimal.ONE);
 			invAmt = new BigDecimal(40125);
 			line.setPrice(invAmt);
-			line.setC_Tax_ID(104); // Standard
+			line.setC_Tax_ID(DictionaryIDs.C_Tax.STANDARD.id); // Standard
 			line.saveEx();
 			
 			completeDocument(invoice2);
@@ -2143,11 +2277,11 @@ public class AllocationTest extends AbstractTestCase {
 				}
 			}
 		} finally {
+			rollback();
+			
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			deleteConversionRate(cr3);
-			
-			rollback();
+			deleteConversionRate(cr3);			
 		}
 	}
 
@@ -2188,7 +2322,7 @@ public class AllocationTest extends AbstractTestCase {
 
 
 		line1.setLine(10);
-		line1.setC_Charge_ID(CHARGE_FREIGHT);
+		line1.setC_Charge_ID(DictionaryIDs.C_Charge.FREIGHT.id);
 		line1.setQty(new BigDecimal("1"));
 		line1.setPrice(totallines);
 		line1.setC_Tax_ID(taxid);
@@ -2199,7 +2333,5 @@ public class AllocationTest extends AbstractTestCase {
 		postDocument(invoice);
 
 		return invoice;
-	}
-
-
+	}	
 }

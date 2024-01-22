@@ -240,6 +240,7 @@ public class AttachmentS3System implements IAttachmentStore {
 		return true;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private AmazonS3 getS3Client() {
 		AWSCredentials credentials = null;
 		try {

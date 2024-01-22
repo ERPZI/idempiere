@@ -41,6 +41,7 @@ import org.compiere.model.MLocation;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrderPaySchedule;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.PO;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -94,6 +95,8 @@ public class InvoiceGenerate extends SvrProcess
 	private BigDecimal p_MinimumAmtInvSched = null;
 	/**	Per Invoice Savepoint */
 	private Savepoint m_savepoint = null;
+	/** BPartner on the last order processed */
+	private int m_bpartnerID = 0;
 
 	/**
 	 *  Prepare - e.g., get Parameters.
@@ -124,12 +127,12 @@ public class InvoiceGenerate extends SvrProcess
 				p_docAction = (String)para[i].getParameter();
 			else if (name.equals("MinimumAmt"))
 				p_MinimumAmt = para[i].getParameterAsBigDecimal();
-			//MPo, 4/8/2016 Add Document Type
-			else if (name.equals("DocType"))
+			//MPo, 11/10/23
+			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			//
 			else
-				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
 
 		//	Login Date
@@ -156,8 +159,9 @@ public class InvoiceGenerate extends SvrProcess
 			+ ", Consolidate=" + p_ConsolidateDocument);
 		//
 		StringBuilder sql = null;
-		if (p_Selection)	//	VInvoiceGen
+		if ((getProcessInfo().getAD_InfoWindow_ID() > 0) || (getProcessInfo().getAD_InfoWindow_ID()==0 && p_Selection))
 		{
+			p_Selection = true;
 			sql = new StringBuilder("SELECT C_Order.* FROM C_Order, T_Selection ")
 				.append("WHERE C_Order.DocStatus='CO' AND C_Order.IsSOTrx='Y' ")
 				.append("AND C_Order.C_Order_ID = T_Selection.T_Selection_ID ")
@@ -166,24 +170,24 @@ public class InvoiceGenerate extends SvrProcess
 		}
 		else
 		{
-			sql = new StringBuilder("SELECT * FROM C_Order o ")
-				.append("WHERE DocStatus IN('CO','CL') AND IsSOTrx='Y'");
+			sql = new StringBuilder("SELECT o.* FROM C_Invoice_Candidate_v ic JOIN C_Order o ON o.C_Order_ID = ic.C_Order_ID ")
+				.append("WHERE DocStatus IN('CO','CL') AND IsSOTrx='Y' ");
 			if (p_AD_Org_ID != 0)
-				sql.append(" AND AD_Org_ID=?");
+				sql.append(" AND ic.AD_Org_ID=?");
 			if (p_C_BPartner_ID != 0)
-				sql.append(" AND C_BPartner_ID=?");
+				sql.append(" AND ic.C_BPartner_ID=?");
 			if (p_C_Order_ID != 0)
-				sql.append(" AND C_Order_ID=?");
+				sql.append(" AND ic.C_Order_ID=?");
 			//
-			sql.append(" AND EXISTS (SELECT * FROM C_OrderLine ol ")
-					.append("WHERE o.C_Order_ID=ol.C_Order_ID AND ol.QtyOrdered<>ol.QtyInvoiced ");
+			sql.append(" AND EXISTS (SELECT 1 FROM C_OrderLine ol ")
+					.append("WHERE o.C_Order_ID=ol.C_Order_ID AND ol.QtyOrdered<>ol.QtyInvoiced AND ic.DocSource = 'O' ");
 			//
 			if (p_M_InOut_ID != 0)
 				sql.append(" AND EXISTS (SELECT '1' FROM M_InOutLine iol WHERE iol.C_OrderLine_ID=ol.C_OrderLine_ID AND iol.M_InOut_ID=?) ");
 			//
 			sql.append(") AND o.C_DocType_ID IN (SELECT C_DocType_ID FROM C_DocType ")
 					.append("WHERE DocBaseType='SOO' AND DocSubTypeSO NOT IN ('ON','OB','WR')) ")
-				.append("ORDER BY AD_Org_ID, M_Warehouse_ID, PriorityRule, C_BPartner_ID, Bill_Location_ID, C_Order_ID");
+				.append("ORDER BY o.AD_Org_ID, o.M_Warehouse_ID, o.PriorityRule, o.C_BPartner_ID, o.Bill_Location_ID, o.Bill_User_ID, o.C_Order_ID");
 		}
 	//	sql += " FOR UPDATE";
 		
@@ -210,6 +214,7 @@ public class InvoiceGenerate extends SvrProcess
 		}
 		catch (Exception e)
 		{
+			DB.close(pstmt);
 			throw new AdempiereException(e);
 		}
 		return generate(pstmt);
@@ -234,10 +239,13 @@ public class InvoiceGenerate extends SvrProcess
 				StringBuilder msgsup = new StringBuilder(Msg.getMsg(getCtx(), "Processing")).append(" ").append(order.getDocumentInfo());
 				statusUpdate(msgsup.toString());
 				
-				//	New Invoice Location
-				if (!p_ConsolidateDocument 
-					|| (m_invoice != null 
-					&& m_invoice.getC_BPartner_Location_ID() != order.getBill_Location_ID()) )
+				//	New BPartner, or new Invoice Location, or new Invoice Contact
+				if (!p_ConsolidateDocument
+						|| (m_bpartnerID != 0
+						&& m_bpartnerID != order.getC_BPartner_ID())
+						|| (m_invoice != null 
+						&& (m_invoice.getC_BPartner_Location_ID() != order.getBill_Location_ID() ||
+							m_invoice.getAD_User_ID() != order.getBill_User_ID()) ) )
 					completeInvoice();
 				boolean completeOrder = MOrder.INVOICERULE_AfterOrderDelivered.equals(order.getInvoiceRule());
 				
@@ -356,6 +364,7 @@ public class InvoiceGenerate extends SvrProcess
 						m_line += 1000;
 					}
 				}	//	complete Order
+				m_bpartnerID = order.getC_BPartner_ID();
 			}	//	for all orders
 		}
 		catch (Exception e)
@@ -395,8 +404,6 @@ public class InvoiceGenerate extends SvrProcess
 				throw new AdempiereException(e);
 			}
 			//MPo, 4/8/2016
-			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
-			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
 			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
 			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
 			//
@@ -432,8 +439,6 @@ public class InvoiceGenerate extends SvrProcess
 				throw new AdempiereException(e);
 			}
 			//MPo, 4/8/2016
-			//m_invoice = new MInvoice (order, 0, p_DateInvoiced);
-			//m_invoice = new MInvoice (order, 1000049, p_DateInvoiced);
 			m_invoice = new MInvoice (order, p_C_DocType_ID, p_DateInvoiced);
 			m_invoice.setZI_Branch_ID(order.getZI_Branch_ID());
 			//

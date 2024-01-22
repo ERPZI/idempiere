@@ -26,6 +26,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IReservationTracer;
 import org.adempiere.util.IReservationTracerFactory;
 import org.compiere.acct.Doc;
+import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.IMiniTable;
 import org.compiere.model.MClient;
@@ -66,6 +67,9 @@ public class Match
 	//private static final int		MODE_MATCHED = 1;
 
 	/**	Indexes in Table			*/
+	public static final int		I_ID = 0;
+	public static final int		I_DocumentNo = 1;
+	public static final int		I_DocumentDate = 2;
 	public static final int		I_BPartner = 3;
 	public static final int		I_Line = 4;
 	public static final int		I_Product = 5;
@@ -74,14 +78,12 @@ public class Match
 	//MPo, 22/7/2016 Add PrCtr
 	public static final int    I_PrCtr = 8;
 	//
-
-
+	
 	private StringBuffer    m_sql = null;
 	private String          m_dateColumn = "";
 	private String          m_qtyColumn = "";
 	private String          m_groupBy = "";
 	private StringBuffer	m_linetype = null;
- 
 	private String 			m_trxName = null;
 	
 	/**
@@ -107,7 +109,7 @@ public class Match
 	 *  Search Button Pressed - Fill match from
 	 */
 	//MPo, 21/7/2016 Add PrCtr
-//	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
+	//	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
 	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Integer PrCtr, Timestamp from, Timestamp to, boolean matched)
 	{
 		//  ** Create SQL **
@@ -159,17 +161,13 @@ public class Match
 	 */
 	public void cmd_process(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, int matchMode, int matchFrom, String matchTo, BigDecimal m_xMatched)
 	{
-		log.config("");
 		//  Matched From
 		int matchedRow = xMatchedTable.getSelectedRow();
 		if (matchedRow < 0)
 			return;
 		KeyNamePair lineMatched = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Line);
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_Product);
-		//MPo, 22/7/2016
-		//KeyNamePair PrCtr = (KeyNamePair)xMatchedTable.getValueAt(matchedRow, I_PrCtr);
-		//
-
+		
 		double totalQty = m_xMatched.doubleValue();
 
 		//  Matched To
@@ -242,13 +240,13 @@ public class Match
 			}
 		}
 	}   //  cmd_process
-
 	
+
 	/**
 	 *  Fill match to
 	 */
 	//MPo, 22/7/2016
-//	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
+	//	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
 	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean samePrCtr, boolean matched)
 	{
 		int row = xMatchedTable.getSelectedRow();
@@ -271,7 +269,6 @@ public class Match
 		//
 		//MPo, 22/7/2016 Add PrCtr
 		KeyNamePair PrCtr = (KeyNamePair)xMatchedTable.getValueAt(row, I_PrCtr);
-		//System.out.println(PrCtr.getKey());
 		//
 		if (sameBPartner)
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(BPartner.getKey());
@@ -338,9 +335,9 @@ public class Match
 				m_sql.append(" AND mi.M_InOutLine_ID  = ").append(Line_ID);
 			
 			m_groupBy = " GROUP BY hdr.C_Invoice_ID,hdr.DocumentNo,hdr.DateInvoiced,bp.Name,hdr.C_BPartner_ID,"
-				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID " //JAVIER
-				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 25/9/2019 Add PrCtr 
-				+ "HAVING "
+				//+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, org.Name, hdr.AD_Org_ID, dt.DocBaseType " //JAVIER
+				+ " lin.Line,lin.C_InvoiceLine_ID,p.Name,lin.M_Product_ID,dt.DocBaseType,lin.QtyInvoiced, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID, dt.DocBaseType" //MPo, 25/9/2019 Add PrCtr 
+				+ " HAVING "
 				+ (matched ? "0" : "CASE WHEN dt.DocBaseType='APC' THEN lin.QtyInvoiced * -1 ELSE lin.QtyInvoiced END")
 				+ "<>SUM(NVL(mi.Qty,0))";
 		}
@@ -385,11 +382,11 @@ public class Match
 			}
 			m_sql.append( " AND hdr.DocStatus IN ('CO','CL')" );
 			m_groupBy = " GROUP BY hdr.C_Order_ID,hdr.DocumentNo,hdr.DateOrdered,bp.Name,hdr.C_BPartner_ID,"
+				//+ " lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, org.Name, hdr.AD_Org_ID " //JAVIER
 				+ " lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 22/7/2016 Add PrCtr
-				//+ ",org.Name, hdr.AD_Org_ID " //JAVIER
 				+ "HAVING "
 				+ (matched ? "0" : "lin.QtyOrdered");
-						
+			
 			if (matchToType == MATCH_SHIPMENT)
 				m_groupBy = m_groupBy + "<>SUM(CASE WHEN (mo.M_InOutLine_ID IS NOT NULL) THEN COALESCE(mo.Qty,0) ELSE 0 END) ";
 			else if (matchToType == MATCH_INVOICE)
@@ -411,7 +408,7 @@ public class Match
 				m_sql.append("SUM(COALESCE(m.Qty,0)),");
 				//m_sql.append("org.Name, hdr.AD_Org_ID " //JAVIER
 				m_sql.append("ev.Name, lin.User1_ID, org.Name, hdr.AD_Org_ID " //MPo, 20/5/22
-				+ " FROM M_InOut hdr"
+				+ "FROM M_InOut hdr"
 				+ " INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)" //JAVIER
 				+ " INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)"
 				+ " INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)"
@@ -642,4 +639,25 @@ public class Match
 			return m_matchOptions[matchType];
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @return {@link ColumnInfo} array
+	 */
+	public ColumnInfo[] getColumnLayout() {
+		ColumnInfo[] layout = new ColumnInfo[] {
+				new ColumnInfo(" ",                                         ".", IDColumn.class, false, false, ""),
+				new ColumnInfo(Msg.translate(Env.getCtx(), "DocumentNo"),   ".", String.class),             //  1
+				new ColumnInfo(Msg.translate(Env.getCtx(), "Date"),         ".", Timestamp.class),
+				new ColumnInfo(Msg.translate(Env.getCtx(), "C_BPartner_ID"),".", KeyNamePair.class, "."),   //  3
+				new ColumnInfo(Msg.translate(Env.getCtx(), "Line"),         ".", KeyNamePair.class, "."),
+				new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
+				new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
+				new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
+				//MPo, 5/10/23 move code from WMatch.java to here 
+				new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),    //  8
+				new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")   	//  9
+			};
+		return layout;
+	}	
 }

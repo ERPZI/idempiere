@@ -59,11 +59,14 @@ import org.compiere.model.Query;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.wf.MWorkflow;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.ConversionRateHelper;
 import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 /**
  * @author Elaine Tan - etantg
@@ -74,6 +77,7 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Invoice Total=12,587.48, Period 1
@@ -84,8 +88,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5053
 	 */
 	public void testAllocateInvoicePaymentPosting_1() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id); // C&W Construction
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
@@ -96,10 +100,10 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date2 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date3 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(32.458922422202);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
@@ -109,7 +113,7 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		BigDecimal eurToUsd3 = new BigDecimal(33.27812049435);
 		MConversionRate cr3 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date3, eurToUsd3, false);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice1 = createInvoice(true, bpartner, date1, M_PriceList_ID, C_ConversionType_ID);
@@ -171,14 +175,15 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalList);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
 			deleteConversionRate(cr3);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period)
 	 * Invoice Total=12,587.48
@@ -189,19 +194,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5053
 	 */
 	public void testAllocateInvoicePaymentPosting_2() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(32.458922422202);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice1 = createInvoice(true, bpartner, date, M_PriceList_ID, C_ConversionType_ID);
@@ -259,12 +264,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Payment Total=12,000, Period 1
@@ -273,8 +279,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4200
 	 */
 	public void testAllocateInvoicePaymentPosting_3() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.PATIO.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
@@ -282,17 +288,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30.212666962751);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(29.905289946739);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2, false);
 				
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
@@ -329,13 +335,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, gainLossLineList, null);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period)
 	 * Payment Total=12,000
@@ -344,19 +351,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4200
 	 */
 	public void testAllocateInvoicePaymentPosting_4() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.AGRI_TECH.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30.212666962751);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
 				
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
@@ -390,12 +397,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Invoice1 Total=9,362.50, Period 1
@@ -410,8 +418,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4200
 	 */
 	public void testAllocateInvoicePaymentPosting_5() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
@@ -419,17 +427,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(29.905289946739);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(31.526248754713);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2, false);
 				
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice1 = createInvoice(true, bpartner, date1, M_PriceList_ID, C_ConversionType_ID);
@@ -538,13 +546,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalLineList);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period)
 	 * Invoice1 Total=9,362.50
@@ -559,19 +568,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4200
 	 */
 	public void testAllocateInvoicePaymentPosting_6() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id); // C&W Construction
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(29.905289946739);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
 						
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice1 = createInvoice(true, bpartner, date, M_PriceList_ID, C_ConversionType_ID);
@@ -676,12 +685,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Payment Total=12,000, Period 1
@@ -692,8 +702,9 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4127
 	 */
 	public void testAllocateInvoicePaymentPosting_7() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id, getTrxName()); 
+		DB.getDatabase().forUpdate(bpartner, 0);
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
@@ -701,17 +712,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30.212666962751);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(29.905289946739);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2, false);
 				
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
@@ -776,13 +787,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalLineList);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period)
 	 * Payment Total=12,000
@@ -793,23 +805,24 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4127
 	 */
 	public void testAllocateInvoicePaymentPosting_8() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.PATIO.id, getTrxName()); // C&W Construction
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30.212666962751);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
 						
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
 			BigDecimal payAmt = new BigDecimal(12000);
+			DB.getDatabase().forUpdate(bpartner, 0);
 			MPayment payment = createPayment(true, bpartner, ba.getC_BankAccount_ID(), date, payAmt, euro.getC_Currency_ID(), C_ConversionType_ID);
 			completeDocument(payment);
 			postDocument(payment);
@@ -867,12 +880,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalLineList);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period)
 	 * Invoice Total=12,000, Period 1
@@ -883,8 +897,10 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4127
 	 */
 	public void testAllocateInvoicePaymentPosting_9() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.AGRI_TECH.id, getTrxName());
+		DB.getDatabase().forUpdate(bpartner, 0);
+		
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
@@ -892,17 +908,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30.212666962751);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1, false);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(29.905289946739);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2, false);
 				
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
@@ -965,13 +981,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalLineList);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period)
 	 * Invoice Total=12,000
@@ -982,19 +999,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4127
 	 */
 	public void testAllocateInvoicePaymentPosting_10() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 117); // C&W Construction
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30.212666962751);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd, false);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
@@ -1054,12 +1071,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, null, currBalLineList);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + reversal)
 	 * Invoice Total=1000, Period 1
@@ -1208,6 +1226,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, gainLossLineList, null);
 		} finally {
+			rollback();
+			
 			deleteConversionRate(cr1a);
 			deleteConversionRate(cr1b);
 			deleteConversionRate(cr2a);
@@ -1217,12 +1237,11 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			plv.deleteEx(true);
 			priceList.deleteEx(true);
-			
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + reversal)
 	 * Payment Total=1000, Period 1
@@ -1231,7 +1250,7 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5339
 	 */
 	public void testAllocateInvoicePaymentPosting_12() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id); // C&W Construction
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id); 
 		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		
@@ -1371,6 +1390,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, tradeLineList, gainLossLineList, null);
 		} finally {
+			rollback();
+
 			deleteConversionRate(cr1a);
 			deleteConversionRate(cr1b);
 			deleteConversionRate(cr2a);
@@ -1379,13 +1400,12 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			deleteConversionRate(cr3b);
 			
 			plv.deleteEx(true);
-			priceList.deleteEx(true);
-			
-			rollback();
+			priceList.deleteEx(true);			
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + reversal)
 	 * Invoice Total=1000, Period 1
@@ -1393,8 +1413,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocateInvoicePosting_1() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.TREE_FARM.id); // Tree Farm Inc.
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -1403,17 +1423,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(31);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice = createInvoice(true, bpartner, date1, M_PriceList_ID, C_ConversionType_ID);
@@ -1442,13 +1462,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, null, tradeLineList, gainLossLineList, null);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period + reversal)
 	 * Invoice Total=1000
@@ -1456,19 +1477,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocateInvoicePosting_2() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice = createInvoice(true, bpartner, date, M_PriceList_ID, C_ConversionType_ID);
@@ -1494,12 +1515,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, null, tradeLineList, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + offset)
 	 * Invoice Total=1000, Period 1
@@ -1507,8 +1529,8 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocateInvoicePosting_3() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.SEED_FARM.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -1517,17 +1539,17 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1);
 		
 		BigDecimal eurToUsd2 = new BigDecimal(31);
 		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2);
 		
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice = createInvoice(true, bpartner, date1, M_PriceList_ID, C_ConversionType_ID);
@@ -1565,13 +1587,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, null, tradeLineList, gainLossLineList, null);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period + offset)
 	 * Invoice Total=1000
@@ -1579,19 +1602,19 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocateInvoicePosting_4() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
-		MCharge charge = MCharge.get(Env.getCtx(), 200000); // Freight Charges
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.PATIO.id); 
+		MCharge charge = MCharge.get(Env.getCtx(), DictionaryIDs.C_Charge.FREIGHT.id); // Freight Charges
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd);
 	
-		int M_PriceList_ID = 103; // Export in EUR
+		int M_PriceList_ID = DictionaryIDs.M_PriceList.EXPORT.id; // Export in EUR
 		
 		try {
 			MInvoice invoice = createInvoice(true, bpartner, date, M_PriceList_ID, C_ConversionType_ID);
@@ -1626,12 +1649,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, null, tradeLineList, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + reversal)
 	 * Payment Total=1000, Period 1
@@ -1639,7 +1663,7 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocatePaymentPosting_1() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.AGRI_TECH.id); 
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -1648,10 +1672,10 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1);
 		
@@ -1684,13 +1708,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, null, gainLossLineList, null);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period + reversal)
 	 * Payment Total=1000, Period 1
@@ -1698,14 +1723,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocatePaymentPosting_2() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.TREE_FARM.id); // Tree Farm Inc.
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd);
 		
@@ -1732,12 +1757,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, null, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (different period + offset)
 	 * Payment Total=1000, Period 1
@@ -1745,7 +1771,7 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocatePaymentPosting_3() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.C_AND_W.id);
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 
 		Calendar cal = Calendar.getInstance();
@@ -1754,10 +1780,10 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		Timestamp date2 = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd1 = new BigDecimal(30);
 		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1);
 		
@@ -1796,13 +1822,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, null, gainLossLineList, null);
 		} finally {
+			rollback();
 			deleteConversionRate(cr1);
 			deleteConversionRate(cr2);
-			rollback();
 		}
 	}
 	
 	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
 	/**
 	 * Test the allocation posting (same period + offset)
 	 * Payment Total=1000
@@ -1810,14 +1837,14 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	 * https://idempiere.atlassian.net/browse/IDEMPIERE-4696
 	 */
 	public void testAllocatePaymentPosting_4() {
-		MBPartner bpartner = MBPartner.get(Env.getCtx(), 114); // Tree Farm Inc.
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.TREE_FARM.id); // Tree Farm Inc.
 		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
 		Timestamp date = currentDate;
 		
-		int C_ConversionType_ID = 201; // Company
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
 		
-		MCurrency usd = MCurrency.get(100); // USD
-		MCurrency euro = MCurrency.get("EUR"); // EUR
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
 		BigDecimal eurToUsd = new BigDecimal(30);
 		MConversionRate cr = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date, eurToUsd);
 		
@@ -1850,8 +1877,70 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 			
 			testAllocationPosting(ass, allocList, paymentLineList, null, null, null);
 		} finally {
-			deleteConversionRate(cr);
 			rollback();
+			deleteConversionRate(cr);
+		}
+	}
+	
+	@Test
+	@ResourceLock(value = MConversionRate.Table_Name)
+	/**
+	 * Test the allocation posting (different period + reversal)
+	 * Payment with Charge Total=1000, Period 1
+	 * Payment with Charge Total=1000, Period 2 (Reversed)
+	 * https://idempiere.atlassian.net/browse/IDEMPIERE-5878
+	 */
+	public void testAllocatePaymentPosting_5() {
+		MBPartner bpartner = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.AGRI_TECH.id); 
+		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(currentDate.getTime());
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
+		Timestamp date2 = currentDate;
+		
+		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.COMPANY.id; // Company
+		
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); // USD
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); // EUR
+		BigDecimal eurToUsd1 = new BigDecimal(4);
+		MConversionRate cr1 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date1, eurToUsd1);
+		
+		BigDecimal eurToUsd2 = new BigDecimal(5);
+		MConversionRate cr2 = createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, date2, eurToUsd2);
+		
+		try {
+			MBankAccount ba = getBankAccount(usd.getC_Currency_ID());
+			BigDecimal payAmt = new BigDecimal(1000);
+			MPayment payment = createPayment(true, bpartner, ba.getC_BankAccount_ID(), date1, payAmt, euro.getC_Currency_ID(), C_ConversionType_ID);
+			payment.setC_Charge_ID(DictionaryIDs.C_Charge.BANK.id); // Bank Charge
+			payment.saveEx();
+			completeDocument(payment);
+			postDocument(payment);
+			
+			reverseDocument(payment, false);
+			MPayment reversalPayment = new MPayment(Env.getCtx(), payment.getReversal_ID(), getTrxName());
+			postDocument(reversalPayment);
+			
+			MAcctSchema[] ass = MAcctSchema.getClientAcctSchema(Env.getCtx(), Env.getAD_Client_ID(Env.getCtx()));
+			MAllocationHdr[] allocList = MAllocationHdr.getOfPayment(Env.getCtx(), payment.getC_Payment_ID(), getTrxName());
+			
+			BigDecimal allocAmount = payAmt;
+			ArrayList<PostingLine> paymentLineList = new ArrayList<PostingLine>();
+			ArrayList<PostingLine> gainLossLineList = new ArrayList<PostingLine>();
+			BigDecimal accountedDrAmt = getAccountedAmount(usd, allocAmount, cr1.getMultiplyRate());
+			BigDecimal accountedCrAmt = getAccountedAmount(usd, allocAmount, cr2.getMultiplyRate());
+			paymentLineList.add(new PostingLine(usd, accountedDrAmt, Env.ZERO));
+			paymentLineList.add(new PostingLine(usd, Env.ZERO, accountedCrAmt));
+			BigDecimal gainLossAmt = new BigDecimal(1000).setScale(usd.getStdPrecision(), RoundingMode.HALF_UP);
+			gainLossLineList.add(new PostingLine(usd, gainLossAmt, Env.ZERO));
+			
+			testAllocationPosting(ass, allocList, paymentLineList, null, gainLossLineList, null);
+		} finally {
+			rollback();
+			deleteConversionRate(cr1);
+			deleteConversionRate(cr2);
 		}
 	}
 		
@@ -1862,34 +1951,11 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 	
 	private MConversionRate createConversionRate(int C_Currency_ID, int C_Currency_ID_To, int C_ConversionType_ID, 
 			Timestamp date, BigDecimal rate, boolean isMultiplyRate) {
-		MConversionRate cr = new MConversionRate(Env.getCtx(), 0, null);
-		cr.setC_Currency_ID(C_Currency_ID);
-		cr.setC_Currency_ID_To(C_Currency_ID_To);
-		cr.setC_ConversionType_ID(C_ConversionType_ID);
-		cr.setValidFrom(date);
-		cr.setValidTo(date);
-		if (isMultiplyRate)
-			cr.setMultiplyRate(rate);
-		else
-			cr.setDivideRate(rate);
-		cr.saveEx();
-		return cr;
+		return ConversionRateHelper.createConversionRate(C_Currency_ID, C_Currency_ID_To, C_ConversionType_ID, date, rate, isMultiplyRate);
 	}
 	
 	private void deleteConversionRate(MConversionRate cr) {
-		String whereClause = "ValidFrom=? AND ValidTo=? "
-				+ "AND C_Currency_ID=? AND C_Currency_ID_To=? "
-				+ "AND C_ConversionType_ID=? "
-				+ "AND AD_Client_ID=? AND AD_Org_ID=?";
-		MConversionRate reciprocal = new Query(Env.getCtx(), MConversionRate.Table_Name, whereClause, null)
-				.setParameters(cr.getValidFrom(), cr.getValidTo(), 
-						cr.getC_Currency_ID_To(), cr.getC_Currency_ID(),
-						cr.getC_ConversionType_ID(),
-						cr.getAD_Client_ID(), cr.getAD_Org_ID())
-				.firstOnly();
-		if (reciprocal != null)
-			reciprocal.deleteEx(true);
-		cr.deleteEx(true);
+		ConversionRateHelper.deleteConversionRate(cr);
 	}
 	
 	private MInvoice createInvoice(boolean isSOTrx, MBPartner bpartner, Timestamp date, int M_PriceList_ID, int C_ConversionType_ID) {
@@ -2068,11 +2134,13 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 
 			int C_BPartner_ID = 0;
 			int C_BankAccount_ID = 0;
+			int C_Charge_ID = 0;
 			MAllocationLine[] lines = alloc.getLines(false);
 			for (MAllocationLine line : lines) {
 				if (line.getC_Payment_ID() > 0) {
 					C_BPartner_ID = line.getC_Payment().getC_BPartner_ID();
 					C_BankAccount_ID = line.getC_Payment().getC_BankAccount_ID();
+					C_Charge_ID = line.getC_Payment().getC_Charge_ID();
 					break;
 				}
 			}
@@ -2097,6 +2165,10 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 				if (C_BPartner_ID > 0)
 					doc.setC_BPartner_ID(C_BPartner_ID);
 				
+				MAccount acctCharge = null;
+				if (C_Charge_ID != 0)
+					acctCharge = MCharge.getAccount(C_Charge_ID, as);
+				
 				MAccount acctUnallocatedCash = doc.getAccount(Doc.ACCTTYPE_UnallocatedCash, as);
 				MAccount acctReceivable = doc.getAccount(Doc.ACCTTYPE_C_Receivable, as);
 				MAccount acctLiability = doc.getAccount(Doc.ACCTTYPE_V_Liability, as);
@@ -2115,7 +2187,9 @@ public class Allocation2ndAcctSchemaTest extends AbstractTestCase {
 				int[] ids = MFactAcct.getAllIDs(MFactAcct.Table_Name, whereClause, getTrxName());
 				for (int id : ids) {
 					MFactAcct fa = new MFactAcct(Env.getCtx(), id, getTrxName());
-					if (acctUnallocatedCash != null && acctUnallocatedCash.getAccount_ID() == fa.getAccount_ID())
+					if (C_Charge_ID != 0 && acctCharge != null && acctCharge.getAccount_ID() == fa.getAccount_ID())
+						totalPaymentAmtAcct = totalPaymentAmtAcct.add(fa.getAmtAcctDr()).subtract(fa.getAmtAcctCr());
+					else if (C_Charge_ID == 0 && acctUnallocatedCash != null && acctUnallocatedCash.getAccount_ID() == fa.getAccount_ID())
 						totalPaymentAmtAcct = totalPaymentAmtAcct.add(fa.getAmtAcctDr()).subtract(fa.getAmtAcctCr());
 					else if ((acctReceivable != null && acctReceivable.getAccount_ID() == fa.getAccount_ID()) || 
 							(acctLiability != null && acctLiability.getAccount_ID() == fa.getAccount_ID()))

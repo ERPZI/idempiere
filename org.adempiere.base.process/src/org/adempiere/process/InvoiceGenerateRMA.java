@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
+import org.compiere.model.MProcessPara;
 import org.compiere.model.MRMA;
 import org.compiere.model.MRMALine;
 import org.compiere.process.DocAction;
@@ -36,9 +37,9 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
 /**
- * Generate invoice for Vendor RMA
+ * Generate invoice for customer RMA
  * @author  Ashley Ramdass
- * 
+ *
  * Based on org.compiere.process.InvoiceGenerate
  */
 @org.adempiere.base.annotation.Process
@@ -71,30 +72,35 @@ public class InvoiceGenerateRMA extends SvrProcess
                 ;
             else if (name.equals("Selection"))
                 p_Selection = "Y".equals(para[i].getParameter());
+            else if (name.equals("DateInvoiced"))
+            	m_dateinvoiced = (Timestamp)para[i].getParameter();
             else if (name.equals("DocAction"))
                 p_docAction = (String)para[i].getParameter();
-            //MPo, 8/8/2016 Add Document Type
-			else if (name.equals("DocType"))
+            //MPo, 25/10/23 Add Document Type
+			else if (name.equals("C_DocType_ID"))
 				p_C_DocType_ID = para[i].getParameterAsInt();
 			//
             else
-                log.log(Level.SEVERE, "Unknown Parameter: " + name);
+				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
         }
         
-        m_dateinvoiced = Env.getContextAsDate(getCtx(), Env.DATE);
-        if (m_dateinvoiced == null)
-        {
-            m_dateinvoiced = new Timestamp(System.currentTimeMillis());
+        if (m_dateinvoiced == null) {
+	    	m_dateinvoiced = Env.getContextAsDate(getCtx(), Env.DATE);
+	        if (m_dateinvoiced == null)
+	        {
+	        	m_dateinvoiced = new Timestamp(System.currentTimeMillis());
+	        }
         }
+        if (getProcessInfo().getAD_InfoWindow_ID() > 0) p_Selection=true;
     }
 
     protected String doIt() throws Exception
     {
         if (!p_Selection)
         {
-            throw new IllegalStateException("Shipments can only be generated from selection");
+            throw new IllegalStateException("Invoice can only be generated from selection");
         }
-        
+
         String sql = "SELECT rma.M_RMA_ID FROM M_RMA rma, T_Selection "
             + "WHERE rma.DocStatus='CO' AND rma.IsSOTrx='Y' AND rma.AD_Client_ID=? "
             + "AND rma.M_RMA_ID = T_Selection.T_Selection_ID " 
@@ -132,29 +138,31 @@ public class InvoiceGenerateRMA extends SvrProcess
         String docTypeSQl = "SELECT dt.C_DocTypeInvoice_ID FROM C_DocType dt "
             + "INNER JOIN M_RMA rma ON dt.C_DocType_ID=rma.C_DocType_ID "
             + "WHERE rma.M_RMA_ID=?";
-        
-        int docTypeId = DB.getSQLValue(null, docTypeSQl, M_RMA_ID);
-        
+
+        int docTypeId = DB.getSQLValue(get_TrxName(), docTypeSQl, M_RMA_ID);
+
         return docTypeId;
     }
     
     private MInvoice createInvoice(MRMA rma)
     {
         int docTypeId = getInvoiceDocTypeId(rma.get_ID());
-            
+
         if (docTypeId == -1)
         {
-            throw new IllegalStateException("Could not get invoice document type for Vendor RMA");
+            throw new IllegalStateException("Could not get invoice document type for Customer RMA");
         }
-        
+
         MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
         invoice.setRMA(rma);
         
-        //MPo, 8/8/2016 Overwrite document from selected DocType
+        //MPo, 25/10/23 Overwrite document from selected DocType
         //invoice.setC_DocTypeTarget_ID(docTypeId);
         invoice.setC_DocTypeTarget_ID(p_C_DocType_ID);
         invoice.setZI_Branch_ID(rma.getZI_Branch_ID());
         //
+        invoice.setDateInvoiced(m_dateinvoiced);
+        invoice.setDateAcct(m_dateinvoiced);
         if (!invoice.save())
         {
             throw new IllegalStateException("Could not create invoice");

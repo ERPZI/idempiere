@@ -31,7 +31,7 @@ public class X_AD_Tab extends PO implements I_AD_Tab, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20220119L;
+	private static final long serialVersionUID = 20221224L;
 
     /** Standard Constructor */
     public X_AD_Tab (Properties ctx, int AD_Tab_ID, String trxName)
@@ -422,6 +422,21 @@ public class X_AD_Tab extends PO implements I_AD_Tab, I_Persistent
 		return (String)get_Value(COLUMNNAME_CommitWarning);
 	}
 
+	/** Set Delete Confirmation Logic.
+		@param DeleteConfirmationLogic Delete Confirmation Logic
+	*/
+	public void setDeleteConfirmationLogic (String DeleteConfirmationLogic)
+	{
+		set_Value (COLUMNNAME_DeleteConfirmationLogic, DeleteConfirmationLogic);
+	}
+
+	/** Get Delete Confirmation Logic.
+		@return Delete Confirmation Logic	  */
+	public String getDeleteConfirmationLogic()
+	{
+		return (String)get_Value(COLUMNNAME_DeleteConfirmationLogic);
+	}
+
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -762,7 +777,7 @@ public class X_AD_Tab extends PO implements I_AD_Tab, I_Persistent
 		return false;
 	}
 
-	/** Set TranslationTab.
+	/** Set Translation Tab.
 		@param IsTranslationTab This Tab contains translation information
 	*/
 	public void setIsTranslationTab (boolean IsTranslationTab)
@@ -770,7 +785,7 @@ public class X_AD_Tab extends PO implements I_AD_Tab, I_Persistent
 		set_Value (COLUMNNAME_IsTranslationTab, Boolean.valueOf(IsTranslationTab));
 	}
 
-	/** Get TranslationTab.
+	/** Get Translation Tab.
 		@return This Tab contains translation information
 	  */
 	public boolean isTranslationTab()
