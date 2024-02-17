@@ -33,7 +33,7 @@ public class X_M_MovementLine extends PO implements I_M_MovementLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20240217L;
 
     /** Standard Constructor */
     public X_M_MovementLine (Properties ctx, int M_MovementLine_ID, String trxName)
@@ -254,9 +254,9 @@ public class X_M_MovementLine extends PO implements I_M_MovementLine, I_Persiste
 		return ii.intValue();
 	}
 
-	public I_M_Locator getM_Locator() throws RuntimeException
+	public org.compiere.model.I_M_Locator getM_Locator() throws RuntimeException
 	{
-		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_ID)
 			.getPO(getM_Locator_ID(), get_TrxName());
 	}
 
@@ -282,9 +282,9 @@ public class X_M_MovementLine extends PO implements I_M_MovementLine, I_Persiste
 		return ii.intValue();
 	}
 
-	public I_M_Locator getM_LocatorTo() throws RuntimeException
+	public org.compiere.model.I_M_Locator getM_LocatorTo() throws RuntimeException
 	{
-		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
+		return (org.compiere.model.I_M_Locator)MTable.get(getCtx(), org.compiere.model.I_M_Locator.Table_ID)
 			.getPO(getM_LocatorTo_ID(), get_TrxName());
 	}
 
@@ -524,5 +524,24 @@ public class X_M_MovementLine extends PO implements I_M_MovementLine, I_Persiste
 	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
+	}
+
+	/** Set Cost.
+		@param ZI_PriceCost Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	*/
+	public void setZI_PriceCost (BigDecimal ZI_PriceCost)
+	{
+		set_Value (COLUMNNAME_ZI_PriceCost, ZI_PriceCost);
+	}
+
+	/** Get Cost.
+		@return Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public BigDecimal getZI_PriceCost()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PriceCost);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

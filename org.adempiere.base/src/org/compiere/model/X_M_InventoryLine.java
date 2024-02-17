@@ -33,7 +33,7 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20240217L;
 
     /** Standard Constructor */
     public X_M_InventoryLine (Properties ctx, int M_InventoryLine_ID, String trxName)
@@ -536,5 +536,24 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 	public String getValue()
 	{
 		return (String)get_Value(COLUMNNAME_Value);
+	}
+
+	/** Set Cost.
+		@param ZI_PriceCost Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	*/
+	public void setZI_PriceCost (BigDecimal ZI_PriceCost)
+	{
+		set_Value (COLUMNNAME_ZI_PriceCost, ZI_PriceCost);
+	}
+
+	/** Get Cost.
+		@return Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public BigDecimal getZI_PriceCost()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ZI_PriceCost);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

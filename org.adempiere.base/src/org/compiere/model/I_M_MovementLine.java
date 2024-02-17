@@ -184,7 +184,7 @@ public interface I_M_MovementLine
 	  */
 	public int getM_Locator_ID();
 
-	public I_M_Locator getM_Locator() throws RuntimeException;
+	public org.compiere.model.I_M_Locator getM_Locator() throws RuntimeException;
 
     /** Column name M_LocatorTo_ID */
     public static final String COLUMNNAME_M_LocatorTo_ID = "M_LocatorTo_ID";
@@ -199,7 +199,7 @@ public interface I_M_MovementLine
 	  */
 	public int getM_LocatorTo_ID();
 
-	public I_M_Locator getM_LocatorTo() throws RuntimeException;
+	public org.compiere.model.I_M_Locator getM_LocatorTo() throws RuntimeException;
 
     /** Column name M_Movement_ID */
     public static final String COLUMNNAME_M_Movement_ID = "M_Movement_ID";
@@ -348,4 +348,17 @@ public interface I_M_MovementLine
 	  * Search key for the record in the format required - must be unique
 	  */
 	public String getValue();
+
+    /** Column name ZI_PriceCost */
+    public static final String COLUMNNAME_ZI_PriceCost = "ZI_PriceCost";
+
+	/** Set Cost.
+	  * Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public void setZI_PriceCost (BigDecimal ZI_PriceCost);
+
+	/** Get Cost.
+	  * Cost per Unit of Measure including all indirect costs (Freight, etc.)
+	  */
+	public BigDecimal getZI_PriceCost();
 }
