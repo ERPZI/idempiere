@@ -1,15 +1,35 @@
 -- IDEMPIERE-6025 Purchase Credit Memo > Create Lines From not displaying open/deferred matched PO invoice quantities
-SELECT register_migration_script('202403051827_IDEMPIERE-6025.sql') FROM dual;
+SELECT register_migration_script('202402291804_IDEMPIERE-6025.sql') FROM dual;
 
--- Mar 5, 2024, 6:27:42 PM MYT
+-- Feb 29, 2024, 6:04:33 PM MYT
 UPDATE AD_ViewComponent SET OtherClause='GROUP BY l.QtyOrdered,CASE WHEN l.QtyOrdered=0 THEN 0 ELSE l.QtyEntered/l.QtyOrdered END,
 l.C_UOM_ID, po.VendorProductNo, l.M_Product_ID, l.C_Charge_ID, l.Line, l.C_OrderLine_ID, o.IsSOTrx, 
 l.AD_Client_ID, l.AD_Org_ID, l.IsActive,l.c_bpartner_id,l.C_Order_ID, m2.Qty, l.QtyInvoiced
 HAVING (l.QtyOrdered-(CASE WHEN SUM(m.Qty) IS NULL THEN l.QtyInvoiced ELSE SUM(COALESCE(m.Qty,0))+COALESCE(m2.Qty,0) END) <> 0) 
-OR (COALESCE(m2.Qty,0) <> 0)',Updated=TO_TIMESTAMP('2024-03-05 18:27:42','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_ViewComponent_ID=200227
+OR (COALESCE(m2.Qty,SUM(COALESCE(m.Qty,0))) <> 0)', FromClause='FROM C_OrderLine l
+     JOIN C_Order o ON o.C_Order_ID = l.C_Order_ID 
+     LEFT JOIN M_Product_PO po ON l.M_Product_ID = po.M_Product_ID AND l.C_BPartner_ID = po.C_BPartner_ID
+     LEFT JOIN M_MatchPO m ON l.c_orderline_id = m.C_OrderLine_ID AND m.C_InvoiceLine_ID IS NOT NULL AND COALESCE(m.Reversal_ID,0)=0 AND m.Posted<>''d'' 
+	 LEFT JOIN (
+		 SELECT m2.C_OrderLine_ID, SUM(COALESCE(m2.Qty,0)) AS Qty 
+		 FROM M_MatchPO m2 
+		 WHERE m2.C_InvoiceLine_ID IS NOT NULL
+		 AND COALESCE(m2.Reversal_ID,0)=0 
+		 AND m2.Posted=''d''
+		 GROUP BY m2.C_OrderLine_ID
+	 ) m2 ON l.c_orderline_id = m2.C_OrderLine_ID 
+     LEFT JOIN M_Product p ON l.M_Product_ID = p.M_Product_ID',Updated=TO_TIMESTAMP('2024-02-29 18:04:33','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_ViewComponent_ID=200227
 ;
 
--- Mar 5, 2024, 6:27:54 PM MYT
+-- Feb 29, 2024, 6:05:09 PM MYT
+UPDATE AD_ViewColumn SET ColumnSQL='l.QtyOrdered-(CASE WHEN SUM(m.Qty) IS NULL THEN l.QtyInvoiced ELSE SUM(COALESCE(m.Qty,0))+COALESCE(m2.Qty,0) END)',Updated=TO_TIMESTAMP('2024-02-29 18:05:09','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_ViewColumn_ID=217539
+;
+
+-- Feb 29, 2024, 6:06:19 PM MYT
+UPDATE AD_ViewColumn SET ColumnSQL='COALESCE(m2.Qty,SUM(COALESCE(m.Qty,0)))',Updated=TO_TIMESTAMP('2024-02-29 18:06:19','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_ViewColumn_ID=217538
+;
+
+-- Feb 29, 2024, 6:07:01 PM MYT
 CREATE OR REPLACE VIEW C_INVOICE_CREATEFROM_V (
 	CREDITQTY,
 	QTY,
@@ -115,7 +135,7 @@ HAVING
 			END
 		) <> 0
 	)
-	OR (COALESCE(M2.QTY, 0) <> 0)
+	OR (COALESCE(M2.QTY, SUM(COALESCE(M.QTY, 0))) <> 0)
 UNION ALL
 SELECT
 	CASE
