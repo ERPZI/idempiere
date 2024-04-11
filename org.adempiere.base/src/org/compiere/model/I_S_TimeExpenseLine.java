@@ -400,17 +400,17 @@ public interface I_S_TimeExpenseLine
 	  * Optional additional user defined information
 	  */
 	public String getNote();
-	
-	 /** Column name PriceEntered */
+
+    /** Column name PriceEntered */
     public static final String COLUMNNAME_PriceEntered = "PriceEntered";
 
 	/** Set Price.
-	  * Price Entered - the price based on the selected price list on header
+	  * Price Entered - the price based on the selected/base UoM
 	  */
 	public void setPriceEntered (BigDecimal PriceEntered);
 
 	/** Get Price.
-	  * Price Entered - the price based on the selected price list on header
+	  * Price Entered - the price based on the selected/base UoM
 	  */
 	public BigDecimal getPriceEntered();
 
@@ -620,6 +620,19 @@ s AP price list)
 
 	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
 
+    /** Column name ZI_Branch */
+    public static final String COLUMNNAME_ZI_Branch = "ZI_Branch";
+
+	/** Set Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public void setZI_Branch (String ZI_Branch);
+
+	/** Get Branch Code.
+	  * Branch in an organization for Tax reporting purposes
+	  */
+	public String getZI_Branch();
+
     /** Column name ZI_ReceiptAvailable */
     public static final String COLUMNNAME_ZI_ReceiptAvailable = "ZI_ReceiptAvailable";
 
@@ -641,6 +654,21 @@ s AP price list)
 
 	/** Get Receipt No.	  */
 	public String getZI_ReceiptNo();
+
+    /** Column name ZI_User_ID */
+    public static final String COLUMNNAME_ZI_User_ID = "ZI_User_ID";
+
+	/** Set User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public void setZI_User_ID (int ZI_User_ID);
+
+	/** Get User/Contact.
+	  * User within the system - Internal or Business Partner Contact
+	  */
+	public int getZI_User_ID();
+
+	public org.compiere.model.I_AD_User getZI_User() throws RuntimeException;
 
     /** Column name ZI_VendorName */
     public static final String COLUMNNAME_ZI_VendorName = "ZI_VendorName";
