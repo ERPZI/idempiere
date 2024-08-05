@@ -237,6 +237,15 @@ public interface I_ZI_Woo_Product
 	/** Get woo_brand	  */
 	public String getwoo_brand();
 
+    /** Column name woo_enable_reviews */
+    public static final String COLUMNNAME_woo_enable_reviews = "woo_enable_reviews";
+
+	/** Set woo_enable_reviews	  */
+	public void setwoo_enable_reviews (boolean woo_enable_reviews);
+
+	/** Get woo_enable_reviews	  */
+	public boolean iswoo_enable_reviews();
+
     /** Column name woo_product_categories */
     public static final String COLUMNNAME_woo_product_categories = "woo_product_categories";
 

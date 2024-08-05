@@ -33,7 +33,7 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240719L;
+	private static final long serialVersionUID = 20240805L;
 
     /** Standard Constructor */
     public X_ZI_Woo_Product (Properties ctx, int ZI_Woo_Product_ID, String trxName)
@@ -317,6 +317,28 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 	public String getwoo_brand()
 	{
 		return (String)get_Value(COLUMNNAME_woo_brand);
+	}
+
+	/** Set woo_enable_reviews.
+		@param woo_enable_reviews woo_enable_reviews
+	*/
+	public void setwoo_enable_reviews (boolean woo_enable_reviews)
+	{
+		set_ValueNoCheck (COLUMNNAME_woo_enable_reviews, Boolean.valueOf(woo_enable_reviews));
+	}
+
+	/** Get woo_enable_reviews.
+		@return woo_enable_reviews	  */
+	public boolean iswoo_enable_reviews()
+	{
+		Object oo = get_Value(COLUMNNAME_woo_enable_reviews);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set woo_product_categories.
