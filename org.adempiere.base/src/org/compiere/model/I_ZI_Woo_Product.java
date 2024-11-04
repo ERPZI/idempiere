@@ -318,6 +318,15 @@ public interface I_ZI_Woo_Product
 	/** Get woo_sale_price	  */
 	public BigDecimal getwoo_sale_price();
 
+    /** Column name woo_sku */
+    public static final String COLUMNNAME_woo_sku = "woo_sku";
+
+	/** Set woo_sku	  */
+	public void setwoo_sku (String woo_sku);
+
+	/** Get woo_sku	  */
+	public String getwoo_sku();
+
     /** Column name woo_stock_management */
     public static final String COLUMNNAME_woo_stock_management = "woo_stock_management";
 

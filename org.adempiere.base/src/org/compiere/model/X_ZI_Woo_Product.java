@@ -33,7 +33,7 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240831L;
+	private static final long serialVersionUID = 20241104L;
 
     /** Standard Constructor */
     public X_ZI_Woo_Product (Properties ctx, int ZI_Woo_Product_ID, String trxName)
@@ -468,6 +468,21 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set woo_sku.
+		@param woo_sku woo_sku
+	*/
+	public void setwoo_sku (String woo_sku)
+	{
+		set_ValueNoCheck (COLUMNNAME_woo_sku, woo_sku);
+	}
+
+	/** Get woo_sku.
+		@return woo_sku	  */
+	public String getwoo_sku()
+	{
+		return (String)get_Value(COLUMNNAME_woo_sku);
 	}
 
 	/** Set woo_stock_management.
