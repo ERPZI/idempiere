@@ -289,20 +289,6 @@ public class ImportOrder extends SvrProcess
 				  .append("WHERE M_Shipper_ID IS NULL AND ShipperName IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Shipper=" + no);
-		// c_bpartner_location_name => C_BPartner_Location_ID
-		//sql = new StringBuilder ("UPDATE I_Order o ")
-		//		  .append("SET C_BPartner_Location_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location bpl")
-		//		  .append(" WHERE o.c_bpartner_location_name=bpl.Name AND o.AD_Client_ID=bpl.AD_Client_ID AND o.c_bpartner_id = bpl.c_bpartner_id AND isShipTo='Y') ")
-		//		  .append("WHERE C_BPartner_Location_ID IS NULL AND c_bpartner_location_name IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
-		// no = DB.executeUpdate(sql.toString(), get_TrxName());
-		//if (log.isLoggable(Level.FINE)) log.fine("Set BPartner Location=" + no);
-		// c_bpartner_billto_location_name => BillTo_ID
-		//sql = new StringBuilder ("UPDATE I_Order o ")
-		//		  .append("SET BillTo_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location bpl")
-		//		  .append(" WHERE o.c_bpartner_billto_location_name=bpl.Name AND o.AD_Client_ID=bpl.AD_Client_ID) ")
-		//		  .append("WHERE BillTo_ID IS NULL AND c_bpartner_billto_location_name IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
-		//no = DB.executeUpdate(sql.toString(), get_TrxName());
-		//if (log.isLoggable(Level.FINE)) log.fine("Set BillTo BPartner Location=" + no);
 		// UOMName => C_UOM_ID
 		sql = new StringBuilder ("UPDATE I_Order o ")
 				  .append("SET C_UOM_ID=(SELECT C_UOM_ID FROM C_UOM uom")
@@ -439,7 +425,22 @@ public class ImportOrder extends SvrProcess
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
 			log.warning ("Invalid Region=" + no);
-
+		//>>MPo, 2/12/24
+		// PartnerLocationName => C_BPartner_Location_ID
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			  .append("SET C_BPartner_Location_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location bpl")
+			  .append(" WHERE o.PartnerLocationName=bpl.Name AND o.AD_Client_ID=bpl.AD_Client_ID AND o.c_bpartner_id = bpl.c_bpartner_id AND isShipTo='Y') ")
+			  .append("WHERE C_BPartner_Location_ID IS NULL AND PartnerLocationName IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set BPartner Location=" + no);
+		// InvoiceLocationName => BillTo_ID
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			  .append("SET BillTo_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location bpl")
+			  .append(" WHERE o.InvoiceLocationName=bpl.Name AND o.AD_Client_ID=bpl.AD_Client_ID AND o.c_bpartner_id = bpl.c_bpartner_id AND isBillTo='Y') ")
+			  .append("WHERE BillTo_ID IS NULL AND InvoiceLocationName IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set BPartner Invoice Location=" + no);
+		//<<MPo
 		//	Existing Location ? Exact Match
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET (BillTo_ID,C_BPartner_Location_ID)=(SELECT C_BPartner_Location_ID,C_BPartner_Location_ID")

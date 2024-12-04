@@ -646,6 +646,15 @@ public interface I_I_Order
 	  */
 	public boolean isI_IsImported();
 
+    /** Column name InvoiceLocationName */
+    public static final String COLUMNNAME_InvoiceLocationName = "InvoiceLocationName";
+
+	/** Set Invoice Location Name	  */
+	public void setInvoiceLocationName (String InvoiceLocationName);
+
+	/** Get Invoice Location Name	  */
+	public String getInvoiceLocationName();
+
     /** Column name I_Order_ID */
     public static final String COLUMNNAME_I_Order_ID = "I_Order_ID";
 
@@ -806,6 +815,15 @@ public interface I_I_Order
 	  */
 	public String getOrgValue();
 
+    /** Column name PartnerLocationName */
+    public static final String COLUMNNAME_PartnerLocationName = "PartnerLocationName";
+
+	/** Set Partner Location Name	  */
+	public void setPartnerLocationName (String PartnerLocationName);
+
+	/** Get Partner Location Name	  */
+	public String getPartnerLocationName();
+
     /** Column name PaymentTermValue */
     public static final String COLUMNNAME_PaymentTermValue = "PaymentTermValue";
 
@@ -948,14 +966,10 @@ public interface I_I_Order
     /** Column name RepName */
     public static final String COLUMNNAME_RepName = "RepName";
 
-	/** Set Sales Rep Name.
-	  * Name of the Sales Representative
-	  */
+	/** Set Sales Rep Name	  */
 	public void setRepName (String RepName);
 
-	/** Get Sales Rep Name.
-	  * Name of the Sales Representative
-	  */
+	/** Get Sales Rep Name	  */
 	public String getRepName();
 
     /** Column name SalesRep_ID */
@@ -976,14 +990,10 @@ public interface I_I_Order
     /** Column name ShipperName */
     public static final String COLUMNNAME_ShipperName = "ShipperName";
 
-	/** Set ShipperName.
-	  * Name of the Shipper
-	  */
+	/** Set Shipper Name	  */
 	public void setShipperName (String ShipperName);
 
-	/** Get ShipperName.
-	  * Name of the Shipper
-	  */
+	/** Get Shipper Name	  */
 	public String getShipperName();
 
     /** Column name SKU */
