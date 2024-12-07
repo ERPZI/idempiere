@@ -33,7 +33,7 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241104L;
+	private static final long serialVersionUID = 20241207L;
 
     /** Standard Constructor */
     public X_ZI_Woo_Product (Properties ctx, int ZI_Woo_Product_ID, String trxName)
@@ -140,6 +140,34 @@ public class X_ZI_Woo_Product extends PO implements I_ZI_Woo_Product, I_Persiste
 	public String getlocator()
 	{
 		return (String)get_Value(COLUMNNAME_locator);
+	}
+
+	public I_M_Locator getM_Locator() throws RuntimeException
+	{
+		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
+			.getPO(getM_Locator_ID(), get_TrxName());
+	}
+
+	/** Set Locator.
+		@param M_Locator_ID Warehouse Locator
+	*/
+	public void setM_Locator_ID (int M_Locator_ID)
+	{
+		if (M_Locator_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Locator_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
+	}
+
+	/** Get Locator.
+		@return Warehouse Locator
+	  */
+	public int getM_Locator_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Product.
