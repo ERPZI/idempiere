@@ -8,6 +8,9 @@ when detect side effect, fix to only apply for parameter window*/
 .main-parameter-layout {
 	height: 100%;
 }
+.process-modal-dialog {
+	width: 600px;
+}
 .process-modal-dialog .main-parameter-layout{
 	height: auto;
 	flex-basis: auto;
@@ -28,8 +31,23 @@ when detect side effect, fix to only apply for parameter window*/
 }
 
 .report-option-container {
-	overflow-x: auto;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
 }
+
+.report-option-container div {
+    padding: 2px;
+}
+
+/* Chromium based browsers + Safari */
+@supports (not (-moz-appearance: none)) {
+	.report-option-container {
+		height: 100% !important;
+	}
+}
+
 .top-parameter-layout{
 	overflow: auto;
 	padding-bottom: 2vh;
@@ -80,6 +98,9 @@ when detect side effect, fix to only apply for parameter window*/
 	.popup-dialog.z-window.z-window-overlapped.z-window-shadow,
 	.popup-dialog.z-window.z-window-noborder.z-window-highlighted.z-window-shadow{
 		width:100%;
+	}	
+	.process-modal-dialog {
+		width: 100%;
 	}
 }
 

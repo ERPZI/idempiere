@@ -42,13 +42,13 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
- *	Parser for OFX bank statements
- *
+ *	Parser for OFX bank statements.
+ *  <p>
  *  This class is a parser for OFX bankstatements. OFX versions from 102 to 202 
- *  and MS-Money OFC message sets are supported.
+ *  and MS-Money OFC message sets are supported.<br/>
  *  Only fully XML compliant OFX data is supported. Files that are not XML
  *  compliant, e.g. OFX versions older then 200, will be preprocessed by
- *  the OFX1ToXML class before parsing.
+ *  the OFX1ToXML class before parsing.<br/>
  *  This class should be extended by a class that obtains the data to be parsed
  *  for example from a file, or using HTTP.
  *
@@ -78,10 +78,8 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	protected Timestamp 			m_dateLastRun = null;
 	protected Timestamp 			m_statementDate = null;
 
-	StringBuffer 					m_valueBuffer = new StringBuffer();
+	protected StringBuffer 			m_valueBuffer = new StringBuffer();
 	
-
-
 	/**	XML OFX Tag					*/
 	public static final String	XML_OFX_TAG = "OFX";
 	
@@ -105,8 +103,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 		
 	/**	Status aggregate				*/
 	public static final String	XML_STATUS_TAG = "STATUS";
-	
-	
+		
 	/**	Statement-response aggregate			*/
 	public static final String	XML_STMTRS_TAG = "STMTRS";
 	/**	XML CURDEF Tag					*/
@@ -173,8 +170,8 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	
 	/**
 	 * 	Initialize the loader
-	 * 	 * @param controller Reference to the BankStatementLoaderController
-	@return Initialized succesfully
+	 * 	@param controller Reference to the BankStatementLoaderController
+	 *  @return Initialized successfully
 	 */
 	protected boolean init(MBankStatementLoader controller)
 	{
@@ -248,7 +245,8 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 			
 			if (isOfx1)
 			{
-				m_reader = new BufferedReader(new InputStreamReader(new OFX1ToXML(reader)));
+				OFX1ToXML in = new OFX1ToXML(reader);
+				m_reader = new BufferedReader(new InputStreamReader(in));
 			}
 			else
 			{
@@ -260,15 +258,19 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 		{
 			m_errorMessage = new StringBuffer("ErrorReadingData");
 			m_errorDescription = new StringBuffer(e.getMessage());
-			closeBufferedReader();
 			return result;
+		}
+		finally
+		{
+			closeBufferedReader();
 		}
 
 		return result;
 	}	//	attachInput
 	
-	/**	Verify the validity of the OFX data
-	 *	@return true if input is valid OFX data
+	/**	
+	 * Verify the validity of the OFX data
+	 * @return true if input is valid OFX data
 	 */
 	public boolean isValid()
 	{
@@ -292,22 +294,23 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 		return result;
 	}	//isValid
 
-	/**	Check wether the import was succesfull
-	 *	@return true if all statement lines have been imported succesfully
+	/**	
+	 * Check whether the import was successful
+	 * @return true if all statement lines have been imported successfully
 	 */
 	public boolean importSuccessfull()
 	{
 		/*
 		 * Currently there are no checks after the statement lines are read.
-		 * Once all lines are read correctly a successfull import is assumed.
+		 * Once all lines are read correctly a successful import is assumed.
 		 */
 		return m_success;
 	}	//	importSuccessfull
 	
 	/**
-	 * Read statementlines from InputStream.
-	 * @return load success
+	 * Read statementlines from InputStream.<br/>
 	 * This method will be invoked from ImportController.
+	 * @return load success
 	 */
 	public boolean loadLines()
 	{
@@ -334,6 +337,9 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 		
 	}	//	loadLines
 	
+	/**
+	 * Close {@link #m_reader}
+	 */
 	private void closeBufferedReader() {
 		if (m_reader != null)
 			try {
@@ -344,8 +350,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getDateLastRun
-	 * @return Timestamp
+	 * @return last run date
 	 */
 	public Timestamp getDateLastRun()
 	{
@@ -353,8 +358,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getRoutingNo
-	 * @return String
+	 * @return routing number
 	 */
 	public String getRoutingNo()
 	{
@@ -362,8 +366,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getBankAccountNo
-	 * @return String
+	 * @return line bank account number
 	 */
 	public String getBankAccountNo()
 	{
@@ -371,16 +374,14 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getIBAN
-	 * @return String
+	 * @return IBAN
 	 */
 	public String getIBAN() {
 		return null;
 	}
 	
 	/**
-	 * Method getStatementReference
-	 * @return String
+	 * @return line statement reference
 	 */
 	public String getStatementReference()
 	{
@@ -388,8 +389,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getStatementDate
-	 * @return Timestamp
+	 * @return statement date
 	 */
 	public Timestamp getStatementDate()
 	{
@@ -397,8 +397,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getReference
-	 * @return String
+	 * @return line reference
 	 */
 	public String getReference()
 	{
@@ -406,8 +405,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getStatementLineDate
-	 * @return Timestamp
+	 * @return line statement date
 	 */
 	public Timestamp getStatementLineDate()
 	{
@@ -415,8 +413,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getValutaDate
-	 * @return Timestamp
+	 * @return line valuta date
 	 */
 	public Timestamp getValutaDate()
 	{
@@ -424,8 +421,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getTrxType
-	 * @return String
+	 * @return line trx type
 	 */
 	public String getTrxType()
 	{
@@ -433,8 +429,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getIsReversal
-	 * @return boolean
+	 * @return true if line is reversal
 	 */
 	public boolean getIsReversal()
 	{
@@ -442,8 +437,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getCurrency
-	 * @return String
+	 * @return line currency
 	 */
 	public String getCurrency()
 	{
@@ -451,8 +445,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getStmtAmt
-	 * @return BigDecimal
+	 * @return line statement amount
 	 */
 	public BigDecimal getStmtAmt()
 	{
@@ -460,8 +453,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getTrxAmt
-	 * @return Transaction Amount
+	 * @return Line Transaction Amount
 	 */
 	public BigDecimal getTrxAmt()
 	{
@@ -472,7 +464,6 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getInterestAmount
 	 * @return Interest Amount
 	 */
 	public BigDecimal getInterestAmt()
@@ -482,8 +473,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	
 	
 	/**
-	 * Method getMemo
-	 * @return String
+	 * @return line memo
 	 */
 	public String getMemo()
 	{
@@ -491,8 +481,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getChargeName
-	 * @return String
+	 * @return line charge name
 	 */
 	public String getChargeName()
 	{
@@ -500,8 +489,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getChargeAmt
-	 * @return BigDecimal
+	 * @return line charge amount
 	 */
 	public BigDecimal getChargeAmt()
 	{
@@ -509,8 +497,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getTrxID
-	 * @return String
+	 * @return line transaction id
 	 */
 	public String getTrxID()
 	{
@@ -518,8 +505,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getPayeeAccountNo
-	 * @return String
+	 * @return line payee account number
 	 */
 	public String getPayeeAccountNo()
 	{
@@ -527,8 +513,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getPayeeName
-	 * @return String
+	 * @return line payee name
 	 */
 	public String getPayeeName()
 	{
@@ -536,8 +521,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getCheckNo
-	 * @return String
+	 * @return line check number
 	 */
 	public String getCheckNo()
 	{
@@ -555,6 +539,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	 * @throws org.xml.sax.SAXException
 	 * @see org.xml.sax.ContentHandler#startElement(String, String, String, Attributes)
 	 */
+	@Override
 	public void startElement (String uri, String localName, String qName, Attributes attributes)
 		throws org.xml.sax.SAXException
 	{
@@ -584,7 +569,8 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	 * @param length int
 	 * @throws SAXException
 	 * @see org.xml.sax.ContentHandler#characters(char[], int, int)
-	 **/	
+	 */
+	@Override
 	public void characters (char ch[], int start, int length) throws SAXException
 	{
 
@@ -595,7 +581,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	
 	/**
 	 * Check for valid XML structure. (all tags are properly ended).
-	 * The statements are passed to ImportController when the statement end (</STMTTRN>) 
+	 * The statements are passed to ImportController when the statement end (&lt;/STMTTRN&gt;) 
 	 * is detected.
 	 * @param uri String
 	 * @param localName String
@@ -603,6 +589,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	 * @throws SAXException
 	 * @see org.xml.sax.ContentHandler#endElement(String, String, String)
 	 */
+	@Override
 	public void endElement (String uri, String localName, String qName) throws SAXException
 	{
 		
@@ -766,33 +753,16 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 			}
 		}
 	}	//	endElement
-	
-	
-	/*
-	 * Copyright 2008 Web Cohesion
-	 *
-	 * Licensed under the Apache License, Version 2.0 (the "License");
-	 * you may not use this file except in compliance with the License.
-	 * You may obtain a copy of the License at
-	 *
-	 *   http://www.apache.org/licenses/LICENSE-2.0
-	 *
-	 * Unless required by applicable law or agreed to in writing, software
-	 * distributed under the License is distributed on an "AS IS" BASIS,
-	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
-	 * 
+		
+	/**
 	 * source: https://github.com/stoicflame/ofx4j/blob/a604e4f6ffefea61403434cf853bbd1b20740386/src/main/java/com/webcohesion/ofx4j/io/DefaultStringConversion.java
-	 * 
+	 * <p>
+	 * Parse the timezone offset of the form [HOURS_OFF_GMT:TZ_ID]
+	 *
+	 * @param tzoffset The offset pattern.
+	 * @return The timezone.
 	 */
-	  /**
-	   * Parse the timezone offset of the form [HOURS_OFF_GMT:TZ_ID]
-	   *
-	   * @param tzoffset The offset pattern.
-	   * @return The timezone.
-	   */
-	  protected TimeZone parseTimeZone(String tzoffset) {
+	protected TimeZone parseTimeZone(String tzoffset) {
 	    StringTokenizer tokenizer = new StringTokenizer(tzoffset, "[]:");
 	    TimeZone tz = GMT_TIME_ZONE;
 	    if (tokenizer.hasMoreTokens()) {
@@ -807,12 +777,12 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	public static final int DATE_FORMAT_LENGTH = "yyyyMMddHHmmss.SSS".length();
 	public static final int TIME_FORMAT_LENGTH = "HHmmss.SSS".length();	
 	
-	  /**
-	   * Parses a date according to OFX.
-	   *
-	   * @param value The value of the date.
-	   * @return The date value.
-	   */
+	/**
+	 * Parses a date according to OFX.
+	 *
+	 * @param value The value of the date.
+	 * @return The date value.
+	 */
 	protected Date parseDate(String value) {
 	    char[] parseableDate = new char[DATE_FORMAT_LENGTH];
 	    Arrays.fill(parseableDate, '0');
@@ -850,7 +820,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	  
 	/**
-	 * Method parseOfxDate
+	 * Parse OFX date
 	 * @param value String
 	 * @return Timestamp
 	 * @throws ParseException
@@ -868,8 +838,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}   //parseOfxDate
 	
 	/**
-	 * Method getLastErrorMessage
-	 * @return String
+	 * @return last error message
 	 */
 	public String getLastErrorMessage()
 	{
@@ -877,8 +846,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	}
 	
 	/**
-	 * Method getLastErrorDescription
-	 * @return String
+	 * @return last error description
 	 */
 	public String getLastErrorDescription()
 	{
@@ -889,7 +857,7 @@ public abstract class OFXBankStatementHandler extends DefaultHandler
 	 * @author ET
 	 * @version $Id: OFXBankStatementHandler.java,v 1.3 2006/07/30 00:51:05 jjanke Exp $
 	 */
-	static class StatementLine
+	protected static class StatementLine
 	{
 		protected String routingNo = null;
 		protected String bankAccountNo = null;

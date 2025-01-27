@@ -80,6 +80,7 @@ import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.panel.StatusBarPanel;
 import org.adempiere.webui.part.MultiTabPart;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
@@ -101,6 +102,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.model.MTab;
 import org.compiere.model.MTable;
 import org.compiere.model.MUserQuery;
+import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.model.SystemIDs;
 import org.compiere.util.AdempiereSystemError;
@@ -158,8 +160,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	private static final String HISTORY_DAY_YEAR = "Year";
 	private static final String HISTORY_DAY_MONTH = "Month";
 	private static final String HISTORY_DAY_WEEK = "Week";
-	private static final String HISTORY_DAY_DAY = "Day";
-	ValueNamePair[] historyItems = new ValueNamePair[] {
+	private static final String HISTORY_DAY_DAY = "Day";	
+	protected ValueNamePair[] historyItems = new ValueNamePair[] {
 			new ValueNamePair("",                " "),
 			new ValueNamePair(HISTORY_DAY_ALL,   Msg.getMsg(Env.getCtx(), HISTORY_DAY_ALL)),
 			new ValueNamePair(HISTORY_DAY_YEAR,  Msg.getMsg(Env.getCtx(), HISTORY_DAY_YEAR)),
@@ -215,7 +217,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     private ArrayList<WEditor>          m_sEditorsTo = new ArrayList<WEditor>();
     /** Tab number for lookup and context */
     public static final int     TABNO = 99;
-    /** Max display lenght of Fields on simple search tab   */
+    /** Max display length of Fields on simple search tab   */
     public static final int     FIELDLENGTH = 20;
     /** AD_Tab_ID of calling tab */
     private int m_AD_Tab_ID = 0;
@@ -295,6 +297,9 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 
 	/** Column name attribute set instance */
 	private static final String COLUMNNAME_M_AttributeSetInstance_ID = "M_AttributeSetInstance_ID";
+	
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
     /**
      * FindWindow Constructor
@@ -761,7 +766,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         tabPanel.setStyle("height: 100%; width: 100%");
         tabPanel.appendChild(winAdvanced);
         tabPanel.setId("advancedSearch");
-        winMain.addTab(tabPanel, Msg.getMsg(Env.getCtx(), "Advanced").replaceAll("&", ""), false, false);
+        winMain.addTab(tabPanel, Msg.getMsg(Env.getCtx(), "Advanced"), false, false);
         initSimple();
         initAdvanced();
 
@@ -944,7 +949,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         Collections.sort(gridFieldList, new Comparator<GridField>() {
 			@Override
 			public int compare(GridField o1, GridField o2) {
-				return o1.getSeqNoSelection()-o2.getSeqNoSelection();
+				// order by SeqNoSelection, sending the zeroes to the end
+				int sel1 = o1.getSeqNoSelection();
+				if (sel1 == 0)
+					sel1 = Integer.MAX_VALUE;
+				int sel2 = o2.getSeqNoSelection();
+				if (sel2 == 0)
+					sel2 = Integer.MAX_VALUE;
+				return sel1-sel2;
 			}
 		});
         
@@ -1058,17 +1070,6 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     			return;
         ListItem listItem = new ListItem();
         listItem.setId("Row"+ rowCount++);
-
-        int id = 0;
-
-        if(advancedPanel.getItemCount()>0){
-			String previousID = advancedPanel.getItems().get(advancedPanel.getItemCount()-1).getId();
-			previousID = previousID.substring(3, previousID.length());
-			id = Integer.valueOf(previousID);
-			id++;
-        }
-
-        listItem.setId("Row"+id);
 
         Combobox listTable = new Combobox();
         listTable.setId("listTable"+listItem.getId());
@@ -1588,8 +1589,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 
         //  Editor
         WEditor editor = null;
-        //false will use hflex which is render 1 pixel too width on firefox
-        editor = WebEditorFactory.getEditor(mField, true);
+        editor = WebEditorFactory.getEditor(mField, false);
         if (editor == null || !editor.isSearchable()) {
         	return false;
         }
@@ -1964,6 +1964,10 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
      * user cancellation, close dialog
      */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		m_isCancel = true;
 		dispose();
 	}
@@ -2044,12 +2048,14 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
     		return;
 
     	String code = userQuery.getCode();
-    	if (code.startsWith("@SQL=")) {
+    	if (code.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
+			winMain.getComponent().getTabpanel(1) .getLinkedTab().setLabel(Msg.getMsg(Env.getCtx(), "SQL"));
 			m_whereUserQuery = "(" + code.substring(code.indexOf("=")+1, code.length()) + ")";
 			if (log.isLoggable(Level.INFO))
 				log.log(Level.INFO, m_whereUserQuery);
 			hideAdvanced();
     	} else {
+			winMain.getComponent().getTabpanel(1) .getLinkedTab().setLabel(Msg.getMsg(Env.getCtx(), "Advanced"));
         	String[] segments = code.split(Pattern.quote(SEGMENT_SEPARATOR));
 
             List<?> rowList = advancedPanel.getChildren();
@@ -2203,7 +2209,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            //  Column
 	            ListItem row = (ListItem)rowList.get(rowIndex);
 	            Combobox table = (Combobox)row.getFellow("listTable"+row.getId());
-    	        String exists="";  
+    	        StringBuilder exists = new StringBuilder();
 
     	        boolean isExists = false;
     	        boolean isExistCondition = false;
@@ -2247,8 +2253,19 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 		            if (table.getSelectedItem() != null && !table.getSelectedItem().getValue().equals(m_AD_Tab_UU))
 					{       
 						if (!isCompositeExists) {
-							exists ="SELECT 1 FROM "+m_gridTab.getTableName()+" WHERE "+m_gridTab.getTableName()+"."+m_gridTab.getLinkColumnName()+" = "+m_tableName+"."+m_tableName+"_ID ";//  "+tab.getTableName()+".";
-							ColumnSQL = exists + " AND " + getLeftBracketValue(row) + ColumnSQL;
+							MTable refTable = MTable.get(Env.getCtx(), m_tableName);
+							exists.append("SELECT 1 FROM ").append(m_gridTab.getTableName())
+							.append(" WHERE ").append(m_gridTab.getTableName()).append(".").append(m_gridTab.getLinkColumnName())
+							.append(" = ").append(m_tableName).append(".");
+							if (refTable.isUUIDKeyTable())
+								exists.append(PO.getUUIDColumnName(m_tableName));
+							else
+								exists.append(m_tableName).append("_ID ");
+							
+							exists.append(" AND ")
+								.append(getLeftBracketValue(row))
+								.append(ColumnSQL);
+							ColumnSQL = exists.toString();
 						}         
 
 						isExists = true;
@@ -2351,7 +2368,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            if (parsedValue == null)
 	                continue;
 	            String infoDisplay = (value == null ? "" : value.toString());
-	            // When Atribute is set Field is null
+	            // When Attribute is set Field is null
 	            if(table.getSelectedItem() != null && !table.getSelectedItem().getValue().toString().equals(MAttribute.COLUMNNAME_M_Attribute_ID))
 	            {
 		            if (field.isLookup())
@@ -2999,14 +3016,10 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         
         //  Test for no records
         if (getNoOfRecords(m_query, true) != 0) {
-        	if (m_total == COUNTING_RECORDS_TIMED_OUT) {
-        		Dialog.error(m_targetWindowNo, "InfoQueryTimeOutError");
-        	} else {
-                if (advancedPanel != null) {
-                	advancedPanel.getItems().clear();
-                }
-                dispose();
+        	if (advancedPanel != null) {
+        		advancedPanel.getItems().clear();
         	}
+        	dispose();
         }
     }   //  cmd_ok_Simple
     
@@ -3077,11 +3090,7 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         }
         
         if (getNoOfRecords(m_query, true) != 0) {
-        	if (m_total == COUNTING_RECORDS_TIMED_OUT) {
-        		Dialog.error(m_targetWindowNo, "InfoQueryTimeOutError");
-        	} else {
-                dispose();
-        	}
+        	dispose();
         }
     }   //  cmd_ok_Advanced
     
@@ -3129,8 +3138,8 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         	Env.setContext(Env.getCtx(), m_targetWindowNo, TABNO, GridTab.CTX_FindSQL, finalSQL);
 
         //  Execute Query
-        int timeout = MSysConfig.getIntValue(MSysConfig.GRIDTABLE_LOAD_TIMEOUT_IN_SECONDS, 
-        		GridTable.DEFAULT_GRIDTABLE_LOAD_TIMEOUT_IN_SECONDS, Env.getAD_Client_ID(Env.getCtx()));
+        int timeout = MSysConfig.getIntValue(MSysConfig.GRIDTABLE_INITIAL_COUNT_TIMEOUT_IN_SECONDS, 
+        		GridTable.DEFAULT_GRIDTABLE_COUNT_TIMEOUT_IN_SECONDS, Env.getAD_Client_ID(Env.getCtx()));
         m_total = 999999;
         Statement stmt = null;
         ResultSet rs = null;
@@ -3166,12 +3175,12 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
         //  No Records
         if (m_total == 0 && alertRecords)
             Dialog.warn(m_targetWindowNo, "FindZeroRecords", null);
-        //  More then allowed
+        //  Load not more than max allow
         if (m_gridTab != null && alertRecords && m_total != COUNTING_RECORDS_TIMED_OUT && m_gridTab.isQueryMax(m_total))
         {
-            Dialog.error(m_targetWindowNo, "FindOverMax",
-                m_total + " > " + m_gridTab.getMaxQueryRecords());
-            m_total = 0; // return 0 if more then allowed - teo_sarca [ 1708717 ]
+            Dialog.info(m_targetWindowNo, "FindOverMax",
+                    m_total + " > " + m_gridTab.getMaxQueryRecords());
+            m_total = m_gridTab.getMaxQueryRecords();
         }
         else
             if (log.isLoggable(Level.CONFIG)) log.config("#" + m_total);

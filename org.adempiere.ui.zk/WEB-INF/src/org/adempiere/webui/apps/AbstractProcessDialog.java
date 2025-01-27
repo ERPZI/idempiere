@@ -486,7 +486,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	 */
 	protected void reportOptionLayout(HtmlBasedComponent bottomParameterLayout) {
 		if (!isReport() && !isJasperReport())
-			return;//if not a report not need show this pannel
+			return;//if not a report not need show this panel
 
 		// option control
 		Hlayout reportOptionLayout = new Hlayout();
@@ -511,10 +511,9 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		//summary option
 		chbIsSummary = new Checkbox();
 		chbIsSummary.setSclass("option-input-parameter");
+		chbIsSummary.setLabel(Msg.translate(Env.getCtx(), "Summary"));
 		Label lPrintFormat = new Label(Msg.translate(Env.getCtx(), "AD_PrintFormat_ID"));
 		lPrintFormat.setSclass("option-input-parameter print-format-label");
-		Label lIsSummary = new Label(Msg.translate(Env.getCtx(), "Summary"));
-		lIsSummary.setSclass("option-input-parameter");
 
 		//print formats
 		MClient client = MClient.get(m_ctx);
@@ -531,7 +530,6 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 		}
 		fPrintFormat.getComponent().setSclass("option-input-parameter print-format-list");
 		fPrintFormat.getComponent().setPlaceholder(lPrintFormat.getValue());
-		reportOptionLayout.appendChild(lIsSummary);
 		reportOptionLayout.appendChild(chbIsSummary);
 	}
 
@@ -854,7 +852,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			MPInstance instance = null;
 			try {
 				instance = new MPInstance(Env.getCtx(),
-						getProcessInfo().getAD_Process_ID(), getProcessInfo().getRecord_ID());
+						getProcessInfo().getAD_Process_ID(), getProcessInfo().getTable_ID(), getProcessInfo().getRecord_ID(), getProcessInfo().getRecord_UU());
 				instance.setName(saveName);
 				saveReportOptionToInstance(instance);
 				instance.saveEx();
@@ -994,6 +992,8 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 	protected void cancelProcess() 
 	{
 		m_cancel = true;
+		if(getParent() != null && getParent() instanceof HtmlBasedComponent)
+			((HtmlBasedComponent)getParent()).focus();
 		this.dispose();
 	}
 	
@@ -1087,7 +1087,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			if (count >= MSysConfig.getIntValue(MSysConfig.BACKGROUND_JOB_MAX_IN_SYSTEM, 20))
 				throw new IllegalStateException(Msg.getMsg(m_ctx, "BackgroundJobExceedMaxInSystem"));
 			
-			instance = new MPInstance(m_ctx, m_pi.getAD_Process_ID(), m_pi.getRecord_ID());
+			instance = new MPInstance(m_ctx, m_pi.getAD_Process_ID(), m_pi.getTable_ID(), m_pi.getRecord_ID(), m_pi.getRecord_UU());
 			instance.setIsRunAsJob(true);
 			instance.setIsProcessing(true);
 			instance.setNotificationType(getNotificationType());
@@ -1419,6 +1419,7 @@ public abstract class AbstractProcessDialog extends Window implements IProcessUI
 			Env.setContext(m_ctx, Env.LANGUAGE, ctx.getProperty(Env.LANGUAGE));
 			Env.setContext(m_ctx, Env.AD_USER_ID, ctx.getProperty(Env.AD_USER_ID));
 			Env.setContext(m_ctx, Env.DATE, ctx.getProperty(Env.DATE));
+			Env.setContext(m_ctx, Env.AD_SESSION_ID, ctx.getProperty(Env.AD_SESSION_ID));
 		}
 		
 		@Override

@@ -24,6 +24,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,10 +36,12 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.model.MReportView;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.SystemIDs;
 import org.compiere.util.CLogMgt;
@@ -57,7 +61,7 @@ import bsh.Interpreter;
 
 /**
  * Data Engine.
- * Creates SQL and laods data into PrintData (including totals/etc.)
+ * Creates SQL and loads data into PrintData (including totals/etc.)
  *
  * @author 	Jorg Janke
  * @version 	$Id: DataEngine.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
@@ -138,6 +142,10 @@ public class DataEngine
 	private int				m_windowNo = 0;
 
 	private Map<Object, Object> m_summarized = new HashMap<Object, Object>();
+
+	public static final int DEFAULT_REPORT_LOAD_TIMEOUT_IN_SECONDS = 120;
+
+	public static final int DEFAULT_GLOBAL_MAX_REPORT_RECORDS = 100000;
 
 	/**************************************************************************
 	 * 	Load Data
@@ -340,9 +348,9 @@ public class DataEngine
 				int AD_PrintFormatItem_ID = rs.getInt("AD_PrintFormatItem_ID");
 				String ColumnName = rs.getString(2);
 				String ColumnSQL = rs.getString(24);
-				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQLFIND="))
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith(MColumn.VIRTUAL_SEARCH_COLUMN_PREFIX))
 					ColumnSQL = ColumnSQL.substring(9);
-				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith("@SQL="))
+				if (ColumnSQL != null && ColumnSQL.length() > 0 && ColumnSQL.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 					ColumnSQL = "NULL";
 				if (ColumnSQL != null && ColumnSQL.contains("@"))
 					ColumnSQL = Env.parseContext(Env.getCtx(), m_windowNo, ColumnSQL, false, true);
@@ -424,9 +432,9 @@ public class DataEngine
 					//	=> (..) AS AName, Table.ID,
 					if (script != null && !script.isEmpty())
 					{
-						if (script.startsWith("@SQL="))
+						if (script.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX))
 						{
-							script = "(" + script.replace("@SQL=", "").trim() + ")";
+							script = "(" + script.replace(MColumn.VIRTUAL_UI_COLUMN_PREFIX, "").trim() + ")";
 							script = Env.parseContext(Env.getCtx(), m_windowNo, script, false);
 						}
 						else
@@ -442,7 +450,8 @@ public class DataEngine
 					// Warning here: Oracle treats empty strings '' as NULL and the code below checks for wasNull on this column
 					.append("' '").append(" AS \"").append(pfiName).append("\",");
 					//
-					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, DisplayType.Text, FieldLength, orderName, isPageBreak);
+					int scriptDisplayType = getDisplayTypeFromPattern(formatPattern);
+					pdc = new PrintDataColumn(AD_PrintFormatItem_ID, -1, pfiName, scriptDisplayType, FieldLength, orderName, isPageBreak);
 					synonymNext();
 				}
 				//	-- Parent, TableDir (and unqualified Search) --
@@ -696,8 +705,8 @@ public class DataEngine
 
 		if (columns.size() == 0)
 		{
-			log.log(Level.SEVERE, "No Colums - Delete Report Format " + reportName + " and start again");
-			if (log.isLoggable(Level.FINEST)) log.finest("No Colums - SQL=" + sql + " - ID=" + format.get_ID());
+			log.log(Level.SEVERE, "No Columns - Delete Report Format " + reportName + " and start again");
+			if (log.isLoggable(Level.FINEST)) log.finest("No Columns - SQL=" + sql + " - ID=" + format.get_ID());
 			return null;
 		}
 
@@ -805,6 +814,31 @@ public class DataEngine
 	}	//	getPrintDataInfo
 
 	/**
+	 * Try to determine the display type from a pattern
+	 * - try a DecimalFormat if the pattern contains any of the characters # 0
+	 * - try a SimpleDateFormat if the pattern contains any of the characters y M d h H m s S
+	 * - otherwise (or if the format is not valid) return Text
+	 * @param pattern
+	 * @return DateTime for a SimpleDateFormat, Number for a DecimalFormat, otherwise Text
+	 */
+	private int getDisplayTypeFromPattern(String pattern) {
+		if (! Util.isEmpty(pattern, true)) {
+ 			if (pattern.matches(".*[#0].*")) {
+ 		        try {
+ 	                new DecimalFormat(pattern);
+ 	                return DisplayType.Number;
+	            } catch (Exception ex) {}
+ 			} else if (pattern.matches(".*[yMdhHmsS].*")) {
+	            try {
+		            new SimpleDateFormat(pattern);
+		            return DisplayType.DateTime;
+	            } catch (Exception ex) {}
+	        }
+		}
+        return DisplayType.Text;
+    }
+
+	/**
 	 *	Next Synonym.
 	 * 	Creates next synonym A..Z AA..ZZ AAA..ZZZ
 	 */
@@ -898,11 +932,20 @@ public class DataEngine
 		int reportLineID = 0;
 		ArrayList<PrintDataColumn> scriptColumns = new ArrayList<PrintDataColumn>();
 		//
+		int timeout = MSysConfig.getIntValue(MSysConfig.REPORT_LOAD_TIMEOUT_IN_SECONDS, DEFAULT_REPORT_LOAD_TIMEOUT_IN_SECONDS, Env.getAD_Client_ID(Env.getCtx()));
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		String sql = pd.getSQL();
 		try
 		{
-			pstmt = DB.prepareNormalReadReplicaStatement(pd.getSQL(), m_trxName);
+			int maxRows = MSysConfig.getIntValue(MSysConfig.GLOBAL_MAX_REPORT_RECORDS, DEFAULT_GLOBAL_MAX_REPORT_RECORDS, Env.getAD_Client_ID(Env.getCtx()));
+			if (maxRows > 0 && DB.getDatabase().isPagingSupported())
+				sql = DB.getDatabase().addPagingSQL(sql, 1, maxRows+1);
+			pstmt = DB.prepareNormalReadReplicaStatement(sql, m_trxName);
+			if (maxRows > 0 && ! DB.getDatabase().isPagingSupported())
+				pstmt.setMaxRows(maxRows+1);
+			if (timeout > 0)
+				pstmt.setQueryTimeout(timeout);
 			rs = pstmt.executeQuery();
 
 			boolean isExistsT_Report_PA_ReportLine_ID = false;
@@ -919,9 +962,13 @@ public class DataEngine
 				}
 			}
 
+			int cnt = 0;
 			//	Row Loop
 			while (rs.next())
 			{
+				cnt++;
+				if (maxRows > 0 && cnt > maxRows)
+					throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReportMaxRowsReached", new Object[] {maxRows}));
 				if (hasLevelNo)
 				{
 					levelNo = rs.getInt("LevelNo");
@@ -1093,7 +1140,7 @@ public class DataEngine
 									pde = new PrintDataElement(pdc.getAD_PrintFormatItem_ID(), pdc.getColumnName(), Boolean.valueOf(b), pdc.getDisplayType(), pdc.getFormatPattern());
 								}
 							}
-							else if (pdc.getDisplayType() == DisplayType.TextLong)
+							else if (pdc.getDisplayType() == DisplayType.TextLong || (pdc.getDisplayType() == DisplayType.JSON && DB.isOracle()))
 							{
 								String value = "";
 								if ("java.lang.String".equals(rs.getMetaData().getColumnClassName(counter)))
@@ -1155,7 +1202,9 @@ public class DataEngine
 		}
 		catch (SQLException e)
 		{
-			log.log(Level.SEVERE, pdc + " - " + e.getMessage() + "\nSQL=" + pd.getSQL());
+			if (DB.getDatabase().isQueryTimeout(e))
+				throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReportQueryTimeout", new Object[] {timeout}));
+			log.log(Level.SEVERE, pdc + " - " + e.getMessage() + "\nSQL=" + sql);
 			throw new AdempiereException(e);
 		}
 		finally
@@ -1192,7 +1241,7 @@ public class DataEngine
 		//	Check last Group Change
 		if (m_group.getGroupColumnCount() > 1)	//	one is TOTAL
 		{
-			for (int i = pd.getColumnInfo().length-1; i >= 0; i--)	//	backwards (leaset group first)
+			for (int i = pd.getColumnInfo().length-1; i >= 0; i--)	//	backwards (last group first)
 			{
 				PrintDataColumn group_pdc = pd.getColumnInfo()[i];
 				if (!m_group.isGroupColumn(group_pdc.getAD_PrintFormatItem_ID()))
@@ -1273,10 +1322,10 @@ public class DataEngine
 		if (pd.getRowCount() == 0)
 		{
 			if (CLogMgt.isLevelFiner())
-				log.warning("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime) 
-					+ " - " + pd.getSQL());
+				log.finer("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime) 
+					+ " - " + sql);
 			else
-				log.warning("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime)); 
+				log.info("NO Rows - ms=" + (System.currentTimeMillis()-m_startTime)); 
 		}
 		else
 			if (log.isLoggable(Level.INFO)) log.info("Rows=" + pd.getRowCount()

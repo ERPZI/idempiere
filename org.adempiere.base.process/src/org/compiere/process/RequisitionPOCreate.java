@@ -314,6 +314,7 @@ public class RequisitionPOCreate extends SvrProcess
 			|| rLine.getM_AttributeSetInstance_ID() != m_M_AttributeSetInstance_ID
 			|| rLine.getC_Charge_ID() != 0		//	single line per charge
 			|| m_order == null
+			|| (rLine.getC_BPartner_ID() > 0 && m_order.getC_BPartner_ID() != rLine.getC_BPartner_ID())
 			|| m_order.getDatePromised().compareTo(rLine.getDateRequired()) != 0
 			// MPo, 9/6/2016 Create a new PO line if any reference field is different
 			|| rLine.getUser1_ID() != m_User1_ID

@@ -533,7 +533,7 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 				//  Get File Info
 				// MPo, 13/10/23
 				makeFile();
-				//tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), m_PaymentExport.getFilenameSuffix());
+				//tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), null);
 				//filenameForDownload = m_PaymentExport.getFilenamePrefix() + m_PaymentExport.getFilenameSuffix();
 				
 				//no = m_PaymentExport.exportToFile(m_checks,(Boolean) fDepositBatch.getValue(),PaymentRule, tempFile, err);

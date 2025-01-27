@@ -28,16 +28,26 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CacheMgt;
 import org.compiere.util.Env;
 
-public class MUserPreference extends X_AD_UserPreference{
-	/**
+public class MUserPreference extends X_AD_UserPreference {
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -5816348717625872665L;
+	private static final long serialVersionUID = 4313636387666521703L;
 
-	public MUserPreference(Properties ctx, int AD_UserPreference_ID,
-			String trxName) {
+	/**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param AD_UserPreference_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MUserPreference(Properties ctx, String AD_UserPreference_UU, String trxName) {
+        super(ctx, AD_UserPreference_UU, trxName);
+    }
+
+	public MUserPreference(Properties ctx, int AD_UserPreference_ID, String trxName) {
 		super(ctx, AD_UserPreference_ID, trxName);
 
 	} //MUserPreference
@@ -115,8 +125,17 @@ public class MUserPreference extends X_AD_UserPreference{
 
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
-		if (success)
+		if (success) {
 			fillPreferences();
+			if (is_ValueChanged(COLUMNNAME_IsReadOnlySession)) {
+				// Cache reset in same thread
+				CacheMgt.get().reset(MRole.Table_Name);
+				// reset cache to re-read the ReadOnly logic
+				CacheMgt.get().reset(MWindow.Table_Name);
+				CacheMgt.get().reset(MTab.Table_Name);
+				CacheMgt.get().reset(MField.Table_Name);
+			}
+		}
 		return success;
 	}
 

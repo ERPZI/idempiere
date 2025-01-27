@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for S_TimeExpenseLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 11 - $Id$ */
 @org.adempiere.base.Model(table="S_TimeExpenseLine")
-public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Persistent 
+public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240411L;
+	private static final long serialVersionUID = 20240102L;
 
     /** Standard Constructor */
     public X_S_TimeExpenseLine (Properties ctx, int S_TimeExpenseLine_ID, String trxName)
@@ -86,6 +86,42 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
         } */
     }
 
+    /** Standard Constructor */
+    public X_S_TimeExpenseLine (Properties ctx, String S_TimeExpenseLine_UU, String trxName)
+    {
+      super (ctx, S_TimeExpenseLine_UU, trxName);
+      /** if (S_TimeExpenseLine_UU == null)
+        {
+			setDateExpense (new Timestamp( System.currentTimeMillis() ));
+// @DateExpense@;@DateReport@
+			setIsInvoiced (false);
+			setIsTimeReport (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM S_TimeExpenseLine WHERE S_TimeExpense_ID=@S_TimeExpense_ID@
+			setProcessed (false);
+			setS_TimeExpense_ID (0);
+			setS_TimeExpenseLine_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_S_TimeExpenseLine (Properties ctx, String S_TimeExpenseLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, S_TimeExpenseLine_UU, trxName, virtualColumns);
+      /** if (S_TimeExpenseLine_UU == null)
+        {
+			setDateExpense (new Timestamp( System.currentTimeMillis() ));
+// @DateExpense@;@DateReport@
+			setIsInvoiced (false);
+			setIsTimeReport (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM S_TimeExpenseLine WHERE S_TimeExpense_ID=@S_TimeExpense_ID@
+			setProcessed (false);
+			setS_TimeExpense_ID (0);
+			setS_TimeExpenseLine_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_S_TimeExpenseLine (Properties ctx, ResultSet rs, String trxName)
     {
@@ -93,7 +129,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -120,7 +156,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			.getPO(getC_Activity_ID(), get_TrxName());
 	}
 
-	/** Set Functional Area.
+	/** Set Activity.
 		@param C_Activity_ID Business Activity
 	*/
 	public void setC_Activity_ID (int C_Activity_ID)
@@ -131,7 +167,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Functional Area.
+	/** Get Activity.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID()
@@ -525,10 +561,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isInvoiced()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInvoiced);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -548,10 +584,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isTimeReport()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTimeReport);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -579,28 +615,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
-
-	/** Set Line Amount.
-		@param LineNetAmt Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	*/
-	public void setLineNetAmt (BigDecimal LineNetAmt)
-	{
-		throw new IllegalArgumentException ("LineNetAmt is virtual column");	}
-
-	/** Get Line Amount.
-		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	  */
-	public BigDecimal getLineNetAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineNetAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
 	{
@@ -646,22 +664,23 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return (String)get_Value(COLUMNNAME_Note);
 	}
 
-	/** Set Price.
-		@param PriceEntered Price Entered - the price based on the selected/base UoM
+	/** Set Line Amount.
+		@param LineNetAmt 
+		Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	*/
-	public void setPriceEntered (BigDecimal PriceEntered)
+	public void setLineNetAmt (BigDecimal LineNetAmt)
 	{
-		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
+		set_Value (COLUMNNAME_LineNetAmt, LineNetAmt);
 	}
 
-	/** Get Price.
-		@return Price Entered - the price based on the selected/base UoM
+	/** Get Line Amount.
+		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
-	public BigDecimal getPriceEntered()
+	public BigDecimal getLineNetAmt () 
 	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineNetAmt);
 		if (bd == null)
-			 return Env.ZERO;
+			return Env.ZERO;
 		return bd;
 	}
 
@@ -717,10 +736,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

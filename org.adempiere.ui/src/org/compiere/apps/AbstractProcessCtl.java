@@ -63,7 +63,7 @@ public abstract class AbstractProcessCtl implements Runnable
 		windowno = WindowNo;
 		m_processUI = aProcessUI;
 		m_pi = pi;
-		m_trx = trx;	//	handeled correctly
+		m_trx = trx;	//	handled correctly
 	}   //  ProcessCtl
 
 	/** Windowno */
@@ -175,6 +175,7 @@ public abstract class AbstractProcessCtl implements Runnable
 				String errmsg = m_pi.getSummary();
 				pinstance.setResult(!m_pi.isError());
 				pinstance.setErrorMsg(errmsg);	
+				pinstance.setJsonData(m_pi.getJsonData());
 				pinstance.saveEx();
 				unlock();
 			}
@@ -350,7 +351,7 @@ public abstract class AbstractProcessCtl implements Runnable
 
 	/**************************************************************************
 	 *  Start Java Process Class.
-	 *      instanciate the class implementing the interface ProcessCall.
+	 *      instantiate the class implementing the interface ProcessCall.
 	 *  The class can be a Server/Client class (when in Package
 	 *  org adempiere.process or org.compiere.model) or a client only class
 	 *  (e.g. in org.compiere.report)

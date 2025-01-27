@@ -80,8 +80,6 @@ import org.zkoss.zul.South;
 //MPo, 26/5/18
 import org.compiere.model.MTable;
 //
-
-
 /**
  * Form to create allocation (C_AllocationHdr and C_AllocationLine).
  *

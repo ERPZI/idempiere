@@ -28,7 +28,7 @@ import org.adempiere.model.ITaxProvider;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-
+import org.compiere.util.Util;
 
 /**
  *	RMA Line Model
@@ -39,9 +39,22 @@ import org.compiere.util.Msg;
 public class MRMALine extends X_M_RMALine
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 3088864372141663734L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_RMALine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MRMALine(Properties ctx, String M_RMALine_UU, String trxName) {
+        super(ctx, M_RMALine_UU, trxName);
+		if (Util.isEmpty(M_RMALine_UU))
+			setInitialDefaults();
+		init();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -54,15 +67,25 @@ public class MRMALine extends X_M_RMALine
 		this (ctx, M_RMALine_ID, trxName, (String[]) null);
 	}	//	MRMALine
 
+	/**
+	 * @param ctx
+	 * @param M_RMALine_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MRMALine(Properties ctx, int M_RMALine_ID, String trxName, String... virtualColumns) {
 		super(ctx, M_RMALine_ID, trxName, virtualColumns);
 		if (M_RMALine_ID == 0)
-		{
-			setQty(Env.ONE);
-			this.setQtyDelivered(Env.ZERO);
-		}
-
+			setInitialDefaults();
 		init();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setQty(Env.ONE);
+		this.setQtyDelivered(Env.ZERO);
 	}
 
 	/**
@@ -94,7 +117,7 @@ public class MRMALine extends X_M_RMALine
     protected int taxId = 0;
     
     /**
-     * Initialise parameters that are required
+     * Initialise instance variables
      */
     protected void init()
     {
@@ -158,6 +181,10 @@ public class MRMALine extends X_M_RMALine
         	MInvoice invoice = getParent().getOriginalInvoice();
         	if (invoice != null)
         	{
+        		int dropshipLocationId = -1;
+        		MOrder order = invoice.getOriginalOrder();
+        		if (order != null)
+        			dropshipLocationId = order.getDropShip_Location_ID();
         		pp.setM_PriceList_ID(invoice.getM_PriceList_ID());
         		pp.setPriceDate(invoice.getDateInvoiced());
         		
@@ -169,7 +196,7 @@ public class MRMALine extends X_M_RMALine
         		taxId = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), invoice.getDateInvoiced(), invoice.getDateInvoiced(),
             			getAD_Org_ID(), getParent().getShipment().getM_Warehouse_ID(),
             			invoice.getC_BPartner_Location_ID(),		//	should be bill to
-            			invoice.getC_BPartner_Location_ID(), getParent().isSOTrx(), deliveryViaRule, get_TrxName());
+            			invoice.getC_BPartner_Location_ID(), dropshipLocationId, getParent().isSOTrx(), deliveryViaRule, get_TrxName());
         	}
         	else 
         	{
@@ -183,7 +210,7 @@ public class MRMALine extends X_M_RMALine
         			taxId = Core.getTaxLookup().get(getCtx(), getM_Product_ID(), getC_Charge_ID(), order.getDateOrdered(), order.getDateOrdered(),
                 			getAD_Org_ID(), order.getM_Warehouse_ID(),
                 			order.getC_BPartner_Location_ID(),		//	should be bill to
-                			order.getC_BPartner_Location_ID(), getParent().isSOTrx(), order.getDeliveryViaRule(), get_TrxName());
+                			order.getC_BPartner_Location_ID(), order.getDropShip_Location_ID(), getParent().isSOTrx(), order.getDeliveryViaRule(), get_TrxName());
         		}
             	else
             		throw new IllegalStateException("No Invoice/Order found the Shipment/Receipt associated");
@@ -218,8 +245,8 @@ public class MRMALine extends X_M_RMALine
 	}	//	setM_InOutLine_ID
 	
 	/**
-	 * 	Get Ship Line
-	 *	@return ship line
+	 * 	Get Shipment Line
+	 *	@return shipment line
 	 */
 	public MInOutLine getShipLine()
 	{
@@ -241,7 +268,7 @@ public class MRMALine extends X_M_RMALine
     }
     
     /**
-     * Calculates the unit amount for the product/charge
+     * Get unit amount for product/charge
      * @return Unit Amount
      */
     public BigDecimal getUnitAmt()
@@ -250,8 +277,8 @@ public class MRMALine extends X_M_RMALine
     }
     
     /**
-     *  Get Total Amt for the line including tax
-     *  @return amt
+     *  Get Total Amount for the line including tax
+     *  @return total amount
      */
     public BigDecimal getTotalAmt()
     {
@@ -361,6 +388,10 @@ public class MRMALine extends X_M_RMALine
         return true;
     }
     
+    /**
+     * Validate that line quantity is &lt;= MInOutLine quantity
+     * @return true if pass validation
+     */
     public boolean checkQty() 
     {
         if (m_ioLine.getMovementQty().compareTo(getQty()) < 0)
@@ -379,7 +410,7 @@ public class MRMALine extends X_M_RMALine
 	}
     
     /**
-     * 
+     * Update RMA tax
      * @param oldTax true if the old C_Tax_ID should be used
      * @return true if success, false otherwise
      */
@@ -502,8 +533,8 @@ public class MRMALine extends X_M_RMALine
     }   //  addDescription
     
     /**
-     * Get precision
-     * Based on Invoice if the shipment was invoiced, on Order otherwise
+     * Get precision.
+     * Based on Invoice if the shipment was invoiced, on Order otherwise.
      */
     public int getPrecision()
     {
@@ -512,9 +543,9 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get UOM
-     * Based on Shipment line if present
-     * Default to Each (100) for charge
-     * @return UOM if based on shipment line and 100 for charge based
+     * @return C_UOM_ID <br/>
+     * - if shipment line exists, from shipment line <br/> 
+     * - otherwise return 100 (Each) for charge line or product UOM for product line
      */
     public int getC_UOM_ID()
     {
@@ -541,7 +572,7 @@ public class MRMALine extends X_M_RMALine
 	
 	/**
 	 * 	Get Charge
-	 *	@return product or null
+	 *	@return charge or null
 	 */
 	public MCharge getCharge()
 	{
@@ -563,7 +594,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Project
-     * @return project if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return C_Project_ID from shipment line. Otherwise, return 0
      */
     public int getC_Project_ID()
     {
@@ -574,7 +605,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Project Phase
-     * @return project phase if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return C_ProjectPhase_ID from shipment line. Otherwise, return 0
      */
     public int getC_ProjectPhase_ID()
     {
@@ -585,7 +616,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Project Task
-     * @return project task if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return C_ProjectTask_ID from shipment line. Otherwise, return 0
      */
     public int getC_ProjectTask_ID()
     {
@@ -596,7 +627,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Activity
-     * @return project phase if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return C_Activity_ID from shipment line. Otherwise, return 0
      */
     public int getC_Activity_ID()
     {
@@ -607,7 +638,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Campaign
-     * @return campaign if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return C_Campaign_ID from shipment line. Otherwise, return 0
      */
     public int getC_Campaign_ID()
     {
@@ -618,7 +649,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Org Trx
-     * @return Org Trx if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return AD_OrgTrx_ID from shipment line. Otherwise, return 0
      */
     public int getAD_OrgTrx_ID()
     {
@@ -629,7 +660,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get User1
-     * @return user1 if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return User1_ID from shipment line. Otherwise, return 0
      */
     public int getUser1_ID()
     {
@@ -640,7 +671,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get User2
-     * @return user2 if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return User2_ID from shipment line. Otherwise, return 0
      */
     public int getUser2_ID()
     {
@@ -651,7 +682,7 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Attribute Set Instance
-     * @return ASI if based on shipment line and 0 for charge based
+     * @return If based on shipment line, return M_AttributeSetInstance_ID from shipment line. Otherwise, return 0
      */
     public int getM_AttributeSetInstance_ID()
     {
@@ -662,7 +693,9 @@ public class MRMALine extends X_M_RMALine
     
     /**
      * Get Locator
-     * @return locator if based on shipment line and 0 for charge based
+     * @return M_Locator_ID <br/>
+     * - if based on shipment line, return M_Locator_ID from shipment line <br/>
+     * - otherwise, return 0 for charge line or default locator for product line
      */
     public int getM_Locator_ID()
     {
@@ -678,6 +711,9 @@ public class MRMALine extends X_M_RMALine
         return m_ioLine.getM_Locator_ID();
     }
 
+    /**
+     * Reset {@link #m_parent} to null 
+     */
 	public void clearParent()
 	{
 		this.m_parent = null;

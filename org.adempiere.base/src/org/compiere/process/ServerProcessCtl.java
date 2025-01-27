@@ -83,7 +83,7 @@ public class ServerProcessCtl implements Runnable {
 		{
 			try 
 			{ 
-				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getRecord_ID()); 
+				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getTable_ID(), pi.getRecord_ID(), pi.getRecord_UU()); 
 			} 
 			catch (Exception e) 
 			{ 
@@ -256,6 +256,12 @@ public class ServerProcessCtl implements Runnable {
 			m_pi.setReportingProcess(true);
 			m_pi.setClassName(ProcessUtil.JASPER_STARTER_CLASS);
 			startProcess();
+			if (m_pi.isError()) {
+				MPInstance pinstance = new MPInstance(Env.getCtx(), m_pi.getAD_PInstance_ID(), null);
+				pinstance.setErrorMsg(m_pi.getSummary());
+				pinstance.setJsonData(m_pi.getJsonData());
+				pinstance.saveEx();
+			}
 			return;
 		}
 		
@@ -301,7 +307,7 @@ public class ServerProcessCtl implements Runnable {
 
 	/**************************************************************************
 	 *  Start Java Process Class.
-	 *      instanciate the class implementing the interface ProcessCall.
+	 *      instantiate the class implementing the interface ProcessCall.
 	 *  The class can be a Server/Client class (when in Package
 	 *  org adempiere.process or org.compiere.model) or a client only class
 	 *  (e.g. in org.compiere.report)

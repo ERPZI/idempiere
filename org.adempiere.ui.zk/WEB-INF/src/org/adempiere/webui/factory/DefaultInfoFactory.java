@@ -39,10 +39,11 @@ import org.compiere.model.I_M_InOut;
 import org.compiere.model.Lookup;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInfoWindow;
+import org.compiere.model.MTable;
 import org.compiere.util.Env;
 
 /**
- *
+ * Default implementation of {@link IInfoFactory}
  * @author hengsin
  *
  */
@@ -64,6 +65,19 @@ public class DefaultInfoFactory implements IInfoFactory {
 				value, multiSelection, whereClause, AD_InfoWindow_ID, lookup, null, field);
 	}
 
+	/**
+	 * @param WindowNo
+	 * @param tableName
+	 * @param keyColumn
+	 * @param value
+	 * @param multiSelection
+	 * @param whereClause
+	 * @param AD_InfoWindow_ID
+	 * @param lookup
+	 * @param predefinedContextVariables
+	 * @param field
+	 * @return InfoPanel
+	 */
 	public InfoPanel create(int WindowNo, String tableName, String keyColumn,
 				String value, boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup, String predefinedContextVariables, GridField field) {
 		InfoPanel info = null;
@@ -220,7 +234,10 @@ public class DefaultInfoFactory implements IInfoFactory {
 	public InfoWindow create(int windowNo, int AD_InfoWindow_ID, String predefinedContextVariables) {
 		MInfoWindow infoWindow = MInfoWindow.getInfoWindow(AD_InfoWindow_ID);
 		String tableName = infoWindow.getAD_Table().getTableName();
+		MTable table = (MTable)infoWindow.getAD_Table();
 		String keyColumn = tableName + "_ID";
+		if(table.isUUIDKeyTable())
+			keyColumn = tableName + "_UU";
 		InfoPanel info = create(windowNo, tableName, keyColumn, null, false, null, AD_InfoWindow_ID, false, predefinedContextVariables, null);
 		if (info instanceof InfoWindow)
 			return (InfoWindow) info;
@@ -228,6 +245,10 @@ public class DefaultInfoFactory implements IInfoFactory {
 			return null;
 	}
 
+	/**
+	 * Set IsSOTrx context variable base on C_DocType_ID context value.
+	 * @param WindowNo
+	 */
 	private void setSOTrxBasedOnDocType(int WindowNo) {
 		int C_DocType_ID = Env.getContextAsInt(Env.getCtx(), WindowNo, "C_DocType_ID");
 		if (C_DocType_ID != 0) {

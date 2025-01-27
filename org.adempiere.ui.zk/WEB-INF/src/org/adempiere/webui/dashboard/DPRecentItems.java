@@ -28,6 +28,7 @@ import org.compiere.model.MRecentItem;
 import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
+import org.compiere.model.PO;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -230,17 +231,21 @@ public class DPRecentItems extends DashboardPanel implements EventListener<Event
 			catch (Exception e) {
 			}
 
-			if (AD_RecentItem_ID > 0) {
+			if ( AD_RecentItem_ID > 0) {
 				MRecentItem ri = MRecentItem.get(Env.getCtx(), AD_RecentItem_ID);
-				String TableName = MTable.getTableName(Env.getCtx(), ri.getAD_Table_ID());
-				MQuery query = MQuery.getEqualQuery(TableName + "_ID", ri.getRecord_ID());
-
+				MTable table = MTable.get(ri.getAD_Table_ID());
+				String TableName = table.getTableName();
+				MQuery query;
+				if (ri.getRecord_UU() != null)
+					query = MQuery.getEqualQuery(PO.getUUIDColumnName(TableName), ri.getRecord_UU());
+				else
+					query = MQuery.getEqualQuery(table.getKeyColumns()[0], ri.getRecord_ID());
 				SessionManager.getAppDesktop().openWindow(ri.getAD_Window_ID(), query, null);
 			}
 		}
 		if (comp instanceof Image || comp instanceof ToolBarButton) // Refresh button
 		{
-			refresh();
+			refresh(new ServerPushTemplate(bxRecentItems.getDesktop()));
 		}
 	}
 
@@ -269,7 +274,7 @@ public class DPRecentItems extends DashboardPanel implements EventListener<Event
 		for (MRecentItem ri : ris) {
 			if (ri.getAD_Window_ID() > 0 && MRole.getDefault().getWindowAccess(ri.getAD_Window_ID()) == null)
 				continue;
-			if (ri.getAD_Window_ID() > 0 && !MRole.getDefault().isRecordAccess(ri.getAD_Table_ID(), ri.getRecord_ID(), true))
+			if (ri.getAD_Window_ID() > 0 && ri.getRecord_ID() > 0 && !MRole.getDefault().isRecordAccess(ri.getAD_Table_ID(), ri.getRecord_ID(), true))
 				continue;
 				
 			String label = ri.getLabel();
@@ -309,6 +314,7 @@ public class DPRecentItems extends DashboardPanel implements EventListener<Event
 			riDBremove(AD_RecentItem_ID);
 			bxRecentItems.removeChild(btn);
 			bxRecentItems.invalidate();
+			refresh(new ServerPushTemplate(bxRecentItems.getDesktop()));
 		}
 	}
 

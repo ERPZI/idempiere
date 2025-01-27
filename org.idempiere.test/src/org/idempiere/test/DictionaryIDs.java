@@ -96,7 +96,17 @@ public final class DictionaryIDs {
 			this.id = id;
 		}
 	}
-	
+
+	public enum AD_SysConfig {
+		TAX_LOOKUP_SERVICE(200198);
+		
+		public final int id;
+
+		private AD_SysConfig(int id) {
+			this.id = id;
+		}
+	}
+
 	public enum AD_User {
 		GARDEN_ADMIN(101),
 		GARDEN_USER(102),
@@ -287,9 +297,7 @@ public final class DictionaryIDs {
 	}
 
 	public enum C_ElementValue {
-		CHECKING_IN_TRANSFER(509),
-		//MPo, 3/10/23 Add Profit Center
-		THZII_ER(1001319);
+		CHECKING_IN_TRANSFER(509);
 		
 		public final int id;
 		
@@ -297,7 +305,17 @@ public final class DictionaryIDs {
 			this.id = id;
 		}
 	}
-	
+
+	public enum C_Location {
+		ORG_WH_HQ(114);
+
+		public final int id;
+
+		private C_Location(int id) {
+			this.id = id;
+		}
+	}
+
 	public enum C_PaymentTerm {
 		NET_30(100),
 		NET_30_DAYS(107),
@@ -347,6 +365,16 @@ public final class DictionaryIDs {
 		}
 	}
 	
+	public enum C_Region {
+		CT(102);
+
+		public final int id;
+
+		private C_Region(int id) {
+			this.id = id;
+		}
+	}
+
 	public enum C_Tax {
 		STANDARD(104),
 		CT_SALES(105),
@@ -482,7 +510,18 @@ public final class DictionaryIDs {
 			this.id = id;
 		}
 	}
-	
+
+	public enum M_PriceList_Version {
+		STANDARD_2003(104),
+		IMPORT_2003(200000);
+
+		public final int id;
+
+		private M_PriceList_Version(int id) {
+			this.id = id;
+		}
+	}
+
 	public enum M_Product {
 		STANDARD(122,"c713192a-9ed3-4740-ad32-9583c30d0206"),
 		OAK(123,"220b7a9a-4917-4bb2-b431-1426afacd7b8"),
@@ -544,13 +583,35 @@ public final class DictionaryIDs {
 			this.id = id;
 		}
 	}
-	
+
+	public enum M_ProductPrice {
+		PATIOSET_STANDARD_2003(200084),
+		PATIOCHAIR_STANDARD_2003(200033),
+		PATIOCHAIR_IMPORT_2003(200095);
+
+		public final int id;
+
+		private M_ProductPrice(int id) {
+			this.id = id;
+		}
+	}
+
 	public enum M_RMAType {
 		DAMAGE_ON_ARRIVAL(100);
 		
 		public final int id;
 
 		private M_RMAType(int id) {
+			this.id = id;
+		}
+	}
+	
+	public enum M_SerNoCtl {
+		SERIAL_NO_EXAMPLE(100);
+		
+		public final int id;
+		
+		private M_SerNoCtl(int id) {
 			this.id = id;
 		}
 	}

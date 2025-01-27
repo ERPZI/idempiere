@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for S_TimeExpenseLine
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 11
  */
 public interface I_S_TimeExpenseLine 
 {
@@ -65,12 +65,12 @@ public interface I_S_TimeExpenseLine
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Functional Area.
+	/** Set Activity.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Functional Area.
+	/** Get Activity.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -360,19 +360,6 @@ public interface I_S_TimeExpenseLine
 	  */
 	public int getLine();
 
-    /** Column name LineNetAmt */
-    public static final String COLUMNNAME_LineNetAmt = "LineNetAmt";
-
-	/** Set Line Amount.
-	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	  */
-	public void setLineNetAmt (BigDecimal LineNetAmt);
-
-	/** Get Line Amount.
-	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
-	  */
-	public BigDecimal getLineNetAmt();
-
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
 
@@ -401,18 +388,18 @@ public interface I_S_TimeExpenseLine
 	  */
 	public String getNote();
 
-    /** Column name PriceEntered */
-    public static final String COLUMNNAME_PriceEntered = "PriceEntered";
+	 /** Column name LineNetAmt */
+    public static final String COLUMNNAME_LineNetAmt = "LineNetAmt";
 
-	/** Set Price.
-	  * Price Entered - the price based on the selected/base UoM
+	/** Set Line Amount.
+	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
-	public void setPriceEntered (BigDecimal PriceEntered);
+	public void setLineNetAmt (BigDecimal LineNetAmt);
 
-	/** Get Price.
-	  * Price Entered - the price based on the selected/base UoM
+	/** Get Line Amount.
+	  * Line Extended Amount (Quantity * Actual Price) without Freight and Charges
 	  */
-	public BigDecimal getPriceEntered();
+	public BigDecimal getLineNetAmt();
 
     /** Column name PriceInvoiced */
     public static final String COLUMNNAME_PriceInvoiced = "PriceInvoiced";

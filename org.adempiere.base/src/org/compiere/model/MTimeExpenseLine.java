@@ -345,4 +345,4 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 		int no = DB.executeUpdate(sql, get_TrxName());
 	}	//	updateHeader
 	
-}	//	MTimeExpenseLine
+}

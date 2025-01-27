@@ -53,11 +53,11 @@ import org.compiere.model.MSysConfig;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
- *	EMail Object.
+ *	EMail delivery and receive support for iDempiere<br/>
+ *  <p>
  *	Resources:
- *	http://java.sun.com/products/javamail/index.html
- * 	http://java.sun.com/products/javamail/FAQ.html
- *
+ *	<li>http://java.sun.com/products/javamail/index.html
+ * 	<li>http://java.sun.com/products/javamail/FAQ.html
  *  <p>
  *  When I try to send a message, I get javax.mail.SendFailedException:
  * 		550 Unable to relay for my-address
@@ -72,7 +72,7 @@ import com.sun.mail.smtp.SMTPMessage;
 public final class EMail implements Serializable
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -8982983766981221312L;
 
@@ -83,7 +83,6 @@ public final class EMail implements Serializable
 	public final static String EMAIL_SEND_MSG = "EmailSendMsg";
 	
 	/**
-	 *	Full Constructor
 	 *  @param client the client
 	 *  @param from Sender's EMail address
 	 *  @param to   Recipient EMail address
@@ -97,7 +96,6 @@ public final class EMail implements Serializable
 	}	//	EMail
 
 	/**
-	 *	Full Constructor
 	 *  @param client the client
 	 *  @param from Sender's EMail address
 	 *  @param to   Recipient EMail address
@@ -112,7 +110,6 @@ public final class EMail implements Serializable
 	}	//	EMail
 
 	/**
-	 *	Full Constructor
 	 *	@param ctx context
 	 *  @param smtpHost The mail server
 	 *  @param from Sender's EMail address
@@ -127,7 +124,6 @@ public final class EMail implements Serializable
 	}
 
 	/**
-	 *	Full Constructor
 	 *	@param ctx context
 	 *  @param smtpHost The mail server
 	 *  @param from Sender's EMail address
@@ -143,7 +139,6 @@ public final class EMail implements Serializable
 	}
 
 	/**
-	 *	Full Constructor
 	 *	@param ctx context
 	 *  @param smtpHost The mail server
 	 *  @param smtpPort
@@ -307,6 +302,12 @@ public final class EMail implements Serializable
 		props.put("mail.host", m_smtpHost);
 		//Timeout for sending the email defaulted to 20 seconds if not defined in a SysConfig Key
 		props.put("mail.smtp.timeout", MSysConfig.getIntValue(MSysConfig.MAIL_SMTP_TIMEOUT, 20000, Env.getAD_Client_ID(m_ctx)));
+		int mail_smtp_connectiontimeout = MSysConfig.getIntValue(MSysConfig.MAIL_SMTP_CONNECTIONTIMEOUT, -1, Env.getAD_Client_ID(m_ctx));
+		if (mail_smtp_connectiontimeout >= 0)
+			props.put("mail.smtp.connectiontimeout", mail_smtp_connectiontimeout);
+		int mail_smtp_writetimeout = MSysConfig.getIntValue(MSysConfig.MAIL_SMTP_WRITETIMEOUT, -1, Env.getAD_Client_ID(m_ctx));
+		if (mail_smtp_writetimeout >= 0)
+			props.put("mail.smtp.writetimeout", mail_smtp_writetimeout);
 
 		if (CLogMgt.isLevelFinest())
 			props.put("mail.debug", "true");
