@@ -84,6 +84,7 @@ public class MOrder extends X_C_Order implements DocAction
 				lin.Line, lin.C_OrderLine_ID, p.Name, lin.M_Product_ID,
 				lin.QtyOrdered,
 				%s,
+				ev.Name, lin.User1_ID,
 				org.Name, hdr.AD_Org_ID 
 				 FROM C_Order hdr 
 				 INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)
@@ -91,6 +92,7 @@ public class MOrder extends X_C_Order implements DocAction
 				 INNER JOIN C_OrderLine lin ON (hdr.C_Order_ID=lin.C_Order_ID)
 				 INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)
 				 INNER JOIN C_DocType dt ON (hdr.C_DocType_ID=dt.C_DocType_ID AND dt.DocBaseType='POO')
+ 				 INNER JOIN C_ElementValue ev ON (lin.User1_ID=ev.C_ElementValue_ID)
 				 FULL JOIN M_MatchPO mo ON (lin.C_OrderLine_ID=mo.C_OrderLine_ID)  
 				 WHERE %s
 				 AND hdr.DocStatus IN ('CO','CL')
@@ -100,7 +102,9 @@ public class MOrder extends X_C_Order implements DocAction
 	private static final String BASE_MATCHING_GROUP_BY_SQL =
 			"""
 				GROUP BY hdr.C_Order_ID,hdr.DocumentNo,hdr.DateOrdered,bp.Name,hdr.C_BPartner_ID,
-				lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered, org.Name, hdr.AD_Org_ID 
+				lin.Line,lin.C_OrderLine_ID,p.Name,lin.M_Product_ID,lin.QtyOrdered,
+				ev.Name, lin.User1_ID, 
+				org.Name, hdr.AD_Org_ID 
 				HAVING %s <> %s
 			""";
 	
@@ -151,7 +155,11 @@ public class MOrder extends X_C_Order implements DocAction
 	 * @param trxName
 	 * @return list of orders not fully matched to receipt
 	 */
-	public static List<MatchingRecord> getNotFullyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo, 31/1/25 release-11 Add PrCtr
+	//public static List<MatchingRecord> getNotFullyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getNotFullyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//
+	{
 		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_RECEIPT);
 		if (M_InOutLine_ID > 0) {
 			builder.append(" AND mo.M_InOutLine_ID = ").append(M_InOutLine_ID);
@@ -162,6 +170,11 @@ public class MOrder extends X_C_Order implements DocAction
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//	
 		if (from != null) {
 			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -176,8 +189,11 @@ public class MOrder extends X_C_Order implements DocAction
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+				//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -195,7 +211,11 @@ public class MOrder extends X_C_Order implements DocAction
 	 * @param trxName
 	 * @return list of orders full or partially match to receipt 
 	 */
-	public static List<MatchingRecord> getFullOrPartiallyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo, 31/1/25 release-11 PrCtr
+	//public static List<MatchingRecord> getFullOrPartiallyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToReceipt(int C_BPartner_ID, int M_Product_ID, int M_InOutLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//
+	{
 		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_RECEIPT);
 		if (M_InOutLine_ID > 0) {
 			builder.append(" AND mo.M_InOutLine_ID = ").append(M_InOutLine_ID);
@@ -206,6 +226,11 @@ public class MOrder extends X_C_Order implements DocAction
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//		
 		if (from != null) {
 			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -220,8 +245,11 @@ public class MOrder extends X_C_Order implements DocAction
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+				//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -239,7 +267,11 @@ public class MOrder extends X_C_Order implements DocAction
 	 * @param trxName
 	 * @return list of orders not fully matched to invoice
 	 */
-	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo, 31/1/25 release-11 PrCtr
+	//public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	{
+	//
 		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_RECEIPT);
 		if (C_InvoiceLine_ID > 0) {
 			builder.append(" AND mo.C_InvoiceLine_ID = ").append(C_InvoiceLine_ID);
@@ -250,6 +282,11 @@ public class MOrder extends X_C_Order implements DocAction
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//		
 		if (from != null) {
 			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -264,8 +301,11 @@ public class MOrder extends X_C_Order implements DocAction
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+				//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -283,7 +323,10 @@ public class MOrder extends X_C_Order implements DocAction
 	 * @param trxName
 	 * @return list of orders full or partially match to invoice
 	 */
-	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo, 31/1/25 release-11 PrCtr
+	//public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	{
 		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_INVOICE);
 		if (C_InvoiceLine_ID > 0) {
 			builder.append(" AND mo.C_InvoiceLine_ID = ").append(C_InvoiceLine_ID);
@@ -294,6 +337,11 @@ public class MOrder extends X_C_Order implements DocAction
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//		
 		if (from != null) {
 			builder.append(" AND ").append("hdr.DateOrdered").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -309,7 +357,9 @@ public class MOrder extends X_C_Order implements DocAction
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -322,8 +372,10 @@ public class MOrder extends X_C_Order implements DocAction
 	 * record for matchings
 	 */
 	public static record MatchingRecord(int C_Order_ID, String documentNo, Timestamp documentDate, String businessPartnerName, int C_BPartner_ID, int line, int C_OrderLine_ID,
-			String productName, int M_Product_ID, BigDecimal qtyOrdered, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
-	
+			//MPo, 31/1/25 release-11 Add PrcTr
+			//String productName, int M_Product_ID, BigDecimal qtyOrdered, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
+			String productName, int M_Product_ID, BigDecimal qtyOrdered, BigDecimal matchedQty, String organizationName, int AD_Org_ID, String prctrName, int User1_ID) {}
+			//	
 	/**
 	 * 	Create new Order by copying
 	 * 	@param from order

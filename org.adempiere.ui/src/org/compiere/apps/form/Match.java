@@ -1,4 +1,3 @@
-
 /******************************************************************************
  * Copyright (C) 2009 Low Heng Sin                                            *
  * Copyright (C) 2009 Idalica Corporation                                     *
@@ -66,10 +65,9 @@ public class Match
 	public static final int		I_Product = 5;
 	public static final int		I_QTY = 6;
 	public static final int		I_MATCHED = 7;
-	//MPo, 26/1/25 release-11
-	public static final int    I_PrCtr = 8;
-	//
-	
+	//MPo, 30/1/25 release-11 Add PrCtr
+	public static final int		I_PrCtr = 8;
+	//	
 	private StringBuffer    m_sql = null;
 	private String          m_dateColumn = "";
 	private String          m_qtyColumn = "";
@@ -107,10 +105,9 @@ public class Match
 	 *  @param to optional to date
 	 *  @param matched true for partial or fully match, false for not matched
 	 */
-	//MPo, 26/1/25 release-11
+	//MPo, 29/1/25 release-11 Add PrCtr
 	//public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched)
 	public IMiniTable cmd_search(IMiniTable xMatchedTable, int display, String matchToString, Integer Product, Integer Vendor, Timestamp from, Timestamp to, boolean matched, Integer PrCtr)
-
 	{
 		//  ** Create SQL **
 		int matchToType = MATCH_INVOICE;
@@ -122,6 +119,14 @@ public class Match
 		tableInit(display, matchToType, matched,null);	//	sets m_sql
 
 		//  ** Add Where Clause **
+		
+		//MPo, 29/1/25 release-11
+		// PrCtr
+		if (PrCtr != null)
+		{
+			m_sql.append(" AND lin.User1_ID=").append(PrCtr);
+		}
+		//
 		//  Product
 		if (Product != null)
 		{
@@ -134,6 +139,7 @@ public class Match
 			//Integer Vendor = (Integer)onlyVendor.getValue();
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(Vendor);
 		}
+				
 		//  Date
 		if (from != null && to != null)
 			m_sql.append(" AND ").append(m_dateColumn).append(" BETWEEN ")
@@ -142,13 +148,6 @@ public class Match
 			m_sql.append(" AND ").append(m_dateColumn).append(" >= ").append(DB.TO_DATE(from));
 		else if (to != null)
 			m_sql.append(" AND ").append(m_dateColumn).append(" <= ").append(DB.TO_DATE(to));
-		
-		//MPo, 26/1/25 release-11 User1_ID
-		// PrCtr
-		if (PrCtr != null)
-		{
-			m_sql.append(" AND lin.User1_ID=").append(PrCtr);
-		}
 		
 		//  ** Load Table **
 		tableLoad (xMatchedTable);
@@ -259,7 +258,7 @@ public class Match
 	 * @param sameQty
 	 * @param matched true for partial or fully match, false for not matched
 	 */
-	//MPo, 26/1/25 release-11 Add PrCtr
+	//MPo, 30/1/25 release-11 Add PrCtr
 	//public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean matched)
 	public IMiniTable cmd_searchTo(IMiniTable xMatchedTable, IMiniTable xMatchedToTable, String displayString, int matchToType, boolean sameBPartner, boolean sameProduct, boolean sameQty, boolean samePrCtr, boolean matched)
 	//
@@ -280,27 +279,23 @@ public class Match
 		//  ** Add Where Clause **
 		KeyNamePair BPartner = (KeyNamePair)xMatchedTable.getValueAt(row, I_BPartner);
 		KeyNamePair Product = (KeyNamePair)xMatchedTable.getValueAt(row, I_Product);
-		//MPo, 26/1/25 release-11 Add PrCtr
+		//MPo, 30/1/25 release-11 Add PrCtr
 		KeyNamePair PrCtr = (KeyNamePair)xMatchedTable.getValueAt(row, I_PrCtr);
 		//
-		
 		if (log.isLoggable(Level.FINE)) log.fine("BPartner=" + BPartner + " - Product=" + Product);
 		//
 		if (sameBPartner)
 			m_sql.append(" AND hdr.C_BPartner_ID=").append(BPartner.getKey());
 		if (sameProduct)
 			m_sql.append(" AND lin.M_Product_ID=").append(Product.getKey());
-		//MPo, 26/1/25 release-11 Add PrCtr
-		if (samePrCtr)
+		//MPo, 30/1/25 release-11 Add PrCtr
+		if (samePrCtr) {
 			m_sql.append(" AND lin.User1_ID=").append(PrCtr.getKey());
-		//
-		
+		}
 		//  calculate qty
 		double docQty = ((Double)xMatchedTable.getValueAt(row, I_QTY)).doubleValue();
 		if (sameQty)
 			m_sql.append(" AND ").append(m_qtyColumn).append("=").append(docQty);
-		
-		
 		//  ** Load Table **
 		tableLoad (xMatchedToTable);
 
@@ -490,9 +485,10 @@ public class Match
 				new ColumnInfo(Msg.translate(Env.getCtx(), "M_Product_ID"), ".", KeyNamePair.class, "."),   //  5
 				new ColumnInfo(Msg.translate(Env.getCtx(), "Qty"),          ".", Double.class),
 				new ColumnInfo(Msg.translate(Env.getCtx(), "Matched"),      ".", Double.class),
-				//MPo, 26/1/25 Add PrCtr 
+				//MPo, 30/1/25 Add PrCtr
 				new ColumnInfo(Msg.translate(Env.getCtx(), "User1_ID"),     ".", KeyNamePair.class, "."),    //  8
-				new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),    ".", KeyNamePair.class, ".")   	//  9
+				new ColumnInfo(Msg.translate(Env.getCtx(), "AD_Org_ID"),     ".", KeyNamePair.class, ".")    //  9
+				//
 			};
 		return layout;
 	}	

@@ -89,13 +89,16 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 				SELECT hdr.M_InOut_ID, hdr.DocumentNo, hdr.MovementDate, bp.Name, hdr.C_BPartner_ID,
 				lin.Line, lin.M_InOutLine_ID, p.Name, lin.M_Product_ID,
 				CASE WHEN (dt.DocBaseType='MMS' AND hdr.issotrx='N') THEN lin.MovementQty * -1 ELSE lin.MovementQty END,
-				%s, org.Name, hdr.AD_Org_ID 
+				%s,
+				 ev.Name, lin.User1_ID, 
+				 org.Name, hdr.AD_Org_ID 
 				 FROM M_InOut hdr 
 				 INNER JOIN AD_Org org ON (hdr.AD_Org_ID=org.AD_Org_ID)
 				 INNER JOIN C_BPartner bp ON (hdr.C_BPartner_ID=bp.C_BPartner_ID)
 				 INNER JOIN M_InOutLine lin ON (hdr.M_InOut_ID=lin.M_InOut_ID)
 				 INNER JOIN M_Product p ON (lin.M_Product_ID=p.M_Product_ID)
 				 INNER JOIN C_DocType dt ON (hdr.C_DocType_ID = dt.C_DocType_ID AND (dt.DocBaseType='MMR' OR (dt.DocBaseType='MMS' AND hdr.isSOTrx ='N')))
+ 				 INNER JOIN C_ElementValue ev ON (lin.User1_ID=ev.C_ElementValue_ID)
 				 FULL JOIN %s m ON (lin.M_InOutLine_ID=m.M_InOutLine_ID) 
 				 WHERE hdr.DocStatus IN ('CO','CL')				  
 			""";
@@ -104,7 +107,9 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	private static final String BASE_MATCHING_GROUP_BY_SQL =
 			"""
 				GROUP BY hdr.M_InOut_ID,hdr.DocumentNo,hdr.MovementDate,bp.Name,hdr.C_BPartner_ID,
-				  lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, org.Name, hdr.AD_Org_ID, dt.DocBaseType, hdr.IsSOTrx
+				  lin.Line,lin.M_InOutLine_ID,p.Name,lin.M_Product_ID,lin.MovementQty, 
+				  ev.Name, lin.User1_ID,
+				  org.Name, hdr.AD_Org_ID, dt.DocBaseType, hdr.IsSOTrx
 				HAVING %s <> %s
 			""";
 	
@@ -148,7 +153,12 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * @param trxName
 	 * @return list of material receipts not fully matched to order
 	 */
-	public static List<MatchingRecord> getNotFullyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//
+	//MPo 31/1/25 release-11 Add PrCtr
+	//public static List<MatchingRecord> getNotFullyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getNotFullyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//	
+	{
 		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_ORDER);
 		if (C_OrderLine_ID > 0) {
 			builder.append(" AND m.C_OrderLine_ID=").append(C_OrderLine_ID);
@@ -159,6 +169,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//		
 		if (from != null) {
 			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -174,7 +189,10 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+						//MPo, 31/1/25 release-11 Add PrCtr
+						//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+						//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -192,7 +210,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * @param trxName
 	 * @return list of material receipts full or partially match to order 
 	 */
-	public static List<MatchingRecord> getFullOrPartiallyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo 31/1/25 release-11 Add PrCtr
+	//public static List<MatchingRecord> getFullOrPartiallyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName) 
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToOrder(int C_BPartner_ID, int M_Product_ID, int C_OrderLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//
+	{
 		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_ORDER);
 		if (C_OrderLine_ID > 0) {
 			builder.append(" AND m.C_OrderLine_ID=").append(C_OrderLine_ID);
@@ -203,6 +225,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+				if (User1_ID > 0) {
+					builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//		
 		if (from != null) {
 			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -217,8 +244,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+				//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -236,7 +266,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * @param trxName
 	 * @return list of material receipts not fully match to invoice
 	 */
-	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo 31/1/25 release-11 Add PrCtr
+	//public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getNotFullyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//
+	{
 		StringBuilder builder = new StringBuilder(NOT_FULLY_MATCHED_TO_INVOICE);
 		if (C_InvoiceLine_ID > 0) {
 			builder.append(" AND m.C_InvoiceLine_ID=").append(C_InvoiceLine_ID);
@@ -247,6 +281,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//
 		if (from != null) {
 			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -261,8 +300,10 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+				//MPo, 31/1/25 release-11 Add PrCtr
+				//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -280,7 +321,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * @param trxName
 	 * @return list of material receipts full or partially match to invoice 
 	 */
-	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName) {
+	//MPo 31/1/25 release-11 Add PrCtr
+	//public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName)
+	public static List<MatchingRecord> getFullOrPartiallyMatchedToInvoice(int C_BPartner_ID, int M_Product_ID, int C_InvoiceLine_ID, Timestamp from, Timestamp to, String trxName, int User1_ID)
+	//
+	{
 		StringBuilder builder = new StringBuilder(FULL_OR_PARTIALLY_MATCHED_TO_INVOICE);
 		if (C_InvoiceLine_ID > 0) {
 			builder.append(" AND m.C_InvoiceLine_ID=").append(C_InvoiceLine_ID);
@@ -291,6 +336,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		if (C_BPartner_ID > 0) {
 			builder.append(" AND hdr.C_BPartner_ID=").append(C_BPartner_ID);
 		}
+		//MPo 31/1/25 release-11 Add PrCtr
+		if (User1_ID > 0) {
+			builder.append(" AND lin.User1_ID=").append(User1_ID);
+		}
+		//
 		if (from != null) {
 			builder.append(" AND ").append("hdr.MovementDate").append(" >= ").append(DB.TO_DATE(from));
 		}
@@ -305,8 +355,11 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 		try (PreparedStatement stmt = DB.prepareStatement(sql, trxName)) {
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), 
-						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+				MatchingRecord matchingRecord = new MatchingRecord(rs.getInt(1), rs.getString(2), rs.getTimestamp(3), rs.getString(4), rs.getInt(5), rs.getInt(6), rs.getInt(7),
+						//MPo, 31/1/25 release-11 Add PrCtr
+						//rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13));
+						rs.getString(8), rs.getInt(9), rs.getBigDecimal(10), rs.getBigDecimal(11), rs.getString(12), rs.getInt(13), rs.getString(14), rs.getInt(15));
+						//
 				records.add(matchingRecord);
 			}
 		} catch (SQLException e) {
@@ -319,8 +372,10 @@ public class MInOut extends X_M_InOut implements DocAction, IDocsPostProcess
 	 * record for matchings
 	 */
 	public static record MatchingRecord(int M_InOut_ID, String documentNo, Timestamp documentDate, String businessPartnerName, int C_BPartner_ID, int line, int M_InOutLine_ID,
-			String productName, int M_Product_ID, BigDecimal movementQty, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
-	
+			//MPo, 31/1/26 release-11 Add PrcTr
+			//String productName, int M_Product_ID, BigDecimal movementQty, BigDecimal matchedQty, String organizationName, int AD_Org_ID) {}
+			String productName, int M_Product_ID, BigDecimal movementQty, BigDecimal matchedQty, String organizationName, int AD_Org_ID, String prctrName, int User1_ID) {}
+			//
 	/**
 	 * 	Create Shipment From Order
 	 *	@param order order
