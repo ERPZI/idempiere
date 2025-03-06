@@ -532,7 +532,7 @@ public class Doc_MatchInv extends Doc
 				
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
-					updateFactLineAmtSource(varianceLine, ipvSource.multiply(amtVariance).divide(ipv));
+					updateFactLineAmtSource(varianceLine, ipvSource.multiply(amtVariance).divide(ipv, 12, RoundingMode.HALF_UP));
 				}
 			}
 			if (amtAsset.compareTo(Env.ZERO) != 0)
@@ -542,7 +542,7 @@ public class Doc_MatchInv extends Doc
 
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
-					updateFactLineAmtSource(line, ipvSource.multiply(amtAsset).divide(ipv));
+					updateFactLineAmtSource(line, ipvSource.multiply(amtAsset).divide(ipv, 12, RoundingMode.HALF_UP));
 				}
 			}
 		} else if (X_M_Cost.COSTINGMETHOD_AverageInvoice.equals(costingMethod) && !zeroQty) {
