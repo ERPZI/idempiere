@@ -56,7 +56,7 @@ public class Allocation
 	protected int       m_C_DocType_ID = 0;
 	protected int       m_C_BPartner_ID = 0;
 	//MPo, 19/7/2016 Add PrCr
-	protected int		m_User1_ID = 0;
+	protected int		m_User1_ID = 999;
 	//
 	private int         m_noInvoices = 0;
 	private int         m_noPayments = 0;

@@ -276,8 +276,13 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		row.appendCellChild(labelDateAcct.rightAlign());
 		row.appendCellChild(fieldDateAcct.getComponent(), 2);
 		row.appendCellChild(labelDateAcct2.rightAlign());
-		ZKUpdateUtil.setHflex(fieldDateAcct2.getComponent(), "true");
-		row.appendCellChild(fieldDateAcct2.getComponent(), 2);
+		//ZKUpdateUtil.setHflex(fieldDateAcct2.getComponent(), "true");
+		//row.appendCellChild(fieldDateAcct2.getComponent(), 2);
+		Hbox boxTo = new Hbox();
+		boxTo.appendChild(fieldDateAcct2.getComponent());
+		DateRangeButton drb = (new DateRangeButton(fieldDateAcct, fieldDateAcct2));
+		boxTo.appendChild(drb);
+		row.appendCellChild(boxTo, 2);
 		//MPo, 4/7/18 add PrCtr
 		row = rows.newRow();
 		row.appendCellChild(labelPrCtr.rightAlign());
@@ -287,12 +292,6 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		ZKUpdateUtil.setHflex(fieldMatchCode, "true");
 		row.appendCellChild(fieldMatchCode, 2);
 		//
-		
-		Hbox boxTo = new Hbox();
-		boxTo.appendChild(fieldDateAcct2.getComponent());
-		DateRangeButton drb = (new DateRangeButton(fieldDateAcct, fieldDateAcct2));
-		boxTo.appendChild(drb);
-		row.appendCellChild(boxTo, 2);
 
 		row = rows.newRow();
 		row.appendChild(bRefresh);

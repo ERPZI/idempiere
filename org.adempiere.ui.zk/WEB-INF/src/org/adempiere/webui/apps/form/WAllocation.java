@@ -497,7 +497,7 @@ public class WAllocation extends Allocation
 		organizationPick.addValueChangeListener(this);
 		
 		//MPo, 26/5/18 add original change: 20/8/2016 This is to avoid issues when AD_Column_ID is different in DEV,PROTO,UAT and PROD
-		AD_Column_ID = MTable.get(Env.getCtx(), "ZI_WarehouseToPrCtr").getColumn("User1_ID").getAD_Column_ID();
+		AD_Column_ID = MTable.get(Env.getCtx(), "C_Order").getColumn("User1_ID").getAD_Column_ID();
 		MLookup lookupPrCtr = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
 		prctrSearch = new WSearchEditor("User1_ID", true, false, true, lookupPrCtr);
 		prctrSearch.addValueChangeListener(this);
