@@ -32,7 +32,7 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20250328L;
 
     /** Standard Constructor */
     public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName)
@@ -42,6 +42,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
         {
 			setI_BPartner_ID (0);
 			setI_IsImported (false);
+// N
+			setIsACH (false);
+// N
+			setbp_isactive (false);
 // N
         } */
     }
@@ -55,6 +59,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 			setI_BPartner_ID (0);
 			setI_IsImported (false);
 // N
+			setIsACH (false);
+// N
+			setbp_isactive (false);
+// N
         } */
     }
 
@@ -67,6 +75,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 			setI_BPartner_ID (0);
 			setI_IsImported (false);
 // N
+			setIsACH (false);
+// N
+			setbp_isactive (false);
+// N
         } */
     }
 
@@ -78,6 +90,10 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
         {
 			setI_BPartner_ID (0);
 			setI_IsImported (false);
+// N
+			setIsACH (false);
+// N
+			setbp_isactive (false);
 // N
         } */
     }
@@ -109,6 +125,82 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getAD_User_ID(), get_TrxName());
+	}
+
+	/** Set User/Contact.
+		@param AD_User_ID User within the system - Internal or Business Partner Contact
+	*/
+	public void setAD_User_ID (int AD_User_ID)
+	{
+		if (AD_User_ID < 1)
+			set_Value (COLUMNNAME_AD_User_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+	}
+
+	/** Get User/Contact.
+		@return User within the system - Internal or Business Partner Contact
+	  */
+	public int getAD_User_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Account EMail.
+		@param A_EMail Email Address
+	*/
+	public void setA_EMail (String A_EMail)
+	{
+		set_Value (COLUMNNAME_A_EMail, A_EMail);
+	}
+
+	/** Get Account EMail.
+		@return Email Address
+	  */
+	public String getA_EMail()
+	{
+		return (String)get_Value(COLUMNNAME_A_EMail);
+	}
+
+	/** Set Account Name.
+		@param A_Name Name on Credit Card or Account holder
+	*/
+	public void setA_Name (String A_Name)
+	{
+		set_Value (COLUMNNAME_A_Name, A_Name);
+	}
+
+	/** Get Account Name.
+		@return Name on Credit Card or Account holder
+	  */
+	public String getA_Name()
+	{
+		return (String)get_Value(COLUMNNAME_A_Name);
+	}
+
+	/** Set Account No.
+		@param AccountNo Account Number
+	*/
+	public void setAccountNo (String AccountNo)
+	{
+		set_Value (COLUMNNAME_AccountNo, AccountNo);
+	}
+
+	/** Get Account No.
+		@return Account Number
+	  */
+	public String getAccountNo()
+	{
+		return (String)get_Value(COLUMNNAME_AccountNo);
+	}
 
 	/** Set Address 1.
 		@param Address1 Address line 1 for this location
@@ -142,32 +234,89 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_Address2);
 	}
 
-	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
-			.getPO(getAD_User_ID(), get_TrxName());
-	}
-
-	/** Set User/Contact.
-		@param AD_User_ID User within the system - Internal or Business Partner Contact
+	/** BPBankAcctUse AD_Reference_ID=393 */
+	public static final int BPBANKACCTUSE_AD_Reference_ID=393;
+	/** Both = B */
+	public static final String BPBANKACCTUSE_Both = "B";
+	/** Direct Debit = D */
+	public static final String BPBANKACCTUSE_DirectDebit = "D";
+	/** None = N */
+	public static final String BPBANKACCTUSE_None = "N";
+	/** Direct Deposit = T */
+	public static final String BPBANKACCTUSE_DirectDeposit = "T";
+	/** Set Account Usage.
+		@param BPBankAcctUse Business Partner Bank Account usage
 	*/
-	public void setAD_User_ID (int AD_User_ID)
+	public void setBPBankAcctUse (String BPBankAcctUse)
 	{
-		if (AD_User_ID < 1)
-			set_Value (COLUMNNAME_AD_User_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+
+		set_Value (COLUMNNAME_BPBankAcctUse, BPBankAcctUse);
 	}
 
-	/** Get User/Contact.
-		@return User within the system - Internal or Business Partner Contact
+	/** Get Account Usage.
+		@return Business Partner Bank Account usage
 	  */
-	public int getAD_User_ID()
+	public String getBPBankAcctUse()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		return (String)get_Value(COLUMNNAME_BPBankAcctUse);
+	}
+
+	/** Set BP Contact Greeting.
+		@param BPContactGreeting Greeting for Business Partner Contact
+	*/
+	public void setBPContactGreeting (String BPContactGreeting)
+	{
+		set_Value (COLUMNNAME_BPContactGreeting, BPContactGreeting);
+	}
+
+	/** Get BP Contact Greeting.
+		@return Greeting for Business Partner Contact
+	  */
+	public String getBPContactGreeting()
+	{
+		return (String)get_Value(COLUMNNAME_BPContactGreeting);
+	}
+
+	/** BankAccountType AD_Reference_ID=216 */
+	public static final int BANKACCOUNTTYPE_AD_Reference_ID=216;
+	/** Cash = B */
+	public static final String BANKACCOUNTTYPE_Cash = "B";
+	/** Checking = C */
+	public static final String BANKACCOUNTTYPE_Checking = "C";
+	/** Card = D */
+	public static final String BANKACCOUNTTYPE_Card = "D";
+	/** Savings = S */
+	public static final String BANKACCOUNTTYPE_Savings = "S";
+	/** Set Bank Account Type.
+		@param BankAccountType Bank Account Type
+	*/
+	public void setBankAccountType (String BankAccountType)
+	{
+
+		set_Value (COLUMNNAME_BankAccountType, BankAccountType);
+	}
+
+	/** Get Bank Account Type.
+		@return Bank Account Type
+	  */
+	public String getBankAccountType()
+	{
+		return (String)get_Value(COLUMNNAME_BankAccountType);
+	}
+
+	/** Set Bank Name.
+		@param BankName Bank Name
+	*/
+	public void setBankName (String BankName)
+	{
+		set_Value (COLUMNNAME_BankName, BankName);
+	}
+
+	/** Get Bank Name.
+		@return Bank Name	  */
+	public String getBankName()
+	{
+		return (String)get_Value(COLUMNNAME_BankName);
 	}
 
 	/** Set Birthday.
@@ -186,20 +335,60 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_Birthday);
 	}
 
-	/** Set BP Contact Greeting.
-		@param BPContactGreeting Greeting for Business Partner Contact
-	*/
-	public void setBPContactGreeting (String BPContactGreeting)
+	public org.compiere.model.I_C_BP_BankAccount getC_BP_BankAccount() throws RuntimeException
 	{
-		set_Value (COLUMNNAME_BPContactGreeting, BPContactGreeting);
+		return (org.compiere.model.I_C_BP_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BP_BankAccount.Table_ID)
+			.getPO(getC_BP_BankAccount_ID(), get_TrxName());
 	}
 
-	/** Get BP Contact Greeting.
-		@return Greeting for Business Partner Contact
-	  */
-	public String getBPContactGreeting()
+	/** Set Partner Bank Account.
+		@param C_BP_BankAccount_ID Bank Account of the Business Partner
+	*/
+	public void setC_BP_BankAccount_ID (int C_BP_BankAccount_ID)
 	{
-		return (String)get_Value(COLUMNNAME_BPContactGreeting);
+		if (C_BP_BankAccount_ID < 1)
+			set_Value (COLUMNNAME_C_BP_BankAccount_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BP_BankAccount_ID, Integer.valueOf(C_BP_BankAccount_ID));
+	}
+
+	/** Get Partner Bank Account.
+		@return Bank Account of the Business Partner
+	  */
+	public int getC_BP_BankAccount_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_BankAccount_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BP_Group)MTable.get(getCtx(), org.compiere.model.I_C_BP_Group.Table_ID)
+			.getPO(getC_BP_Group_ID(), get_TrxName());
+	}
+
+	/** Set Business Partner Group.
+		@param C_BP_Group_ID Business Partner Group
+	*/
+	public void setC_BP_Group_ID (int C_BP_Group_ID)
+	{
+		if (C_BP_Group_ID < 1)
+			set_Value (COLUMNNAME_C_BP_Group_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
+	}
+
+	/** Get Business Partner Group.
+		@return Business Partner Group
+	  */
+	public int getC_BP_Group_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_Group_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
@@ -258,29 +447,29 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException
+	public org.compiere.model.I_C_Bank getC_Bank() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_BP_Group)MTable.get(getCtx(), org.compiere.model.I_C_BP_Group.Table_ID)
-			.getPO(getC_BP_Group_ID(), get_TrxName());
+		return (org.compiere.model.I_C_Bank)MTable.get(getCtx(), org.compiere.model.I_C_Bank.Table_ID)
+			.getPO(getC_Bank_ID(), get_TrxName());
 	}
 
-	/** Set Business Partner Group.
-		@param C_BP_Group_ID Business Partner Group
+	/** Set Bank.
+		@param C_Bank_ID Bank
 	*/
-	public void setC_BP_Group_ID (int C_BP_Group_ID)
+	public void setC_Bank_ID (int C_Bank_ID)
 	{
-		if (C_BP_Group_ID < 1)
-			set_Value (COLUMNNAME_C_BP_Group_ID, null);
+		if (C_Bank_ID < 1)
+			set_Value (COLUMNNAME_C_Bank_ID, null);
 		else
-			set_Value (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
+			set_Value (COLUMNNAME_C_Bank_ID, Integer.valueOf(C_Bank_ID));
 	}
 
-	/** Get Business Partner Group.
-		@return Business Partner Group
+	/** Get Bank.
+		@return Bank
 	  */
-	public int getC_BP_Group_ID()
+	public int getC_Bank_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_Group_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Bank_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -337,6 +526,62 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public int getC_Greeting_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Greeting_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Job getC_Job() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Job)MTable.get(getCtx(), org.compiere.model.I_C_Job.Table_ID)
+			.getPO(getC_Job_ID(), get_TrxName());
+	}
+
+	/** Set Position.
+		@param C_Job_ID Job Position
+	*/
+	public void setC_Job_ID (int C_Job_ID)
+	{
+		if (C_Job_ID < 1)
+			set_Value (COLUMNNAME_C_Job_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Job_ID, Integer.valueOf(C_Job_ID));
+	}
+
+	/** Get Position.
+		@return Job Position
+	  */
+	public int getC_Job_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Job_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Region)MTable.get(getCtx(), org.compiere.model.I_C_Region.Table_ID)
+			.getPO(getC_Region_ID(), get_TrxName());
+	}
+
+	/** Set Region.
+		@param C_Region_ID Identifies a geographical Region
+	*/
+	public void setC_Region_ID (int C_Region_ID)
+	{
+		if (C_Region_ID < 1)
+			set_Value (COLUMNNAME_C_Region_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Region_ID, Integer.valueOf(C_Region_ID));
+	}
+
+	/** Get Region.
+		@return Identifies a geographical Region
+	  */
+	public int getC_Region_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Region_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -422,32 +667,20 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_CountryCode);
 	}
 
-	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Region)MTable.get(getCtx(), org.compiere.model.I_C_Region.Table_ID)
-			.getPO(getC_Region_ID(), get_TrxName());
-	}
-
-	/** Set Region.
-		@param C_Region_ID Identifies a geographical Region
+	/** Set D-U-N-S.
+		@param DUNS Dun &amp; Bradstreet Number
 	*/
-	public void setC_Region_ID (int C_Region_ID)
+	public void setDUNS (String DUNS)
 	{
-		if (C_Region_ID < 1)
-			set_Value (COLUMNNAME_C_Region_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Region_ID, Integer.valueOf(C_Region_ID));
+		set_Value (COLUMNNAME_DUNS, DUNS);
 	}
 
-	/** Get Region.
-		@return Identifies a geographical Region
+	/** Get D-U-N-S.
+		@return Dun &amp; Bradstreet Number
 	  */
-	public int getC_Region_ID()
+	public String getDUNS()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Region_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		return (String)get_Value(COLUMNNAME_DUNS);
 	}
 
 	/** Set Description.
@@ -466,22 +699,6 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	/** Set D-U-N-S.
-		@param DUNS Dun &amp; Bradstreet Number
-	*/
-	public void setDUNS (String DUNS)
-	{
-		set_Value (COLUMNNAME_DUNS, DUNS);
-	}
-
-	/** Get D-U-N-S.
-		@return Dun &amp; Bradstreet Number
-	  */
-	public String getDUNS()
-	{
-		return (String)get_Value(COLUMNNAME_DUNS);
-	}
-
 	/** Set EMail Address.
 		@param EMail Electronic Mail Address
 	*/
@@ -496,6 +713,22 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public String getEMail()
 	{
 		return (String)get_Value(COLUMNNAME_EMail);
+	}
+
+	/** Set Element Value Key.
+		@param ElementValueValue Key of the Element Value
+	*/
+	public void setElementValueValue (String ElementValueValue)
+	{
+		set_Value (COLUMNNAME_ElementValueValue, ElementValueValue);
+	}
+
+	/** Get Element Value Key.
+		@return Key of the Element Value
+	  */
+	public String getElementValueValue()
+	{
+		return (String)get_Value(COLUMNNAME_ElementValueValue);
 	}
 
 	/** Set Fax.
@@ -621,6 +854,29 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_InterestAreaName);
 	}
 
+	/** Set ACH.
+		@param IsACH Automatic Clearing House
+	*/
+	public void setIsACH (boolean IsACH)
+	{
+		set_Value (COLUMNNAME_IsACH, Boolean.valueOf(IsACH));
+	}
+
+	/** Get ACH.
+		@return Automatic Clearing House
+	  */
+	public boolean isACH()
+	{
+		Object oo = get_Value(COLUMNNAME_IsACH);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Customer.
 		@param IsCustomer Indicates if this Business Partner is a Customer
 	*/
@@ -738,6 +994,89 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_Name2);
 	}
 
+	/** NotificationType AD_Reference_ID=344 */
+	public static final int NOTIFICATIONTYPE_AD_Reference_ID=344;
+	/** EMail+Notice = B */
+	public static final String NOTIFICATIONTYPE_EMailPlusNotice = "B";
+	/** EMail = E */
+	public static final String NOTIFICATIONTYPE_EMail = "E";
+	/** Notice = N */
+	public static final String NOTIFICATIONTYPE_Notice = "N";
+	/** None = X */
+	public static final String NOTIFICATIONTYPE_None = "X";
+	/** Set Notification Type.
+		@param NotificationType Type of Notifications
+	*/
+	public void setNotificationType (String NotificationType)
+	{
+
+		set_Value (COLUMNNAME_NotificationType, NotificationType);
+	}
+
+	/** Get Notification Type.
+		@return Type of Notifications
+	  */
+	public String getNotificationType()
+	{
+		return (String)get_Value(COLUMNNAME_NotificationType);
+	}
+
+	public org.compiere.model.I_C_PaymentTerm getPO_PaymentTerm() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_ID)
+			.getPO(getPO_PaymentTerm_ID(), get_TrxName());
+	}
+
+	/** Set PO Payment Term.
+		@param PO_PaymentTerm_ID Payment rules for a purchase order
+	*/
+	public void setPO_PaymentTerm_ID (int PO_PaymentTerm_ID)
+	{
+		if (PO_PaymentTerm_ID < 1)
+			set_Value (COLUMNNAME_PO_PaymentTerm_ID, null);
+		else
+			set_Value (COLUMNNAME_PO_PaymentTerm_ID, Integer.valueOf(PO_PaymentTerm_ID));
+	}
+
+	/** Get PO Payment Term.
+		@return Payment rules for a purchase order
+	  */
+	public int getPO_PaymentTerm_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PO_PaymentTerm_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_PriceList getPO_PriceList() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_ID)
+			.getPO(getPO_PriceList_ID(), get_TrxName());
+	}
+
+	/** Set Purchase Price List.
+		@param PO_PriceList_ID Price List used by this Business Partner
+	*/
+	public void setPO_PriceList_ID (int PO_PriceList_ID)
+	{
+		if (PO_PriceList_ID < 1)
+			set_Value (COLUMNNAME_PO_PriceList_ID, null);
+		else
+			set_Value (COLUMNNAME_PO_PriceList_ID, Integer.valueOf(PO_PriceList_ID));
+	}
+
+	/** Get Purchase Price List.
+		@return Price List used by this Business Partner
+	  */
+	public int getPO_PriceList_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PO_PriceList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Password.
 		@param Password Password of any length (case sensitive)
 	*/
@@ -752,6 +1091,65 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public String getPassword()
 	{
 		return (String)get_Value(COLUMNNAME_Password);
+	}
+
+	/** PaymentRulePO AD_Reference_ID=195 */
+	public static final int PAYMENTRULEPO_AD_Reference_ID=195;
+	/** Cash = B */
+	public static final String PAYMENTRULEPO_Cash = "B";
+	/** Direct Debit = D */
+	public static final String PAYMENTRULEPO_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULEPO_CreditCard = "K";
+	/** Mixed POS Payment = M */
+	public static final String PAYMENTRULEPO_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULEPO_OnCredit = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String PAYMENTRULEPO_IDDirectDepositHSBCPriorityPayment = "R";
+	/** Check = S */
+	public static final String PAYMENTRULEPO_Check = "S";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULEPO_DirectDepositARAndAPHSBCACH = "T";
+	/** [TH] Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULEPO_THDirectDepositHSBCPromptPay = "W";
+	/** [TH] Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULEPO_THDirectDepositBBLSMART = "X";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULEPO_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String PAYMENTRULEPO_THCheckHSBCCOS = "Z";
+	/** Set Payment Rule.
+		@param PaymentRulePO Purchase payment option
+	*/
+	public void setPaymentRulePO (String PaymentRulePO)
+	{
+
+		set_Value (COLUMNNAME_PaymentRulePO, PaymentRulePO);
+	}
+
+	/** Get Payment Rule.
+		@return Purchase payment option
+	  */
+	public String getPaymentRulePO()
+	{
+		return (String)get_Value(COLUMNNAME_PaymentRulePO);
+	}
+
+	/** Set Payment Term Key.
+		@param PaymentTermValue Key of the Payment Term
+	*/
+	public void setPaymentTermValue (String PaymentTermValue)
+	{
+		set_Value (COLUMNNAME_PaymentTermValue, PaymentTermValue);
+	}
+
+	/** Get Payment Term Key.
+		@return Key of the Payment Term
+	  */
+	public String getPaymentTermValue()
+	{
+		return (String)get_Value(COLUMNNAME_PaymentTermValue);
 	}
 
 	/** Set Phone.
@@ -786,6 +1184,22 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_Phone2);
 	}
 
+	/** Set Position Name.
+		@param PositionName Name of the Position
+	*/
+	public void setPositionName (String PositionName)
+	{
+		set_Value (COLUMNNAME_PositionName, PositionName);
+	}
+
+	/** Get Position Name.
+		@return Name of the Position
+	  */
+	public String getPositionName()
+	{
+		return (String)get_Value(COLUMNNAME_PositionName);
+	}
+
 	/** Set ZIP.
 		@param Postal Postal code
 	*/
@@ -816,6 +1230,22 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public String getPostal_Add()
 	{
 		return (String)get_Value(COLUMNNAME_Postal_Add);
+	}
+
+	/** Set PriceList Name.
+		@param PriceListName Name of the PriceList
+	*/
+	public void setPriceListName (String PriceListName)
+	{
+		set_Value (COLUMNNAME_PriceListName, PriceListName);
+	}
+
+	/** Get PriceList Name.
+		@return Name of the PriceList
+	  */
+	public String getPriceListName()
+	{
+		return (String)get_Value(COLUMNNAME_PriceListName);
 	}
 
 	/** Set Processed.
@@ -863,22 +1293,6 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return false;
 	}
 
-	/** Set Region.
-		@param RegionName Name of the Region
-	*/
-	public void setRegionName (String RegionName)
-	{
-		set_Value (COLUMNNAME_RegionName, RegionName);
-	}
-
-	/** Get Region.
-		@return Name of the Region
-	  */
-	public String getRegionName()
-	{
-		return (String)get_Value(COLUMNNAME_RegionName);
-	}
-
 	public org.compiere.model.I_R_InterestArea getR_InterestArea() throws RuntimeException
 	{
 		return (org.compiere.model.I_R_InterestArea)MTable.get(getCtx(), org.compiere.model.I_R_InterestArea.Table_ID)
@@ -905,6 +1319,22 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Region.
+		@param RegionName Name of the Region
+	*/
+	public void setRegionName (String RegionName)
+	{
+		set_Value (COLUMNNAME_RegionName, RegionName);
+	}
+
+	/** Get Region.
+		@return Name of the Region
+	  */
+	public String getRegionName()
+	{
+		return (String)get_Value(COLUMNNAME_RegionName);
 	}
 
 	/** Set Tax ID.
@@ -939,6 +1369,34 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_Title);
 	}
 
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
+
+	/** Set Cost Center.
+		@param User2_ID User defined list element #2
+	*/
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1)
+			set_Value (COLUMNNAME_User2_ID, null);
+		else
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get Cost Center.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Search Key.
 		@param Value Search key for the record in the format required - must be unique
 	*/
@@ -962,4 +1420,26 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
     {
         return new KeyNamePair(get_ID(), getValue());
     }
+
+	/** Set bp_isactive.
+		@param bp_isactive bp_isactive
+	*/
+	public void setbp_isactive (boolean bp_isactive)
+	{
+		set_Value (COLUMNNAME_bp_isactive, Boolean.valueOf(bp_isactive));
+	}
+
+	/** Get bp_isactive.
+		@return bp_isactive	  */
+	public boolean isbp_isactive()
+	{
+		Object oo = get_Value(COLUMNNAME_bp_isactive);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
 }

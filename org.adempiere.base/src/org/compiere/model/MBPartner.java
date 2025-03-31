@@ -332,6 +332,16 @@ public class MBPartner extends X_C_BPartner implements ImmutablePOSupport
 		setTaxID(impBP.getTaxID());
 		setNAICS(impBP.getNAICS());
 		setC_BP_Group_ID(impBP.getC_BP_Group_ID());
+		//MPo, 28/3/25 Set Employee Cost Center
+		setUser2_ID(impBP.getUser2_ID());
+		setIsActive(impBP.isbp_isactive());
+		//Set Employee Purchase Price List
+		setPO_PriceList_ID(impBP.getPO_PriceList_ID());
+		//Set Employee PO Payment Term
+		setPO_PaymentTerm_ID(impBP.getPO_PaymentTerm_ID());
+		//Set Employee Payment Rule
+		setPaymentRulePO(impBP.getPaymentRulePO());
+		//
 	}	//	MBPartner
 	
 	/**
