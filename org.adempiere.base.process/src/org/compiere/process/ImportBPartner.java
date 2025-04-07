@@ -228,13 +228,14 @@ implements ImportProcess
 				.append(" AND I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Bank=" + no);
-		sql = new StringBuilder ("UPDATE I_BPartner ")
-				.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Bank, ' ")
-				.append("WHERE C_Bank_ID IS NULL")
-				.append(" AND GroupValue='ZI Employee'")
-				.append(" AND I_IsImported<>'Y'").append(clientCheck);
-		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.CONFIG)) log.config("Invalid Position=" + no);
+		//Import without Bank should be possible
+		//sql = new StringBuilder ("UPDATE I_BPartner ")
+		//		.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Bank, ' ")
+		//		.append("WHERE C_Bank_ID IS NULL")
+		//		.append(" AND GroupValue='ZI Employee'")
+		//		.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		//no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		//if (log.isLoggable(Level.CONFIG)) log.config("Invalid Bank=" + no);
 		//
 		//	Set Country
 		sql = new StringBuilder ("UPDATE I_BPartner i ")
@@ -459,7 +460,7 @@ implements ImportProcess
 						}
 						if (impBP.getDUNS() != null)
 							bp.setDUNS(impBP.getDUNS());
-						if (impBP.getTaxID() != null)
+						if (impBP.getTaxID() != null || impBP.getGroupValue().equals("ZI Employee")) //MPo, 6/4/25 HR requirement to delete sensitive employee information
 							bp.setTaxID(impBP.getTaxID());
 						if (impBP.getNAICS() != null)
 							bp.setNAICS(impBP.getNAICS());
@@ -585,7 +586,8 @@ implements ImportProcess
 				//MPo, 24/3/25
 //				****	Create/Update Employee Bank Details	****
 				MBPBankAccount bpb = null;
-				if (impBP.getC_BP_BankAccount_ID() != 0)		//	Update Bank for employees
+				if (impBP.getC_BP_BankAccount_ID() != 0 &&  
+					impBP.getGroupValue().equals("ZI Employee")) //	Bank Account-subtab exists - Update Employee Bank Details
 				{
 					bpb = new MBPBankAccount(getCtx(), impBP.getC_BP_BankAccount_ID(), get_TrxName());
 					bpb.setIsACH(impBP.isACH());
@@ -593,18 +595,18 @@ implements ImportProcess
 						bpb.setBPBankAcctUse(impBP.getBPBankAcctUse());
 					if (impBP.getBankAccountType() != null)
 						bpb.setBankAccountType(impBP.getBankAccountType());
-					if (impBP.getC_Bank_ID() != 0)
+					//if (impBP.getC_Bank_ID() != 0) //HR requirement to delete sensitive employee information
 						bpb.setC_Bank_ID(impBP.getC_Bank_ID());
-					if (impBP.getAccountNo() != null)
+					//if (impBP.getAccountNo() != null) //HR requirement to delete sensitive employee information
 						bpb.setAccountNo(impBP.getAccountNo());
-					if (impBP.getA_Name() != null)
+					//if (impBP.getA_Name() != null) //HR requirement to delete sensitive employee information
 						bpb.setA_Name(impBP.getA_Name());
-					if (impBP.getA_EMail() != null)
+					//if (impBP.getA_EMail() != null) //HR requirement to delete sensitive employee information
 						bpb.setA_EMail(impBP.getA_EMail());
 					ModelValidationEngine.get().fireImportValidate(this, impBP, bpb, ImportValidator.TIMING_AFTER_IMPORT);
 					bpb.saveEx();
 				}
-				else 	//	New Bank Details
+				else 	//	New Employee Bank Details
 					if (impBP.getGroupValue().equals("ZI Employee"))
 					{
 						bpb = new MBPBankAccount(bp.getCtx(),0,bp.get_TrxName());
@@ -669,15 +671,15 @@ implements ImportProcess
 						user.setDescription(impBP.getContactDescription());
 					if (impBP.getComments() != null)
 						user.setComments(impBP.getComments());
-					if (impBP.getPhone() != null)
+					if (impBP.getPhone() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information
 						user.setPhone(impBP.getPhone());
 					if (impBP.getPhone2() != null)
 						user.setPhone2(impBP.getPhone2());
 					if (impBP.getFax() != null)
 						user.setFax(impBP.getFax());
-					if (impBP.getEMail() != null)
+					if (impBP.getEMail() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information
 						user.setEMail(impBP.getEMail());
-					if (impBP.getBirthday() != null)
+					if (impBP.getBirthday() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information)
 						user.setBirthday(impBP.getBirthday());
 					//MPo, 27/3/25
 					if (impBP.getC_Job_ID() != 0)
