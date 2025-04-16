@@ -608,6 +608,19 @@ public interface I_I_BPartner
 	  */
 	public boolean isEmployee();
 
+    /** Column name IsSalesRep */
+    public static final String COLUMNNAME_IsSalesRep = "IsSalesRep";
+
+	/** Set Sales Representative.
+	  * Indicates if  the business partner is a sales representative or company agent
+	  */
+	public void setIsSalesRep (boolean IsSalesRep);
+
+	/** Get Sales Representative.
+	  * Indicates if  the business partner is a sales representative or company agent
+	  */
+	public boolean isSalesRep();
+
     /** Column name IsVendor */
     public static final String COLUMNNAME_IsVendor = "IsVendor";
 
