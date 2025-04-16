@@ -509,6 +509,7 @@ implements ImportProcess
 					bpl = null;
 					if (impBP.getC_BPartner_Location_ID() != 0)		//	Update Location
 					{
+						System.out.println("getC_BPartner_Location_ID: " + impBP.getC_BPartner_Location_ID());
 						bpl = new MBPartnerLocation(getCtx(), impBP.getC_BPartner_Location_ID(), get_TrxName());
 						MLocation location = new MLocation(getCtx(), bpl.getC_Location_ID(), get_TrxName());
 						location.setC_Country_ID(impBP.getC_Country_ID());
@@ -824,6 +825,9 @@ implements ImportProcess
 		if (impBP.isCustomer()){		
 			bp.setIsCustomer(true);
 		}
+		//MPo, 13/4/25
+		bp.setIsSalesRep(impBP.isSalesRep());	//As agreed with HR.
+		//
 	}	// setTypeOfBPartner
 	
 }	//	ImportBPartner

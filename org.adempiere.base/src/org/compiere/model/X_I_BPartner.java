@@ -32,7 +32,7 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250404L;
+	private static final long serialVersionUID = 20250412L;
 
     /** Standard Constructor */
     public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName)
@@ -44,6 +44,8 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 			setI_IsImported (false);
 // N
 			setIsACH (false);
+// N
+			setIsSalesRep (false);
 // N
 			setbp_isactive (false);
 // N
@@ -61,6 +63,8 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 // N
 			setIsACH (false);
 // N
+			setIsSalesRep (false);
+// N
 			setbp_isactive (false);
 // N
         } */
@@ -77,6 +81,8 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 // N
 			setIsACH (false);
 // N
+			setIsSalesRep (false);
+// N
 			setbp_isactive (false);
 // N
         } */
@@ -92,6 +98,8 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 			setI_IsImported (false);
 // N
 			setIsACH (false);
+// N
+			setIsSalesRep (false);
 // N
 			setbp_isactive (false);
 // N
@@ -914,6 +922,29 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public boolean isEmployee()
 	{
 		Object oo = get_Value(COLUMNNAME_IsEmployee);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Sales Representative.
+		@param IsSalesRep Indicates if  the business partner is a sales representative or company agent
+	*/
+	public void setIsSalesRep (boolean IsSalesRep)
+	{
+		set_Value (COLUMNNAME_IsSalesRep, Boolean.valueOf(IsSalesRep));
+	}
+
+	/** Get Sales Representative.
+		@return Indicates if  the business partner is a sales representative or company agent
+	  */
+	public boolean isSalesRep()
+	{
+		Object oo = get_Value(COLUMNNAME_IsSalesRep);
 		if (oo != null)
 		{
 			 if (oo instanceof Boolean)
