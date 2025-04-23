@@ -114,9 +114,8 @@ public class FileUtil
 	private int				m_actions = 0;
 	private int				m_actionIndex = -1;
 
-	static final String[] ACTIONS = new String[]
+	protected static final String[] ACTIONS = new String[]
 		{"List", "Replace", "Latex", "License"};
-
 
 	/**
 	 * 	Is Action Valid
@@ -137,7 +136,7 @@ public class FileUtil
 	}	//	validAction
 
 	/**
-	 * 	Process File
+	 * 	Process File with set action
 	 *	@param file file
 	 * 	@param p1 parameter 1
 	 * 	@param p2 parameter 2
@@ -186,8 +185,7 @@ public class FileUtil
 		}
 	}	//	processFileAction
 
-	
-	/**************************************************************************
+	/**
 	 * 	Replace String in File.
 	 * 	@param file file
 	 * 	@param from old String
@@ -195,14 +193,12 @@ public class FileUtil
 	 * 	@throws IOException
 	 */
 	private void replaceString (File file, String from, String to) throws IOException
-	{
+	{		
 		String fileName = file.getAbsolutePath();
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		//
 		File tmpFile = new File(fileName + ".tmp");
-		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
 		boolean found = false;
-
+		try (BufferedReader in = new BufferedReader(new FileReader(file));
+		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));) {
 		String line = null;
 		int lineNo = 0;
 		while ((line = in.readLine()) != null)
@@ -217,10 +213,7 @@ public class FileUtil
 			}
 			out.write(line);
 			out.newLine();
-		}	//	while reading file
-		//
-		in.close();
-		out.close();
+		}}	//	while reading file
 		//
 		if (found)
 		{
@@ -247,10 +240,8 @@ public class FileUtil
 		}
 	}	//	replaceString
 
-	
-	
-	/**************************************************************************
-	 * 	Strip Latex specifics.
+	/**
+	 * 	Strip Latex specifics.<br/>
 	 * 	 \textsl{\colorbox{yellow}{\textbf{Important:}}} For more information on the
 		installation of the Adempiere Server and the Adempiere Client please refer to
 		\href{http://www.adempiere.org/support/index.html}{Adempiere Support} for more details and the latest
@@ -261,14 +252,12 @@ public class FileUtil
 	private void latex (File file) throws IOException
 	{
 		String fileName = file.getAbsolutePath();
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		//
 		File outFile = new File(fileName + ".txt");
-		BufferedWriter out = new BufferedWriter (new FileWriter(outFile, false));
+		int lineNo = 0;
+		try (BufferedReader in = new BufferedReader(new FileReader(file));
+		BufferedWriter out = new BufferedWriter (new FileWriter(outFile, false));) {
 
 		String line = null;
-		int lineNo = 0;
-
 		while ((line = in.readLine()) != null)
 		{
 			lineNo++;
@@ -291,15 +280,11 @@ public class FileUtil
 			//
 			out.write(sb.toString());
 			out.newLine();
-		}	//	while reading file
-		//
-		in.close();
-		out.close();
+		}}	//	while reading file
 		System.out.println("File " + fileName + " - lines=" + lineNo);
 	}	//	latex
-
 	
-	/**************************************************************************
+	/**
 	 * 	Replace License info.
 	 * 	@param file file
 	 * 	@throws IOException
@@ -307,14 +292,13 @@ public class FileUtil
 	private void license (File file) throws IOException
 	{
 		String fileName = file.getAbsolutePath();
-		boolean isJava = fileName.endsWith(".java");
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		//
 		File tmpFile = new File(fileName + ".tmp");
-		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
+		boolean isJava = fileName.endsWith(".java");
+		boolean found = false;
+		try (BufferedReader in = new BufferedReader(new FileReader(file));
+		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));) {
 
 		out.write(COPYRIGHT);
-		boolean found = false;
 
 		String line = null;
 		while ((line = in.readLine()) != null)
@@ -329,10 +313,7 @@ public class FileUtil
 				out.write(line);
 				out.newLine();
 			}
-		}	//	while reading file
-		//
-		in.close();
-		out.close();
+		}}	//	while reading file
 		//
 		if (found)
 		{
@@ -598,7 +579,6 @@ public class FileUtil
 				if (destinationFileOutputStream != null)
 					destinationFileOutputStream.close();
 			} catch(Exception e) { 
-				throw new AdempiereException("Exception : " + e);
 			}
 		}
 	}

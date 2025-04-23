@@ -53,6 +53,9 @@ public class DefaultKeyStore implements IKeyStore {
 
 	private String algorithm;
 
+	/**
+	 * Load or create key store
+	 */
 	public DefaultKeyStore(){
 		File file = new File(Ini.getAdempiereHome(), IDEMPIERE_KEYSTORE_PROPERTIES);
 		if (file.exists()) {
@@ -92,6 +95,9 @@ public class DefaultKeyStore implements IKeyStore {
 		}
 	}
 
+	/**
+	 * Create key using legacy algorithm (DES)
+	 */
 	private void createLegacyKey() {
 		m_key = new javax.crypto.spec.SecretKeySpec
 				(new byte[] {122,125,125,104,122,125,125,104}, LEGACY_ALGORITHM);

@@ -30,6 +30,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/avalon-framework-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlcompressor.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/yuicompressor.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/autolink.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commonmark.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commonmark-ext-autolink.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commonmark-ext-gfm-tables.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>

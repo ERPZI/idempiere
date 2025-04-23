@@ -80,10 +80,10 @@ public class GridField
 	implements Serializable, Evaluatee, Cloneable
 {
 	/**
-	 * generated serial id
+	 * 
 	 */
-	private static final long serialVersionUID = -4496344553246662012L;
-	
+	private static final long serialVersionUID = -1301956809914059765L;
+
 	private static final Character SPECIAL_CASE_DEFAULT = '1';
 	private static final Character SQL_DEFAULT = '2';
 	private static final Character DEFAULT_LOGIC = '3';
@@ -466,11 +466,7 @@ public class GridField
 				isAlwaysUpdatable = Evaluator.parseSQLLogic(m_vo.AlwaysUpdatableLogic, ctx, m_vo.WindowNo,
 						m_vo.TabNo, m_vo.ColumnName);
 			} else {
-				Evaluatee evaluatee = new Evaluatee() {
-					public String get_ValueAsString(String variableName) {
-						return GridField.this.get_ValueAsString(ctx, variableName);
-					}
-				};
+				Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 				isAlwaysUpdatable = Evaluator.evaluateLogic(evaluatee, m_vo.AlwaysUpdatableLogic);
 				if (log.isLoggable(Level.FINEST))
 					log.finest(m_vo.ColumnName + " R/O(" + m_vo.AlwaysUpdatableLogic + ") => R/W-" + isAlwaysUpdatable);
@@ -551,11 +547,7 @@ public class GridField
 			}
 			else
 			{
-				Evaluatee evaluatee = new Evaluatee() {
-					public String get_ValueAsString(String variableName) {
-						return GridField.this.get_ValueAsString(ctx, variableName);
-					}
-				};
+				Evaluatee evaluatee = variableName -> {return get_ValueAsString(ctx, variableName);};
 				boolean retValue = !Evaluator.evaluateLogic(evaluatee, m_vo.ReadOnlyLogic);
 				if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName + " R/O(" + m_vo.ReadOnlyLogic + ") => R/W-" + retValue);
 				if (!retValue)
@@ -1235,6 +1227,7 @@ public class GridField
 	 *  @return true if valid
 	 *  @deprecated use validateValueNoDirect instead
 	 */
+	@Deprecated
 	public boolean validateValue()
 	{
 		//  null
@@ -1310,11 +1303,7 @@ public class GridField
 			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, m_vo.ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
-			Evaluatee evaluatee = new Evaluatee() {
-				public String get_ValueAsString(String variableName) {
-					return GridField.this.get_ValueAsString(ctx, variableName);
-				}
-			};
+			Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 			boolean retValue = Evaluator.evaluateLogic(evaluatee, m_vo.DisplayLogic);
 			if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName 
 				+ " (" + m_vo.DisplayLogic + ") => " + retValue);
@@ -1355,11 +1344,7 @@ public class GridField
 			if (m_vo.DisplayLogic.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 				return Evaluator.parseSQLLogic(m_vo.DisplayLogic, ctx, m_vo.WindowNo, m_vo.TabNo, m_vo.ColumnName);
 			}
-			Evaluatee evaluatee = new Evaluatee() {
-				public String get_ValueAsString(String variableName) {
-					return GridField.this.get_ValueAsString(ctx, variableName);
-				}
-			};
+			Evaluatee evaluatee = (variableName) -> {return get_ValueAsString(ctx, variableName);};
 			boolean retValue = Evaluator.evaluateLogic(evaluatee, m_vo.DisplayLogic);
 			if (log.isLoggable(Level.FINEST)) log.finest(m_vo.ColumnName 
 				+ " (" + m_vo.DisplayLogic + ") => " + retValue);
@@ -1373,6 +1358,7 @@ public class GridField
 	 *	@param variableName name
 	 *	@return value
 	 */
+	@Override
 	public String get_ValueAsString (String variableName)
 	{
 		return get_ValueAsString(m_vo.ctx, variableName);
@@ -1388,7 +1374,7 @@ public class GridField
 	{
 		if (m_parentEvaluatee != null) {
 			String value = m_parentEvaluatee.get_ValueAsString(variableName);
-			if (value != null)
+			if (!Util.isEmpty(value))
 				return value;
 		}
 		return new DefaultEvaluatee(getGridTab(), m_vo.WindowNo, m_vo.TabNo).get_ValueAsString(ctx, variableName);
@@ -1520,6 +1506,16 @@ public class GridField
 	{
 		return m_vo.Header;
 	}
+
+	/**
+	 * Get EntityType
+	 * @return Window Entity Type
+	 */
+	public String getEntityType()
+	{
+		return m_vo.EntityType;
+	}
+
 	/**
 	 * 	Get Display Type
 	 *	@return display type

@@ -87,7 +87,6 @@ import org.zkoss.zul.Vlayout;
  *  Form to perform Matching between Purchase Order, Vendor Invoice and Material Receipt.
  *
  *  @author     Jorg Janke
- *  @version    $Id: VMatch.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  */
 @org.idempiere.ui.zk.annotation.Form(name = "org.compiere.apps.form.VMatch")
 public class WMatch extends Match
@@ -463,8 +462,8 @@ public class WMatch extends Match
 	 */
 	private void dynInit()
 	{
-		ColumnInfo[] layout = getColumnLayout(); //MPo, 5/10/23 Move pre-i10 code from here to Match.java MERGE CONFLICT
-		
+		ColumnInfo[] layout = getColumnLayout();
+
 		xMatchedTable.prepareTable(layout, "", "", false, "");
 		xMatchedToTable.prepareTable(layout, "", "", true, "");
 

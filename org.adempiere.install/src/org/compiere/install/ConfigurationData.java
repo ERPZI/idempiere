@@ -59,6 +59,7 @@ import org.compiere.util.DB;
 import org.compiere.util.EMail;
 import org.compiere.util.EMailAuthenticator;
 import org.compiere.util.Ini;
+import org.compiere.util.Util;
 import org.eclipse.jetty.util.security.Password;
 
 
@@ -793,11 +794,9 @@ public class ConfigurationData
 	protected boolean testServerPort (int port)
 	{
 		System.out.println("testServerPort: " + port);
-		try
-		{
-			ServerSocket ss = new ServerSocket (port);
+		try (ServerSocket ss = new ServerSocket (port))
+		{			
 			if (log.isLoggable(Level.FINE)) log.fine(ss.getInetAddress() + ":" + ss.getLocalPort() + " - created");
-			ss.close();
 		}
 		catch (Exception ex)
 		{
@@ -981,6 +980,11 @@ public class ConfigurationData
 		} else {
 			Ini.setProperty(Ini.P_CONNECTION, cc.toStringLong(true));
 		}
+		
+		// default to ignore jetty annotations parser warnings
+		Arrays.asList("org.eclipse.jetty.ee8.annotations.AnnotationParser.TraceLevel", "org.eclipse.jetty.ee8.osgi.annotations.AnnotationParser.TraceLevel")
+			.forEach(p -> {if (Util.isEmpty(Ini.getProperty(p),true)) Ini.setProperty(p, "SEVERE");});
+
 		Ini.saveProperties(false);
 		return true;
 	}	//	saveIni

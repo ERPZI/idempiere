@@ -34,7 +34,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
 /**
- *	Tax Handling
+ *	Static methods for the looking up of tax id (C_Tax_ID)
  *
  * 	@author 	Jorg Janke
  * 	@version 	$Id: Tax.java,v 1.3 2006/07/30 00:51:02 jjanke Exp $
@@ -47,9 +47,7 @@ public class Tax
 	/**	Logger							*/
 	static private CLogger			log = CLogger.getCLogger (Tax.class);
 
-
 	/**
-	 * 
 	 * @param ctx
 	 * @param M_Product_ID
 	 * @param C_Charge_ID
@@ -63,6 +61,7 @@ public class Tax
 	 * @deprecated
 	 * @return
 	 */
+	@Deprecated
 	public static int get (Properties ctx, int M_Product_ID, int C_Charge_ID,
 			Timestamp billDate, Timestamp shipDate,
 			int AD_Org_ID, int M_Warehouse_ID,
@@ -70,17 +69,16 @@ public class Tax
 			boolean IsSOTrx) {
 		return get(ctx, M_Product_ID, C_Charge_ID, billDate, shipDate, AD_Org_ID, M_Warehouse_ID, billC_BPartner_Location_ID, shipC_BPartner_Location_ID, -1, IsSOTrx, null);
 	}
-	
-	
-	/**************************************************************************
+		
+	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		M_Product_ID/C_Charge_ID	->	C_TaxCategory_ID
-	 *		billDate, shipDate			->	billDate, shipDate
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID
+	 *      M_Product_ID/C_Charge_ID    ->	C_TaxCategory_ID
+	 *      billDate, shipDate          ->	billDate, shipDate
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->  shipFromC_Location_ID
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -109,15 +107,15 @@ public class Tax
 				billC_BPartner_Location_ID, shipC_BPartner_Location_ID, dropshipC_BPartner_Location_ID, IsSOTrx, null, trxName);
 	}
 	
-	/**************************************************************************
+	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		M_Product_ID/C_Charge_ID	->	C_TaxCategory_ID
-	 *		billDate, shipDate			->	billDate, shipDate
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID
+	 *      M_Product_ID/C_Charge_ID    ->	C_TaxCategory_ID
+	 *      billDate, shipDate          ->	billDate, shipDate
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->	shipFromC_Location_ID
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -207,6 +205,7 @@ public class Tax
 	 * @return
 	 * @deprecated
 	 */
+	@Deprecated
 	public static int getCharge (Properties ctx, int C_Charge_ID,
 			Timestamp billDate, Timestamp shipDate,
 			int AD_Org_ID, int M_Warehouse_ID,
@@ -218,13 +217,13 @@ public class Tax
 	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		C_Charge_ID					->	C_TaxCategory_ID
-	 *		billDate					->	billDate
-	 *		shipDate					->	shipDate (ignored)
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID (ignored)
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID (ignored)
+	 *      C_Charge_ID                 ->	C_TaxCategory_ID
+	 *      billDate                    ->	billDate
+	 *      shipDate                    ->	shipDate (ignored)
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->	shipFromC_Location_ID (ignored)
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID (ignored)
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -255,13 +254,13 @@ public class Tax
 	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		C_Charge_ID					->	C_TaxCategory_ID
-	 *		billDate					->	billDate
-	 *		shipDate					->	shipDate (ignored)
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID (ignored)
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID (ignored)
+	 *      C_Charge_ID                 ->	C_TaxCategory_ID
+	 *      billDate                    ->	billDate
+	 *      shipDate                    ->	shipDate (ignored)
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->	shipFromC_Location_ID (ignored)
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID (ignored)
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -400,6 +399,7 @@ public class Tax
 	 * @return
 	 * @deprecated
 	 */
+	@Deprecated
 	public static int getProduct (Properties ctx, int M_Product_ID,
 			Timestamp billDate, Timestamp shipDate,
 			int AD_Org_ID, int M_Warehouse_ID,
@@ -411,13 +411,13 @@ public class Tax
 	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		M_Product_ID				->	C_TaxCategory_ID
-	 *		billDate					->	billDate
-	 *		shipDate					->	shipDate (ignored)
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID (ignored)
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID (ignored)
+	 *      M_Product_ID                ->	C_TaxCategory_ID
+	 *      billDate                    ->	billDate
+	 *      shipDate                    ->	shipDate (ignored)
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->	shipFromC_Location_ID (ignored)
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID (ignored)
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -447,13 +447,13 @@ public class Tax
 	/**
 	 *	Get Tax ID - converts parameters to call Get Tax.
 	 *  <pre>{@code
-	 *		M_Product_ID				->	C_TaxCategory_ID
-	 *		billDate					->	billDate
-	 *		shipDate					->	shipDate (ignored)
-	 *		AD_Org_ID					->	billFromC_Location_ID
-	 *		M_Warehouse_ID				->	shipFromC_Location_ID (ignored)
-	 *		billC_BPartner_Location_ID  ->	billToC_Location_ID
-	 *		shipC_BPartner_Location_ID 	->	shipToC_Location_ID (ignored)
+	 *      M_Product_ID                ->	C_TaxCategory_ID
+	 *      billDate                    ->	billDate
+	 *      shipDate                    ->	shipDate (ignored)
+	 *      AD_Org_ID                   ->	billFromC_Location_ID
+	 *      M_Warehouse_ID              ->	shipFromC_Location_ID (ignored)
+	 *      billC_BPartner_Location_ID  ->	billToC_Location_ID
+	 *      shipC_BPartner_Location_ID  ->	shipToC_Location_ID (ignored)
 	 *
 	 *  if IsSOTrx is false, bill and ship are reversed
 	 *  }</pre>
@@ -562,8 +562,6 @@ public class Tax
 					billDate, billFromC_Location_ID, billToC_Location_ID, trxName);
 			}
 
-			// ----------------------------------------------------------------
-
 			//	Detail for error isolation
 
 		//	M_Product_ID				->	C_TaxCategory_ID
@@ -625,8 +623,6 @@ public class Tax
 				log.fine("getProduct - billToC_Location_ID = " + billToC_Location_ID);
 			}
 			
-			//-----------------------------------------------------------------
-
 		//	M_Warehouse_ID				->	shipFromC_Location_ID
 			variable = "M_Warehouse_ID";
 			sql = "SELECT C_Location_ID FROM M_Warehouse WHERE M_Warehouse_ID=?";
@@ -698,9 +694,8 @@ public class Tax
 			return C_Tax_ID;
 		}
 	}	//	getExemptTax
-
 	
-	/**************************************************************************
+	/**
 	 *	Get Tax ID (Detail).
 	 *  @param ctx context
 	 *	@param C_TaxCategory_ID tax category

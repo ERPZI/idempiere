@@ -24,7 +24,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for I_BPartner
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="I_BPartner")
 public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 {
@@ -32,7 +32,7 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20250412L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_I_BPartner (Properties ctx, int I_BPartner_ID, String trxName)
@@ -269,22 +269,6 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 		return (String)get_Value(COLUMNNAME_BPBankAcctUse);
 	}
 
-	/** Set BP Contact Greeting.
-		@param BPContactGreeting Greeting for Business Partner Contact
-	*/
-	public void setBPContactGreeting (String BPContactGreeting)
-	{
-		set_Value (COLUMNNAME_BPContactGreeting, BPContactGreeting);
-	}
-
-	/** Get BP Contact Greeting.
-		@return Greeting for Business Partner Contact
-	  */
-	public String getBPContactGreeting()
-	{
-		return (String)get_Value(COLUMNNAME_BPContactGreeting);
-	}
-
 	/** BankAccountType AD_Reference_ID=216 */
 	public static final int BANKACCOUNTTYPE_AD_Reference_ID=216;
 	/** Cash = B */
@@ -325,6 +309,22 @@ public class X_I_BPartner extends PO implements I_I_BPartner, I_Persistent
 	public String getBankName()
 	{
 		return (String)get_Value(COLUMNNAME_BankName);
+	}
+		
+	/** Set BP Contact Greeting.
+		@param BPContactGreeting Greeting for Business Partner Contact
+	*/
+	public void setBPContactGreeting (String BPContactGreeting)
+	{
+		set_Value (COLUMNNAME_BPContactGreeting, BPContactGreeting);
+	}
+
+	/** Get BP Contact Greeting.
+		@return Greeting for Business Partner Contact
+	  */
+	public String getBPContactGreeting()
+	{
+		return (String)get_Value(COLUMNNAME_BPContactGreeting);
 	}
 
 	/** Set Birthday.

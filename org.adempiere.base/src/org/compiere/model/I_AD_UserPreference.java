@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_UserPreference
  *  @author iDempiere (generated) 
- *  @version Release 11
+ *  @version Release 12
  */
 public interface I_AD_UserPreference 
 {
@@ -98,10 +98,14 @@ public interface I_AD_UserPreference
     /** Column name AutoCommit */
     public static final String COLUMNNAME_AutoCommit = "AutoCommit";
 
-	/** Set Automatic Commit	  */
+	/** Set Save on Navigate.
+	  * Automatically save changes to the current record upon user navigation.
+	  */
 	public void setAutoCommit (boolean AutoCommit);
 
-	/** Get Automatic Commit	  */
+	/** Get Save on Navigate.
+	  * Automatically save changes to the current record upon user navigation.
+	  */
 	public boolean isAutoCommit();
 
     /** Column name AutoNew */
@@ -185,6 +189,15 @@ public interface I_AD_UserPreference
 
 	/** Get Read Only Session	  */
 	public boolean isReadOnlySession();
+
+    /** Column name IsShowTechnicalInfOnHelp */
+    public static final String COLUMNNAME_IsShowTechnicalInfOnHelp = "IsShowTechnicalInfOnHelp";
+
+	/** Set Show Technical Information on Help	  */
+	public void setIsShowTechnicalInfOnHelp (boolean IsShowTechnicalInfOnHelp);
+
+	/** Get Show Technical Information on Help	  */
+	public boolean isShowTechnicalInfOnHelp();
 
     /** Column name IsUseSimilarTo */
     public static final String COLUMNNAME_IsUseSimilarTo = "IsUseSimilarTo";

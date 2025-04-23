@@ -47,7 +47,8 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8636352432923806208L;
+	private static final long serialVersionUID = 5259015877977440085L;
+
 
 	/** Constant for Predefine System Configuration Names (in alphabetical order) */
 	
@@ -108,11 +109,13 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String DPViews_ShowInfoAccount = "DPViews_ShowInfoAccount";
     public static final String DPViews_ShowInfoSchedule = "DPViews_ShowInfoSchedule";
     public static final String EMAIL_NOTIFY_2PACK = "EMAIL_NOTIFY_2PACK";
+    public static final String EMAIL_SERVER_START_ENABLED = "EMAIL_SERVER_START_ENABLED";
     public static final String EMAIL_TEST_MAILTEXT_ID = "EMAIL_TEST_MAILTEXT_ID";
     public static final String ENABLE_PAYMENTBOX_BUTTON = "ENABLE_PAYMENTBOX_BUTTON";
     public static final String ENABLE_SSO = "ENABLE_SSO";
     public static final String ENABLE_SSO_OSGI_CONSOLE = "ENABLE_SSO_OSGI_CONSOLE";
     public static final String ENABLE_SSO_IDEMPIERE_MONITOR = "ENABLE_SSO_IDEMPIERE_MONITOR";
+    public static final String EXPORT_BLOB_COLUMN_FOR_INSERT = "EXPORT_BLOB_COLUMN_FOR_INSERT";
     public static final String FEEDBACK_EMAIL_CC = "FEEDBACK_EMAIL_CC";
     public static final String FEEDBACK_EMAIL_TO = "FEEDBACK_EMAIL_TO";
     public static final String FORCE_POSTING_PRIOR_TO_PERIOD_CLOSE = "FORCE_POSTING_PRIOR_TO_PERIOD_CLOSE";
@@ -274,6 +277,8 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME = "ZK_THEME";
     public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";
+    public static final String ZK_THUMBNAIL_IMAGE_HEIGHT = "ZK_THUMBNAIL_IMAGE_HEIGHT";
+    public static final String ZK_THUMBNAIL_IMAGE_WIDTH = "ZK_THUMBNAIL_IMAGE_WIDTH";
     public static final String ZK_TOOLBAR_SHOW_MORE_VERTICAL = "ZK_TOOLBAR_SHOW_MORE_VERTICAL";
     public static final String ZK_USE_PDF_JS_VIEWER = "ZK_USE_PDF_JS_VIEWER";
     public static final String ZOOM_ACROSS_QUERY_TIMEOUT = "ZOOM_ACROSS_QUERY_TIMEOUT";
@@ -311,7 +316,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MSysConfig.class);
 	/** Cache			*/
-	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0);
+	private static CCache<String, String> s_cache = new CCache<String, String>(Table_Name, 40, 0, false, 0);
 	
 	/**
 	 * Get system configuration property of type string
@@ -808,19 +813,15 @@ public class MSysConfig extends X_AD_SysConfig
 		return dt;
 	}	
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord
-	 *	@return true if save
-	 */
 	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("New=" + newRecord);
 		
+		// Validate configuration level
 		if (getAD_Client_ID() != 0 || getAD_Org_ID() != 0) {
 			
-			// Get the configuration level from the System Record
+			// Get the configuration level from System client Record
 			String configLevel = null;
 			String sql = "SELECT ConfigurationLevel FROM AD_SysConfig WHERE Name=? AND AD_Client_ID = 0 AND AD_Org_ID = 0";
 			PreparedStatement pstmt = null;
@@ -844,10 +845,10 @@ public class MSysConfig extends X_AD_SysConfig
 			}
 			
 			if (configLevel == null) {
-				// not found for system
-				// if saving an org parameter - look config in client
+				// No System client record
+				// If saving with org parameter, find configuration level from client
 				if (getAD_Org_ID() != 0) {
-					// Get the configuration level from the System Record
+					// Get the configuration level from client record
 					sql = "SELECT ConfigurationLevel FROM AD_SysConfig WHERE Name=? AND AD_Client_ID = ? AND AD_Org_ID = 0";
 					try
 					{

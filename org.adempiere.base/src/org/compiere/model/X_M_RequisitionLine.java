@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_RequisitionLine
  *  @author iDempiere (generated)
- *  @version Release 11 - $Id$ */
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_RequisitionLine")
 public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20231222L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_RequisitionLine (Properties ctx, int M_RequisitionLine_ID, String trxName)
@@ -47,9 +47,8 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
 			setLineNetAmt (Env.ZERO);
-			setM_Product_ID (0);
-			setM_Requisition_ID (0);
 			setM_RequisitionLine_ID (0);
+			setM_Requisition_ID (0);
 			setPriceActual (Env.ZERO);
 			setPriceEntered (Env.ZERO);
 			setQty (Env.ZERO);
@@ -70,8 +69,8 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
 			setLineNetAmt (Env.ZERO);
-			setM_Requisition_ID (0);
 			setM_RequisitionLine_ID (0);
+			setM_Requisition_ID (0);
 			setPriceActual (Env.ZERO);
 			setQty (Env.ZERO);
 // 1
@@ -87,8 +86,8 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
 			setLineNetAmt (Env.ZERO);
-			setM_Requisition_ID (0);
 			setM_RequisitionLine_ID (0);
+			setM_Requisition_ID (0);
 			setPriceActual (Env.ZERO);
 			setQty (Env.ZERO);
 // 1
@@ -104,8 +103,8 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 			setLine (0);
 // @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
 			setLineNetAmt (Env.ZERO);
-			setM_Requisition_ID (0);
 			setM_RequisitionLine_ID (0);
+			setM_Requisition_ID (0);
 			setPriceActual (Env.ZERO);
 			setQty (Env.ZERO);
 // 1
@@ -426,34 +425,6 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Requisition)MTable.get(getCtx(), org.compiere.model.I_M_Requisition.Table_ID)
-			.getPO(getM_Requisition_ID(), get_TrxName());
-	}
-
-	/** Set Requisition.
-		@param M_Requisition_ID Material Requisition
-	*/
-	public void setM_Requisition_ID (int M_Requisition_ID)
-	{
-		if (M_Requisition_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_Requisition_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_Requisition_ID, Integer.valueOf(M_Requisition_ID));
-	}
-
-	/** Get Requisition.
-		@return Material Requisition
-	  */
-	public int getM_Requisition_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Requisition_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Requisition Line.
 		@param M_RequisitionLine_ID Material Requisition Line
 	*/
@@ -489,6 +460,34 @@ public class X_M_RequisitionLine extends PO implements I_M_RequisitionLine, I_Pe
 	public String getM_RequisitionLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_RequisitionLine_UU);
+	}
+
+	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Requisition)MTable.get(getCtx(), org.compiere.model.I_M_Requisition.Table_ID)
+			.getPO(getM_Requisition_ID(), get_TrxName());
+	}
+
+	/** Set Requisition.
+		@param M_Requisition_ID Material Requisition
+	*/
+	public void setM_Requisition_ID (int M_Requisition_ID)
+	{
+		if (M_Requisition_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Requisition_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Requisition_ID, Integer.valueOf(M_Requisition_ID));
+	}
+
+	/** Get Requisition.
+		@return Material Requisition
+	  */
+	public int getM_Requisition_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Requisition_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Unit Price.

@@ -276,8 +276,6 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		row.appendCellChild(labelDateAcct.rightAlign());
 		row.appendCellChild(fieldDateAcct.getComponent(), 2);
 		row.appendCellChild(labelDateAcct2.rightAlign());
-		//ZKUpdateUtil.setHflex(fieldDateAcct2.getComponent(), "true");
-		//row.appendCellChild(fieldDateAcct2.getComponent(), 2);
 		Hbox boxTo = new Hbox();
 		boxTo.appendChild(fieldDateAcct2.getComponent());
 		DateRangeButton drb = (new DateRangeButton(fieldDateAcct, fieldDateAcct2));

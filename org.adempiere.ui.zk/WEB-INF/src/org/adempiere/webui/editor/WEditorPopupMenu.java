@@ -44,7 +44,6 @@ import org.zkoss.zul.Menuitem;
  * Popup context menu for {@link WEditor}.
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 25, 2007
- * @version $Revision: 0.10 $
  */
 public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
 {
@@ -361,6 +360,8 @@ public class WEditorPopupMenu extends Menupopup implements EventListener<Event>
 			Menuitem editor = new Menuitem(Msg.getElement(Env.getCtx(), "AD_FieldSuggestion_ID"));
 			if (ThemeManager.isUseFontIconForImage())
 				editor.setIconSclass("z-icon-FieldSuggestion");
+			else
+				editor.setImage(ThemeManager.getThemeResource("images/FieldSuggestion16.png"));
 			editor.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) throws Exception {

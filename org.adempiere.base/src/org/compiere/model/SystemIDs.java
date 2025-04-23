@@ -16,12 +16,10 @@
  *****************************************************************************/
 package org.compiere.model;
 
-
 /**
  *  List all hardcoded ID used in the code
  *  @author Carlos Ruiz, Nicolas Micoud, ...
  */
-
 public class SystemIDs 
 {
 	public final static int COLUMN_AD_WF_ACTIVITY_AD_USER_ID = 10443;	
@@ -138,6 +136,7 @@ public class SystemIDs
 	public final static int REFERENCE_DATATYPE_ID = 13;
 	public final static int REFERENCE_DATATYPE_UUID = 200231;
 	public final static int REFERENCE_DATATYPE_IMAGE = 32;
+	public final static int REFERENCE_DATATYPE_IMAGE_URL = 200271;
 	public final static int REFERENCE_DATATYPE_INTEGER = 11;
 	public final static int REFERENCE_DATATYPE_LIST = 17;
 	public final static int REFERENCE_DATATYPE_LOCATION = 21;
@@ -230,6 +229,7 @@ public class SystemIDs
 	public final static int WINDOW_RETURNTOVENDOR = 53098;
 	public final static int WINDOW_SALES_ORDER = 143;
 	public final static int WINDOW_SHIPMENT_CUSTOMER = 169;
+	public final static int WINDOW_TEST = 127;
 	public final static int WINDOW_USER_PREFERENCE = 200073;
 	public final static int WINDOW_VENDOR_RMA = 53099;
 	public final static int WINDOW_WAREHOUSE_LOCATOR = 139;

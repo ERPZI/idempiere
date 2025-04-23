@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import org.adempiere.base.LookupFactoryHelper;
@@ -70,9 +71,14 @@ import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.Tabpanels;
 import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.WInfoWindowListItemRenderer;
+import org.adempiere.webui.component.WListItemRenderer;
 import org.adempiere.webui.component.WListbox;
+import org.adempiere.webui.component.WTableColumn;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.editor.IEditorConfiguration;
 import org.adempiere.webui.editor.WEditor;
+import org.adempiere.webui.editor.WImageEditor;
+import org.adempiere.webui.editor.WImageURLEditor;
 import org.adempiere.webui.editor.WSearchEditor;
 import org.adempiere.webui.editor.WTableDirEditor;
 import org.adempiere.webui.editor.WebEditorFactory;
@@ -100,6 +106,7 @@ import org.compiere.model.GridWindow;
 import org.compiere.model.InfoColumnVO;
 import org.compiere.model.InfoRelatedVO;
 import org.compiere.model.Lookup;
+import org.compiere.model.MAttachment;
 import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MInfoColumn;
 import org.compiere.model.MInfoWindow;
@@ -112,6 +119,7 @@ import org.compiere.model.MRole;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUserDefInfo;
+import org.compiere.model.MUserDefProc;
 import org.compiere.model.X_AD_InfoColumn;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
@@ -142,8 +150,10 @@ import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.ComboitemRenderer;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Filedownload;
+import org.zkoss.zul.Image;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listitem;
+import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.North;
 import org.zkoss.zul.Paging;
@@ -437,10 +447,18 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    			
    			// make process button
 			MProcess process = MProcess.get(Env.getCtx(), infoProcess.getAD_Process_ID());
-   			Button btProcess = confirmPanel.addProcessButton(process.get_Translation(MProcess.COLUMNNAME_Name), infoProcess.getImageURL());
+			String name = process.get_Translation(MProcess.COLUMNNAME_Name);
+
+   			MUserDefProc userDef = MUserDefProc.getBestMatch(Env.getCtx(), process.getAD_Process_ID());
+   			if (userDef != null) {
+   				if (userDef.getName() != null)
+   					name = userDef.getName();
+   			}
+
+   			Button btProcess = confirmPanel.addProcessButton(name, infoProcess.getImageURL());
    			if (Util.isEmpty(infoProcess.getImageURL(), true)) {
    				btProcess.setImage(null);
-   				btProcess.setLabel(process.get_Translation(MProcess.COLUMNNAME_Name));
+   				btProcess.setLabel(name);
    			}
    			
    			// save process_id, handle event will use
@@ -472,10 +490,27 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    			cbbProcess.setItemRenderer(new ComboitemRenderer<MInfoProcess>() {
    				public void render(Comboitem item, MInfoProcess data, int index){
    					MProcess process = MProcess.get(Env.getCtx(), data.getAD_Process_ID());
+   					String name = process.get_Translation(MProcess.COLUMNNAME_Name);
+
+   					MUserDefProc userDef = MUserDefProc.getBestMatch(Env.getCtx(), process.getAD_Process_ID());
+   					if (userDef != null) {
+   						if (userDef.getName() != null)
+   							name = userDef.getName();
+   					}
+
    					item.setValue(process);
-   					item.setLabel(process.get_Translation(MProcess.COLUMNNAME_Name));
+
+   					item.setLabel(name);
    					if (!Util.isEmpty(data.getImageURL(), true)) {
-   						if (ThemeManager.isUseFontIconForImage())
+   						if (MAttachment.isAttachmentURLPath(data.getImageURL()))
+   						{
+							item.setImage(MAttachment.getImageAttachmentURLFromPath(null, data.getImageURL()));
+   						}
+   						else if (data.getImageURL().indexOf("://") > 0)
+   						{
+   							item.setImage(data.getImageURL());
+   						}
+   						else if (ThemeManager.isUseFontIconForImage())
    		   	   				item.setIconSclass(ThemeManager.getIconSclass(data.getImageURL()));
    						else
    							item.setImage(ThemeManager.getThemeResource("images/" + data.getImageURL()));
@@ -513,7 +548,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
    				
    				// init button to show menu
    				btMenuProcess = confirmPanel.addButton("ProcessMenu", null);
-   				btMenuProcess.setPopup("ipMenu, before_start");   				
+   				btMenuProcess.addEventListener(Events.ON_CLICK, e -> {
+   					ipMenu.open(btMenuProcess, "before_start");
+   				});
    			}
    		}
 	}
@@ -584,7 +621,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected void bindInfoProcessMenu (){
 		if (infoProcessMenuList == null || infoProcessMenuList == null)
 			return;
-		
+				
 		ipMenu.getChildren().clear();
 		for (MInfoProcess infoProcess : infoProcessMenuList){
 			if (!infoProcess.isDisplayed(infoContext, p_WindowNo)){
@@ -592,11 +629,26 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 			}
 			
 			MProcess process = MProcess.get(Env.getCtx(), infoProcess.getAD_Process_ID());
+			String name = process.get_Translation(MProcess.COLUMNNAME_Name);
+
+			MUserDefProc userDef = MUserDefProc.getBestMatch(Env.getCtx(), process.getAD_Process_ID());
+			if (userDef != null) {
+				if (userDef.getName() != null)
+					name = userDef.getName();
+			}
+
    			// Create menu item for each info process
    	   		Menuitem ipMenuItem = new Menuitem();
-   	   		ipMenuItem.setLabel(process.get_Translation(MProcess.COLUMNNAME_Name));
+   	   		ipMenuItem.setLabel(name);
    	   		if (!Util.isEmpty(infoProcess.getImageURL(), true)) {
-   	   			if (ThemeManager.isUseFontIconForImage())
+   	   			if (infoProcess.getImageURL().indexOf("://") > 0)
+   	   			{
+   	   				if (MAttachment.isAttachmentURLPath(infoProcess.getImageURL()))
+   	   					ipMenuItem.setImage(MAttachment.getImageAttachmentURLFromPath(null, infoProcess.getImageURL()));
+   	   				else
+   	   					ipMenuItem.setImage(infoProcess.getImageURL());
+   	   			}
+   	   			else if (ThemeManager.isUseFontIconForImage())
    	   				ipMenuItem.setIconSclass(ThemeManager.getIconSclass(infoProcess.getImageURL()));
    	   			else
    	   				ipMenuItem.setImage(ThemeManager.getThemeResource("images/" + infoProcess.getImageURL()));
@@ -819,7 +871,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				boolean isMandatory = !m_lookup && infoColumn.isMandatory() && infoColumn.isQueryCriteria();
 				GridFieldVO vo = GridFieldVO.createParameter(infoContext, p_WindowNo, AEnv.getADWindowID(p_WindowNo), infoWindow.getAD_InfoWindow_ID(), 0,
 						columnName, infoColumn.getNameTrl(), infoColumn.getAD_Reference_ID(), 
-						infoColumn.getAD_Reference_Value_ID(), isMandatory, false, infoColumn.getPlaceHolderTrl());
+						infoColumn.getAD_Reference_Value_ID(), isMandatory, false, infoColumn.getPlaceHolderTrl(), infoColumn.getEntityType());
 				
 				if (infoColumn.getAD_Val_Rule_ID() > 0) {
 					vo.ValidationCode = infoColumn.getValidationCode();
@@ -1084,7 +1136,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				{
 					columnInfo = new ColumnInfo(infoColumn.getNameTrl(), colSQL, DisplayType.getClass(infoColumn.getAD_Reference_ID(), true), infoColumn.isReadOnly() || haveNotProcess);
 				}
-				columnInfo.setColDescription(infoColumn.getNameTrl());
+				columnInfo.setColDescription(infoColumn.getDescriptionTrl());
 				columnInfo.setAD_Reference_ID(infoColumn.getAD_Reference_ID());
 				columnInfo.setAD_Reference_Value_ID(infoColumn.getAD_Reference_Value_ID());
 				columnInfo.setGridField(gridFields.get(i));
@@ -1543,11 +1595,56 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 		}
 	}
 
+	/** editor configuration for readonly field editor **/
+	private final static IEditorConfiguration readOnlyEditorConfiguration = new IEditorConfiguration() {
+		@Override
+		public Boolean getReadonly() {
+			return Boolean.TRUE;
+		}
+
+		@Override
+		public Boolean getMandatory() {
+			return Boolean.FALSE;
+		}
+	};
+	
 	@Override
 	protected void prepareTable(ColumnInfo[] layout, String from, String where,
 			String orderBy) {
 		super.prepareTable(layout, from, where, orderBy);
 
+		ListitemRenderer<?> renderer = contentPanel.getItemRenderer();
+		if (renderer instanceof WListItemRenderer lir) {
+			int columns = lir.getNoColumns();
+			for(int i = 0; i < columns; i++) {
+				WTableColumn column = lir.getColumn(i);
+				if (column.getAD_Reference_ID() == DisplayType.ImageURL) {
+					column.setEditorProvider(t -> {
+						GridField gridField = layout[t.columnIndex].getGridField();
+						WImageURLEditor editor = new WImageURLEditor(gridField, true, readOnlyEditorConfiguration);
+						editor.setValue(t.value);
+						return editor;
+					});
+				} else if (column.getAD_Reference_ID() == DisplayType.Image) {
+					column.setEditorProvider(t -> {
+						GridField gridField = layout[t.columnIndex].getGridField();
+						WImageEditor editor = new WImageEditor(gridField, true, readOnlyEditorConfiguration);
+						editor.setValue(t.value);
+						Image image = editor.getComponent();
+						if (image.getContent() != null) {
+							image.setWidth(MSysConfig.getIntValue(MSysConfig.ZK_THUMBNAIL_IMAGE_WIDTH, 100, Env.getAD_Client_ID(Env.getCtx()))+"px");
+							image.setHeight(MSysConfig.getIntValue(MSysConfig.ZK_THUMBNAIL_IMAGE_HEIGHT, 100, Env.getAD_Client_ID(Env.getCtx()))+"px");
+							image.setClientAttribute("onmouseenter", "idempiere.showFullSizeImage(event)");
+							image.setClientAttribute("onmouseleave", "idempiere.hideFullSizeImage(event)");
+						}
+						if (t.value == null)
+							LayoutUtils.addSclass("no-image", editor.getComponent());
+						return editor;
+					});
+				}
+			}
+		}
+		
 		addViewIDToQuery();
 		addKeyViewToQuery();
 
@@ -1807,7 +1904,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 	protected void layoutParameterGrid(boolean update) {
 		if (!update) {
 			parameterGrid = GridFactory.newGridLayout();
-			parameterGrid.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "infoParameterPanel");
+			parameterGrid.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "infoParameterPanel");
 			parameterGrid.setStyle("width: 95%; margin: auto !important;");
 		}
 		if (parameterGrid.getColumns() != null)
@@ -2218,7 +2315,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
         // for SELECT DISTINCT, ORDER BY expressions must appear in select list - applies for lookup columns and multiselection columns
         if(dataSql.startsWith("SELECT DISTINCT") && indexOrderColumn > 0) {
         	ColumnInfo orderColumnInfo = p_layout[indexOrderColumn];
-        	if (DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID()) || DisplayType.isChosenMultipleSelection(orderColumnInfo.getAD_Reference_ID())) {
+        	if (   !Util.isEmpty(orderColumnInfo.getDisplayColumn())
+        		&& (   DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID())
+        			|| DisplayType.isChosenMultipleSelection(orderColumnInfo.getAD_Reference_ID()))) {
         		dataSql = appendOrderByToSelectList(dataSql, orderClause);
         	}
         }
@@ -2407,7 +2506,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				event.getTarget().getAttribute(ATT_INFO_PROCESS_KEY) != null){
 			
 			MProcess process = (MProcess)event.getTarget().getAttribute(ATT_INFO_PROCESS_KEY);
-			SessionManager.getAppDesktop().updateHelpTooltip(process.get_Translation(MProcess.COLUMNNAME_Name), process.get_Translation(MProcess.COLUMNNAME_Description), process.get_Translation(MProcess.COLUMNNAME_Help), null);
+			SessionManager.getAppDesktop().updateHelpTooltip(process.get_Translation(MProcess.COLUMNNAME_Name), process.get_Translation(MProcess.COLUMNNAME_Description), process.get_Translation(MProcess.COLUMNNAME_Help), null, process.getEntityType());
 		}
 		else if (event.getName().equals(Events.ON_FOCUS)) {
     		for (WEditor editor : editors)
@@ -2424,7 +2523,7 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
     		if (selectedItem != null && selectedItem.getValue() != null){
     			MProcess selectedValue = (MProcess)selectedItem.getValue();
     			
-        		SessionManager.getAppDesktop().updateHelpTooltip(selectedValue.get_Translation(MProcess.COLUMNNAME_Name), selectedValue.get_Translation(MProcess.COLUMNNAME_Description), selectedValue.get_Translation(MProcess.COLUMNNAME_Help), null);
+        		SessionManager.getAppDesktop().updateHelpTooltip(selectedValue.get_Translation(MProcess.COLUMNNAME_Name), selectedValue.get_Translation(MProcess.COLUMNNAME_Description), selectedValue.get_Translation(MProcess.COLUMNNAME_Help), null, null);
     		}
     		    		
     	}else if (event.getName().equals(Events.ON_OK) && event.getTarget() != null){ // event when push enter at parameter
@@ -2778,9 +2877,9 @@ public class InfoWindow extends InfoPanel implements ValueChangeListener, EventL
 				continue;
 			}
 			
-			isValid = isValid & validateField (wEditor);
+			isValid = isValid && validateField (wEditor);
 			if(wEditor2 != null)
-				isValid = isValid & validateField(wEditor2);
+				isValid = isValid && validateField(wEditor2);
 		}
 		
 		return isValid;

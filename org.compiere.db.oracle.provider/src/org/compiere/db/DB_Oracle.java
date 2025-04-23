@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HexFormat;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -800,6 +801,7 @@ public class DB_Oracle implements AdempiereDatabase
      *  @return data type
      *  @deprecated
      */
+    @Deprecated
     public String getDataType (String columnName, int displayType, int precision,
         boolean defaultValue)
     {
@@ -1217,5 +1219,10 @@ public class DB_Oracle implements AdempiereDatabase
 	@Override
 	public ITablePartitionService getTablePartitionService() {
 		return new TablePartitionService();
+	}
+
+	@Override
+	public String TO_Blob(byte[] blob) {
+		return "HEXTORAW('"+HexFormat.of().formatHex(blob)+"')";
 	}
 }   //  DB_Oracle

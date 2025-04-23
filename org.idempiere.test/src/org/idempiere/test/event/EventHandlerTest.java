@@ -26,6 +26,7 @@ package org.idempiere.test.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -37,6 +38,7 @@ import org.adempiere.base.Core;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.base.event.EventProperty;
 import org.adempiere.base.event.FactsEventData;
+import org.adempiere.base.event.ImportEventData;
 import org.adempiere.base.event.annotations.AfterLogin;
 import org.adempiere.base.event.annotations.EventDelegate;
 import org.adempiere.base.event.annotations.ModelEventDelegate;
@@ -232,6 +234,8 @@ public class EventHandlerTest extends AbstractTestCase {
 		pi.setAD_User_ID(getAD_User_ID());
 		pi.setRecord_ID(Patio_Chair);
 		pi.setTransactionName(getTrxName());
+		if(process.getAD_PrintFormat_ID() > 0)
+			pi.setTransientObject(process.getAD_PrintFormat());
 		
 		ServerProcessCtl.process(pi, getTrx());
 		if (pi.isError()) {
@@ -430,6 +434,8 @@ public class EventHandlerTest extends AbstractTestCase {
 		
 		@AfterImport
 		public void afterImport() {
+			ImportEventData data = getImportEventData();
+			assertNotNull(data);
 			Env.setContext(Env.getCtx(), getClass().getName(), true);
 		}
 	}

@@ -61,6 +61,7 @@ import org.compiere.apps.IProcessParameter;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.MClient;
+import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MPInstancePara;
@@ -71,6 +72,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -92,8 +94,8 @@ import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.XulElement;
 
 /**
- * Process Parameter Panel.
- * Embedded in {@link ProcessDialog} and {@link ProcessModalDialog}.
+ * Process Parameter Panel.<br/>
+ * Embedded in {@link ProcessDialog} and {@link ProcessModalDialog}.<br/>
  * Capture parameters input, validate and save to DB.
  * 
  * @author Low Heng Sin
@@ -140,7 +142,7 @@ public class ProcessParameterPanel extends Panel implements
 	} // ProcessParameterPanel
 	
 	/**
-	 * Layout UI
+	 * Layout panel
 	 */
 	private void initComponent() {
 		centerPanel = GridFactory.newGridLayout();
@@ -263,7 +265,7 @@ public class ProcessParameterPanel extends Panel implements
 					+ "p.FieldLength, p.IsMandatory, p.IsRange, p.dateRangeOption, p.ColumnName, "
 					+ "p.DefaultValue, p.DefaultValue2, p.VFormat, p.ValueMin, p.ValueMax, "
 					+ "p.SeqNo, p.AD_Reference_Value_ID, vr.Code AS ValidationCode, "
-					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern, p.MandatoryLogic, p.Placeholder, p.Placeholder2, p.isAutoComplete, "
+					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern, p.MandatoryLogic, p.Placeholder, p.Placeholder2, p.isAutoComplete, p.EntityType, "
 					+ "'' AS ValidationCodeLookup, "
 					+ "fg.Name AS FieldGroup, fg.FieldGroupType, fg.IsCollapsedByDefault, p.IsShowNegateButton "
 					+ "FROM AD_Process_Para p"
@@ -277,7 +279,7 @@ public class ProcessParameterPanel extends Panel implements
 					+ "p.FieldLength, p.IsMandatory, p.IsRange, p.dateRangeOption, p.ColumnName, "
 					+ "p.DefaultValue, p.DefaultValue2, p.VFormat, p.ValueMin, p.ValueMax, "
 					+ "p.SeqNo, p.AD_Reference_Value_ID, vr.Code AS ValidationCode, "
-					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern,p.MandatoryLogic, t.Placeholder, t.Placeholder2, p.isAutoComplete, "
+					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern,p.MandatoryLogic, t.Placeholder, t.Placeholder2, p.isAutoComplete, p.EntityType, "
 					+ "'' AS ValidationCodeLookup, "
 					+ "fgt.Name AS FieldGroup, fg.FieldGroupType, fg.IsCollapsedByDefault, p.IsShowNegateButton "
 					+ "FROM AD_Process_Para p"
@@ -403,6 +405,15 @@ public class ProcessParameterPanel extends Panel implements
 		if (hasFields) {
 			centerPanel.appendChild(rows);
 			dynamicDisplay();
+
+			if (m_processInfo.getAD_Process_ID() > 0) {
+				String className = MProcess.get(Env.getCtx(), m_processInfo.getAD_Process_ID()).getClassname();
+
+				List<IProcessParameterListener> listeners = Extensions.getProcessParameterListeners(className, null);
+				for(IProcessParameterListener listener : listeners)
+					listener.onInit(this);
+			}
+
 		} else
 			dispose();
 		return hasFields;
@@ -552,7 +563,7 @@ public class ProcessParameterPanel extends Panel implements
 	} // createField
 
 	/**
-	 * set place holder message
+	 * Set place holder message
 	 * @param editor
 	 * @param msg
 	 */
@@ -706,7 +717,7 @@ public class ProcessParameterPanel extends Panel implements
 	}
 
 	/** 
-	 * load parameters from saved instance
+	 * Load parameters from saved instance
 	 * @param instance
 	 */
 	public boolean loadParameters(MPInstance instance)
@@ -1045,6 +1056,7 @@ public class ProcessParameterPanel extends Panel implements
 	 * 
 	 * @param evt ValueChangeEvent
 	 */
+	@Override
 	public void valueChange(ValueChangeEvent evt) {
 		String propName = evt.getPropertyName();
 		if (evt.getSource() instanceof WEditor) {
@@ -1333,7 +1345,15 @@ public class ProcessParameterPanel extends Panel implements
 	}
 	
 	/**
-	 * focus to first visible field editor.
+	 * Get process info 
+	 * @return process info
+	 */
+	public ProcessInfo getProcessInfo() {
+		return m_processInfo;
+	}
+	
+	/**
+	 * Focus to first visible field editor.
 	 * @return true if there is at least one visible field editor.
 	 */
 	public boolean focusToFirstEditor() {
@@ -1392,7 +1412,8 @@ public class ProcessParameterPanel extends Panel implements
 	}
 	
 	/**
-	 * @return true if editor is showing dialog awaiting user action (usually info window).
+	 * Is WSearchEditor showing dialog that is awaiting user action
+	 * @return true if WSearchEditor is showing dialog that is awaiting user action (usually info window).
 	 */
 	public boolean isWaitingForDialog() {
 		for (int i = 0; i < m_mFields.size(); i++) {
@@ -1440,44 +1461,71 @@ public class ProcessParameterPanel extends Panel implements
 
 	@Override
 	public String get_ValueAsString(String variableName) {
-		for(WEditor editor : m_wEditors) {
-			if (editor.getGridField().getColumnName().equals(variableName)) {
-				//base on code in GridField.updateContext() method
-				int displayType = editor.getGridField().getVO().displayType;	
-				if (displayType == DisplayType.Text 
-					|| displayType == DisplayType.Memo
-					|| displayType == DisplayType.TextLong
-					|| displayType == DisplayType.JSON
-					|| displayType == DisplayType.Binary
-					|| displayType == DisplayType.RowID
-					|| editor.getGridField().isEncrypted())
-					return ""; //	ignore
-				
-				Object value = editor.getValue();
-				if (value == null)
-					return "";
-				else if (value instanceof Boolean)
-				{
-					return (((Boolean)value) ? "Y" : "N");
-				}
-				else if (value instanceof Timestamp)
-				{
-					String stringValue = null;
-					if (value != null && !value.toString().equals("")) {
-						Calendar c1 = Calendar.getInstance();
-						c1.setTime((Date) value);
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						stringValue = sdf.format(c1.getTime());
-					}
-					return stringValue;
-				}
-				else
-				{
-					return value.toString();
-				}
-			}
-		}
-		return null;
+		DefaultEvaluatee evaluatee = new DefaultEvaluatee(new FieldEditorDataProvider());
+		return evaluatee.get_ValueAsString(variableName);				
 	}
 
+	/**
+	 * Data provider implementation backed by parameter field editors
+	 */
+	private class FieldEditorDataProvider implements DefaultEvaluatee.DataProvider {
+
+		@Override
+		public Object getValue(String columnName) {
+			for(WEditor editor : m_wEditors) {
+				if (editor.getGridField().getColumnName().equals(columnName)) {
+					//base on code in GridField.updateContext() method
+					int displayType = editor.getGridField().getVO().displayType;	
+					if (displayType == DisplayType.Text 
+						|| displayType == DisplayType.Memo
+						|| displayType == DisplayType.TextLong
+						|| displayType == DisplayType.JSON
+						|| displayType == DisplayType.Binary
+						|| displayType == DisplayType.RowID
+						|| editor.getGridField().isEncrypted())
+						return ""; //	ignore
+					
+					Object value = editor.getValue();
+					if (value == null)
+						return "";
+					else if (value instanceof Boolean)
+					{
+						return (((Boolean)value) ? "Y" : "N");
+					}
+					else if (value instanceof Timestamp)
+					{
+						String stringValue = null;
+						if (value != null && !value.toString().equals("")) {
+							Calendar c1 = Calendar.getInstance();
+							c1.setTime((Date) value);
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							stringValue = sdf.format(c1.getTime());
+						}
+						return stringValue;
+					}
+					else
+					{
+						return value.toString();
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Object getProperty(String propertyName) {
+			return null;
+		}
+
+		@Override
+		public MColumn getColumn(String columnName) {
+			return null;
+		}
+
+		@Override
+		public String getTrxName() {
+			return null;
+		}
+		
+	}
 } // ProcessParameterPanel

@@ -29,7 +29,7 @@ import java.sql.Timestamp;
 public class ProcessInfoLog implements Serializable
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 2790364724540395200L;
 
@@ -37,7 +37,7 @@ public class ProcessInfoLog implements Serializable
 	 * 	Create Process Info Log.
 	 *  @param AD_PInstance_Log_UU Log UU
 	 *	@param Log_ID Log ID
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -64,7 +64,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *	@param Log_ID Log ID
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -78,7 +78,7 @@ public class ProcessInfoLog implements Serializable
 	
 	/**
 	 * 	Create Process Info Log.
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -94,7 +94,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *  @param AD_PInstance_Log_UU Log UU
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -108,7 +108,7 @@ public class ProcessInfoLog implements Serializable
 
 	/**
 	 * 	Create Process Info Log.
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -122,7 +122,7 @@ public class ProcessInfoLog implements Serializable
 
 	/**
 	 * 	Create Process Info Log.
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -135,7 +135,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *	@param Log_ID Log ID
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -148,7 +148,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *	@param AD_PInstance_Log_UU Log UU
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -162,7 +162,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *	@param AD_PInstance_Log_UU Log UU
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -175,7 +175,7 @@ public class ProcessInfoLog implements Serializable
 	/**
 	 * 	Create Process Info Log.
 	 *	@param Log_ID Log ID
-	 *	@param P_ID Process ID
+	 *	@param P_ID ID parameter, usually same as record id
 	 *	@param P_Date Process Date
 	 *	@param P_Number Process Number
 	 *	@param P_Msg Process Message
@@ -199,14 +199,26 @@ public class ProcessInfoLog implements Serializable
 	private String 		m_PInstanceLogType;
 	private String		m_AD_PInstance_Log_UU;
 
+	/**
+	 * Get AD_Table_ID
+	 * @return AD_Table_ID
+	 */
 	public int getAD_Table_ID() {
 		return m_AD_Table_ID;
 	}
 
+	/**
+	 * Set AD_Table_ID
+	 * @param tableId AD_Table_ID
+	 */
 	public void setAD_Table_ID(int tableId) {
 		this.m_AD_Table_ID = tableId;
 	}
 
+	/**
+	 * Get record id
+	 * @return record id
+	 */
 	public int getRecord_ID() {
 		return m_Record_ID;
 	}
@@ -232,16 +244,16 @@ public class ProcessInfoLog implements Serializable
 	}
 
 	/**
-	 * Method getP_ID
-	 * @return int
+	 * Get P_ID
+	 * @return id value
 	 */
 	public int getP_ID()
 	{
 		return m_P_ID;
 	}
 	/**
-	 * Method setP_ID
-	 * @param P_ID int
+	 * Set P_ID
+	 * @param P_ID
 	 */
 	public void setP_ID (int P_ID)
 	{
@@ -249,7 +261,7 @@ public class ProcessInfoLog implements Serializable
 	}
 
 	/**
-	 * Method getP_Date
+	 * Get P_Date
 	 * @return Timestamp
 	 */
 	public Timestamp getP_Date()
@@ -257,7 +269,7 @@ public class ProcessInfoLog implements Serializable
 		return m_P_Date;
 	}
 	/**
-	 * Method setP_Date
+	 * Set P_Date
 	 * @param P_Date Timestamp
 	 */
 	public void setP_Date (Timestamp P_Date)
@@ -266,7 +278,7 @@ public class ProcessInfoLog implements Serializable
 	}
 
 	/**
-	 * Method getP_Number
+	 * Get P_Number
 	 * @return BigDecimal
 	 */
 	public BigDecimal getP_Number()
@@ -283,16 +295,16 @@ public class ProcessInfoLog implements Serializable
 	}
 
 	/**
-	 * Method getP_Msg
-	 * @return String
+	 * Get P_Msg
+	 * @return Message
 	 */
 	public String getP_Msg()
 	{
 		return m_P_Msg;
 	}
 	/**
-	 * Method setP_Msg
-	 * @param P_Msg String
+	 * Set P_Msg
+	 * @param P_Msg
 	 */
 	public void setP_Msg (String P_Msg)
 	{

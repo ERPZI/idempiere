@@ -11,8 +11,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,    *
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
  *****************************************************************************/
-
-
 package org.adempiere.webui.panel.action;
 
 import java.io.ByteArrayOutputStream;
@@ -363,6 +361,7 @@ public class ReportAction implements EventListener<Event>
 			pi.setRecord_IDs(jasperRecordIDs);
 			pi.setRecord_UUs(jasperRecordUUs);
 			//pi.setIsBatch(true);
+			pi.setTransientObject(pf);
 			
 			if (export)
 			{

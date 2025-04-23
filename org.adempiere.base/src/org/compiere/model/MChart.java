@@ -40,6 +40,9 @@ import org.jfree.data.xy.XYDataset;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+/**
+ * Extended model class for AD_Chart
+ */
 public class MChart extends X_AD_Chart {
 	/**
 	 * generated serial id

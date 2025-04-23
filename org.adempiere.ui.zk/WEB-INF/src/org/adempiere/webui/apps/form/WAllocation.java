@@ -356,7 +356,7 @@ public class WAllocation extends Allocation
 		row.appendCellChild(organizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
-		organizationPick.showMenu();	
+		organizationPick.showMenu();		
 		//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr for Allocation Selection
 		row.appendCellChild(prctrLabel.rightAlign());
 		ZKUpdateUtil.setHflex(prctrSearch.getComponent(), "true");
@@ -601,7 +601,7 @@ public class WAllocation extends Allocation
 	}
 
 	/**
-	 *  Table Model Listener for {@link #paymentTable} and {@link #invoiceTable}
+	 *  Table Model Listener for {@link #paymentTable} and {@link #invoiceTable}<br/>
 	 *  - Recalculate Totals
 	 *  @param e event
 	 */

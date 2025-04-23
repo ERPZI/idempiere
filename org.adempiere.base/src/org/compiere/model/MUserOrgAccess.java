@@ -24,7 +24,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
-
 /**
  *	User Org Access
  *	
@@ -38,7 +37,6 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	 */
 	private static final long serialVersionUID = -6016959957385716517L;
 
-
 	/**
 	 * 	Get Organizational Access of User
 	 *	@param ctx context
@@ -51,7 +49,7 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	}	//	getOfUser
 
 	/**
-	 * 	Get Organizational Info
+	 * 	Get Organizational Access of User
 	 *	@param ctx context
 	 *	@param where SQL where clause
 	 *	@param id user id
@@ -71,9 +69,8 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	/**	Static Logger	*/
 	@SuppressWarnings("unused")
 	private static CLogger	s_log	= CLogger.getCLogger (MUserOrgAccess.class);
-
 	
-	/**************************************************************************
+	/**
 	 * 	Load Constructor
 	 *	@param ctx context
 	 *	@param rs result set
@@ -85,11 +82,11 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	}	//	MUserOrgAccess
 
     /**
-    * UUID based Constructor
-    * @param ctx  Context
-    * @param AD_User_OrgAccess_UU  UUID key
-    * @param trxName Transaction
-    */
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_User_OrgAccess_UU  UUID key
+     * @param trxName Transaction
+     */
     public MUserOrgAccess(Properties ctx, String AD_User_OrgAccess_UU, String trxName) {
         super(ctx, AD_User_OrgAccess_UU, trxName);
 		if (Util.isEmpty(AD_User_OrgAccess_UU))
@@ -97,7 +94,7 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
     }
 
 	/**
-	 * 	Persistency Constructor
+	 * 	New Record Constructor
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -133,6 +130,7 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("MUserOrgAccess[");
@@ -143,9 +141,8 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 		sb.append("]");
 		return sb.toString();
 	}	//	toString
-
 	
-	/**************************************************************************
+	/**
 	 * 	Extended String Representation
 	 * 	@param ctx context
 	 *	@return extended info
@@ -162,8 +159,8 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	private String	m_orgName;
 	
 	/**
-	 * 	Get Client Name
-	 *	@return name
+	 * 	Get Tenant Name
+	 *	@return tenant name
 	 */
 	public String getClientName()
 	{
@@ -178,8 +175,8 @@ public class MUserOrgAccess extends X_AD_User_OrgAccess
 	}	//	getClientName
 	
 	/**
-	 * 	Get Client Name
-	 *	@return name
+	 * 	Get Organization Name
+	 *	@return organization name
 	 */
 	public String getOrgName()
 	{

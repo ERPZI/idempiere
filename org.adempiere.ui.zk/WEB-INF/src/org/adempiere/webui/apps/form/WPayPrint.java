@@ -165,7 +165,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	protected Label lSumPayments = new Label();
 	/** Sum of C_PaySelectionCheck.PayAmt */
 	protected WNumberEditor fSumPayments = new WNumberEditor();
-
 	
 	/**
 	 *  Layout {@link #form}
@@ -287,7 +286,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		paySelectSearch.setValue(Integer.valueOf(m_C_PaySelection_ID));
 		loadPaySelectInfo();
 	}	//	setsetPaySelection
-
 
 	/**
 	 * Event Listener
@@ -715,7 +713,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			}
 		});
 	}   //  cmd_print
-
 
 	/**
 	 *  Get Checks
