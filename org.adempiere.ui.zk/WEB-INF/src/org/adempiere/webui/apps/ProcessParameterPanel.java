@@ -1339,11 +1339,6 @@ public class ProcessParameterPanel extends Panel implements
 		m_processInfo = processInfo;
 	}
 	
-	
-	public ProcessInfo getProcessInfo() {
-		return m_processInfo;
-	}
-	
 	/**
 	 * Get process info 
 	 * @return process info
@@ -1461,7 +1456,7 @@ public class ProcessParameterPanel extends Panel implements
 
 	@Override
 	public String get_ValueAsString(String variableName) {
-		DefaultEvaluatee evaluatee = new DefaultEvaluatee(new FieldEditorDataProvider());
+		DefaultEvaluatee evaluatee = new DefaultEvaluatee(new FieldEditorDataProvider(), m_WindowNo, m_TabNo);
 		return evaluatee.get_ValueAsString(variableName);				
 	}
 
