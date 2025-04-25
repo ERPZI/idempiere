@@ -23,29 +23,35 @@ INSERT INTO AD_ViewColumn (AD_Client_ID,AD_Org_ID,AD_ViewColumn_ID,AD_ViewColumn
 CREATE OR REPLACE VIEW RV_Storage_Per_Product(AD_Client_ID, AD_Org_ID, M_Product_ID, Value, Name, Description, UPC, SKU, C_UOM_ID, M_Product_Category_ID, Classification, Weight, Volume, VersionNo, GuaranteeDays, GuaranteeDaysMin, SumQtyOnHand, SumQtyAvailable, SumQtyOrdered, SumQtyReserved) AS SELECT strg.ad_client_id AS AD_Client_ID, strg.ad_org_id AS AD_Org_ID, p.m_product_id AS M_Product_ID, p.value AS Value, p.name AS Name, p.description AS Description, p.upc AS UPC, p.sku AS SKU, p.c_uom_id AS C_UOM_ID, p.m_product_category_id AS M_Product_Category_ID, p.classification AS Classification, p.weight AS Weight, p.volume AS Volume, p.versionno AS VersionNo, p.guaranteedays AS GuaranteeDays, p.guaranteedaysmin AS GuaranteeDaysMin, strg.sumqtyonhand AS SumQtyOnHand, strg.sumqtyavailable AS SumQtyAvailable, strg.sumqtyordered AS SumQtyOrdered, strg.sumqtyreserved AS SumQtyReserved FROM m_product p JOIN ( SELECT rv_storage.m_product_id, rv_storage.m_locator_id, sum(rv_storage.qtyonhand) AS sumqtyonhand, sum(rv_storage.qtyavailable) AS sumqtyavailable, sum(rv_storage.qtyordered) AS sumqtyordered, sum(rv_storage.qtyreserved) AS sumqtyreserved, rv_storage.ad_client_id, rv_storage.ad_org_id FROM rv_storage GROUP BY rv_storage.m_product_id, rv_storage.m_locator_id, rv_storage.ad_client_id, rv_storage.ad_org_id) strg ON p.m_product_id = strg.m_product_id JOIN m_locator l ON strg.m_locator_id = l.m_locator_id
 ;
 
+-- MPo, 25/4/2025 Element already exists as 1000433
 -- Jan 9, 2025, 1:15:06 PM CET
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203983,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyavailable','sumqtyavailable','sumqtyavailable','D','ffd77962-19f6-474c-afd3-96e1debe1df5')
-;
+--INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203983,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyavailable','sumqtyavailable','sumqtyavailable','D','ffd77962-19f6-474c-afd3-96e1debe1df5')
+--;
 
+-- MPo, 25/4/2025 Column already exists as 1000433
 -- Jan 9, 2025, 1:15:06 PM CET
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (217026,0.0,'sumqtyavailable',53247,'sumqtyavailable',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,203983,'N','N','D','N','75d564b7-673f-4c40-9c66-06f6edbde2b7','N')
-;
+--INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (1000433,0.0,'sumqtyavailable',53247,'sumqtyavailable',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,203983,'N','N','D','N','75d564b7-673f-4c40-9c66-06f6edbde2b7','N')
+--;
 
+-- MPo, 25/4/2025 Element already exists as 1000434
 -- Jan 9, 2025, 1:15:07 PM CET
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203984,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyordered','sumqtyordered','sumqtyordered','D','699e13b2-d9dc-4de5-bdce-13003606db49')
-;
+--INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203984,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyordered','sumqtyordered','sumqtyordered','D','699e13b2-d9dc-4de5-bdce-13003606db49')
+--;
 
+-- MPo, 25/4/2025 Column already exists as 1000434
 -- Jan 9, 2025, 1:15:07 PM CET
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (217027,0.0,'sumqtyordered',53247,'sumqtyordered',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,203984,'N','N','D','N','cdaed881-1e7a-43f9-868a-d13b094d0380','N')
-;
+--INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (1000434,0.0,'sumqtyordered',53247,'sumqtyordered',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:06','YYYY-MM-DD HH24:MI:SS'),100,203984,'N','N','D','N','cdaed881-1e7a-43f9-868a-d13b094d0380','N')
+--;
 
+-- MPo, 25/4/2025 Element already exists as 1000432
 -- Jan 9, 2025, 1:15:07 PM CET
-INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203985,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyreserved','sumqtyreserved','sumqtyreserved','D','f705bc1b-cd16-4559-9306-d4bbc2f5ee50')
-;
+--INSERT INTO AD_Element (AD_Element_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,ColumnName,Name,PrintName,EntityType,AD_Element_UU) VALUES (203985,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,'sumqtyreserved','sumqtyreserved','sumqtyreserved','D','f705bc1b-cd16-4559-9306-d4bbc2f5ee50')
+--;
 
+-- MPo, 25/4/2025 Column already exists as 1000432
 -- Jan 9, 2025, 1:15:08 PM CET
-INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (217028,0.0,'sumqtyreserved',53247,'sumqtyreserved',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,203985,'N','N','D','N','7c195147-abaf-414b-97a2-3de5828c665b','N')
-;
+--INSERT INTO AD_Column (AD_Column_ID,Version,Name,AD_Table_ID,ColumnName,FieldLength,IsKey,IsParent,IsMandatory,IsTranslated,IsIdentifier,IsEncrypted,AD_Reference_ID,AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,AD_Element_ID,IsUpdateable,IsSelectionColumn,EntityType,IsAlwaysUpdateable,AD_Column_UU,IsToolbarButton) VALUES (1000432,'sumqtyreserved',53247,'sumqtyreserved',14,'N','N','N','N','N','N',29,0,0,'Y',TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,TO_TIMESTAMP('2025-01-09 13:15:07','YYYY-MM-DD HH24:MI:SS'),100,203985,'N','N','D','N','7c195147-abaf-414b-97a2-3de5828c665b','N')
+--;
 
 -- Jan 9, 2025, 1:16:40 PM CET
 UPDATE AD_Element SET ColumnName='SumQtyAvailable', Name='Sum Qty Available', Description='Summary of products available in all locators', PrintName='Sum Qty Available',Updated=TO_TIMESTAMP('2025-01-09 13:16:40','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Element_ID=203983

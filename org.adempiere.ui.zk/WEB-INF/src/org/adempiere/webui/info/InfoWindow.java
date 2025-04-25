@@ -34,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import org.adempiere.base.LookupFactoryHelper;
