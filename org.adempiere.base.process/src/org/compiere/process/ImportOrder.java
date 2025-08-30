@@ -826,6 +826,13 @@ public class ImportOrder extends SvrProcess
 					if (imp.getC_OrderSource() != null)
 						order.setC_OrderSource_ID(imp.getC_OrderSource_ID());
 					//
+					//MPo, 25/8/25
+					if (imp.getFreightAmt() != null) {
+						order.setFreightCostRule("F"); // Fix Price
+						order.setDeliveryViaRule("S"); // Shipper
+						order.setFreightAmt(imp.getFreightAmt());
+						
+					}
 					order.saveEx();
 					noInsert++;
 					lineNo = 10;
