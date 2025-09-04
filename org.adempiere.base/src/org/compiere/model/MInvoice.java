@@ -538,6 +538,11 @@ public class MInvoice extends X_C_Invoice implements DocAction, IDocsPostProcess
 		setC_BPartner_ID(order.getBill_BPartner_ID());
 		setC_BPartner_Location_ID(order.getBill_Location_ID());
 		setAD_User_ID(order.getBill_User_ID());
+		//MPo, 4/9/25
+		//Set branch for invoices created from SO sub-type On Credit Order 
+		if (getZI_Branch_ID() == 0) 
+			setZI_Branch_ID(order.getZI_Branch_ID());
+		//
 	}	//	MInvoice
 
 	/**
