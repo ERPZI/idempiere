@@ -1308,6 +1308,8 @@ public class MCostDetail extends X_M_CostDetail
 			sb.append (",M_InventoryLine_ID=").append (getM_InventoryLine_ID());
 		if (getM_ProductionLine_ID() != 0)
 			sb.append (",M_ProductionLine_ID=").append (getM_ProductionLine_ID());
+		if (getM_MatchInv_ID() != 0)
+			sb.append (",M_MatchInv_ID=").append (getM_MatchInv_ID());
 		sb.append(",Amt=").append(getAmt())
 			.append(",Qty=").append(getQty());
 		if (isDelta())
@@ -1432,9 +1434,28 @@ public class MCostDetail extends X_M_CostDetail
 		}
 
 		MCost cost = MCost.get(product, M_ASI_ID, as, Org_ID, ce.getM_CostElement_ID(), get_TrxName());
-		
+		MCostDetail cd = null;
+		boolean isOrderLandedCost = getC_OrderLine_ID() > 0 && getM_CostElement_ID() > 0;
+		boolean isReversedOrderLandedCost = isOrderLandedCost 
+				&& isDelta() && getDeltaQty().signum() == -1 && getDeltaAmt().signum() == -1
+				&& (ce.isAveragePO() || ce.isAverageInvoice());
+		if (isOrderLandedCost && !isReversedOrderLandedCost) {	
+			// order landed cost, get the cost info from previous order or order landed cost
+			StringBuilder whereClause = new StringBuilder();
+			whereClause.append("C_OrderLine_ID = ? ");
+			whereClause.append(" AND TRUNC(DateAcct) = "+DB.TO_DATE(getDateAcct(), true));
+			whereClause.append(" AND M_AttributeSetInstance_ID = ?");
+			whereClause.append(" AND C_AcctSchema_ID = ?");
+			whereClause.append(" AND M_CostDetail_ID < ?");
+			cd = new Query(as.getCtx(), I_M_CostDetail.Table_Name, whereClause.toString(), get_TrxName())
+					.setParameters(getC_OrderLine_ID(), M_ASI_ID, as.get_ID(), this.get_ID())
+					.setOrderBy("M_CostDetail_ID DESC")
+					.first();
+			
+		}
 		ICostInfo costInfo = MCost.getCostInfo(product.getCtx(), product.getAD_Client_ID(), Org_ID, product.getM_Product_ID(), 
-				as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(), M_ASI_ID, getDateAcct(), this, get_TrxName());
+					as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(), M_ASI_ID, getDateAcct(), 
+					cd != null ? cd : this, get_TrxName());
 		if (costInfo != null)
 		{
 			cost.setCurrentQty(costInfo.getCurrentQty());
@@ -1454,8 +1475,18 @@ public class MCostDetail extends X_M_CostDetail
 		BigDecimal amt = Env.ZERO;
 		if (isDelta())
 		{
-			qty = getDeltaQty();
-			amt = getDeltaAmt();
+			if (!isOrderLandedCost) {
+				qty = getDeltaQty();
+				amt = getDeltaAmt();
+			} else {
+				if (isReversedOrderLandedCost) {
+					qty = getDeltaQty();
+					amt = getDeltaAmt();
+				} else {
+					qty = getQty();
+					amt = getAmt();
+				}
+			}
 		}
 		else
 		{
@@ -1466,7 +1497,7 @@ public class MCostDetail extends X_M_CostDetail
 
 		//determine whether this is cost only adjustment entry
 		boolean costAdjustment = false;
-		if (this.getM_CostElement_ID() > 0 && this.getM_CostElement_ID() != ce.getM_CostElement_ID())
+		if (this.getM_CostElement_ID() > 0 && this.getM_CostElement_ID() != ce.getM_CostElement_ID() && !isReversedOrderLandedCost)
 		{
 			MCostElement thisCostElement = MCostElement.get(getCtx(), getM_CostElement_ID());
 			if (thisCostElement.getCostingMethod() == null && ce.getCostingMethod() != null)
@@ -1488,7 +1519,8 @@ public class MCostDetail extends X_M_CostDetail
 			
 			if (ce.isAveragePO())
 			{
-				cost.setWeightedAverage(amt, qty);
+				if (!(qty.signum() == 0 && cost.getCurrentQty().signum() <= 0))
+					cost.setWeightedAverage(amt, qty);
 				if (log.isLoggable(Level.FINER)) log.finer("PO - AveragePO - " + cost);
 			}
 			else if (ce.isLastPOPrice() && !costAdjustment)
@@ -1548,8 +1580,7 @@ public class MCostDetail extends X_M_CostDetail
 			{
 				cost.setWeightedAverage(amt, qty);
 			}
-			else if (ce.isFifo()
-				|| ce.isLifo())
+			else if ((ce.isFifo() || ce.isLifo()))
 			{
 				//	Real ASI - costing level Org
 				MCostQueue cq = MCostQueue.get(product, getM_AttributeSetInstance_ID(), 
@@ -1791,7 +1822,8 @@ public class MCostDetail extends X_M_CostDetail
 		{
 			if (ce.isAveragePO())
 			{
-				cost.setWeightedAverage(amt, qty);
+				if (!(qty.signum() == 0 && cost.getCurrentQty().signum() <= 0))
+					cost.setWeightedAverage(amt, qty);
 			}			
 		}
 		else	//	unknown or no id
@@ -1840,6 +1872,15 @@ public class MCostDetail extends X_M_CostDetail
 		List<String> repostedRecordIds = new ArrayList<String>();
 		
 		StringBuilder selectSql = new StringBuilder();
+		selectSql.append("WITH base_cd AS (");
+		selectSql.append(" SELECT cd.DateAcct, ");
+		selectSql.append(" CASE WHEN COALESCE(refcd.DateAcct,cd.DateAcct) = cd.DateAcct ");
+		selectSql.append(" THEN COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) ELSE cd.M_CostDetail_ID END AS Ref_CostDetail_ID, ");
+		selectSql.append(" cd.M_CostDetail_ID ");
+		selectSql.append(" FROM M_CostDetail cd ");
+		selectSql.append(" LEFT JOIN M_CostDetail refcd ON (refcd.M_CostDetail_ID=cd.Ref_CostDetail_ID) ");
+		selectSql.append(" WHERE cd.M_CostDetail_ID=? ");
+		selectSql.append(") ");
 		selectSql.append("SELECT mpo.M_MatchPO_ID, il.C_Invoice_ID, iol.M_InOut_ID, mi.M_MatchInv_ID, invl.M_Inventory_ID, ");
 		selectSql.append("ml.M_Movement_ID, pl.M_Production_ID, pi.C_ProjectIssue_ID ");
 		selectSql.append("FROM M_CostDetail cd ");
@@ -1855,14 +1896,16 @@ public class MCostDetail extends X_M_CostDetail
 		selectSql.append("WHERE cd.AD_Client_ID=? ");
 		selectSql.append("AND cd.C_AcctSchema_ID=? ");
 		selectSql.append("AND cd.M_Product_ID=? ");
-		selectSql.append("AND (cd.DateAcct, COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID), cd.M_CostDetail_ID) > ("); 
-		selectSql.append(" SELECT cd.DateAcct, ");
-		selectSql.append(" CASE WHEN COALESCE(refcd.DateAcct,cd.DateAcct) = cd.DateAcct ");
-		selectSql.append(" THEN COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) ELSE cd.M_CostDetail_ID END, ");
-		selectSql.append(" cd.M_CostDetail_ID ");
-		selectSql.append(" FROM M_CostDetail cd ");
-		selectSql.append(" LEFT JOIN M_CostDetail refcd ON (refcd.M_CostDetail_ID=cd.Ref_CostDetail_ID) ");
-		selectSql.append(" WHERE cd.M_CostDetail_ID=? ");
+		selectSql.append("AND (cd.DateAcct > (SELECT DateAcct FROM base_cd)");
+		selectSql.append(" OR (");
+		selectSql.append("   cd.DateAcct = (SELECT DateAcct FROM base_cd) ");
+		selectSql.append("   AND COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) > (SELECT Ref_CostDetail_ID FROM base_cd) ");
+		selectSql.append(" ) ");
+		selectSql.append(" OR (");
+		selectSql.append("   cd.DateAcct = (SELECT DateAcct FROM base_cd) ");
+		selectSql.append("   AND COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) = (SELECT Ref_CostDetail_ID FROM base_cd) ");
+		selectSql.append("   AND cd.M_CostDetail_ID > (SELECT M_CostDetail_ID FROM base_cd) ");
+		selectSql.append(" ) ");
 		selectSql.append(") ");
 		selectSql.append("AND cd.DateAcct >= ? "); 
 		selectSql.append("AND cd.Processed='Y' ");
@@ -1876,7 +1919,7 @@ public class MCostDetail extends X_M_CostDetail
     	try
     	{
     		pstmt = DB.prepareStatement(selectSql.toString(), trxName);
-    		DB.setParameters(pstmt, new Object[] {AD_Client_ID, C_AcctSchema_ID, M_Product_ID, M_CostDetail_ID, DateAcct});
+    		DB.setParameters(pstmt, new Object[] {M_CostDetail_ID, AD_Client_ID, C_AcctSchema_ID, M_Product_ID, DateAcct});
     		rs = pstmt.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
     		while (rs.next()) {
@@ -1938,6 +1981,8 @@ public class MCostDetail extends X_M_CostDetail
 				if (tableID == MInvoice.Table_ID) {
 					MMatchInv[] miList = MMatchInv.getInvoice(Env.getCtx(), recordID, trxName);
 					for (MMatchInv mi : miList) {
+						if (mi.getDateAcct().compareTo(DateAcct) < 0)
+							continue;
 						repostedRecordId = MMatchInv.Table_ID + "_" + mi.get_ID();
 						if (repostedRecordIds.contains(repostedRecordId))
 							continue;
