@@ -1096,7 +1096,10 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 	 * @return true if info window should auto hide empty columns
 	 */
 	protected boolean isAutoHideEmptyColumns() {
-		return MSysConfig.getBooleanValue(MSysConfig.ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx()));
+		if (ClientInfo.isMobile())
+			return MSysConfig.getBooleanValue(MSysConfig.ZK_INFO_MOBILE_AUTO_HIDE_EMPTY_COLUMNS, true, Env.getAD_Client_ID(Env.getCtx()));
+		else
+			return MSysConfig.getBooleanValue(MSysConfig.ZK_INFO_AUTO_HIDE_EMPTY_COLUMNS, false, Env.getAD_Client_ID(Env.getCtx()));
 	}
 
 	/**
@@ -1423,7 +1426,9 @@ public abstract class InfoPanel extends Window implements EventListener<Event>, 
 		String colsql = !Util.isEmpty(displayColumn) ? displayColumn : p_layout[col].getColSQL().trim();
 		
 		colsql = getSelectForOrderBy(colsql);
-		if(!Util.isEmpty(displayColumn) && (DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID()) || DisplayType.isChosenMultipleSelection(orderColumnInfo.getAD_Reference_ID()))) {
+		if (   !Util.isEmpty(displayColumn)
+			&& (   (DisplayType.isID(orderColumnInfo.getAD_Reference_ID()) && orderColumnInfo.getAD_Reference_ID() != DisplayType.ID)
+			    || DisplayType.isLookup(orderColumnInfo.getAD_Reference_ID()))) {
 			String from = getFromForOrderBy(orderColumnInfo, displayColumn);
 			String where = getWhereForOrderBy(orderColumnInfo);
 			

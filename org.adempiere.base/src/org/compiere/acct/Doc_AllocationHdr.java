@@ -1010,6 +1010,7 @@ public class Doc_AllocationHdr extends Doc
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
 				//
+				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
 					invGainLossFactLines.add(fl);
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
@@ -1033,6 +1034,7 @@ public class Doc_AllocationHdr extends Doc
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
 				//
+				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
 					invGainLossFactLines.add(fl);
 			}
@@ -1053,6 +1055,7 @@ public class Doc_AllocationHdr extends Doc
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
 				//
+				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
 					invGainLossFactLines.add(fl);
 			}
@@ -1063,6 +1066,7 @@ public class Doc_AllocationHdr extends Doc
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
 				//
+				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
 					invGainLossFactLines.add(fl);
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
