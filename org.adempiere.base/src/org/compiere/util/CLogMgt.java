@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Filter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -44,9 +44,8 @@ import org.compiere.model.MClient;
 import org.idempiere.distributed.IClusterMember;
 import org.idempiere.distributed.IClusterService;
 
-
 /**
- *	idempiere Log Management.
+ *	Contain static methods for iDempiere Log Management.
  *
  *  @author Jorg Janke
  *  @version $Id: CLogMgt.java,v 1.4 2006/07/30 00:54:36 jjanke Exp $
@@ -57,7 +56,8 @@ public class CLogMgt
 	private static final CLogErrorBuffer ERROR_BUFFER_HANDLER = new CLogErrorBuffer();
 	private static CLogFile fileHandler;
 	
-	private static final Map<String, Level> levelMap = new HashMap<String, Level>();
+	private static final Map<String, Level> levelMap = new ConcurrentHashMap<String, Level>();
+	private static final Map<String, Logger> loggerMap = new ConcurrentHashMap<String, Logger>();
 	
 	private final static Runnable configurationListener = new Runnable() {
 		@Override
@@ -66,9 +66,13 @@ public class CLogMgt
 		}
 	};
 	
-	private static synchronized void reInit() {
+	/**
+	 * Re-initialize after log configuration change. 
+	 */
+	public static synchronized void reInit() {
 		CLogMgt.initialize(Ini.isClient());
 		if (!levelMap.isEmpty()) {
+			loggerMap.clear();
 			for(String key : levelMap.keySet()) {
 				setLevel(key, levelMap.get(key));
 			}
@@ -79,8 +83,17 @@ public class CLogMgt
 	}
 	
 	/**
+	 * Get from level map loaded from idempiere.properties
+	 * @param name class or package name
+	 * @return Level or null
+	 */
+	public static Level getFromLevelMap(String name) {
+		return levelMap.get(name);
+	}
+	
+	/**
 	 * 	Initialize Logging
-	 * 	@param isClient client
+	 * 	@param isClient true if running as client
 	 */
 	public static synchronized void initialize(boolean isClient)
 	{
@@ -107,32 +120,11 @@ public class CLogMgt
 		{
 			Logger rootLogger = getRootLogger();
 			
-		//	System.out.println(rootLogger.getName() + " (" + rootLogger + ")");
 			Handler[] handlers = rootLogger.getHandlers();
 			for (int i = 0; i < handlers.length; i ++)
 			{
 				handlerNames.add(handlers[i].getClass().getName());
 			}
-			/**
-			Enumeration en = mgr.getLoggerNames();
-			while (en.hasMoreElements())
-			{
-				Logger lll = Logger.getLogger(en.nextElement().toString());
-				System.out.println(lll.getName() + " (" + lll + ")");
-			//	System.out.println("- level=" + lll.getLevel());
-			//	System.out.println("- parent=" + lll.getParent() + " - UseParentHandlers=" + lll.getUseParentHandlers());
-			//	System.out.println("- filter=" + lll.getFilter());
-				handlers = lll.getHandlers();
-			//	System.out.println("- handlers=" + handlers.length);
-				for (int i = 0; i < handlers.length; i ++)
-				{
-					System.out.println("  > " + handlers[i]);
-					if (!s_handlers.contains(handlers[i]))
-						s_handlers.add(handlers[i]);
-				}
-				//	System.out.println();
-			}
-			/** **/
 		}
 		catch (Exception e)
 		{
@@ -189,8 +181,21 @@ public class CLogMgt
 	
 		mgr.removeConfigurationListener(configurationListener);
 		mgr.addConfigurationListener(configurationListener);
+		
+		//Set handler level to ALL. This let decision of level stop at the logger layer.
+		//This avoid complication with using parent handler where child logger level < root logger level.
+		try
+		{
+			Logger rootLogger = getRootLogger();
+			
+			Handler[] handlers = rootLogger.getHandlers();
+			for (int i = 0; i < handlers.length; i ++)
+			{
+				handlers[i].setLevel(Level.ALL);
+			}
+		}
+		catch (Exception e) {}		
 	}	//	initialize
-
 
 	/** Logger				*/
 	private static Logger		log = Logger.getAnonymousLogger();
@@ -203,7 +208,7 @@ public class CLogMgt
 	private static final String NL = System.getProperty("line.separator");
 
 	/**
-	 * 	Get Handlers
+	 * 	Get Log Handlers
 	 *	@return handlers
 	 */
 	protected static Handler[] getHandlers()
@@ -214,7 +219,7 @@ public class CLogMgt
 	}	//	getHandlers
 
 	/**
-	 * 	Add Handler (to root logger)
+	 * 	Add Log Handler (to root logger)
 	 *	@param handler new Handler
 	 */
 	public static void addHandler(Handler handler)
@@ -227,9 +232,8 @@ public class CLogMgt
 		if (log.isLoggable(Level.CONFIG))log.log(Level.CONFIG, "Handler=" + handler);
 	}	//	addHandler
 
-
 	/**
-	 * 	Set Formatter for all handlers
+	 * 	Set Formatter for all log handlers
 	 *	@param formatter formatter
 	 */
 	protected static void setFormatter (java.util.logging.Formatter formatter)
@@ -244,7 +248,7 @@ public class CLogMgt
 	}	//	setFormatter
 
 	/**
-	 * 	Set Filter for all handlers
+	 * 	Set Filter for all log handlers
 	 *	@param filter filter
 	 */
 	protected static void setFilter (Filter filter)
@@ -259,7 +263,7 @@ public class CLogMgt
 	}	//	setFilter
 
 	/**
-	 * 	Set Level for all Loggers
+	 * 	Set Level for loggers
 	 *	@param level log level
 	 *	@param loggerNamePart optional partial class/logger name
 	 */
@@ -291,7 +295,8 @@ public class CLogMgt
 	}
 	
 	/**
-	 * 	Set Level for all handlers
+	 * 	Set Level for log handlers
+	 *  @param loggerName optional partial logger name filter
 	 *	@param level log level
 	 */
 	public static synchronized void setLevel (String loggerName, Level level)
@@ -312,7 +317,7 @@ public class CLogMgt
 			{
 				for (Handler handler : handlers)
 				{
-					handler.setLevel(level);
+					handler.setLevel(Level.ALL);
 				}
 			}
 
@@ -337,8 +342,10 @@ public class CLogMgt
 			}
 		}
 		String key = loggerName == null ? "" : loggerName;
-		if (!levelMap.containsKey(key))
+		if (!levelMap.containsKey(key)) {
 			levelMap.put(key, level);
+			loggerMap.put(key, logger);
+		}
 	}	//	setHandlerLevel
 
 	/**
@@ -359,6 +366,11 @@ public class CLogMgt
 		setLevel(null, levelString);
 	}	//	setLevel
 	
+	/**
+	 * Set level for loggers
+	 * @param loggerName optional partial logger name filter
+	 * @param levelString string representation of level
+	 */
 	public static void setLevel(String loggerName, String levelString)
 	{
 		if (levelString == null)
@@ -376,7 +388,7 @@ public class CLogMgt
 	}
 
 	/**
-	 * 	Set JDBC Debug
+	 * 	Set JDBC Debug. Auto enable when log level is set to ALL.
 	 *	@param enable
 	 */
 	public static void setJDBCDebug(boolean enable)
@@ -388,8 +400,8 @@ public class CLogMgt
 	}	//	setJDBCDebug
 
 	/**
-	 * 	Get logging Level of handlers
-	 *	@return logging level
+	 * 	Get logging Level of root logger
+	 *	@return logging level of root logger
 	 */
 	public static Level getLevel()
 	{
@@ -398,8 +410,8 @@ public class CLogMgt
 	}	//	getLevel
 
 	/**
-	 * 	Get logging Level of handlers
-	 *	@return logging level
+	 * 	Get logging Level of root logger
+	 *	@return logging level or root logger
 	 */
 	public static int getLevelAsInt()
 	{
@@ -420,8 +432,8 @@ public class CLogMgt
 	}	//	isLevel
 
 	/**
-	 * 	Is Logging Level FINEST logged
-	 *	@return true if it is logged
+	 * 	Is Logging Level ALL logged
+	 *	@return true if level ALL is logged
 	 */
 	public static boolean isLevelAll ()
 	{
@@ -430,7 +442,7 @@ public class CLogMgt
 
 	/**
 	 * 	Is Logging Level FINEST logged
-	 *	@return true if it is logged
+	 *	@return true if level FINEST is logged
 	 */
 	public static boolean isLevelFinest ()
 	{
@@ -439,7 +451,7 @@ public class CLogMgt
 
 	/**
 	 * 	Is Logging Level FINER logged
-	 *	@return true if it is logged
+	 *	@return true if level FINER is logged
 	 */
 	public static boolean isLevelFiner ()
 	{
@@ -448,7 +460,7 @@ public class CLogMgt
 
 	/**
 	 * 	Is Logging Level FINE logged
-	 *	@return true if it is logged
+	 *	@return true if level FINE is logged
 	 */
 	public static boolean isLevelFine ()
 	{
@@ -457,7 +469,7 @@ public class CLogMgt
 
 	/**
 	 * 	Is Logging Level INFO logged
-	 *	@return true if it is logged
+	 *	@return true if level INFO is logged
 	 */
 	public static boolean isLevelInfo ()
 	{
@@ -465,22 +477,34 @@ public class CLogMgt
 	}	//	isLevelFine
 
 	/**
+	 * Save the current level when disabling log
+	 */
+	private static Level previousLevel = null;
+	/**
 	 * 	Enable/Disable logging (of handlers)
 	 *	@param enableLogging true if logging enabled
+	 *  @deprecated not recommended to use, problematic method to enable/disable the log globally 
 	 */
+	@Deprecated
 	public static void enable (boolean enableLogging)
 	{
 		Logger rootLogger = getRootLogger();
 
 		if (enableLogging)
-			setLevel(rootLogger.getLevel());
+		{
+			if (previousLevel != null)
+				setLevel(previousLevel);
+			else
+				setLevel(rootLogger.getLevel());
+			reInit();
+			previousLevel = null;
+		}
 		else
 		{
+			previousLevel = rootLogger.getLevel();
 			setLevel(Level.OFF);
 		}
 	}	//	enable
-
-
 
 	/**
 	 * 	Shutdown Logging system
@@ -490,7 +514,6 @@ public class CLogMgt
 		LogManager mgr = LogManager.getLogManager();
 		mgr.reset();
 	}	//	shutdown
-
 
 	/**
 	 *  Print Properties
@@ -524,9 +547,8 @@ public class CLogMgt
 		}
 	}   //  printProperties
 
-
 	/**
-	 *  Get Adempiere System Info
+	 *  Get iDempiere System Info
 	 *  @param sb buffer to append or null
 	 *  @return Info as multiple Line String
 	 */
@@ -574,7 +596,9 @@ public class CLogMgt
 		sb.append("Free Heap = "+formatMemoryInfo(runtime.freeMemory())).append(NL);
 		//
 		//thread info
-		sb.append("Active Threads = " + Thread.activeCount());
+		sb.append("Active Threads = " + Thread.activeCount()).append(NL);
+		// Key Store info
+		sb.append("Key Store = ").append(Core.getKeyStore().getClass().getName());
 		//
 		//cluster info
 		if (Env.getAD_Client_ID(Env.getCtx()) == 0) {
@@ -597,6 +621,11 @@ public class CLogMgt
 		return sb;
 	}   //  getInfo
 
+	/**
+	 * Format amount as M or K texts
+	 * @param amount
+	 * @return formatted text
+	 */
 	private static String formatMemoryInfo(long amount)
 	{
 		String unit = "";
@@ -643,7 +672,7 @@ public class CLogMgt
 		//  Context
 		String[] context = Env.getEntireContext(ctx);
 		sb.append(NL)
-			.append("=== Context (").append(context.length).append(") ===").append(NL);
+			.append("=== Context (%s) ===".formatted(context.length)).append(NL);		
 		Arrays.sort(context);
 		for (int i = 0; i < context.length; i++)
 			sb.append(context[i]).append(NL);
@@ -662,7 +691,6 @@ public class CLogMgt
 		return sb;
 	}   //  getInfoDetail
 
-
 	/**
 	 *  Get translated Message, if DB connection exists
 	 *  @param msg AD_Message
@@ -674,7 +702,6 @@ public class CLogMgt
 			return Msg.translate(Env.getCtx(), msg);
 		return msg;
 	}   //  getMsg
-
 
 	/**
 	 *  Get Server Info.
@@ -719,8 +746,8 @@ public class CLogMgt
 	}   //  getDatabaseInfo
 
 	/**
-	 *  Get Localhost
-	 *  @return local host
+	 *  Get Localhost address 
+	 *  @return local host address
 	 */
 	private static String getLocalHost()
 	{
@@ -752,61 +779,11 @@ public class CLogMgt
 		return rootLogger;
 	}
 	
-	/**************************************************************************
+	/**
 	 * 	CLogMgt
 	 */
 	public CLogMgt ()
 	{
-		testLog();
 	}
-
-	/**
-	 * 	Test Log
-	 */
-	private void testLog()
-	{
-		final CLogger log1 = CLogger.getCLogger("test");
-		//
-		log1.log(Level.SEVERE, "severe");
-		log1.warning("warning");
-		log1.info("Info");
-		log1.config("config");
-		log1.fine("fine");
-		log1.finer("finer");
-		log1.entering("myClass", "myMethod", "parameter");
-		log1.exiting("myClass", "myMethod", "result");
-		log1.finest("finest");
-
-		new Thread()
-		{
-			public void run()
-			{
-				log1.info("thread info");
-			}
-		}.start();
-
-		try
-		{
-			Integer.parseInt("ABC");
-		}
-		catch (Exception e)
-		{
-			log1.log(Level.SEVERE, "error message", e);
-		}
-		if (log1.isLoggable(Level.INFO)){
-			log1.log(Level.INFO, "info message 1", "1Param");
-			log1.log(Level.INFO, "info message n", new Object[]{"1Param","2Param"});
-		}
-	}	//	testLog
-
-	/**
-	 * 	Test
-	 *	@param args ignored
-	 */
-	public static void main (String[] args)
-	{
-		initialize(true);
-		new CLogMgt();
-	}	//	CLogMgt
 
 }	//	CLogMgt

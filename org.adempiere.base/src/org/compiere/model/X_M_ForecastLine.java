@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_ForecastLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_ForecastLine")
-public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persistent 
+public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_ForecastLine (Properties ctx, int M_ForecastLine_ID, String trxName)
@@ -44,8 +44,8 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
         {
 			setC_Period_ID (0);
 			setDatePromised (new Timestamp( System.currentTimeMillis() ));
-			setM_Forecast_ID (0);
 			setM_ForecastLine_ID (0);
+			setM_Forecast_ID (0);
 			setM_Product_ID (0);
 			setM_Warehouse_ID (0);
 // @M_Warehouse_ID@
@@ -62,8 +62,44 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
         {
 			setC_Period_ID (0);
 			setDatePromised (new Timestamp( System.currentTimeMillis() ));
-			setM_Forecast_ID (0);
 			setM_ForecastLine_ID (0);
+			setM_Forecast_ID (0);
+			setM_Product_ID (0);
+			setM_Warehouse_ID (0);
+// @M_Warehouse_ID@
+			setQty (Env.ZERO);
+			setQtyCalculated (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ForecastLine (Properties ctx, String M_ForecastLine_UU, String trxName)
+    {
+      super (ctx, M_ForecastLine_UU, trxName);
+      /** if (M_ForecastLine_UU == null)
+        {
+			setC_Period_ID (0);
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+			setM_ForecastLine_ID (0);
+			setM_Forecast_ID (0);
+			setM_Product_ID (0);
+			setM_Warehouse_ID (0);
+// @M_Warehouse_ID@
+			setQty (Env.ZERO);
+			setQtyCalculated (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ForecastLine (Properties ctx, String M_ForecastLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_ForecastLine_UU, trxName, virtualColumns);
+      /** if (M_ForecastLine_UU == null)
+        {
+			setC_Period_ID (0);
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+			setM_ForecastLine_ID (0);
+			setM_Forecast_ID (0);
 			setM_Product_ID (0);
 			setM_Warehouse_ID (0);
 // @M_Warehouse_ID@
@@ -79,7 +115,7 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -131,7 +167,7 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getC_Period_ID()));
     }
@@ -150,34 +186,6 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
 	public Timestamp getDatePromised()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DatePromised);
-	}
-
-	public org.compiere.model.I_M_Forecast getM_Forecast() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Forecast)MTable.get(getCtx(), org.compiere.model.I_M_Forecast.Table_ID)
-			.getPO(getM_Forecast_ID(), get_TrxName());
-	}
-
-	/** Set Forecast.
-		@param M_Forecast_ID Material Forecast
-	*/
-	public void setM_Forecast_ID (int M_Forecast_ID)
-	{
-		if (M_Forecast_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_Forecast_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_Forecast_ID, Integer.valueOf(M_Forecast_ID));
-	}
-
-	/** Get Forecast.
-		@return Material Forecast
-	  */
-	public int getM_Forecast_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Forecast_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Forecast Line.
@@ -215,6 +223,34 @@ public class X_M_ForecastLine extends PO implements I_M_ForecastLine, I_Persiste
 	public String getM_ForecastLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_ForecastLine_UU);
+	}
+
+	public org.compiere.model.I_M_Forecast getM_Forecast() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Forecast)MTable.get(getCtx(), org.compiere.model.I_M_Forecast.Table_ID)
+			.getPO(getM_Forecast_ID(), get_TrxName());
+	}
+
+	/** Set Forecast.
+		@param M_Forecast_ID Material Forecast
+	*/
+	public void setM_Forecast_ID (int M_Forecast_ID)
+	{
+		if (M_Forecast_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Forecast_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Forecast_ID, Integer.valueOf(M_Forecast_ID));
+	}
+
+	/** Get Forecast.
+		@return Material Forecast
+	  */
+	public int getM_Forecast_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Forecast_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException

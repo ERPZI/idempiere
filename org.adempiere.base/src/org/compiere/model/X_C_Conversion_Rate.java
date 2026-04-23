@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Conversion_Rate
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_Conversion_Rate")
-public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Persistent 
+public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_Conversion_Rate (Properties ctx, int C_Conversion_Rate_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Pe
       super (ctx, C_Conversion_Rate_ID, trxName);
       /** if (C_Conversion_Rate_ID == 0)
         {
-			setC_Conversion_Rate_ID (0);
 			setC_ConversionType_ID (0);
+			setC_Conversion_Rate_ID (0);
 			setC_Currency_ID (0);
 			setC_Currency_ID_To (0);
 			setDivideRate (Env.ZERO);
@@ -58,8 +58,40 @@ public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Pe
       super (ctx, C_Conversion_Rate_ID, trxName, virtualColumns);
       /** if (C_Conversion_Rate_ID == 0)
         {
-			setC_Conversion_Rate_ID (0);
 			setC_ConversionType_ID (0);
+			setC_Conversion_Rate_ID (0);
+			setC_Currency_ID (0);
+			setC_Currency_ID_To (0);
+			setDivideRate (Env.ZERO);
+			setMultiplyRate (Env.ZERO);
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Conversion_Rate (Properties ctx, String C_Conversion_Rate_UU, String trxName)
+    {
+      super (ctx, C_Conversion_Rate_UU, trxName);
+      /** if (C_Conversion_Rate_UU == null)
+        {
+			setC_ConversionType_ID (0);
+			setC_Conversion_Rate_ID (0);
+			setC_Currency_ID (0);
+			setC_Currency_ID_To (0);
+			setDivideRate (Env.ZERO);
+			setMultiplyRate (Env.ZERO);
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Conversion_Rate (Properties ctx, String C_Conversion_Rate_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Conversion_Rate_UU, trxName, virtualColumns);
+      /** if (C_Conversion_Rate_UU == null)
+        {
+			setC_ConversionType_ID (0);
+			setC_Conversion_Rate_ID (0);
 			setC_Currency_ID (0);
 			setC_Currency_ID_To (0);
 			setDivideRate (Env.ZERO);
@@ -75,7 +107,7 @@ public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Pe
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -95,51 +127,6 @@ public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Pe
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	/** Set Conversion Rate.
-		@param C_Conversion_Rate_ID Rate used for converting currencies
-	*/
-	public void setC_Conversion_Rate_ID (int C_Conversion_Rate_ID)
-	{
-		if (C_Conversion_Rate_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Conversion_Rate_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Conversion_Rate_ID, Integer.valueOf(C_Conversion_Rate_ID));
-	}
-
-	/** Get Conversion Rate.
-		@return Rate used for converting currencies
-	  */
-	public int getC_Conversion_Rate_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Conversion_Rate_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_Conversion_Rate_ID()));
-    }
-
-	/** Set C_Conversion_Rate_UU.
-		@param C_Conversion_Rate_UU C_Conversion_Rate_UU
-	*/
-	public void setC_Conversion_Rate_UU (String C_Conversion_Rate_UU)
-	{
-		set_Value (COLUMNNAME_C_Conversion_Rate_UU, C_Conversion_Rate_UU);
-	}
-
-	/** Get C_Conversion_Rate_UU.
-		@return C_Conversion_Rate_UU	  */
-	public String getC_Conversion_Rate_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_Conversion_Rate_UU);
-	}
 
 	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException
 	{
@@ -167,6 +154,51 @@ public class X_C_Conversion_Rate extends PO implements I_C_Conversion_Rate, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Conversion Rate.
+		@param C_Conversion_Rate_ID Rate used for converting currencies
+	*/
+	public void setC_Conversion_Rate_ID (int C_Conversion_Rate_ID)
+	{
+		if (C_Conversion_Rate_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Conversion_Rate_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Conversion_Rate_ID, Integer.valueOf(C_Conversion_Rate_ID));
+	}
+
+	/** Get Conversion Rate.
+		@return Rate used for converting currencies
+	  */
+	public int getC_Conversion_Rate_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Conversion_Rate_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getC_Conversion_Rate_ID()));
+    }
+
+	/** Set C_Conversion_Rate_UU.
+		@param C_Conversion_Rate_UU C_Conversion_Rate_UU
+	*/
+	public void setC_Conversion_Rate_UU (String C_Conversion_Rate_UU)
+	{
+		set_Value (COLUMNNAME_C_Conversion_Rate_UU, C_Conversion_Rate_UU);
+	}
+
+	/** Get C_Conversion_Rate_UU.
+		@return C_Conversion_Rate_UU	  */
+	public String getC_Conversion_Rate_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_Conversion_Rate_UU);
 	}
 
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException

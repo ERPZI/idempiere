@@ -38,10 +38,11 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 
 /**
- *
+ * Default editor for {@link DisplayType#ID} and {@link DisplayType#isNumeric(int)}.<br/>
+ * Implemented with {@link NumberBox}.  
+ * 
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 11, 2007
- * @version $Revision: 0.10 $
  *
  * @author Low Heng Sin
  * @author Cristina Ghita, www.arhipac.ro
@@ -55,30 +56,34 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
     public static final int MAX_DISPLAY_LENGTH = 35;
     public static final int MIN_DISPLAY_LENGTH = 11;
 
+    /** Integer or BigDecimal */
     private Object oldValue;
 
 	private int displayType;
 
 	private String originalStyle;
 
+	/**
+	 * Default constructor, default to {@link DisplayType#Number}.
+	 */
     public WNumberEditor()
     {
     	this(DisplayType.Number);
     }
 
     /**
-    *
-    * @param displayType
-    */
+     *
+     * @param displayType
+     */
     public WNumberEditor(int displayType)
     {
     	this("Number", false, false, true, displayType, "");
     }
 
     /**
-    *
-    * @param gridField
-    */
+     *
+     * @param gridField
+     */
     public WNumberEditor(GridField gridField)
     {
     	this(gridField, false, null);
@@ -107,6 +112,13 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
         init();
     }
 
+    /**
+     * Create new {@link NumberBox} instance.
+     * @param gridField
+     * @param tableEditor
+     * @param editorConfiguration
+     * @return NumberBox
+     */
 	protected static NumberBox newNumberBox(GridField gridField, boolean tableEditor, IEditorConfiguration editorConfiguration) {
 		if (editorConfiguration != null && editorConfiguration instanceof INumberEditorConfiguration) {
 			INumberEditorConfiguration config = (INumberEditorConfiguration) editorConfiguration;
@@ -119,7 +131,7 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
     /**
      *
      * @param gridField
-     * @param integral
+     * @param integral true to create NumberBox for DisplayType.Integer
      */
     public WNumberEditor(GridField gridField, boolean integral)
     {
@@ -153,6 +165,9 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
 		init();
 	}
 
+    /**
+     * Init component and context menu
+     */
 	private void init()
     {
 		setChangeEventWhenEditing (true);
@@ -166,8 +181,6 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
 	        	displayLength = MIN_DISPLAY_LENGTH;
 	        if (!tableEditor)
 	        	getComponent().getDecimalbox().setCols(displayLength);
-//	        else
-//	        	getComponent().getDecimalbox().setCols(0);
 		}
 
 		if (DisplayType.isID(displayType)) 
@@ -199,6 +212,7 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
 	 * Event handler
 	 * @param event
 	 */
+	@Override
     public void onEvent(Event event)
     {
     	if (Events.ON_CHANGE.equalsIgnoreCase(event.getName()) || Events.ON_OK.equalsIgnoreCase(event.getName()))
@@ -238,7 +252,9 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
     /**
      * IDEMPIERE-2553 - Enter amounts without decimal separator
      * @param oldValue
-     * @return
+     * @return oldValue (if oldValue is already with decimal point)<br/>
+     * or oldValue divided by AutomaticDecimalPlacesForAmoun value from Env context 
+     * (for e.g, if AutomaticDecimalPlacesForAmoun=2, oldValue/100)
      */
     public BigDecimal addDecimalPlaces(BigDecimal oldValue){
     	if(oldValue.toString().contains("."))
@@ -257,8 +273,11 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
     		divisor = BigDecimal.TEN.pow(decimalPlaces);
     	BigDecimal newValue = oldValue.divide(divisor, decimalPlaces, RoundingMode.HALF_UP);
     	return newValue;
-    } //getAddDecimalPlaces
+    } //addDecimalPlaces
 
+    /**
+     * @return NumberBox
+     */
     @Override
 	public NumberBox getComponent() {
 		return (NumberBox) component;
@@ -310,6 +329,7 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
      * Handle context menu events
      * @param evt
      */
+    @Override
     public void onMenu(ContextMenuEvent evt)
 	{
 	 	if (WEditorPopupMenu.PREFERENCE_EVENT.equals(evt.getContextEvent()))
@@ -330,8 +350,9 @@ public class WNumberEditor extends WEditor implements ContextMenuListener
 		getComponent().setTableEditorMode(b);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.adempiere.webui.editor.WEditor#setFieldStyle(java.lang.String)
+	/**
+	 * Set field style to Decimalbox inside {@link NumberBox}.
+	 * @param style
 	 */
 	@Override
 	protected void setFieldStyle(String style) {

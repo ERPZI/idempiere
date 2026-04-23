@@ -38,6 +38,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.EMail;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Secure;
 import org.compiere.util.SecureEngine;
@@ -58,7 +59,7 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MUser extends X_AD_User implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 1351277092193923708L;
 
@@ -69,6 +70,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	 * @return array of users
 	 * @deprecated Since 3.5.3a. Please use {@link #getOfBPartner(Properties, int, String)}.
 	 */
+	@Deprecated
 	public static MUser[] getOfBPartner (Properties ctx, int C_BPartner_ID)
 	{
 		return getOfBPartner(ctx, C_BPartner_ID, null);
@@ -130,8 +132,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getWithRole
 
 	/**
-	 * 	Get User (cached) (immutable)
-	 * 	Also loads Admninistrator (0)
+	 * 	Get User (cached) (immutable).
+	 * 	Also loads Administrator (0).
 	 *	@param AD_User_ID id
 	 *	@return user
 	 */
@@ -141,8 +143,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 	Get User (cached) (immutable)
-	 * 	Also loads Admninistrator (0)
+	 * 	Get User (cached) (immutable).
+	 * 	Also loads Administrator (0).
 	 *	@param ctx context
 	 *	@param AD_User_ID id
 	 *	@return user
@@ -195,15 +197,28 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 	Get User
-	 *	@param ctx context
-	 *	@param name name
-	 *	@param password password
-	 *	@return user or null
+	 * Get user via name and password
+	 * @param ctx
+	 * @param name
+	 * @param password
+	 * @return user
 	 */
 	public static MUser get (Properties ctx, String name, String password)
 	{
-		if (name == null || name.length() == 0 || password == null || password.length() == 0)
+		return MUser.get(ctx, name, password, false);
+	}
+	
+	/**
+	 * 	Get User via name and password
+	 *	@param ctx context
+	 *	@param name name
+	 *	@param password password
+	 *	@param isSSOLogin when isSSOLogin is true, password is ignored.
+	 *	@return user or null
+	 */
+	public static MUser get (Properties ctx, String name, String password, boolean isSSOLogin)
+	{
+		if (name == null || name.length() == 0 || (!isSSOLogin && (password == null || password.length() == 0)))
 		{
 			s_log.warning ("Invalid Name/Password = " + name);
 			return null;
@@ -250,8 +265,9 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			if (system == null)
 				throw new IllegalStateException("No System Info");
 			
-			
-			if (system.isLDAP() && ! Util.isEmpty(user.getLDAPUser())) {
+			if (isSSOLogin) {
+				valid = true;
+			} else if (system.isLDAP() && ! Util.isEmpty(user.getLDAPUser())) {
 				valid = system.isLDAP(name, password);
 			} else if (hash_password) {
 				valid = user.authenticateHash(password);
@@ -266,7 +282,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			}
 		}	
 	
-		 return retValue;
+		return retValue;
 	}	//	get
 	
 	/**
@@ -281,7 +297,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			return "?";
 		return user.getName();
 	}	//	getNameOfUser
-
 	
 	/**
 	 * 	User is SalesRep
@@ -299,13 +314,42 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return no == AD_User_ID;
 	}	//	isSalesRep
 	
+	/**
+	 * Get users with role assignment that is readable by current effective role.<br/>
+	 * @param withEmptyElement if true, first element of the return array is an empty element with (-1,"")
+	 * @param trxName optional transaction name
+	 * @return user records (AD_User_ID, Name), order by name
+	 */
+	public static KeyNamePair[] getWithRoleKeyNamePairs(boolean withEmptyElement, String trxName) 
+	{
+		//Internal Users
+		String sql = "SELECT AD_User_ID, Name "
+			+ "FROM AD_User u WHERE EXISTS "
+				+"(SELECT * FROM AD_User_Roles ur WHERE u.AD_User_ID=ur.AD_User_ID) "
+			+ "ORDER BY 2";
+		MRole role = MRole.getDefault();
+		sql = role.addAccessSQL(sql, "u", true, false);
+		return DB.getKeyNamePairsEx(trxName, sql, withEmptyElement);
+	}
+	
 	/**	Cache					*/
 	static private ImmutableIntPOCache<Integer,MUser> s_cache = new ImmutableIntPOCache<Integer,MUser>(Table_Name, 30, 60);
 	/**	Static Logger			*/
 	private static CLogger	s_log	= CLogger.getCLogger (MUser.class);
-	
-	
-	/**************************************************************************
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_User_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MUser(Properties ctx, String AD_User_UU, String trxName) {
+        super(ctx, AD_User_UU, trxName);
+		if (Util.isEmpty(AD_User_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Default Constructor
 	 *	@param ctx context
 	 *	@param AD_User_ID id
@@ -315,11 +359,16 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	{
 		super (ctx, AD_User_ID, trxName);	//	0 is also System
 		if (AD_User_ID == 0)
-		{
-			setIsFullBPAccess (true);
-			setNotificationType(NOTIFICATIONTYPE_None);
-		}		
+			setInitialDefaults();
 	}	//	MUser
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsFullBPAccess (true);
+		setNotificationType(NOTIFICATIONTYPE_None);
+	}
 
 	/**
 	 * 	Parent Constructor
@@ -345,7 +394,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	MUser
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MUser(MUser copy) 
@@ -354,7 +403,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -364,7 +413,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -391,12 +440,12 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	private MUserBPAccess[]	m_bpAccess = null;
 	/** Password Hashed **/
 	private boolean being_hashed = false;
-	
-		
+			
 	/**
-	 * 	Get Value - 7 bit lower case alpha numerics max length 8
+	 * 	Get Value
 	 *	@return value
 	 */
+	@Override
 	public String getValue()
 	{
 		String s = super.getValue();
@@ -407,9 +456,11 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getValue
 
 	/**
-	 * 	Set Value - 7 bit lower case alpha numerics max length 8
+	 * 	Set Value - lower case alpha numerics and max length of 8.<br/>
+	 *  If Value is null, use LDAPUser or Name or the "noname" string instead.
 	 *	@param Value
 	 */
+	@Override
 	public void setValue(String Value)
 	{
 		if (Value == null || Value.trim().length () == 0)
@@ -418,7 +469,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			Value = getName();
 		if (Value == null || Value.length () == 0)
 			Value = "noname";
-		//
+		// lower case alpha numerics and max length of 8
 		String result = cleanValue(Value);
 		if (result.length() > 8)
 		{
@@ -426,6 +477,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			String last = getName(Value, false);
 			if (last.length() > 0)
 			{
+				// Concatenate first character of first name and last name
 				String temp = last;
 				if (first.length() > 0)
 					temp = first.substring (0, 1) + last;
@@ -434,14 +486,15 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			else
 				result = cleanValue(first);
 		}
+		// Truncate to 8 character
 		if (result.length() > 8)
 			result = result.substring (0, 8);
 		super.setValue(result);
 	}	//	setValue
 	
 	/**
-	 * 	Clean Value
-	 *	@param value value
+	 * 	Convert value to lower case and remove non-digit and non-alphabet character
+	 *	@param value
 	 *	@return lower case cleaned value
 	 */
 	private String cleanValue (String value)
@@ -577,8 +630,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			return "";
 		return last.trim();
 	}	//	getName
-	
-	
+		
 	/**
 	 * 	Add to Description
 	 *	@param description description to be added
@@ -593,12 +645,12 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		else
 			setDescription (descr + " - " + description);
 	}	//	addDescription
-	
-	
+		
 	/**
 	 * 	String Representation
 	 *	@return Info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MUser[")
@@ -611,7 +663,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 
 	/**
 	 * 	Is it an Online Access User
-	 *	@return true if it has an email and password
+	 *	@return true if it has an email or password
 	 */
 	public boolean isOnline ()
 	{
@@ -621,7 +673,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	isOnline
 
 	/**
-	 * 	Set EMail - reset validation
+	 * 	Set EMail - reset email validation date
 	 *	@param EMail email
 	 */
 	public void setEMail(String EMail)
@@ -631,7 +683,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	setEMail
 	
 	/**
-	 * 	Convert EMail
+	 * 	Convert EMail to InternetAddress
 	 *	@return Valid Internet Address
 	 */
 	public InternetAddress getInternetAddress ()
@@ -642,8 +694,6 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		try
 		{
 			InternetAddress ia = new InternetAddress (email, true);
-			if (ia != null)
-				ia.validate();	//	throws AddressException
 			return ia;
 		}
 		catch (AddressException ex)
@@ -654,32 +704,17 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	getInternetAddress
 
 	/**
-	 * 	Validate Email (does not work).
-	 * 	Check DNS MX record
-	 * 	@param ia email
-	 *	@return error message or ""
-	 */
-	private String validateEmail (InternetAddress ia)
-	{
-		if (ia == null)
-			return "NoEmail";
-        else 
-        	return ia.getAddress();
-
-	}	//	validateEmail
-	
-	/**
 	 * 	Is the email valid
 	 * 	@return return true if email is valid (artificial check)
 	 */
 	public boolean isEMailValid()
 	{
-		return validateEmail(getInternetAddress()) != null;
+		return EMail.validate(getEMail());
 	}	//	isEMailValid
 	
 	/**
 	 * 	Could we send an email
-	 * 	@return true if EMail Uwer/PW exists
+	 * 	@return true if EMail User/PW exists
 	 */
 	public boolean isCanSendEMail()
 	{
@@ -694,18 +729,17 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	isCanSendEMail
 
 	/**
-	 * 	Get EMail Validation Code
+	 * 	Get EMail Verification Code
 	 *	@return code
 	 */
 	public String getEMailVerifyCode()
 	{
-		long code = getAD_User_ID() 
-			+ getName().hashCode();
+		long code = getAD_User_ID() + getName().hashCode();
 		return "C" + String.valueOf(Math.abs(code)) + "C";
 	}	//	getEMailValidationCode
 	
 	/**
-	 * 	Check and Set EMail Validation Code.
+	 * 	Check and Set EMail Verification Code.
 	 *	@param code code
 	 *	@param info info
 	 *	@return true if valid
@@ -720,7 +754,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 			setEMailVerifyDate(null);
 		setEMailVerify(info);
 		return ok;
-	}	//	setEMailValidationCode
+	}	//	setEMailVerifyCode
 	
 	/**
 	 * 	Is EMail Verified by response
@@ -735,8 +769,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	isEMailVerified
 	
 	/**
-	 * 	Get Notification via EMail
-	 *	@return true if email
+	 * 	Is Notification via EMail
+	 *	@return true if use email for notification
 	 */
 	public boolean isNotificationEMail()
 	{
@@ -746,8 +780,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	isNotificationEMail
 	
 	/**
-	 * 	Get Notification via Note
-	 *	@return true if note
+	 * 	Is Notification via Note
+	 *	@return true if use note for notification
 	 */
 	public boolean isNotificationNote()
 	{
@@ -755,9 +789,8 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return s != null && (NOTIFICATIONTYPE_Notice.equals(s)
 							|| NOTIFICATIONTYPE_EMailPlusNotice.equals(s));
 	}	//	isNotificationNote
-	
-	
-	/**************************************************************************
+		
+	/**
 	 * 	Get User Roles for Org
 	 * 	@param AD_Org_ID org
 	 *	@return array of roles
@@ -769,7 +802,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		
 		ArrayList<MRole> list = new ArrayList<MRole>();
 		// 2007-06-08, matthiasO.
-		// Extension of sql query so that not only roles with org acces for this user
+		// Extension of sql query so that not only roles with org access for this user
 		// are found but also roles which delegate org access to the user level where
 		// this user has access to the org in question
 		String sql = "SELECT * FROM AD_Role r " 
@@ -825,7 +858,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	
 	/**
 	 * 	Is User an Administrator?
-	 *	@return true if Admin
+	 *	@return true if user is Administrator
 	 */
 	public boolean isAdministrator()
 	{
@@ -847,6 +880,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 
 	/**
 	 * 	User has access to URL form?
+	 *  @param url form class name
 	 *	@return true if user has access
 	 */
 	public boolean hasURLFormAccess(String url)
@@ -873,7 +907,7 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 	}	//	hasURLFormAccess
 
 	/**
-	 * 	Has the user Access to BP info and resources
+	 * 	Is user has access to BP info and resources
 	 *	@param BPAccessType access type
 	 *	@param params opt parameter
 	 *	@return true if access
@@ -932,22 +966,17 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		list.toArray (m_bpAccess);
 		return m_bpAccess;
 	}	//	getBPAccess
-	
-	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+		
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	New Address invalidates verification
+		//	New Email Address invalidates previous email verification
 		if (!newRecord && is_ValueChanged("EMail"))
 			setEMailVerifyDate(null);
 
-		// IDEMPIERE-1409
+		// IDEMPIERE-1409 Validate Email
 		if (!Util.isEmpty(getEMail()) && (newRecord || is_ValueChanged("EMail"))) {
-			if (! EMail.validate(getEMail())) {
+			if (! isEMailValid()) {
 				log.saveError("SaveError", Msg.getMsg(getCtx(), "InvalidEMailFormat") + Msg.getElement(getCtx(), COLUMNNAME_EMail) + " - [" + getEMail() + "]");
 				return false;
 			}
@@ -1012,12 +1041,10 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		return true;
 	}	//	beforeSave
 
-
-
 	/**
-	 * 	Is Menu Auto Expand - user preference
-	 *  Check if the user has a preference, otherwise use the value from current role
-	 *	@return boolean
+	 * 	Is Menu Auto Expand - user preference.<br/>
+	 *  Check if the user has a preference, otherwise use the value from current role.
+	 *	@return true if application menu should auto expand
 	 */
 	public boolean isMenuAutoExpand() {
 		boolean isMenuAutoExpand = false;
@@ -1112,12 +1139,10 @@ public class MUser extends X_AD_User implements ImmutablePOSupport
 		}
 	}
 
-	/**
-	 * save new pass to history
-	 */
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
 		if (getPassword() != null && getPassword().length() > 0 && (newRecord || is_ValueChanged("Password"))) {
+			// Save password history for password reuse rule
 			MPasswordRule pwdrule = MPasswordRule.getRules(getCtx(), get_TrxName());
 			if (pwdrule != null && pwdrule.getDays_Reuse_Password() > 0) {
 				boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);

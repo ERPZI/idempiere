@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *	Aging Model
@@ -32,9 +33,21 @@ import org.compiere.util.Env;
 public class MAging extends X_T_Aging
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3067400117623770188L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param T_Aging_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAging(Properties ctx, String T_Aging_UU, String trxName) {
+        super(ctx, T_Aging_UU, trxName);
+		if (Util.isEmpty(T_Aging_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -46,51 +59,55 @@ public class MAging extends X_T_Aging
 	{
 		super (ctx, T_Aging_ID, trxName);
 		if (T_Aging_ID == 0)
-		{
-			setDueAmt (Env.ZERO);
-			setDue0 (Env.ZERO);
-			setDue0_7 (Env.ZERO);
-			setDue0_30 (Env.ZERO);
-			setDue1_7 (Env.ZERO);
-			setDue31_60 (Env.ZERO);
-			setDue31_Plus (Env.ZERO);
-			setDue61_90 (Env.ZERO);
-			setDue61_Plus (Env.ZERO);
-			setDue8_30 (Env.ZERO);
-			setDue91_Plus (Env.ZERO);
-			//MPo, 18/3/2017
-			setZI_Due91_120 (Env.ZERO);
-			setZI_Due121_180 (Env.ZERO);
-			setZI_Due181_360 (Env.ZERO);
-			setZI_Due361_Plus (Env.ZERO);
-
-			//
-			setPastDueAmt (Env.ZERO);
-			setPastDue1_7 (Env.ZERO);
-			setPastDue1_30 (Env.ZERO);
-			setPastDue31_60 (Env.ZERO);
-			setPastDue31_Plus (Env.ZERO);
-			setPastDue61_90 (Env.ZERO);
-			setPastDue61_Plus (Env.ZERO);
-			setPastDue8_30 (Env.ZERO);
-			
-			setPastDue91_Plus (Env.ZERO);
-			//MPo, 18/3/2017
-			setZI_PastDue91_120 (Env.ZERO);
-			setZI_PastDue121_180 (Env.ZERO);
-			setZI_PastDue181_360 (Env.ZERO);
-			setZI_PastDue361_Plus (Env.ZERO);
-			//
-			setOpenAmt(Env.ZERO);
-			setInvoicedAmt(Env.ZERO);
-			//
-			setIsListInvoices (false);
-			setIsSOTrx (false);
-		}
+			setInitialDefaults();
 	}	//	T_Aging
 
 	/**
-	 * 	Full Constructor
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDueAmt (Env.ZERO);
+		setDue0 (Env.ZERO);
+		setDue0_7 (Env.ZERO);
+		setDue0_30 (Env.ZERO);
+		setDue1_7 (Env.ZERO);
+		setDue31_60 (Env.ZERO);
+		setDue31_Plus (Env.ZERO);
+		setDue61_90 (Env.ZERO);
+		setDue61_Plus (Env.ZERO);
+		setDue8_30 (Env.ZERO);
+		setDue91_Plus (Env.ZERO);
+		//MPo, 18/3/2017
+		setZI_Due91_120 (Env.ZERO);
+		setZI_Due121_180 (Env.ZERO);
+		setZI_Due181_360 (Env.ZERO);
+		setZI_Due361_Plus (Env.ZERO);
+
+		//
+		setPastDueAmt (Env.ZERO);
+		setPastDue1_7 (Env.ZERO);
+		setPastDue1_30 (Env.ZERO);
+		setPastDue31_60 (Env.ZERO);
+		setPastDue31_Plus (Env.ZERO);
+		setPastDue61_90 (Env.ZERO);
+		setPastDue61_Plus (Env.ZERO);
+		setPastDue8_30 (Env.ZERO);
+		
+		setPastDue91_Plus (Env.ZERO);
+		//MPo, 18/3/2017
+		setZI_PastDue91_120 (Env.ZERO);
+		setZI_PastDue121_180 (Env.ZERO);
+		setZI_PastDue181_360 (Env.ZERO);
+		setZI_PastDue361_Plus (Env.ZERO);
+		//
+		setOpenAmt(Env.ZERO);
+		setInvoicedAmt(Env.ZERO);
+		//
+		setIsListInvoices (false);
+		setIsSOTrx (false);
+	}
+
+	/**
 	 *	@param ctx context
 	 *	@param AD_PInstance_ID instance
 	 *	@param StatementDate statement date
@@ -142,6 +159,7 @@ public class MAging extends X_T_Aging
 	 *
 	 * @deprecated - better use the new constructor with organization included
 	 */
+	@Deprecated(forRemoval = true, since = "11")
 	public MAging (Properties ctx, int AD_PInstance_ID, Timestamp StatementDate, 
 		int C_BPartner_ID, int C_Currency_ID, 
 		int C_Invoice_ID, int C_InvoicePaySchedule_ID,
@@ -180,7 +198,7 @@ public class MAging extends X_T_Aging
 	private int		m_daysDueSum = 0;
 	
 	/**
-	 * 	Add Amount to Buckets
+	 * 	Add Amount to Buckets (by days due)
 	 *	@param DueDate due date 
 	 *	@param daysDue positive due - negative not due
 	 *	@param invoicedAmt invoiced amount

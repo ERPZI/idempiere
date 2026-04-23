@@ -58,6 +58,7 @@ public class Doc_GLJournal extends Doc
 	 *  Load Specific Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		MJournal journal = (MJournal)getPO();
@@ -72,7 +73,7 @@ public class Doc_GLJournal extends Doc
 
 
 	/**
-	 *	Load Invoice Line
+	 *	Load GL journal lines
 	 *	@param journal journal
 	 *  @return DocLine Array
 	 */
@@ -107,11 +108,11 @@ public class Doc_GLJournal extends Doc
 		return dls;
 	}	//	loadLines
 
-
-	/**************************************************************************
+	/**
 	 *  Get Source Currency Balance - subtracts line and tax amounts from total - no rounding
 	 *  @return positive amount, if total invoice is bigger than lines
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -138,6 +139,7 @@ public class Doc_GLJournal extends Doc
 	 *  @param as acct schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();

@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for ASP_Ref_List
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="ASP_Ref_List")
-public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent 
+public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_ASP_Ref_List (Properties ctx, int ASP_Ref_List_ID, String trxName)
@@ -38,8 +38,8 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
       super (ctx, ASP_Ref_List_ID, trxName);
       /** if (ASP_Ref_List_ID == 0)
         {
-			setAD_Reference_ID (0);
 			setAD_Ref_List_ID (0);
+			setAD_Reference_ID (0);
 			setASP_Level_ID (0);
 			setASP_Ref_List_ID (0);
         } */
@@ -51,8 +51,34 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
       super (ctx, ASP_Ref_List_ID, trxName, virtualColumns);
       /** if (ASP_Ref_List_ID == 0)
         {
-			setAD_Reference_ID (0);
 			setAD_Ref_List_ID (0);
+			setAD_Reference_ID (0);
+			setASP_Level_ID (0);
+			setASP_Ref_List_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_ASP_Ref_List (Properties ctx, String ASP_Ref_List_UU, String trxName)
+    {
+      super (ctx, ASP_Ref_List_UU, trxName);
+      /** if (ASP_Ref_List_UU == null)
+        {
+			setAD_Ref_List_ID (0);
+			setAD_Reference_ID (0);
+			setASP_Level_ID (0);
+			setASP_Ref_List_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_ASP_Ref_List (Properties ctx, String ASP_Ref_List_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, ASP_Ref_List_UU, trxName, virtualColumns);
+      /** if (ASP_Ref_List_UU == null)
+        {
+			setAD_Ref_List_ID (0);
+			setAD_Reference_ID (0);
 			setASP_Level_ID (0);
 			setASP_Ref_List_ID (0);
         } */
@@ -65,7 +91,7 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -85,34 +111,6 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Reference)MTable.get(getCtx(), org.compiere.model.I_AD_Reference.Table_ID)
-			.getPO(getAD_Reference_ID(), get_TrxName());
-	}
-
-	/** Set Reference.
-		@param AD_Reference_ID System Reference and Validation
-	*/
-	public void setAD_Reference_ID (int AD_Reference_ID)
-	{
-		if (AD_Reference_ID < 1)
-			set_Value (COLUMNNAME_AD_Reference_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_Reference_ID, Integer.valueOf(AD_Reference_ID));
-	}
-
-	/** Get Reference.
-		@return System Reference and Validation
-	  */
-	public int getAD_Reference_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Reference_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_AD_Ref_List getAD_Ref_List() throws RuntimeException
 	{
@@ -137,6 +135,34 @@ public class X_ASP_Ref_List extends PO implements I_ASP_Ref_List, I_Persistent
 	public int getAD_Ref_List_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Ref_List_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Reference)MTable.get(getCtx(), org.compiere.model.I_AD_Reference.Table_ID)
+			.getPO(getAD_Reference_ID(), get_TrxName());
+	}
+
+	/** Set Reference.
+		@param AD_Reference_ID System Reference and Validation
+	*/
+	public void setAD_Reference_ID (int AD_Reference_ID)
+	{
+		if (AD_Reference_ID < 1)
+			set_Value (COLUMNNAME_AD_Reference_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Reference_ID, Integer.valueOf(AD_Reference_ID));
+	}
+
+	/** Get Reference.
+		@return System Reference and Validation
+	  */
+	public int getAD_Reference_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Reference_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

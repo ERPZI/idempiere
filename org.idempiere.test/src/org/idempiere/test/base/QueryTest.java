@@ -25,7 +25,9 @@
 package org.idempiere.test.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -44,10 +46,13 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.compiere.model.I_Test;
+import org.compiere.model.MBankAccountProcessor;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MProcess;
+import org.compiere.model.MProduct;
 import org.compiere.model.MTable;
 import org.compiere.model.MTest;
+import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.model.POResultSet;
 import org.compiere.model.Query;
@@ -56,6 +61,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.idempiere.test.AbstractTestCase;
+import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -253,7 +259,7 @@ public class QueryTest extends AbstractTestCase {
 	public void testPaging() {
 		DB.executeUpdateEx("DELETE FROM Test WHERE Name LIKE 'QueryTest%'", getTrxName());
 		for (int i=101; i<=130; i++) {
-			PO testPo = new MTest(Env.getCtx(), "QueryTest", i);
+			PO testPo = new MTest(Env.getCtx(), "QueryTest", i, getTrxName());
 			testPo.save();
 		}
 		Query query = new Query(Env.getCtx(), MTest.Table_Name, "Name LIKE 'QueryTest%'", getTrxName())
@@ -364,7 +370,7 @@ public class QueryTest extends AbstractTestCase {
 		int count = DB.getSQLValueEx(null, "SELECT Count(AD_PInstance_ID) FROM AD_PInstance");
 		if (count == 0) {
 			//Generate Shipments (manual)
-			new MPInstance(MProcess.get(Env.getCtx(), 199), 0);
+			new MPInstance(MProcess.get(Env.getCtx(), 199), 0, 0, null);
 		}
 		
 		// Get one AD_PInstance_ID
@@ -395,7 +401,7 @@ public class QueryTest extends AbstractTestCase {
 	@Test
 	public void testVirtualColumnLoad() {
 		// create bogus record
-		PO testPo = new MTest(Env.getCtx(), getClass().getName(), 1);
+		PO testPo = new MTest(Env.getCtx(), getClass().getName(), 1, getTrxName());
 		testPo.save();
 
 		BigDecimal expected = new BigDecimal("123.45");
@@ -421,4 +427,93 @@ public class QueryTest extends AbstractTestCase {
 		assertEquals(expected, testRecord.getTestVirtualQty().setScale(2, RoundingMode.HALF_UP), "Wrong value returned");
 	}
 
+	@Test
+	public void testTableDirectJoin() {
+		Query query = new Query(Env.getCtx(), MUser.Table_Name, MUser.COLUMNNAME_AD_User_ID + "=?", getTrxName());
+		query.addTableDirectJoin("C_BPartner");
+		query.setParameters(DictionaryIDs.AD_User.GARDEN_USER.id);
+		MUser user = query.first();
+		assertNotNull(user, "Failed to retrieve garden user record");
+		
+		String sql = query.getSQL();
+		assertTrue(sql.toLowerCase().contains("inner join c_bpartner on (ad_user.c_bpartner_id=c_bpartner.c_bpartner_id)"), "Unexpected SQL clause generated from query");
+	}
+	
+	@Test
+	public void testPartialPO() {
+		Query query = new Query(Env.getCtx(), MProduct.Table_Name, MProduct.COLUMNNAME_M_Product_ID + "=?", getTrxName());
+		MProduct product = query.setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).first();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNotNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() > 0);
+		assertFalse(product.is_Immutable());
+		
+		product = query.selectColumns(MProduct.COLUMNNAME_Name, MProduct.COLUMNNAME_Value).setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).first();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() == 0);
+		assertTrue(product.is_Immutable());
+		
+		product = query.selectColumns().setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).first();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNotNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() > 0);
+		assertFalse(product.is_Immutable());
+		
+		List<MProduct> list = query.selectColumns(MProduct.COLUMNNAME_Name, MProduct.COLUMNNAME_Value).setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).list();
+		product = list.get(0);
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() == 0);
+		assertTrue(product.is_Immutable());
+		
+		product = query.selectColumns(MProduct.COLUMNNAME_Name, MProduct.COLUMNNAME_Value).setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).firstOnly();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() == 0);
+		assertTrue(product.is_Immutable());
+		
+		product = (MProduct) query.selectColumns(MProduct.COLUMNNAME_Name, MProduct.COLUMNNAME_Value).setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).scroll().next();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() == 0);
+		assertTrue(product.is_Immutable());
+		
+		Stream<MProduct> stream = query.selectColumns(MProduct.COLUMNNAME_Name, MProduct.COLUMNNAME_Value).setParameters(DictionaryIDs.M_Product.AZALEA_BUSH.id).stream();
+		product = stream.findFirst().get();
+		assertTrue(product.getM_Product_ID() > 0);
+		assertTrue(product.getAD_Client_ID() > 0);
+		assertNotNull(product.getName());
+		assertNotNull(product.getValue());
+		assertNull(product.getProductType());
+		assertTrue(product.getM_Product_Category_ID() == 0);
+		assertTrue(product.is_Immutable());		
+
+		// test if query with select and virtual columns can be ordered by a virtual column
+		Query querybap = new Query(Env.getCtx(), MBankAccountProcessor.Table_Name, MBankAccountProcessor.COLUMNNAME_C_BankAccount_Processor_UU + "=?", getTrxName());
+		MBankAccountProcessor bap = (MBankAccountProcessor) querybap.selectColumns(MBankAccountProcessor.COLUMNNAME_C_BankAccount_ID, MBankAccountProcessor.COLUMNNAME_AcceptCorporate)
+				.setParameters(DictionaryIDs.C_BankAccount_Processor.MONEYBANK_1234.uuid)
+				.setVirtualColumns(MBankAccountProcessor.COLUMNNAME_IsPPAcceptAMEX)
+				.setOrderBy(MBankAccountProcessor.COLUMNNAME_IsPPAcceptAMEX)
+				.scroll().next();
+		assertTrue(bap.getC_BankAccount_ID() > 0);
+	}
 }

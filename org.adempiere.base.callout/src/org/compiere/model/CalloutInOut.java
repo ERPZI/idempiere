@@ -133,7 +133,7 @@ public class CalloutInOut extends CalloutEngine
 		//	Get Details
 		MRMA rma = new MRMA (ctx, M_RMA_ID.intValue(), null);
         MInOut originalReceipt = rma.getShipment();
-		if (rma.get_ID() != 0)
+		if (rma.get_ID() > 0)
 		{
 			mTab.setValue("DateOrdered", originalReceipt.getDateOrdered());
 			mTab.setValue("POReference", originalReceipt.getPOReference());
@@ -162,6 +162,12 @@ public class CalloutInOut extends CalloutEngine
 				mTab.setValue("AD_User_ID", Integer.valueOf(originalReceipt.getAD_User_ID()));
 			else
 				mTab.setValue("AD_User_ID", null);
+			
+	        //Set corresponding document type
+	        int docTypeId = rma.getC_DocType_ID();
+	        int relatedDocTypeId = MDocType.getShipmentReceiptDocType(docTypeId);
+	        if (relatedDocTypeId > 0)
+	        	mTab.setValue("C_DocType_ID", relatedDocTypeId);
 		}
 		return "";
 	}	//	rma
@@ -525,7 +531,7 @@ public class CalloutInOut extends CalloutEngine
 				mTab.setValue("M_Locator_ID", Integer.valueOf(M_Locator_ID));
 		}
 		else
-			mTab.setValue("M_AttributeSetInstance_ID", null);
+			mTab.setValue("M_AttributeSetInstance_ID", 0);
 		//
 		int M_Warehouse_ID = Env.getContextAsInt(ctx, WindowNo, "M_Warehouse_ID");
 		boolean IsSOTrx = "Y".equals(Env.getContext(ctx, WindowNo, "IsSOTrx"));

@@ -17,13 +17,14 @@
 package org.compiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.DBException;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-
+import org.compiere.util.Env;
 
 /**
  *	Accounting Fact Model
@@ -37,7 +38,7 @@ import org.compiere.util.DB;
 public class MFactAcct extends X_Fact_Acct
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 5251847162314796574L;
 
@@ -46,9 +47,10 @@ public class MFactAcct extends X_Fact_Acct
 	 * @param AD_Table_ID table
 	 * @param Record_ID record
 	 * @param trxName transaction
-	 * @return number of rows or -1 for error
+	 * @return number of rows deleted or -1 for error
 	 * @deprecated Since ADempiere 3.5.2a; please use {@link #deleteEx(int, int, String)} instead.
 	 */
+	@Deprecated
 	public static int delete (int AD_Table_ID, int Record_ID, String trxName)
 	{
 		int no = -1;
@@ -63,7 +65,7 @@ public class MFactAcct extends X_Fact_Acct
 	}	//	delete
 	
 	/**
-	 * Delete Accounting
+	 * Delete Fact_Acct records via table and record id
 	 * @param AD_Table_ID table
 	 * @param Record_ID record
 	 * @param trxName transaction
@@ -73,8 +75,20 @@ public class MFactAcct extends X_Fact_Acct
 	public static int deleteEx(int AD_Table_ID, int Record_ID, String trxName)
 	throws DBException
 	{
+		// backup the posting records before delete them
+		final String sqlInsert = "INSERT INTO T_Fact_Acct_History SELECT * FROM Fact_Acct WHERE AD_Table_ID=? AND Record_ID=?";
+		int no = DB.executeUpdateEx(sqlInsert, new Object[]{AD_Table_ID, Record_ID}, trxName);
+		if (no != 0)
+			if (s_log.isLoggable(Level.INFO)) s_log.fine("insert - AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID + " - #" + no);
+		
+		// set the updated to current time - for house keeping purpose
+		final String sqlUpdate = "UPDATE T_Fact_Acct_History SET Updated=? WHERE AD_Table_ID=? AND Record_ID=? AND Created=Updated";
+		no = DB.executeUpdateEx(sqlUpdate.toString(), new Object[] {new Timestamp(System.currentTimeMillis()), AD_Table_ID, Record_ID}, trxName);
+		if (no != 0)
+			if (s_log.isLoggable(Level.INFO)) s_log.fine("update - AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID + " - #" + no);
+				
 		final String sql = "DELETE FROM Fact_Acct WHERE AD_Table_ID=? AND Record_ID=?";
-		int no = DB.executeUpdateEx(sql, new Object[]{AD_Table_ID, Record_ID}, trxName);
+		no = DB.executeUpdateEx(sql, new Object[]{AD_Table_ID, Record_ID}, trxName);
 		if (s_log.isLoggable(Level.FINE)) s_log.fine("delete - AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID + " - #" + no);
 		return no;
 	}
@@ -82,7 +96,17 @@ public class MFactAcct extends X_Fact_Acct
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MFactAcct.class);
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param Fact_Acct_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MFactAcct(Properties ctx, String Fact_Acct_UU, String trxName) {
+        super(ctx, Fact_Acct_UU, trxName);
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param Fact_Acct_ID id
@@ -108,18 +132,20 @@ public class MFactAcct extends X_Fact_Acct
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MFactAcct[");
 		sb.append(get_ID()).append("-Acct=").append(getAccount_ID())
 			.append(",Dr=").append(getAmtSourceDr()).append("|").append(getAmtAcctDr())
 			.append(",Cr=").append(getAmtSourceCr()).append("|").append(getAmtAcctCr())
+			.append(",C_Currency_ID=").append(getC_Currency_ID())
 			.append ("]");
 		return sb.toString ();
 	}	//	toString
 
 	/**
-	 * 	Derive MAccount from record
+	 * 	Get MAccount from record
 	 *	@return Valid Account Combination
 	 */
 	public MAccount getMAccount()
@@ -136,4 +162,19 @@ public class MFactAcct extends X_Fact_Acct
 		return acct;
 	}	//	getMAccount
 
+	private final static String recordIdWhereClause = "AD_Table_ID=? AND Record_ID=? AND C_AcctSchema_ID=?";
+	
+	/**
+	 * Create Fact_Acct query for table and record id
+	 * @param AD_Table_ID
+	 * @param Record_ID
+	 * @param C_AcctSchema_ID
+	 * @param trxName
+	 * @return query
+	 */
+	public static final Query createRecordIdQuery(int AD_Table_ID, int Record_ID, int C_AcctSchema_ID, String trxName) {
+		Query query = new Query(Env.getCtx(), Table_Name, recordIdWhereClause, trxName);
+		return query.setParameters(AD_Table_ID, Record_ID, C_AcctSchema_ID);
+	}
+	
 }	//	MFactAcct

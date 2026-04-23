@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_SchedulerLog
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_SchedulerLog")
-public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persistent 
+public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_SchedulerLog (Properties ctx, int AD_SchedulerLog_ID, String trxName)
@@ -38,8 +38,8 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
       super (ctx, AD_SchedulerLog_ID, trxName);
       /** if (AD_SchedulerLog_ID == 0)
         {
-			setAD_Scheduler_ID (0);
 			setAD_SchedulerLog_ID (0);
+			setAD_Scheduler_ID (0);
 			setIsError (false);
         } */
     }
@@ -50,8 +50,32 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
       super (ctx, AD_SchedulerLog_ID, trxName, virtualColumns);
       /** if (AD_SchedulerLog_ID == 0)
         {
-			setAD_Scheduler_ID (0);
 			setAD_SchedulerLog_ID (0);
+			setAD_Scheduler_ID (0);
+			setIsError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_SchedulerLog (Properties ctx, String AD_SchedulerLog_UU, String trxName)
+    {
+      super (ctx, AD_SchedulerLog_UU, trxName);
+      /** if (AD_SchedulerLog_UU == null)
+        {
+			setAD_SchedulerLog_ID (0);
+			setAD_Scheduler_ID (0);
+			setIsError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_SchedulerLog (Properties ctx, String AD_SchedulerLog_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_SchedulerLog_UU, trxName, virtualColumns);
+      /** if (AD_SchedulerLog_UU == null)
+        {
+			setAD_SchedulerLog_ID (0);
+			setAD_Scheduler_ID (0);
 			setIsError (false);
         } */
     }
@@ -63,7 +87,7 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -83,34 +107,6 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_AD_Scheduler getAD_Scheduler() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Scheduler)MTable.get(getCtx(), org.compiere.model.I_AD_Scheduler.Table_ID)
-			.getPO(getAD_Scheduler_ID(), get_TrxName());
-	}
-
-	/** Set Scheduler.
-		@param AD_Scheduler_ID Schedule Processes
-	*/
-	public void setAD_Scheduler_ID (int AD_Scheduler_ID)
-	{
-		if (AD_Scheduler_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_Scheduler_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_Scheduler_ID, Integer.valueOf(AD_Scheduler_ID));
-	}
-
-	/** Get Scheduler.
-		@return Schedule Processes
-	  */
-	public int getAD_Scheduler_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Scheduler_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Scheduler Log.
 		@param AD_SchedulerLog_ID Result of the execution of the Scheduler
@@ -147,6 +143,34 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
 	public String getAD_SchedulerLog_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_SchedulerLog_UU);
+	}
+
+	public org.compiere.model.I_AD_Scheduler getAD_Scheduler() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Scheduler)MTable.get(getCtx(), org.compiere.model.I_AD_Scheduler.Table_ID)
+			.getPO(getAD_Scheduler_ID(), get_TrxName());
+	}
+
+	/** Set Scheduler.
+		@param AD_Scheduler_ID Schedule Processes
+	*/
+	public void setAD_Scheduler_ID (int AD_Scheduler_ID)
+	{
+		if (AD_Scheduler_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_Scheduler_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_Scheduler_ID, Integer.valueOf(AD_Scheduler_ID));
+	}
+
+	/** Get Scheduler.
+		@return Schedule Processes
+	  */
+	public int getAD_Scheduler_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Scheduler_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Binary Data.
@@ -195,10 +219,10 @@ public class X_AD_SchedulerLog extends PO implements I_AD_SchedulerLog, I_Persis
 	public boolean isError()
 	{
 		Object oo = get_Value(COLUMNNAME_IsError);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

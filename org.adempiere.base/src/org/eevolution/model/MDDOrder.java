@@ -124,6 +124,18 @@ public class MDDOrder extends X_DD_Order implements DocAction
 	}	//	copyFrom
 	
 	
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param DD_Order_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MDDOrder(Properties ctx, String DD_Order_UU, String trxName) {
+        super(ctx, DD_Order_UU, trxName);
+		if (Util.isEmpty(DD_Order_UU))
+			setInitialDefaults();
+    }
+
 	/**************************************************************************
 	 *  Default Constructor
 	 *  @param ctx context
@@ -135,36 +147,40 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		super (ctx, DD_Order_ID, trxName);
 		//  New
 		if (DD_Order_ID == 0)
-		{
-			setDocStatus(DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Prepare);
-			//
-			setDeliveryRule (DELIVERYRULE_Availability);
-			setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
-			setPriorityRule (PRIORITYRULE_Medium);
-			setDeliveryViaRule (DELIVERYVIARULE_Pickup);
-			//
-			setIsSelected (false);
-			setIsSOTrx (true);
-			setIsDropShip(false);
-			setSendEMail (false);
-			//
-			setIsApproved(false);
-			setIsPrinted(false);
-			setIsDelivered(false);
-			//
-			super.setProcessed(false);
-			setProcessing(false);
-			setPosted(false);
-			
-			setDatePromised (new Timestamp(System.currentTimeMillis()));
-			setDateOrdered (new Timestamp(System.currentTimeMillis()));
-
-			setFreightAmt (Env.ZERO);
-			setChargeAmt (Env.ZERO);
-
-		}
+			setInitialDefaults();
 	}	//	MDDOrder
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocStatus(DOCSTATUS_Drafted);
+		setDocAction (DOCACTION_Prepare);
+		//
+		setDeliveryRule (DELIVERYRULE_Availability);
+		setFreightCostRule (FREIGHTCOSTRULE_FreightIncluded);
+		setPriorityRule (PRIORITYRULE_Medium);
+		setDeliveryViaRule (DELIVERYVIARULE_Pickup);
+		//
+		setIsSelected (false);
+		setIsSOTrx (true);
+		setIsDropShip(false);
+		setSendEMail (false);
+		//
+		setIsApproved(false);
+		setIsPrinted(false);
+		setIsDelivered(false);
+		//
+		super.setProcessed(false);
+		setProcessing(false);
+		setPosted(false);
+		
+		setDatePromised (new Timestamp(System.currentTimeMillis()));
+		setDateOrdered (new Timestamp(System.currentTimeMillis()));
+
+		setFreightAmt (Env.ZERO);
+		setChargeAmt (Env.ZERO);
+	}
 
 	/**************************************************************************
 	 *  Project Constructor
@@ -579,13 +595,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		if (log.isLoggable(Level.FINE)) log.fine("setProcessed - " + processed + " - Lines=" + noLine);
 	}	//	setProcessed
 	
-	
-	
-	/**************************************************************************
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return save
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		//	Client/Org Check
@@ -620,7 +630,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 				return false;
 			}
 		}
-		//	Reservations in Warehouse
+		// Validate whether it is ok to change warehouse 
 		if (!newRecord && is_ValueChanged("M_Warehouse_ID"))
 		{
 			MDDOrderLine[] lines = getLines(false,null);
@@ -634,9 +644,9 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		//	No Partner Info - set Template
 		if (getC_BPartner_ID() == 0)
 			setBPartner(MBPartner.getTemplate(getCtx(), getAD_Client_ID()));
+		// Set default values from business partner
 		if (getC_BPartner_Location_ID() == 0)
 			setBPartner(new MBPartner(getCtx(), getC_BPartner_ID(), null));
-
 
 		//	Default Sales Rep
 		if (getSalesRep_ID() == 0)
@@ -649,19 +659,13 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		return true;
 	}	//	beforeSave
 	
-	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return true if can be saved
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success || newRecord)
 			return success;
 		
-		//	Propagate Description changes
+		//	Propagate Description and POReference change to M_Movement records
 		if (is_ValueChanged("Description") || is_ValueChanged("POReference"))
 		{
 			String sql = "UPDATE M_Movement i"
@@ -684,6 +688,10 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		return true;
 	}	//	afterSave
 
+	/**
+	 * Copy columnName value to line (MDDOrderLine) records
+	 * @param columnName
+	 */
 	private void afterSaveSync (String columnName)
 	{
 		if (is_ValueChanged(columnName))
@@ -713,16 +721,13 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		m_forceCreation = forceCreation;
 	}	//	setDocAction
 
-
-	/**
-	 * 	Before Delete
-	 *	@return true of it can be deleted
-	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		if (isProcessed())
 			return false;
 		
+		// Delete lines
 		getLines();
 		for (int i = 0; i < m_lines.length; i++)
 		{
@@ -731,7 +736,7 @@ public class MDDOrder extends X_DD_Order implements DocAction
 		return true;
 	}	//	beforeDelete
  
-	/**************************************************************************
+	/**
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed

@@ -1,5 +1,5 @@
 /******************************************************************************
-// * Product: Adempiere ERP & CRM Smart Business Solution                       *
+ * Product: Adempiere ERP & CRM Smart Business Solution                       *
  * Copyright (C) 1999-2006 ComPiere, Inc. All Rights Reserved.                *
  * This program is free software; you can redistribute it and/or modify it    *
  * under the terms version 2 of the GNU General Public License as published   *
@@ -32,8 +32,15 @@ import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ConfirmPanel;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.SimpleListModel;
+import org.adempiere.webui.component.Tab;
+import org.adempiere.webui.component.Tabbox;
+import org.adempiere.webui.component.Tabpanel;
+import org.adempiere.webui.component.Tabpanels;
+import org.adempiere.webui.component.Tabs;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.DataStatusEvent;
 import org.compiere.model.GridField;
@@ -44,6 +51,7 @@ import org.compiere.model.MColumn;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
@@ -56,6 +64,7 @@ import org.compiere.util.NamePair;
 import org.compiere.util.Util;
 import org.zkoss.zhtml.Pre;
 import org.zkoss.zhtml.Text;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -65,12 +74,9 @@ import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
-import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
 import org.zkoss.zul.North;
-import org.zkoss.zul.Radio;
-import org.zkoss.zul.Radiogroup;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Toolbarbutton;
 
@@ -90,7 +96,7 @@ import org.zkoss.zul.Toolbarbutton;
 public class WRecordInfo extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -7436682051825360216L;
 
@@ -120,7 +126,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		this.setSizable(true);
 		this.setClosable(true);
 		this.setMaximizable(true);
-		this.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "recordInfo");
+		this.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "recordInfo");
 		this.setSclass("popup-dialog record-info-dialog");
 		
 		try
@@ -135,14 +141,15 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		AEnv.showCenterScreen(this);
 	}	//	RecordInfo
 
-
+	/** listbox for change logs */
 	private Listbox table = new Listbox();
+	/** timeline view */
 	private RecordTimeLinePanel timeLinePanel = new RecordTimeLinePanel();
 	private ConfirmPanel confirmPanel = new ConfirmPanel (false);
 
 	/**	Logger			*/
 	private static final CLogger	log = CLogger.getCLogger(WRecordInfo.class);
-	/** The Data		*/
+	/** Change Log Data		*/
 	private Vector<Vector<String>>	m_data = new Vector<Vector<String>>();
 	/** Info			*/
 	private StringBuffer	m_info = new StringBuffer();
@@ -150,6 +157,8 @@ public class WRecordInfo extends Window implements EventListener<Event>
 	private Toolbarbutton m_permalink = new Toolbarbutton();
 	/** Copy Select			*/
 	private Toolbarbutton m_copySelect = new Toolbarbutton();
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	/** Date Time Format		*/
 	private SimpleDateFormat	m_dateTimeFormat = DisplayType.getDateFormat
@@ -166,14 +175,18 @@ public class WRecordInfo extends Window implements EventListener<Event>
 	/** Number Format		*/
 	private DecimalFormat		m_intFormat = DisplayType.getNumberFormat
 		(DisplayType.Integer, Env.getLanguage(Env.getCtx()));
+	private Component tabPanels;
+	private UserPreference userPreference;
+	private Tabbox tabbox;
+	private int windowNo;
 
 	/**
-	 * 	Static Layout
+	 * 	Layout dialog
+	 *  @param showTable
 	 *	@throws Exception
 	 */
 	private void init (boolean showTable) throws Exception
 	{
-
 		Div div = new Div();
 		div.setStyle("width: 100%; height: 100%");
 		Pre pre = new Pre();
@@ -199,39 +212,17 @@ public class WRecordInfo extends Window implements EventListener<Event>
 			north.appendChild(div);						
 			center.appendChild(table);
 			
-			Radiogroup group = new Radiogroup();
-			div.appendChild(group);
-			Hlayout hlayout = new Hlayout();
-			hlayout.setSclass("record-info-radiogroup");
-			Radio radio = new Radio(Msg.getElement(Env.getCtx(), "AD_ChangeLog_ID"));
-			radio.setRadiogroup(group);
-			hlayout.appendChild(radio);		
-			radio = new Radio(Msg.getMsg(Env.getCtx(), "TimeLine"));
-			radio.setRadiogroup(group);
-			hlayout.appendChild(radio);		
-			div.appendChild(hlayout);
-			group.setSelectedIndex(0);
-			
-			group.addEventListener(Events.ON_CHECK, evt -> {
-				int index = group.getSelectedIndex();
-				if (index == 0) {
-					if (table.getParent() == null && timeLinePanel.getParent() != null) {
-						timeLinePanel.detach();
-						center.appendChild(table);
-					}
-				} else if (index == 1) {
-					if (table.getParent() != null && timeLinePanel.getParent() == null) {
-						table.detach();
-						center.appendChild(timeLinePanel);
-					}
-				}
-			});
-			
-			if (ClientInfo.isMobile())
-			{
-				group.setSelectedIndex(1);
-				Events.sendEvent(Events.ON_CHECK, group, null);
-			}
+			tabbox = new Tabbox();
+			ZKUpdateUtil.setVflex(tabbox, "1");
+			ZKUpdateUtil.setHflex(tabbox, "1");
+			Tabs tabs = new Tabs();
+			tabs.setParent(tabbox);
+			tabPanels = new Tabpanels();
+			tabPanels.setParent(tabbox);
+			tabbox.addEventListener(Events.ON_SELECT, this);
+
+			initTabs(tabs);
+			center.appendChild(tabbox);
 		}
 		else
 		{
@@ -259,12 +250,47 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		
 		confirmPanel.addActionListener(Events.ON_CLICK, this);
 		addEventListener(Events.ON_CANCEL, e -> onCancel());
-	}	//	jbInit
+	}	//	init
 	
 	
+	private void initTabs(Tabs tabs) {
+		Tab tab = new Tab();
+		tab.setId("C");
+		tab.setLabel(Msg.getElement(Env.getCtx(), "AD_ChangeLog_ID"));
+		tab.setParent(tabs);
+		Tabpanel tabPanel = createTable();
+		tabPanel.setParent(tabPanels);
+		
+		tab = new Tab();
+		tab.setId("T");
+		tab.setLabel(Msg.getMsg(Env.getCtx(), "TimeLine"));
+		tab.setParent(tabs);
+		tabPanel = createTimeline();
+		tabPanel.setParent(tabPanels);
+		
+		if("T".equals(userPreference.getProperty(UserPreference.P_RECORD_INFO_DEFAULT_TAB)) || ClientInfo.isMobile())
+			tab.setSelected(true);
+	}
+
+
+	private Tabpanel createTable() {
+		Tabpanel tabPanel = new Tabpanel();
+		tabPanel.appendChild(table);
+		return tabPanel;
+	}
+
+
+	private Tabpanel createTimeline() {
+		Tabpanel tabPanel = new Tabpanel();
+		tabPanel.appendChild(timeLinePanel);
+		return tabPanel;
+	}
+
+
+
 	/**
-	 * 	Dynamic Init
-	 * @param gridTab 
+	 * 	Load change logs
+	 *  @param gridTab 
 	 *	@param dse data status event
 	 *	@param title title
 	 *	@return true if table initialized
@@ -275,23 +301,28 @@ public class WRecordInfo extends Window implements EventListener<Event>
 			return false;
 		//  Info
 		MUser user = MUser.get(Env.getCtx(), dse.CreatedBy.intValue());
-		m_info.append(" ")
-			.append(Msg.translate(Env.getCtx(), "CreatedBy"))
-			.append(": ").append(user.getName())
-			.append(" - ").append(m_dateTimeFormat.format(dse.Created)).append("\n");
-		
-		if (!dse.Created.equals(dse.Updated) 
-			|| !dse.CreatedBy.equals(dse.UpdatedBy))
+		if (!ClientInfo.isMobile())
+			m_info.append(" ")
+				.append(Msg.getElement(Env.getCtx(), "CreatedBy"))
+				.append(": ").append(user.getName())
+				.append(" - ").append(m_dateTimeFormat.format(dse.Created)).append("\n");
+
+		// get user preference
+		userPreference = new UserPreference();
+		userPreference.loadPreference(user.getAD_User_ID());
+
+		if ((!dse.Created.equals(dse.Updated)
+			|| !dse.CreatedBy.equals(dse.UpdatedBy)) && !ClientInfo.isMobile())
 		{
 			if (!dse.CreatedBy.equals(dse.UpdatedBy))
 				user = MUser.get(Env.getCtx(), dse.UpdatedBy.intValue());
 			m_info.append(" ")
-				.append(Msg.translate(Env.getCtx(), "UpdatedBy"))
+				.append(Msg.getElement(Env.getCtx(), "UpdatedBy"))
 				.append(": ").append(user.getName())
 				.append(" - ").append(m_dateTimeFormat.format(dse.Updated)).append("\n");
 		}
 		if (dse.Info != null && dse.Info.length() > 0)
-			m_info.append("\n ").append(dse.Info).append("");
+			m_info.append(ClientInfo.isMobile() ? " " : "\n ").append(dse.Info).append("");
 		
 		//get uuid
 		GridTable gridTable = null;
@@ -299,26 +330,31 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		if (gridTab != null)
 		{
 			gridTable = gridTab.getTableModel();
+			windowNo = gridTab.getWindowNo();
 		}
 		else if (dse.getSource() instanceof GridTab) 
 		{
 			gridTab = (GridTab) dse.getSource();
 			gridTable = gridTab.getTableModel();			
 			tabName = gridTab.getName();
+			windowNo = gridTab.getWindowNo();
 		}
 		else if (dse.getSource() instanceof GridTable)
 		{
 			gridTable = (GridTable) dse.getSource();
 			GridField firstField = gridTable.getField(0);
-			if (firstField != null && firstField.getGridTab() != null)
-				tabName = firstField.getGridTab().getName();
+			if (firstField != null) {
+				windowNo = firstField.getWindowNo();
+				if (firstField.getGridTab() != null) {
+					tabName = firstField.getGridTab().getName();
+				}
+			}
 		}
 
 		int Record_ID = -1;
 		if (dse.Record_ID instanceof Integer)
 			Record_ID = ((Integer)dse.Record_ID).intValue();
-		else
-			log.info("dynInit - Invalid Record_ID=" + dse.Record_ID);
+		String Record_UU = null;
 
 		MTable dbtable = null;
 		if (dse.AD_Table_ID != 0)
@@ -329,42 +365,33 @@ public class WRecordInfo extends Window implements EventListener<Event>
 			PO po = gridTable.getPO(dse.getCurrentRow());
 			if (po != null) {
 				String uuidcol = po.getUUIDColumnName();
-				String uuid = null;
-				if (po.is_new()) {
-					if (Record_ID == 0 && MTable.isZeroIDTable(dbtable.getTableName())) {
-						StringBuilder sql = new StringBuilder("SELECT ")
-								.append(uuidcol)
-								.append(" FROM ")
-								.append(dbtable.getTableName())
-								.append(" WHERE ")
-								.append(dbtable.getTableName())
-								.append("_ID=0");
-						uuid = DB.getSQLValueString(null, sql.toString());
-					}
-				} else {
-					uuid = po.get_ValueAsString(uuidcol);
+				Record_UU = po.get_UUID();
+				if (!Util.isEmpty(Record_UU)) {
+					StringBuilder uuinfo = new StringBuilder(uuidcol).append("=").append(Record_UU);
+					if (! m_info.toString().contains(uuinfo))
+						m_info.append("\n ").append(uuinfo);
 				}
-				if (!Util.isEmpty(uuid))
-					m_info.append("\n ").append(uuidcol).append("=").append(uuid);
-				if (po.get_KeyColumns().length == 1) {
-					m_permalink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
-						public void onEvent(Event event) throws Exception {
-							String ticketURL = AEnv.getZoomUrlTableID(po);
-							StringBuffer sb = new StringBuffer("navigator.clipboard.writeText(\"")
+				String ticketURL;
+				if (Record_ID <= 0)
+					ticketURL = AEnv.getZoomUrlTableUU(po);
+				else
+					ticketURL = AEnv.getZoomUrlTableID(po);
+				m_permalink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+					public void onEvent(Event event) throws Exception {
+						StringBuffer sb = new StringBuffer("navigator.clipboard.writeText(\"")
 								.append(ticketURL)
 								.append("\");");
-							Clients.evalJavaScript(sb.toString());
-							Notification.show(Msg.getMsg(Env.getCtx(), "Copied"), Notification.TYPE_INFO, m_permalink, "end_before", 1000);
-						}
-					});
-				}
-				m_permalink.setVisible(po.get_KeyColumns().length == 1);
+						Clients.evalJavaScript(sb.toString());
+						Notification.show(Msg.getMsg(Env.getCtx(), "Copied"), Notification.TYPE_INFO, m_permalink, "end_before", 1000);
+					}
+				});
+				final String whereClause = po.get_WhereClause(true);
 				m_copySelect.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 					public void onEvent(Event event) throws Exception {
 						StringBuffer query = new StringBuffer("navigator.clipboard.writeText(\"SELECT * FROM ")
 							.append(po.get_TableName())
 							.append(" WHERE ")
-							.append(po.get_WhereClause(true));
+							.append(whereClause);
 						query.append("\");");
 						Clients.evalJavaScript(query.toString());
 						Notification.show(Msg.getMsg(Env.getCtx(), "Copied"), Notification.TYPE_INFO, m_copySelect, "end_before", 1000);
@@ -389,13 +416,13 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		if (!MRole.PREFERENCETYPE_Client.equals(MRole.getDefault().getPreferenceType()))
 			return false;
 		
-		if (Record_ID <= 0)
+		if (Record_ID <= 0 && Util.isEmpty(Record_UU))
 			return false;
 		
 		//	Data
 		String sql = "SELECT AD_Column_ID, Updated, UpdatedBy, OldValue, NewValue "
 			+ "FROM AD_ChangeLog "
-			+ "WHERE AD_Table_ID=? AND Record_ID=? "
+			+ "WHERE AD_Table_ID=? AND (Record_ID=? OR Record_UU=?) "
 			+ "ORDER BY Updated DESC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -404,6 +431,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 			pstmt = DB.prepareStatement (sql, null);
 			pstmt.setInt (1, dse.AD_Table_ID);
 			pstmt.setInt (2, Record_ID);
+			pstmt.setString (3, Record_UU);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
@@ -424,12 +452,12 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		
 		//
 		ArrayList<String> columnNames = new ArrayList<String>();
-		columnNames.add(Msg.translate(Env.getCtx(), "Name"));
-		columnNames.add(Msg.translate(Env.getCtx(), "NewValue"));
-		columnNames.add(Msg.translate(Env.getCtx(), "OldValue"));
-		columnNames.add(Msg.translate(Env.getCtx(), "UpdatedBy"));
-		columnNames.add(Msg.translate(Env.getCtx(), "Updated"));
-		columnNames.add(Msg.translate(Env.getCtx(), "AD_Column_ID"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "Name"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "NewValue"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "OldValue"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "UpdatedBy"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "Updated"));
+		columnNames.add(Msg.getElement(Env.getCtx(), "AD_Column_ID"));
 		
 		Listhead listhead = new Listhead();
 		listhead.setSizable(true);
@@ -449,7 +477,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 	}	//	dynInit
 	
 	/**
-	 * 	Add Line
+	 * 	Add change log line to {@link #m_data}
 	 *	@param AD_Column_ID column
 	 *	@param Updated updated
 	 *	@param UpdatedBy user
@@ -462,7 +490,7 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		Vector<String> line = new Vector<String>();
 		//	Column
 		MColumn column = MColumn.get (Env.getCtx(), AD_Column_ID);
-		line.add(Msg.translate(Env.getCtx(), column.getColumnName()));
+		line.add(Msg.getElement(Env.getCtx(), column.getColumnName(), Env.isSOTrx(Env.getCtx(), windowNo)));
 		//
 		if (OldValue != null && OldValue.equals(MChangeLog.NULL))
 			OldValue = null;
@@ -568,13 +596,25 @@ public class WRecordInfo extends Window implements EventListener<Event>
 		m_data.add(line);
 	}	//	addLine
 	
-	
+	@Override
 	public void onEvent(Event event) throws Exception {
+		if(event.getName().equals(Events.ON_SELECT)) {
+			Tab selectedTab = (Tab) tabbox.getSelectedTab();
+			userPreference.setProperty(UserPreference.P_RECORD_INFO_DEFAULT_TAB, selectedTab.getId());
+			userPreference.savePreference();
+			return;
+		}
 		onCancel();
 	}
 
-
+	/**
+	 * Handle onCancel event
+	 */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		this.detach();
 	}
 

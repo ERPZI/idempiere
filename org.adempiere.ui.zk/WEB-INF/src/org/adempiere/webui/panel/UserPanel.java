@@ -26,12 +26,14 @@ import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.component.Messagebox;
 import org.adempiere.webui.session.SessionManager;
+import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.FeedbackManager;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.WPreference;
 import org.compiere.model.MClient;
 import org.compiere.model.MOrg;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.MWarehouse;
 import org.compiere.util.Env;
@@ -48,15 +50,13 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.Composer;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Popup;
-import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.impl.LabelImageElement;
 
 /**
- *
+ * Desktop header panel for user info
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class UserPanel implements EventListener<Event>, Composer<Component>
 {
@@ -82,12 +82,18 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 	private static final String ON_DEFER_CHANGE_ROLE = "onDeferChangeRole";
 	private static final String ON_DEFER_LOGOUT = "onDeferLogout";
 
+	/**
+	 * Default constructor
+	 */
 	public UserPanel()
     {
     	super();
         this.ctx = Env.getCtx();
     }
 
+	/**
+	 * Call when UI is compose from zul definition
+	 */
     protected void onCreate()
     {
     	String s = Msg.getMsg(Env.getCtx(), "CloseTabFromBrowser?").replace("\n", "<br>");
@@ -121,11 +127,20 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	logout.addEventListener(Events.ON_CLICK, this);
     	
     	feedbackMenu = new Menupopup();
+		
     	Menuitem mi = new Menuitem(Msg.getMsg(Env.getCtx(), "RequestNew"));
+    	if (ThemeManager.isUseFontIconForImage())
+    		mi.setIconSclass("z-icon-comment");
+    	else
+    		mi.setImage(ThemeManager.getThemeResource("images/Request16.png"));
     	mi.setId("CreateRequest");
     	feedbackMenu.appendChild(mi);
     	mi.addEventListener(Events.ON_CLICK, this);
     	mi = new Menuitem(Msg.getMsg(Env.getCtx(), "EMailSupport"));
+    	if (ThemeManager.isUseFontIconForImage())
+    		mi.setIconSclass("z-icon-envelope");
+    	else
+    		mi.setImage(ThemeManager.getThemeResource("images/SendMail16.png"));
     	mi.setId("EmailSupport");
     	mi.addEventListener(Events.ON_CLICK, this);
     	feedbackMenu.appendChild(mi);
@@ -143,28 +158,43 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	}
     }
 
+    /**
+     * @return true if client is mobile
+     */
     private boolean isMobile() {
 		return ClientInfo.isMobile();
 	}
 
+    /**
+     * @return name of user
+     */
 	private String getUserName()
     {
         MUser user = MUser.get(ctx);
         return user.getName();
     }
 
+	/**
+	 * @return name of role
+	 */
     private String getRoleName()
     {
         MRole role = MRole.getDefault(ctx, false);
         return role.getName();
     }
 
+    /**
+     * @return name of tenant
+     */
     private String getClientName()
     {
         MClient client = MClient.get(ctx);
         return client.getName();
     }
 
+    /**
+     * @return name of organization
+     */
     private String getOrgName()
     {
     	int orgId = Env.getAD_Org_ID(ctx);
@@ -179,6 +209,7 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
     	}
     }
 
+    @Override
 	public void onEvent(Event event) throws Exception {
 		if (event == null)
 			return;
@@ -244,7 +275,11 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 		}
 		else if (feedback == event.getTarget())
 		{
-			if (feedbackMenu.getPage() == null)
+			if (isMobile() && userPanelLinksContainer != null)
+			{
+				userPanelLinksContainer.appendChild(feedbackMenu);
+			}
+			else if (feedbackMenu.getPage() == null)
 			{
 				component.appendChild(feedbackMenu);
 			}
@@ -292,6 +327,9 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 
 	}
 
+    /**
+     * Open user panel popup for mobile client
+     */
 	protected void openMobileUserPanelPopup() {
 		if (popup != null) {
 			Object value = popup.removeAttribute(popup.getUuid());
@@ -323,7 +361,11 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 		String warehouse = getWarehouseName();
 		if (!Util.isEmpty(warehouse))
 			layout.appendChild(new Label(warehouse));
-		layout.appendChild(new Space());
+		String msgText = "";
+		String msgValue = MSysConfig.getValue(MSysConfig.ZK_DESKTOP_HEADER_MESSAGE_VALUE);
+		if (!Util.isEmpty(msgValue, true))
+			msgText = Msg.getMsg(Env.getCtx(), msgValue);
+		layout.appendChild(new Label(msgText));
 		layout.appendChild(userPanelLinksContainer);
 		
 		popup.appendChild(layout);
@@ -339,11 +381,17 @@ public class UserPanel implements EventListener<Event>, Composer<Component>
 		
 	}
 
+	/**
+	 * @return email of user
+	 */
 	private String getUserEmail() {
 		 MUser user = MUser.get(ctx);
 		return user.getEMail();
 	}
 
+	/**
+	 * @return name of warehouse
+	 */
 	private String getWarehouseName() {
 		int id = Env.getContextAsInt(Env.getCtx(), Env.M_WAREHOUSE_ID);
 		if (id > 0) {

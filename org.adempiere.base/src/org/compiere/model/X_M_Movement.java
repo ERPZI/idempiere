@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_Movement
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_Movement")
-public class X_M_Movement extends PO implements I_M_Movement, I_Persistent 
+public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_Movement (Properties ctx, int M_Movement_ID, String trxName)
@@ -80,6 +80,50 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Movement (Properties ctx, String M_Movement_UU, String trxName)
+    {
+      super (ctx, M_Movement_UU, trxName);
+      /** if (M_Movement_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setIsInTransit (false);
+			setM_Movement_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Movement (Properties ctx, String M_Movement_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Movement_UU, trxName, virtualColumns);
+      /** if (M_Movement_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setIsInTransit (false);
+			setM_Movement_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Movement (Properties ctx, ResultSet rs, String trxName)
     {
@@ -87,7 +131,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -345,25 +389,6 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Charge amount.
-		@param ChargeAmt Charge Amount
-	*/
-	public void setChargeAmt (BigDecimal ChargeAmt)
-	{
-		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
-	}
-
-	/** Get Charge amount.
-		@return Charge Amount
-	  */
-	public BigDecimal getChargeAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -392,6 +417,25 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Charge amount.
+		@param ChargeAmt Charge Amount
+	*/
+	public void setChargeAmt (BigDecimal ChargeAmt)
+	{
+		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
+	}
+
+	/** Get Charge amount.
+		@return Charge Amount
+	  */
+	public BigDecimal getChargeAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Create lines from.
 		@param CreateFrom Process which will generate a new document lines based on an existing document
 	*/
@@ -406,22 +450,6 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public String getCreateFrom()
 	{
 		return (String)get_Value(COLUMNNAME_CreateFrom);
-	}
-
-	/** Set Date Received.
-		@param DateReceived Date a product was received
-	*/
-	public void setDateReceived (Timestamp DateReceived)
-	{
-		set_Value (COLUMNNAME_DateReceived, DateReceived);
-	}
-
-	/** Get Date Received.
-		@return Date a product was received
-	  */
-	public Timestamp getDateReceived()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_DateReceived);
 	}
 
 	public org.eevolution.model.I_DD_Order getDD_Order() throws RuntimeException
@@ -449,6 +477,22 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Date Received.
+		@param DateReceived Date a product was received
+	*/
+	public void setDateReceived (Timestamp DateReceived)
+	{
+		set_Value (COLUMNNAME_DateReceived, DateReceived);
+	}
+
+	/** Get Date Received.
+		@return Date a product was received
+	  */
+	public Timestamp getDateReceived()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateReceived);
 	}
 
 	/** DeliveryRule AD_Reference_ID=151 */
@@ -632,7 +676,7 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -699,10 +743,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -722,10 +766,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isInTransit()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInTransit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -768,22 +812,6 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		return (String)get_Value(COLUMNNAME_M_Movement_UU);
 	}
 
-	/** Set Movement Date.
-		@param MovementDate Date a product was moved in or out of inventory
-	*/
-	public void setMovementDate (Timestamp MovementDate)
-	{
-		set_Value (COLUMNNAME_MovementDate, MovementDate);
-	}
-
-	/** Get Movement Date.
-		@return Date a product was moved in or out of inventory
-	  */
-	public Timestamp getMovementDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
-	}
-
 	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_Shipper)MTable.get(getCtx(), org.compiere.model.I_M_Shipper.Table_ID)
@@ -807,34 +835,6 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public int getM_Shipper_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_Shipper_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_ID)
-			.getPO(getM_Warehouse_ID(), get_TrxName());
-	}
-
-	/** Set Warehouse.
-		@param M_Warehouse_ID Storage Warehouse and Service Point
-	*/
-	public void setM_Warehouse_ID (int M_Warehouse_ID)
-	{
-		if (M_Warehouse_ID < 1)
-			set_Value (COLUMNNAME_M_Warehouse_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
-	}
-
-	/** Get Warehouse.
-		@return Storage Warehouse and Service Point
-	  */
-	public int getM_Warehouse_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -868,6 +868,50 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Warehouse)MTable.get(getCtx(), org.compiere.model.I_M_Warehouse.Table_ID)
+			.getPO(getM_Warehouse_ID(), get_TrxName());
+	}
+
+	/** Set Warehouse.
+		@param M_Warehouse_ID Storage Warehouse and Service Point
+	*/
+	public void setM_Warehouse_ID (int M_Warehouse_ID)
+	{
+		if (M_Warehouse_ID < 1)
+			set_Value (COLUMNNAME_M_Warehouse_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Warehouse_ID, Integer.valueOf(M_Warehouse_ID));
+	}
+
+	/** Get Warehouse.
+		@return Storage Warehouse and Service Point
+	  */
+	public int getM_Warehouse_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Warehouse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Movement Date.
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
 	/** Set Order Reference.
 		@param POReference Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
 	*/
@@ -898,10 +942,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -950,10 +994,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -991,10 +1035,10 @@ public class X_M_Movement extends PO implements I_M_Movement, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

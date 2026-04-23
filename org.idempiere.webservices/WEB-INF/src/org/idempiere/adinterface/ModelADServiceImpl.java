@@ -147,17 +147,16 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	}
 
 	public ModelADServiceImpl()
-	{
-		
-		log.info("Creating session object ADService");
+	{		
+		if (log.isLoggable(Level.INFO)) log.info("Creating session object ADService");
 	}
 	
 	public ModelADServiceImpl(WebServiceContext soapContext,  MessageContext jaxrsContext)
 	{
 		this.jaxwsContext = soapContext;
 		this.jaxrsContext = jaxrsContext;
-		
-		log.info("Creating session object ADService");
+				
+		if (log.isLoggable(Level.INFO)) log.info("Creating session object ADService");
 	}
 	public String getVersion() {
 		return "0.8.0";
@@ -355,7 +354,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			return -1;
 		if (string.equals(io.toString()))
 			return i;
-		if (parameterName.endsWith("_ID") && ADLookup.isUUID(string)) {
+		if (parameterName.endsWith("_ID") && Util.isUUID(string)) {
 			String tableName = parameterName.substring(0, parameterName.length()-3);
 			StringBuilder sql = new StringBuilder("SELECT ");
 			sql.append(parameterName).append(" FROM ").append(tableName)
@@ -454,7 +453,7 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		if (xmlInt != null) {
 			// String xml <...> blocks
 		    String content = xmlInt.toString().replaceAll("<[^>]*>", "");
-		    if (! Util.isEmpty(content, true) && ADLookup.isUUID(content))
+		    if (! Util.isEmpty(content, true) && Util.isUUID(content))
 		    	return content;
 		}
 
@@ -1008,12 +1007,6 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 			if (po == null)
 				return rollbackAndSetError(trx, resp, ret, true, "Cannot create PO for " + tableName);
 	
-			if (po.get_ColumnIndex("Processed") >= 0 && po.get_ValueAsBoolean("Processed")) {
-				resp.setError("Record not updatable for " + table.getTableName() + "_ID = " + record_id);
-				resp.setIsError(true);
-				return ret;
-			}
-	
 			// Setting value back from holder to new persistent po
 			for (DataField field : fields) {
 				int indx = poinfo.getColumnIndex(field.getColumn());
@@ -1186,6 +1179,8 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 		//Clear ctx
 		Env.clearWinContext(Env.getCtx(),0);
 		
+		boolean isProcessed = po.get_ColumnIndex("Processed")>=0 && po.get_ValueAsBoolean("Processed");
+		
 		for (DataField field : fields) {
 			// Implement lookup
 			X_WS_WebServiceFieldInput fieldInput = m_webservicetype.getFieldInput(field.getColumn());
@@ -1213,6 +1208,9 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 								+ ": input column " + field.getColumn() + " does not exist");
 					} else {
 						try {
+							if(!MColumn.get(fieldInput.getAD_Column_ID()).isAlwaysUpdateable() && isProcessed)
+								throw new IdempiereServiceFault("Document Processed", new QName("ProcessedDocument"));
+								
 							setValueAccordingToClass(po, poinfo, field, idxcol,fieldInput);
 						} catch (IdempiereServiceFault e) {
 							log.log(Level.WARNING, "Error setting value", e);
@@ -1288,12 +1286,6 @@ public class ModelADServiceImpl extends AbstractService implements ModelADServic
 	    	if (po == null)
 	    		return rollbackAndSetError(trx, resp, ret, true, "No Record " + recordID + " in " + tableName);
 	    	POInfo poinfo = POInfo.getPOInfo(ctx, table.getAD_Table_ID());
-
-	    	if(po.get_ColumnIndex("Processed")>=0 && po.get_ValueAsBoolean("Processed")){
-	    		resp.setError("Record is processed and can not be updated");
-	    		resp.setIsError(true);
-	    		return ret;
-	    	}
 
 	    	DataRow dr = modelCRUD.getDataRow();
 	    	

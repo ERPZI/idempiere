@@ -17,12 +17,16 @@ package org.adempiere.webui.editor;
 import java.util.logging.Level;
 
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.window.WImageDialog;
 import org.compiere.model.GridField;
 import org.compiere.model.MImage;
+import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
+import org.compiere.util.CacheMgt;
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
@@ -30,14 +34,15 @@ import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Cell;
+import org.zkoss.zul.Html;
 import org.zkoss.zul.Image;
 
 /**
- * This class is based on org.compiere.grid.ed.VImage written by Jorg Janke.
- * @author Jorg Janke
+ * Default editor for {@link DisplayType#Image}.<br/>
+ * Implemented with {@link Image} component and {@link WImageDialog}.
  * 
- * Modifications - UI Compatibility
  * @author Low Heng Sin
  */
 public class WImageEditor extends WEditor
@@ -94,11 +99,14 @@ public class WImageEditor extends WEditor
     	return (Image) component;
     }
     
+    /**
+     * Init component
+     */
     private void init()
     {
     	AImage img = null;
         getComponent().setContent(img);
-        getComponent().setSclass("image-field image-fit-contain");        
+        getComponent().setSclass("image-field");        
     }
 
      @Override
@@ -154,6 +162,14 @@ public class WImageEditor extends WEditor
 			m_mImage = null;
 			AImage img = null;
 			getComponent().setContent(img);
+			ZkCssHelper.removeStyle(getComponent(), "width");
+			ZkCssHelper.removeStyle(getComponent(), "height");
+			LayoutUtils.removeSclass("thumbnail", getComponent());
+			LayoutUtils.removeSclass("image-fit", getComponent());
+			getComponent().setClientAttribute("onmouseenter", null);
+			getComponent().setClientAttribute("onmouseleave", null);
+			//invalidate necessary for setClientAttribute to work
+			getComponent().invalidate();
 			return;
 		}
 		//  Get/Create Image
@@ -171,13 +187,36 @@ public class WImageEditor extends WEditor
 			}
 		}
 		getComponent().setContent(img);
+		if (img != null)
+		{
+			String width = MSysConfig.getIntValue(MSysConfig.ZK_THUMBNAIL_IMAGE_WIDTH, 100, Env.getAD_Client_ID(Env.getCtx()))+"px";
+			String height = MSysConfig.getIntValue(MSysConfig.ZK_THUMBNAIL_IMAGE_HEIGHT, 100, Env.getAD_Client_ID(Env.getCtx()))+"px";
+			String style = "width:"+width+";height:"+height;
+			ZkCssHelper.appendStyle(getComponent(), style);
+			LayoutUtils.addSclass("thumbnail", getComponent());
+			LayoutUtils.addSclass("image-fit", getComponent());
+			getComponent().setClientAttribute("onmouseenter", "idempiere.showFullSizeImage(event)");
+			getComponent().setClientAttribute("onmouseleave", "idempiere.hideFullSizeImage(event)");
+			//invalidate necessary for setClientAttribute to work
+			getComponent().invalidate();
+		}
+		else
+		{
+			ZkCssHelper.removeStyle(getComponent(), "width");
+			ZkCssHelper.removeStyle(getComponent(), "height");
+			LayoutUtils.removeSclass("thumbnail", getComponent());
+			LayoutUtils.removeSclass("image-fit", getComponent());
+			getComponent().setClientAttribute("onmouseenter", null);
+			getComponent().setClientAttribute("onmouseleave", null);
+			//invalidate necessary for setClientAttribute to work
+			getComponent().invalidate();
+		}
     }
     
-	
     @Override
 	public String getDisplayTextForGridView(Object value) {
-		if (value == null) {
-			return "";
+		if (value == null || (value instanceof Integer && (Integer)value == 0)) {
+			return "<span class='no-image'/>";
 		} else {
 			return "...";
 		}
@@ -189,8 +228,11 @@ public class WImageEditor extends WEditor
         return LISTENER_EVENTS;
     }
 
+	@Override
 	public void onEvent(Event event) throws Exception 
 	{
+		String script = "jq('#"+getComponent().getUuid()+"').trigger('mouseleave');";
+		Clients.evalJavaScript(script);
 		if (Events.ON_CLICK.equals(event.getName()) && readwrite)
 		{
 			final WImageDialog vid = new WImageDialog(m_mImage);
@@ -206,6 +248,7 @@ public class WImageEditor extends WEditor
 							newValue = Integer.valueOf(AD_Image_ID);
 						//
 						m_mImage = null;	//	force reload
+						CacheMgt.get().reset(MImage.Table_Name, AD_Image_ID);
 						setValue(newValue);	//	set explicitly
 						//
 						ValueChangeEvent vce = new ValueChangeEvent(WImageEditor.this, gridField.getColumnName(), oldValue, newValue);
@@ -221,10 +264,19 @@ public class WImageEditor extends WEditor
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.adempiere.webui.editor.WEditor#fillHorizontal()
+	/**
+	 * No op., doesn't support stretch of component.
 	 */
 	@Override
 	public void fillHorizontal() {
-	}		
+	}
+
+	@Override
+	public Component getDisplayComponent() {
+		if (m_mImage == null)
+			return new Html();
+		else
+			return null;
+	}
+
 }

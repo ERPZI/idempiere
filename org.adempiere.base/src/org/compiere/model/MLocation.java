@@ -49,7 +49,7 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MLocation extends X_C_Location implements Comparator<Object>, ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3421958100626539835L;
 	
@@ -60,7 +60,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	public static String LOCATION_MAPS_DESTINATION_ADDRESS = MSysConfig.getValue(MSysConfig.LOCATION_MAPS_DESTINATION_ADDRESS);
 	
 	/**
-	 * 	Get Location from Cache
+	 * 	Get Location from Cache (Immutable)
 	 *	@param C_Location_ID id
 	 *	@param trxName transaction
 	 *	@return MLocation
@@ -122,7 +122,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}
 	
 	/**
-	 *	Load Location with ID if Business Partner Location
+	 *	Load Location via Business Partner Location id
 	 *	@param ctx context
 	 *  @param C_BPartner_Location_ID Business Partner Location
 	 *	@param trxName transaction
@@ -164,9 +164,20 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	private static ImmutableIntPOCache<Integer,MLocation> s_cache = new ImmutableIntPOCache<Integer,MLocation>(Table_Name, 100, 30);
 	/**	Static Logger				*/
 	private static CLogger	s_log = CLogger.getCLogger(MLocation.class);
-
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_Location_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MLocation(Properties ctx, String C_Location_UU, String trxName) {
+        super(ctx, C_Location_UU, trxName);
+		if (Util.isEmpty(C_Location_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param C_Location_ID id
@@ -176,15 +187,20 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	{
 		super (ctx, C_Location_ID, trxName);
 		if (C_Location_ID == 0)
-		{
-			MCountry defaultCountry = MCountry.getDefault(); 
-			setCountry(defaultCountry);
-			MRegion defaultRegion = MRegion.getDefault();
-			if (defaultRegion != null 
-				&& defaultRegion.getC_Country_ID() == defaultCountry.getC_Country_ID())
-				setRegion(defaultRegion);
-		}
+			setInitialDefaults();
 	}	//	MLocation
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		MCountry defaultCountry = MCountry.getDefault(); 
+		setCountry(defaultCountry);
+		MRegion defaultRegion = MRegion.getDefault();
+		if (defaultRegion != null 
+			&& defaultRegion.getC_Country_ID() == defaultCountry.getC_Country_ID())
+			setRegion(defaultRegion);
+	}
 
 	/**
 	 * 	Parent Constructor
@@ -199,7 +215,6 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	MLocation
 
 	/**
-	 * 	Full Constructor
 	 *	@param ctx context
 	 *	@param C_Country_ID country
 	 *	@param C_Region_ID region
@@ -226,7 +241,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	MLocation
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MLocation(MLocation copy) 
@@ -235,7 +250,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -245,7 +260,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -315,9 +330,9 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	getCountryName
 	
 	/**
-	 * 	Get Country Line
-	 * 	@param local if true only foreign country is returned
-	 * 	@return country or null
+	 * 	Get Country Name
+	 * 	@param local if true return null for default country
+	 * 	@return country name or null
 	 */
 	public String getCountry (boolean local)
 	{
@@ -326,10 +341,11 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 			return null;
 		return getCountryName();
 	}	//	getCountry
+	
 	/**
-	 * 	Get Country Line
-	 * 	@param local if true only foreign country is returned
-	 * 	@return country or null
+	 * 	Get Translated Country Name
+	 * 	@param local if true return null for default country
+	 * 	@return country name or null
 	 */
 	public String getCountry (boolean local, String language)
 	{
@@ -403,7 +419,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	getRegion
 	
 	/**
-	 * 	Get (local) Region Name
+	 * 	Get Region Name
 	 *	@return	region Name or ""
 	 */
 	public String getRegionName()
@@ -413,7 +429,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 
 	/**
 	 * 	Get Region Name
-	 * 	@param getFromRegion get from region (not locally)
+	 * 	@param getFromRegion true to get from region (C_Region)
 	 *	@return	region Name or ""
 	 */
 	public String getRegionName (boolean getFromRegion)
@@ -430,7 +446,6 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 			regionName = "";
 		return regionName;
 	}	//	getRegionName
-
 	
 	/**
 	 * 	Compares to current record
@@ -465,7 +480,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	equals
 	
 	/**
-	 * 	Equals if "" or Null
+	 * 	Case insensitive equal check (null treated as "")
 	 *	@param c1 c1
 	 *	@param c2 c2
 	 *	@return true if equal (ignore case)
@@ -481,18 +496,20 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	
 	/**
 	 * 	Equals
-	 * 	@param cmp comparator
+	 * 	@param cmp object to compare
 	 * 	@return true if ID the same
 	 */
+	@Override
 	public boolean equals (Object cmp)
 	{
 		if (cmp == null)
 			return false;
 		if (cmp.getClass().equals(this.getClass()))
 			return ((PO)cmp).get_ID() == get_ID();
-		return equals(cmp);
+		return super.equals(cmp);
 	}	//	equals
 
+	@Override
 	public int hashCode()
 	{
 	  assert false : "hashCode not designed";
@@ -500,7 +517,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}
 
 	/**
-	 * 	Print Address Reverse Order
+	 * 	Is Print Address in Reverse Order
 	 *	@return true if reverse depending on country
 	 */
 	public boolean isAddressLinesReverse()
@@ -510,7 +527,6 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 			return getCountry().isAddressLinesLocalReverse();
 		return getCountry().isAddressLinesReverse();
 	}	//	isAddressLinesReverse
-
 	
 	/**
 	 * 	Get formatted City Region Postal line
@@ -522,8 +538,10 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	getCityRegionPostal
 	
 	/**
-	 *	Parse according City/Postal/Region according to displaySequence.
-	 *	@C@ - City		@R@ - Region	@P@ - Postal  @A@ - PostalAdd
+	 *  <pre>
+	 *  Parse City/Postal/Region according to displaySequence.
+	 *  @C@ - City   @R@ - Region   @P@ - Postal   @A@ - PostalAdd
+	 *  </pre>
 	 *  @param c country
 	 *  @return parsed String
 	 */
@@ -599,13 +617,13 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 		String retValue = Util.replace(outStr.toString(), "\\n", "\n");
 		if (log.isLoggable(Level.FINEST)) log.finest("parseCRP - " + c.getDisplaySequence() + " -> " +  retValue);
 		return retValue;
-	}	//	parseContext
-
+	}	//	parseCRP
 	
-	/**************************************************************************
+	/**
 	 *	Return printable String representation
 	 *  @return String
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder retStr = new StringBuilder();
@@ -697,16 +715,12 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 		return sb.toString();
 	}   //  toStringX
 
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getAD_Org_ID() != 0)
 			setAD_Org_ID(0);
-		//	Region Check
+		//	Check is country is using C_Region
 		if (getC_Region_ID() != 0)
 		{
 			if (m_c == null || m_c.getC_Country_ID() != getC_Country_ID())
@@ -716,6 +730,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 		} else {
 			setRegionName(null);
 		}
+		// Find and set C_City_ID
 		if (getC_City_ID() <= 0 && getCity() != null && getCity().length() > 0) {
 			int city_id = DB.getSQLValue(
 					get_TrxName(),
@@ -725,13 +740,13 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 				setC_City_ID(city_id);
 		}
 
-		//check city
+		// Check is C_City_ID mandatory and not fill
 		if (m_c != null && !m_c.isAllowCitiesOutOfList() && getC_City_ID()<=0) {
 			log.saveError("CityNotFound", Msg.translate(getCtx(), "CityNotFound"));
 			return false;
 		}
 		
-		//check city id
+		// Validate C_City_ID is valid
 		if (m_c != null && !m_c.isAllowCitiesOutOfList() && getC_City_ID() > 0) {
 			int city_id = DB.getSQLValue(get_TrxName(),
 										"SELECT C_City_ID "+
@@ -751,17 +766,12 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 
 	public final static String updateBPLocName = "SELECT C_BPartner_Location_ID FROM C_BPartner_Location WHERE C_Location_ID = ? AND IsPreserveCustomName = 'N'";
 
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
-		//	Value/Name change in Account
+		//	Update Combination and Description of C_ValidCombination record
 		if (!newRecord
 			&& ("Y".equals(Env.getContext(getCtx(), "$Element_LF")) 
 				|| "Y".equals(Env.getContext(getCtx(), "$Element_LT")))
@@ -773,7 +783,7 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 			MAccount.updateValueDescription(getCtx(), msgup.toString(), get_TrxName());
 		}	
 		
-		//Update BP_Location name IDEMPIERE 417
+		// Update BP_Location name IDEMPIERE 417
 		if (get_TrxName().startsWith(PO.LOCAL_TRX_PREFIX)) { // saved without trx
 			int bplID = DB.getSQLValueEx(get_TrxName(), updateBPLocName, getC_Location_ID());
 			if (bplID>0)
@@ -804,8 +814,8 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 	}	//	afterSave
 
 	/**
-	 * 	Get edited Value (MLocation) for GoogleMaps / IDEMPIERE-147
-	 *	@return String address
+	 * 	Get formatted address for GoogleMap / IDEMPIERE-147
+	 *	@return formatted address for GoogleMap
 	 */
 	public String getMapsLocation() {
 
@@ -821,6 +831,10 @@ public class MLocation extends X_C_Location implements Comparator<Object>, Immut
 		return address.toString().replace(" ", "+");
 	}
 	
+	/**
+	 * @param columnName
+	 * @return field length for column
+	 */
 	public static int getFieldLength(String columnName) {
 		MTable loctable = MTable.get(Env.getCtx(), Table_ID);
 		MColumn column = loctable.getColumn(columnName);

@@ -50,6 +50,9 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vbox;
 
+/**
+ * Popup menu item for workflow node
+ */
 public class WFPopupItem extends Menuitem {
 	/**
 	 * generated serial id
@@ -70,7 +73,7 @@ public class WFPopupItem extends Menuitem {
 	 * 	Add Line Item
 	 *	@param title title
 	 *	@param node workflow node
-	 *	@param AD_WF_NodeTo_ID if > 0, next workflow node id. if < 0, actions to apply to node
+	 *	@param AD_WF_NodeTo_ID if > 0, next workflow node id. if &lt; 0, actions to apply to node
 	 */
 	public WFPopupItem (String title, MWFNode node, int AD_WF_NodeTo_ID)
 	{

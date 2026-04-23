@@ -37,20 +37,32 @@ import org.compiere.process.DocumentEngine;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
- * 
+ * Bank transfer document
  * @author hengsin
  *
  */
 public class MBankTransfer extends X_C_BankTransfer implements DocAction {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -6091468617167291836L;
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_BankTransfer_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MBankTransfer(Properties ctx, String C_BankTransfer_UU, String trxName) {
+        super(ctx, C_BankTransfer_UU, trxName);
+		if (Util.isEmpty(C_BankTransfer_UU))
+			setInitialDefaults();
+    }
+
 	/**
-	 * 
 	 * @param ctx
 	 * @param C_BankTransfer_ID
 	 * @param trxName
@@ -58,16 +70,20 @@ public class MBankTransfer extends X_C_BankTransfer implements DocAction {
 	public MBankTransfer(Properties ctx, int C_BankTransfer_ID, String trxName) {
 		super(ctx, C_BankTransfer_ID, trxName);
 		if (C_BankTransfer_ID == 0)
-        {
-			setDocAction(DOCACTION_Complete);
-			setDocStatus(DOCSTATUS_Drafted);
-			setPayDate(new Timestamp(System.currentTimeMillis()));
-			setProcessed(false);
-        }
+			setInitialDefaults();
 	}
 	
 	/**
-	 * 
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocAction(DOCACTION_Complete);
+		setDocStatus(DOCSTATUS_Drafted);
+		setPayDate(new Timestamp(System.currentTimeMillis()));
+		setProcessed(false);
+	}
+
+	/**
 	 * @param ctx
 	 * @param rs
 	 * @param trxName
@@ -81,47 +97,47 @@ public class MBankTransfer extends X_C_BankTransfer implements DocAction {
 	protected boolean beforeSave(boolean newRecord) {
 		if (!super.beforeSave(newRecord))
 			return false;
-		
+		// from and to bank account must be different
 		if (getTo_C_BankAccount_ID() == getFrom_C_BankAccount_ID()) {
 			log.saveError("From Bank Account and To Bank Account must be different", toString());
 			return false;
 		}
-		
+		// From bank account and bank transfer document must belongs to the same organization
 		if (getFrom_C_BankAccount().getAD_Org_ID() != 0 && getFrom_C_BankAccount().getAD_Org_ID() != getFrom_AD_Org_ID()) {
 			log.saveError("From Organization does not matches the organization of the From Bank Account", toString());
 			return false;
 		}
-		
+		// Set From Currency from From_C_BankAccount_ID
 		if (getFrom_C_Currency_ID() == 0) {
 			int From_C_Currency_ID = getFrom_C_BankAccount().getC_Currency_ID();
 			if (From_C_Currency_ID > 0)
 				setFrom_C_Currency_ID(From_C_Currency_ID);
 		}
-		
+		// Set To_AD_Org_ID from To_C_BankAccount_ID
 		if (getTo_AD_Org_ID() == 0) {
 			int To_AD_Org_ID = getTo_C_BankAccount().getAD_Org_ID();
 			if (To_AD_Org_ID > 0)
 				setTo_AD_Org_ID(To_AD_Org_ID);
 		}
-		
+		// Set To_C_Currency_ID from To_C_BankAccount_ID
 		if (getTo_C_Currency_ID() == 0) {
 			int To_C_Currency_ID = getTo_C_BankAccount().getC_Currency_ID();
 			if (To_C_Currency_ID > 0)
 				setTo_C_Currency_ID(To_C_Currency_ID);
 		}
-		
+		// Set From_C_BPartner_ID from From_C_BankAccount_ID (through C_BPartner.AD_OrgBP_ID)
 		if (getFrom_C_BPartner_ID() == 0) {
 			String sql = "SELECT bp.C_BPartner_ID FROM C_BPartner bp "
-					+ "WHERE bp.AD_OrgBP_ID IN (SELECT ba.AD_Org_ID FROM C_BankAccount ba WHERE ba.C_BankAccount_ID = ?)) "
+					+ "WHERE bp.AD_OrgBP_ID IN (SELECT ba.AD_Org_ID FROM C_BankAccount ba WHERE ba.C_BankAccount_ID = ?) "
 					+ "AND bp.IsActive = 'Y'";
 			int C_BPartner_ID = DB.getSQLValue(get_TrxName(), sql, getFrom_C_BankAccount_ID());
 			if (C_BPartner_ID > 0)
 				setFrom_C_BPartner_ID(C_BPartner_ID);
 		}
-		
+		// Set To_C_BPartner_ID from To_C_BankAccount_ID (through C_BPartner.AD_OrgBP_ID) or From_C_BPartner_ID
 		if (getTo_C_BPartner_ID() == 0) {
 			String sql = "SELECT bp.C_BPartner_ID FROM C_BPartner bp "
-					+ "WHERE bp.AD_OrgBP_ID IN (SELECT ba.AD_Org_ID FROM C_BankAccount ba WHERE ba.C_BankAccount_ID = ?)) "
+					+ "WHERE bp.AD_OrgBP_ID IN (SELECT ba.AD_Org_ID FROM C_BankAccount ba WHERE ba.C_BankAccount_ID = ?) "
 					+ "AND bp.IsActive = 'Y'";
 			int C_BPartner_ID = DB.getSQLValue(get_TrxName(), sql, getTo_C_BankAccount_ID());
 			if (C_BPartner_ID > 0) {
@@ -132,11 +148,13 @@ public class MBankTransfer extends X_C_BankTransfer implements DocAction {
 		}
 		
 		if (getRate().doubleValue() == 0) {
+			// Calculate currency conversion rate
 			if (getFrom_Amt().compareTo(BigDecimal.ZERO) != 0) {
 				BigDecimal rate = getTo_Amt().divide(getFrom_Amt(), 12, RoundingMode.HALF_UP);
 				setRate(rate);
 			}			
 		} else {
+			//Round To_Amt with standard precision of currency
 			BigDecimal toAmt = getRate().multiply(getFrom_Amt());
 			Integer To_C_Currency_ID = getTo_C_Currency_ID();
 			if (To_C_Currency_ID != null && To_C_Currency_ID > 0) {
@@ -438,6 +456,7 @@ public class MBankTransfer extends X_C_BankTransfer implements DocAction {
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder ("MBankTransfer[");
 		sb.append(get_ID()).append("-").append(getDocumentNo());

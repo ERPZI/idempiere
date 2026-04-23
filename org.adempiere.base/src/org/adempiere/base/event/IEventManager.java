@@ -18,9 +18,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 /**
- *
+ * Interface for global event manager
  * @author hengsin
- *
  */
 public interface IEventManager {
 
@@ -111,4 +110,12 @@ public interface IEventManager {
 		return register(eventHandler.getTopics(), eventHandler.getFilter(), eventHandler);
 	}
 
+	/**
+	 * Get the list of disabled event handlers (className[eventTopic]) 
+	 * @return list of disabled event handlers
+	 */
+	default String[] getDisabledEventHandlers() {
+		return new String[] {};
+	}
+	
 }

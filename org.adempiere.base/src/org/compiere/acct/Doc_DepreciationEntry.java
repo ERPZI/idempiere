@@ -14,11 +14,10 @@ import org.compiere.util.Env;
 import org.compiere.model.MAsset;
 //
 
-
 /**
+ *  Posting for {@link MDepreciationEntry} document.
  *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  *  @version  $Id$
- *
  */
 public class Doc_DepreciationEntry extends Doc
 {
@@ -37,7 +36,7 @@ public class Doc_DepreciationEntry extends Doc
 	private String						m_PostingType = null;
 	private int							m_C_AcctSchema_ID = 0;
 	
-	
+	@Override
 	protected String loadDocumentDetails ()
 	{
 		MDepreciationEntry entry = (MDepreciationEntry)getPO();
@@ -47,6 +46,10 @@ public class Doc_DepreciationEntry extends Doc
 		return null;
 	}
 	
+	/**
+	 * @param depexp
+	 * @return new DocLine instance
+	 */
 	private DocLine createLine(MDepreciationExp depexp)
 	{
 		if (!depexp.isProcessed())
@@ -55,14 +58,14 @@ public class Doc_DepreciationEntry extends Doc
 		return docLine;
 	}
 	
-	
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
 		return retValue;
 	}   //  getBalance
 
-	
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
@@ -79,23 +82,25 @@ public class Doc_DepreciationEntry extends Doc
 		{
 			MDepreciationExp depexp = it.next();
 			DocLine line = createLine(depexp);
+			
 			BigDecimal expenseAmt = depexp.getExpense();
 			//
 			MAccount dr_acct = MAccount.get(getCtx(), depexp.getDR_Account_ID());
 			MAccount cr_acct = MAccount.get(getCtx(), depexp.getCR_Account_ID());
-			FactUtil.createSimpleOperation(fact, line, dr_acct, cr_acct, as.getC_Currency_ID(), expenseAmt, false);
 			//MPo, 25/11/2018 CCtr, PrCtr, FArea for depreciation posting
-			MAsset asset = MAsset.get(getCtx(), depexp.getA_Asset_ID(), null);
-			//System.out.println("Asset: " + asset.getA_Asset_ID());
-			FactLine[] lines = fact.getLines();
-			for (int i = lines.length-1; i > lines.length-3; i--) { // Get the last 2 fact lines
-				lines[i].setUser1_ID(asset.getUser1_ID()); //PrCtr
-				lines[i].setUser2_ID(asset.getUser2_ID()); //CCtr
-				lines[i].setC_Activity_ID(asset.getC_Activity_ID()); //FArea
-				//System.out.println("i: " + i);
-				//System.out.println("FactLine User1_ID: " + lines[i].getUser1_ID());
-				//System.out.println("FactLine User2_ID: " + lines[i].getUser2_ID());
-				//System.out.println("FactLine C_Activity_ID: " + lines[i].getC_Activity_ID());
+			//FactUtil.createSimpleOperation(fact, line, dr_acct, cr_acct, as.getC_Currency_ID(), expenseAmt, false);
+			FactLine[] lines = FactUtil.createSimpleOperation(fact, line, dr_acct, cr_acct, as.getC_Currency_ID(), expenseAmt, false);
+			if (lines[0] != null) {
+				MAsset asset = MAsset.get(getCtx(), depexp.getA_Asset_ID(), null);
+				log.info("A_Asset_ID: " + asset.getA_Asset_ID());
+				lines[0].setUser1_ID(asset.getUser1_ID()); //PrCtr Debit
+				lines[0].setUser2_ID(asset.getUser2_ID()); //CCtr Debit
+				lines[0].setC_Activity_ID(asset.getC_Activity_ID()); //FArea Debit
+				log.info("Fact User1_ID Line 1: " + lines[0].getUser1_ID()); 
+				lines[1].setUser1_ID(asset.getUser1_ID()); //PrCtr Credit
+				lines[1].setUser2_ID(asset.getUser2_ID()); //CCtr Credit
+				lines[1].setC_Activity_ID(asset.getC_Activity_ID()); //FArea Credit
+				log.info("Fact User1_ID Line 2: " + lines[1].getUser1_ID());
 			}
 			//MPo
 		}
@@ -104,4 +109,3 @@ public class Doc_DepreciationEntry extends Doc
 		return facts;
 	}
 }
-

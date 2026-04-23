@@ -311,28 +311,7 @@ public class ImportOrder extends SvrProcess
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set UOM=" + no);		
 		//		
-		//	Payment Term
-		sql = new StringBuilder ("UPDATE I_Order o ")
-			  .append("SET C_PaymentTerm_ID=(SELECT C_PaymentTerm_ID FROM C_PaymentTerm p")
-			  .append(" WHERE o.PaymentTermValue=p.Value AND o.AD_Client_ID=p.AD_Client_ID) ")
-			  .append("WHERE C_PaymentTerm_ID IS NULL AND PaymentTermValue IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set PaymentTerm=" + no);
-		sql = new StringBuilder ("UPDATE I_Order o ")
-			  .append("SET C_PaymentTerm_ID=(SELECT MAX(C_PaymentTerm_ID) FROM C_PaymentTerm p")
-			  .append(" WHERE p.IsDefault='Y' AND o.AD_Client_ID=p.AD_Client_ID) ")
-			  .append("WHERE C_PaymentTerm_ID IS NULL AND o.PaymentTermValue IS NULL AND I_IsImported<>'Y'").append (clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (log.isLoggable(Level.FINE)) log.fine("Set Default PaymentTerm=" + no);
-		//
-		sql = new StringBuilder ("UPDATE I_Order ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No PaymentTerm, ' ")
-			  .append("WHERE C_PaymentTerm_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
-		no = DB.executeUpdate(sql.toString(), get_TrxName());
-		if (no != 0)
-			log.warning ("No PaymentTerm=" + no);
-
+		
 		// MPo, 7/6/23 WarehouseValue => M_Warehouse_ID
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse w")
@@ -460,7 +439,6 @@ public class ImportOrder extends SvrProcess
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
 			log.warning ("Invalid Region=" + no);
-
 		//	Existing Location ? Exact Match
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET (BillTo_ID,C_BPartner_Location_ID)=(SELECT C_BPartner_Location_ID,C_BPartner_Location_ID")
@@ -476,6 +454,18 @@ public class ImportOrder extends SvrProcess
 			  .append(" AND I_IsImported='N'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
+		//MPo, 3/2/26 Set Bill Location from I_Order-InvoiceLocationName, if provided
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			  .append("SET BillTo_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location l")
+			  .append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
+			  .append(" AND l.Name=o.InvoiceLocationName AND o.InvoiceLocationName IS NOT NULL")
+			  .append(" AND ((l.IsBillTo='Y' AND o.IsSOTrx='Y') OR (l.IsPayFrom='Y' AND o.IsSOTrx='N'))")
+			  .append(") ")
+			  .append("WHERE C_BPartner_ID IS NOT NULL AND BillTo_ID IS NULL")
+			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set BP BillTo from BP=" + no);
+		//
 		//	Set Bill Location from BPartner
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET BillTo_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location l")
@@ -486,25 +476,119 @@ public class ImportOrder extends SvrProcess
 			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set BP BillTo from BP=" + no);
+		//MPo, 3/2/26 Set Location from I_Order-PartnerLocationName, if provided
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET C_BPartner_Location_ID=(SELECT C_BPartner_Location_ID FROM C_BPartner_Location l")
+			.append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
+			.append(" AND l.Name=o.PartnerLocationName AND o.PartnerLocationName IS NOT NULL")
+			.append(" AND ((l.IsShipTo='Y' AND o.IsSOTrx='Y') OR o.IsSOTrx='N')")
+			.append(") ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND C_BPartner_Location_ID IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set BP BillTo from BP=" + no);
+		//		
 		//	Set Location from BPartner
 		sql = new StringBuilder ("UPDATE I_Order o ")
-			  .append("SET C_BPartner_Location_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location l")
-			  .append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
-			  .append(" AND ((l.IsShipTo='Y' AND o.IsSOTrx='Y') OR o.IsSOTrx='N')")
-			  .append(") ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND C_BPartner_Location_ID IS NULL")
-			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
+			.append("SET C_BPartner_Location_ID=(SELECT MAX(C_BPartner_Location_ID) FROM C_BPartner_Location l")
+			.append(" WHERE l.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=l.AD_Client_ID")
+			.append(" AND ((l.IsShipTo='Y' AND o.IsSOTrx='Y') OR o.IsSOTrx='N')")
+			.append(") ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND C_BPartner_Location_ID IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set BP Location from BP=" + no);
 		//
 		sql = new StringBuilder ("UPDATE I_Order ")
-			  .append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No BP Location, ' ")
-			  .append("WHERE C_BPartner_ID IS NOT NULL AND (BillTo_ID IS NULL OR C_BPartner_Location_ID IS NULL)")
-			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
+			.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No BP Location, ' ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND (BillTo_ID IS NULL OR C_BPartner_Location_ID IS NULL)")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
 			log.warning ("No BP Location=" + no);
+		
+		// 	Payment Term
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET C_PaymentTerm_ID=(SELECT C_PaymentTerm_ID FROM C_PaymentTerm p")
+			.append(" WHERE o.PaymentTermValue=p.Value AND o.AD_Client_ID=p.AD_Client_ID) ")
+			.append("WHERE C_PaymentTerm_ID IS NULL AND PaymentTermValue IS NOT NULL AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set PaymentTerm=" + no);
+		//MPo, 4/2/26 Lookup payment term from BP instead of using MAX()-default
+		//sql = new StringBuilder ("UPDATE I_Order o ")
+		//	  .append("SET C_PaymentTerm_ID=(SELECT MAX(C_PaymentTerm_ID) FROM C_PaymentTerm p")
+		//	  .append(" WHERE p.IsDefault='Y' AND o.AD_Client_ID=p.AD_Client_ID) ")
+		//	  .append("WHERE C_PaymentTerm_ID IS NULL AND o.PaymentTermValue IS NULL AND I_IsImported<>'Y'").append (clientCheck);
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET C_PaymentTerm_ID=(SELECT C_PaymentTerm_ID FROM C_BPartner bp")
+			.append(" WHERE o.AD_Client_ID=bp.AD_Client_ID AND o.C_BPartner_ID = bp.C_BPartner_ID) ")
+			.append("WHERE C_PaymentTerm_ID IS NULL AND o.PaymentTermValue IS NULL AND I_IsImported<>'Y'").append (clientCheck);
+		//
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Default PaymentTerm=" + no);
+		//
+		sql = new StringBuilder ("UPDATE I_Order ")
+			.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No PaymentTerm, ' ")
+			.append("WHERE C_PaymentTerm_ID IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (no != 0)
+			log.warning ("No PaymentTerm=" + no);
+		
+		//MPo, 4/2/26 Set Delivery Rule from BPartner
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET DeliveryRule=(SELECT DeliveryRule FROM C_BPartner bp")
+			.append(" WHERE bp.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=bp.AD_Client_ID")
+			.append(") ")
+			.append("WHERE DeliveryRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Delivery Rule from BP=" + no);
+		//
+		sql = new StringBuilder ("UPDATE I_Order ")
+			.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No Delivery Rule, ' ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND DeliveryRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (no != 0)
+			log.warning ("No Delivery Rule=" + no);
+		
+		//MPo, 5/2/26 Set Payment Rule from BPartner
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET PaymentRule=(SELECT PaymentRule FROM C_BPartner bp")
+			.append(" WHERE bp.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=bp.AD_Client_ID")
+			.append(") ")
+			.append("WHERE PaymentRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Payment Rule from BP=" + no);
+		//
+		sql = new StringBuilder ("UPDATE I_Order ")
+			.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No Payment Rule, ' ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND PaymentRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (no != 0)
+			log.warning ("No Payment Rule=" + no);
 
+		//MPo, 5/2/26 Set Invoice Rule from BPartner
+		sql = new StringBuilder ("UPDATE I_Order o ")
+			.append("SET InvoiceRule=(SELECT InvoiceRule FROM C_BPartner bp")
+			.append(" WHERE bp.C_BPartner_ID=o.C_BPartner_ID AND o.AD_Client_ID=bp.AD_Client_ID")
+			.append(") ")
+			.append("WHERE InvoiceRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Invoice Rule from BP=" + no);
+		//
+		sql = new StringBuilder ("UPDATE I_Order ")
+			.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=No Invoice Rule, ' ")
+			.append("WHERE C_BPartner_ID IS NOT NULL AND InvoiceRule IS NULL")
+			.append(" AND I_IsImported<>'Y'").append (clientCheck);
+		no = DB.executeUpdate(sql.toString(), get_TrxName());
+		if (no != 0)
+			log.warning ("No Invoice Rule=" + no);
+		
 		//	Product
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET M_Product_ID=(SELECT MAX(M_Product_ID) FROM M_Product p")
@@ -619,7 +703,7 @@ public class ImportOrder extends SvrProcess
 						continue;
 				}
 				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
-				
+								
 				//	BP Location
 				MBPartnerLocation bpl = null; 
 				MBPartnerLocation[] bpls = bp.getLocations(true);
@@ -774,13 +858,13 @@ public class ImportOrder extends SvrProcess
 					order.setClientOrg (imp.getAD_Client_ID(), imp.getAD_Org_ID());
 					//MPo, 26/5/23 Branch
 					order.setZI_Branch_ID(imp.getZI_Branch_ID());
-					
 					//
 					order.setC_DocTypeTarget_ID(imp.getC_DocType_ID());
 					order.setIsSOTrx(imp.isSOTrx());
 					if (imp.getDeliveryRule() != null ) {
 						order.setDeliveryRule(imp.getDeliveryRule());
 					}
+  		
 					if (imp.getDocumentNo() != null)
 						order.setDocumentNo(imp.getDocumentNo());
 					//	Ship Partner
@@ -799,6 +883,9 @@ public class ImportOrder extends SvrProcess
 					order.setM_Warehouse_ID(imp.getM_Warehouse_ID());
 					//MPo, 26/5/2023 PrCtr
 					order.setUser1_ID(imp.getUser1_ID());
+					//MPo, 5/2/2026
+					order.setPaymentRule(imp.getPaymentRule());
+					order.setInvoiceRule(imp.getInvoiceRule());
 					//
 					if (imp.getM_Shipper_ID() != 0)
 						order.setM_Shipper_ID(imp.getM_Shipper_ID());
@@ -826,6 +913,16 @@ public class ImportOrder extends SvrProcess
 					if (imp.getC_OrderSource() != null)
 						order.setC_OrderSource_ID(imp.getC_OrderSource_ID());
 					//
+					//MPo, 25/8/25 E.g. Shopee orders
+					if (imp.getFreightAmt().signum() != 0) {
+						order.setFreightCostRule("F"); // Fix Price
+						order.setDeliveryViaRule("S"); // Shipper is Shopee
+						order.setFreightAmt(imp.getFreightAmt());
+					//MPo, 4/2/26 E.g. B2B orders
+					} else {
+						order.setFreightCostRule("I"); // Freight included
+						order.setDeliveryViaRule("S"); // Shipper is JWD
+					}
 					order.saveEx();
 					noInsert++;
 					lineNo = 10;

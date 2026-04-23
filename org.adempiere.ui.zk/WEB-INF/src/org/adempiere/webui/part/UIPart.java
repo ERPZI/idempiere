@@ -15,14 +15,23 @@ package org.adempiere.webui.part;
 import org.zkoss.zk.ui.Component;
 
 /**
- * 
+ * Controller interface for UI block
  * @author Low Heng Sin
  *
  */
 public interface UIPart {
 	
+	/**
+	 * Create child or root UI block
+	 * @param parent
+	 * @return Component
+	 */
 	public Component createPart(Object parent);
 	
+	/**
+	 * Get root component of UI block
+	 * @return Component
+	 */
 	public Component getComponent();
 	
 }

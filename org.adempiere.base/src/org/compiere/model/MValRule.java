@@ -33,14 +33,14 @@ import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
- *	Persistent Validation Rule Model
+ *	Validation Rule Model
  *  @author Carlos Ruiz
  *  @version $Id: MValRule.java
  */
 public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -2475798196422214666L;
 
@@ -109,7 +109,17 @@ public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 	@SuppressWarnings("unused")
 	private static CLogger	s_log	= CLogger.getCLogger (MValRule.class);
 
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Val_Rule_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MValRule(Properties ctx, String AD_Val_Rule_UU, String trxName) {
+        super(ctx, AD_Val_Rule_UU, trxName);
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param AD_Val_Rule_ID id
@@ -132,7 +142,7 @@ public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 	}	//	MValRule
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MValRule(MValRule copy) 
@@ -141,7 +151,7 @@ public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -151,7 +161,7 @@ public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -175,6 +185,7 @@ public class MValRule extends X_AD_Val_Rule implements ImmutablePOSupport
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder ("MValRule[");

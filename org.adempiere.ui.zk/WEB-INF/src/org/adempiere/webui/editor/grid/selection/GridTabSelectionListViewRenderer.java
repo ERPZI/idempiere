@@ -34,9 +34,8 @@ import org.zkoss.zul.ListitemRendererExt;
 import org.zkoss.zul.RendererCtrl;
 
 /**
- * ListItem renderer for GridTabSelectionListView
+ * ListItem renderer for {@link GridTabSelectionListView}
  * @author hengsin
- *
  */
 public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTableRow>, ListitemRendererExt, RendererCtrl {
 
@@ -60,7 +59,7 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	/**
 	 * @param listitem
 	 * @param data
-	 * @see ListitemRenderer#render(Listitem, Object)
+	 * @see ListitemRenderer#render(Listitem, Object, int)
 	 */
 	@Override
 	public void render(Listitem listitem, GridTableRow data, int index) throws Exception {
@@ -126,6 +125,12 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 		}
 	}
 
+	/**
+	 * Create {@link Listcell} for gridField and value
+	 * @param gridField
+	 * @param value
+	 * @return Listcell
+	 */
 	private Listcell renderCell(GridField gridField, Object value) {
 		Listcell cell;
 		if (gridField.getDisplayType() == DisplayType.YesNo) {
@@ -161,6 +166,7 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	/**
 	 * @see ListitemRendererExt#getControls()
 	 */
+	@Override
 	public int getControls() {
 		return DETACH_ON_RENDER;
 	}
@@ -169,6 +175,7 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	 * @param item
 	 * @see ListitemRendererExt#newListcell(Listitem)
 	 */
+	@Override
 	public Listcell newListcell(Listitem item) {
 		ListCell listCell = new ListCell();
 		listCell.applyProperties();
@@ -180,12 +187,19 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	 * @param listbox
 	 * @see ListitemRendererExt#newListitem(Listbox)
 	 */
+	@Override
 	public Listitem newListitem(Listbox listbox) {
 		ListItem item = new ListItem();
 		item.applyProperties();
 		return item;
 	}
 
+	/**
+	 * Get display text
+	 * @param gridField
+	 * @param value
+	 * @return display text
+	 */
 	private String getDisplayText(GridField gridField, Object value)
 	{
 		if (value == null)
@@ -211,15 +225,14 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	
 	/**
 	 * Is renderer initialize
-	 * @return boolean
+	 * @return true if initialize, false otherwise
 	 */
 	public boolean isInitialize() {
 		return !editors.isEmpty();
 	}
 
 	/**
-	 * 
-	 * @return active editor list
+	 * @return field editor list
 	 */
 	public List<WEditor> getEditors() {
 		List<WEditor> editorList = new ArrayList<WEditor>();
@@ -232,25 +245,34 @@ public class GridTabSelectionListViewRenderer implements ListitemRenderer<GridTa
 	/**
 	 * @see RendererCtrl#doCatch(Throwable)
 	 */
+	@Override
 	public void doCatch(Throwable ex) throws Throwable {
 	}
 
 	/**
 	 * @see RendererCtrl#doFinally()
 	 */
+	@Override
 	public void doFinally() {
 	}
 
 	/**
 	 * @see RendererCtrl#doTry()
 	 */
+	@Override
 	public void doTry() {
 	}
 
+	/**
+	 * @param listView
+	 */
 	public void setListView (GridTabSelectionListView listView) {
 		this.listView = listView;
 	}
 
+	/**
+	 * @return GridTabSelectionListView
+	 */
 	public GridTabSelectionListView getListView() {
 		return listView;
 	}

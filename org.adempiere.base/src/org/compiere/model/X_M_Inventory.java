@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_Inventory
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_Inventory")
-public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent 
+public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_Inventory (Properties ctx, int M_Inventory_ID, String trxName)
@@ -78,6 +78,48 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Inventory (Properties ctx, String M_Inventory_UU, String trxName)
+    {
+      super (ctx, M_Inventory_UU, trxName);
+      /** if (M_Inventory_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setM_Inventory_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Inventory (Properties ctx, String M_Inventory_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Inventory_UU, trxName, virtualColumns);
+      /** if (M_Inventory_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setIsApproved (false);
+			setM_Inventory_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setPosted (false);
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Inventory (Properties ctx, ResultSet rs, String trxName)
     {
@@ -85,7 +127,7 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -287,43 +329,6 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 		return ii.intValue();
 	}
 
-	/** CostingMethod AD_Reference_ID=122 */
-	public static final int COSTINGMETHOD_AD_Reference_ID=122;
-	/** Average PO = A */
-	public static final String COSTINGMETHOD_AveragePO = "A";
-	/** Fifo = F */
-	public static final String COSTINGMETHOD_Fifo = "F";
-	/** Last Invoice = i */
-	public static final String COSTINGMETHOD_LastInvoice = "i";
-	/** Average Invoice = I */
-	public static final String COSTINGMETHOD_AverageInvoice = "I";
-	/** Lifo = L */
-	public static final String COSTINGMETHOD_Lifo = "L";
-	/** Last PO Price = p */
-	public static final String COSTINGMETHOD_LastPOPrice = "p";
-	/** Standard Costing = S */
-	public static final String COSTINGMETHOD_StandardCosting = "S";
-	/** User Defined = U */
-	public static final String COSTINGMETHOD_UserDefined = "U";
-	/** _ = x */
-	public static final String COSTINGMETHOD__ = "x";
-	/** Set Costing Method.
-		@param CostingMethod Indicates how Costs will be calculated
-	*/
-	public void setCostingMethod (String CostingMethod)
-	{
-
-		set_Value (COLUMNNAME_CostingMethod, CostingMethod);
-	}
-
-	/** Get Costing Method.
-		@return Indicates how Costs will be calculated
-	  */
-	public String getCostingMethod()
-	{
-		return (String)get_Value(COLUMNNAME_CostingMethod);
-	}
-
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -350,6 +355,43 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** CostingMethod AD_Reference_ID=122 */
+	public static final int COSTINGMETHOD_AD_Reference_ID=122;
+	/** Average PO = A */
+	public static final String COSTINGMETHOD_AveragePO = "A";
+	/** Fifo = F */
+	public static final String COSTINGMETHOD_Fifo = "F";
+	/** Average Invoice = I */
+	public static final String COSTINGMETHOD_AverageInvoice = "I";
+	/** Lifo = L */
+	public static final String COSTINGMETHOD_Lifo = "L";
+	/** Standard Costing = S */
+	public static final String COSTINGMETHOD_StandardCosting = "S";
+	/** User Defined = U */
+	public static final String COSTINGMETHOD_UserDefined = "U";
+	/** Last Invoice = i */
+	public static final String COSTINGMETHOD_LastInvoice = "i";
+	/** Last PO Price = p */
+	public static final String COSTINGMETHOD_LastPOPrice = "p";
+	/** _ = x */
+	public static final String COSTINGMETHOD__ = "x";
+	/** Set Costing Method.
+		@param CostingMethod Indicates how Costs will be calculated
+	*/
+	public void setCostingMethod (String CostingMethod)
+	{
+
+		set_Value (COLUMNNAME_CostingMethod, CostingMethod);
+	}
+
+	/** Get Costing Method.
+		@return Indicates how Costs will be calculated
+	  */
+	public String getCostingMethod()
+	{
+		return (String)get_Value(COLUMNNAME_CostingMethod);
 	}
 
 	/** Set Description.
@@ -477,7 +519,7 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -512,10 +554,10 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -556,22 +598,6 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 	public String getM_Inventory_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_Inventory_UU);
-	}
-
-	/** Set Movement Date.
-		@param MovementDate Date a product was moved in or out of inventory
-	*/
-	public void setMovementDate (Timestamp MovementDate)
-	{
-		set_Value (COLUMNNAME_MovementDate, MovementDate);
-	}
-
-	/** Get Movement Date.
-		@return Date a product was moved in or out of inventory
-	  */
-	public Timestamp getMovementDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
 	}
 
 	public org.compiere.model.I_M_PerpetualInv getM_PerpetualInv() throws RuntimeException
@@ -630,6 +656,22 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Movement Date.
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
 	/** Set Posted.
 		@param Posted Posting status
 	*/
@@ -644,10 +686,10 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -667,10 +709,10 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -708,10 +750,10 @@ public class X_M_Inventory extends PO implements I_M_Inventory, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for C_PaySelectionCheck
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_PaySelectionCheck")
-public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, I_Persistent 
+public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_PaySelectionCheck (Properties ctx, int C_PaySelectionCheck_ID, String trxName)
@@ -82,6 +82,54 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_PaySelectionCheck (Properties ctx, String C_PaySelectionCheck_UU, String trxName)
+    {
+      super (ctx, C_PaySelectionCheck_UU, trxName);
+      /** if (C_PaySelectionCheck_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_PaySelectionCheck_ID (0);
+			setC_PaySelection_ID (0);
+			setDiscountAmt (Env.ZERO);
+			setIsGeneratedDraft (false);
+// N
+			setIsPrinted (false);
+			setIsReceipt (false);
+			setPayAmt (Env.ZERO);
+			setPaymentRule (null);
+			setProcessed (false);
+// N
+			setQty (0);
+			setWriteOffAmt (Env.ZERO);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaySelectionCheck (Properties ctx, String C_PaySelectionCheck_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_PaySelectionCheck_UU, trxName, virtualColumns);
+      /** if (C_PaySelectionCheck_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_PaySelectionCheck_ID (0);
+			setC_PaySelection_ID (0);
+			setDiscountAmt (Env.ZERO);
+			setIsGeneratedDraft (false);
+// N
+			setIsPrinted (false);
+			setIsReceipt (false);
+			setPayAmt (Env.ZERO);
+			setPaymentRule (null);
+			setProcessed (false);
+// N
+			setQty (0);
+			setWriteOffAmt (Env.ZERO);
+// 0
+        } */
+    }
+
     /** Load Constructor */
     public X_C_PaySelectionCheck (Properties ctx, ResultSet rs, String trxName)
     {
@@ -89,7 +137,7 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -109,34 +157,6 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_BPartner_ID(), get_TrxName());
-	}
-
-	/** Set Business Partner.
-		@param C_BPartner_ID Identifies a Business Partner
-	*/
-	public void setC_BPartner_ID (int C_BPartner_ID)
-	{
-		if (C_BPartner_ID < 1)
-			set_Value (COLUMNNAME_C_BPartner_ID, null);
-		else
-			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
-	}
-
-	/** Get Business Partner.
-		@return Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_C_BP_BankAccount getC_BP_BankAccount() throws RuntimeException
 	{
@@ -166,29 +186,29 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
-			.getPO(getC_Payment_ID(), get_TrxName());
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
 	}
 
-	/** Set Payment.
-		@param C_Payment_ID Payment identifier
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
 	*/
-	public void setC_Payment_ID (int C_Payment_ID)
+	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_Payment_ID < 1)
-			set_Value (COLUMNNAME_C_Payment_ID, null);
+		if (C_BPartner_ID < 1)
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else
-			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Payment.
-		@return Payment identifier
+	/** Get Business Partner.
+		@return Identifies a Business Partner
 	  */
-	public int getC_Payment_ID()
+	public int getC_BPartner_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -259,6 +279,34 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
+			.getPO(getC_Payment_ID(), get_TrxName());
+	}
+
+	/** Set Payment.
+		@param C_Payment_ID Payment identifier
+	*/
+	public void setC_Payment_ID (int C_Payment_ID)
+	{
+		if (C_Payment_ID < 1)
+			set_Value (COLUMNNAME_C_Payment_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+	}
+
+	/** Get Payment.
+		@return Payment identifier
+	  */
+	public int getC_Payment_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Discount Amount.
 		@param DiscountAmt Calculated amount of discount
 	*/
@@ -307,10 +355,10 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public boolean isGeneratedDraft()
 	{
 		Object oo = get_Value(COLUMNNAME_IsGeneratedDraft);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -330,10 +378,10 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -353,10 +401,10 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public boolean isReceipt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReceipt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -438,10 +486,10 @@ public class X_C_PaySelectionCheck extends PO implements I_C_PaySelectionCheck, 
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

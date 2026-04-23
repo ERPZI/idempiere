@@ -26,16 +26,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PP_Order_Workflow
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PP_Order_Workflow")
-public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Persistent 
+public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PP_Order_Workflow (Properties ctx, int PP_Order_Workflow_ID, String trxName)
@@ -43,8 +43,8 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
       super (ctx, PP_Order_Workflow_ID, trxName);
       /** if (PP_Order_Workflow_ID == 0)
         {
-			setAccessLevel (null);
 			setAD_Workflow_ID (0);
+			setAccessLevel (null);
 			setAuthor (null);
 			setCost (Env.ZERO);
 			setDuration (0);
@@ -71,8 +71,64 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
       super (ctx, PP_Order_Workflow_ID, trxName, virtualColumns);
       /** if (PP_Order_Workflow_ID == 0)
         {
-			setAccessLevel (null);
 			setAD_Workflow_ID (0);
+			setAccessLevel (null);
+			setAuthor (null);
+			setCost (Env.ZERO);
+			setDuration (0);
+// 0
+			setDurationUnit (null);
+// h
+			setEntityType (null);
+// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
+			setLimit (0);
+			setName (null);
+			setPP_Order_ID (0);
+			setPP_Order_Workflow_ID (0);
+			setPriority (0);
+			setPublishStatus (null);
+// U
+			setVersion (0);
+			setWaitingTime (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Order_Workflow (Properties ctx, String PP_Order_Workflow_UU, String trxName)
+    {
+      super (ctx, PP_Order_Workflow_UU, trxName);
+      /** if (PP_Order_Workflow_UU == null)
+        {
+			setAD_Workflow_ID (0);
+			setAccessLevel (null);
+			setAuthor (null);
+			setCost (Env.ZERO);
+			setDuration (0);
+// 0
+			setDurationUnit (null);
+// h
+			setEntityType (null);
+// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
+			setLimit (0);
+			setName (null);
+			setPP_Order_ID (0);
+			setPP_Order_Workflow_ID (0);
+			setPriority (0);
+			setPublishStatus (null);
+// U
+			setVersion (0);
+			setWaitingTime (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Order_Workflow (Properties ctx, String PP_Order_Workflow_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_Order_Workflow_UU, trxName, virtualColumns);
+      /** if (PP_Order_Workflow_UU == null)
+        {
+			setAD_Workflow_ID (0);
+			setAccessLevel (null);
 			setAuthor (null);
 			setCost (Env.ZERO);
 			setDuration (0);
@@ -100,7 +156,7 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -120,37 +176,6 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** AccessLevel AD_Reference_ID=5 */
-	public static final int ACCESSLEVEL_AD_Reference_ID=5;
-	/** Organization = 1 */
-	public static final String ACCESSLEVEL_Organization = "1";
-	/** Client only = 2 */
-	public static final String ACCESSLEVEL_ClientOnly = "2";
-	/** Client+Organization = 3 */
-	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
-	/** System only = 4 */
-	public static final String ACCESSLEVEL_SystemOnly = "4";
-	/** System+Client = 6 */
-	public static final String ACCESSLEVEL_SystemPlusClient = "6";
-	/** All = 7 */
-	public static final String ACCESSLEVEL_All = "7";
-	/** Set Data Access Level.
-		@param AccessLevel Access Level required
-	*/
-	public void setAccessLevel (String AccessLevel)
-	{
-
-		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
-	}
-
-	/** Get Data Access Level.
-		@return Access Level required
-	  */
-	public String getAccessLevel()
-	{
-		return (String)get_Value(COLUMNNAME_AccessLevel);
-	}
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
 	{
@@ -236,6 +261,34 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_WorkflowProcessor getAD_WorkflowProcessor() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_WorkflowProcessor)MTable.get(getCtx(), org.compiere.model.I_AD_WorkflowProcessor.Table_ID)
+			.getPO(getAD_WorkflowProcessor_ID(), get_TrxName());
+	}
+
+	/** Set Workflow Processor.
+		@param AD_WorkflowProcessor_ID Workflow Processor Server
+	*/
+	public void setAD_WorkflowProcessor_ID (int AD_WorkflowProcessor_ID)
+	{
+		if (AD_WorkflowProcessor_ID < 1)
+			set_Value (COLUMNNAME_AD_WorkflowProcessor_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_WorkflowProcessor_ID, Integer.valueOf(AD_WorkflowProcessor_ID));
+	}
+
+	/** Get Workflow Processor.
+		@return Workflow Processor Server
+	  */
+	public int getAD_WorkflowProcessor_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_WorkflowProcessor_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_AD_Workflow getAD_Workflow() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Workflow)MTable.get(getCtx(), org.compiere.model.I_AD_Workflow.Table_ID)
@@ -264,32 +317,35 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_AD_WorkflowProcessor getAD_WorkflowProcessor() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_WorkflowProcessor)MTable.get(getCtx(), org.compiere.model.I_AD_WorkflowProcessor.Table_ID)
-			.getPO(getAD_WorkflowProcessor_ID(), get_TrxName());
-	}
-
-	/** Set Workflow Processor.
-		@param AD_WorkflowProcessor_ID Workflow Processor Server
+	/** AccessLevel AD_Reference_ID=5 */
+	public static final int ACCESSLEVEL_AD_Reference_ID=5;
+	/** Organization = 1 */
+	public static final String ACCESSLEVEL_Organization = "1";
+	/** Client only = 2 */
+	public static final String ACCESSLEVEL_ClientOnly = "2";
+	/** Client+Organization = 3 */
+	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
+	/** System only = 4 */
+	public static final String ACCESSLEVEL_SystemOnly = "4";
+	/** System+Client = 6 */
+	public static final String ACCESSLEVEL_SystemPlusClient = "6";
+	/** All = 7 */
+	public static final String ACCESSLEVEL_All = "7";
+	/** Set Data Access Level.
+		@param AccessLevel Access Level required
 	*/
-	public void setAD_WorkflowProcessor_ID (int AD_WorkflowProcessor_ID)
+	public void setAccessLevel (String AccessLevel)
 	{
-		if (AD_WorkflowProcessor_ID < 1)
-			set_Value (COLUMNNAME_AD_WorkflowProcessor_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_WorkflowProcessor_ID, Integer.valueOf(AD_WorkflowProcessor_ID));
+
+		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
 	}
 
-	/** Get Workflow Processor.
-		@return Workflow Processor Server
+	/** Get Data Access Level.
+		@return Access Level required
 	  */
-	public int getAD_WorkflowProcessor_ID()
+	public String getAccessLevel()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_WorkflowProcessor_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
+		return (String)get_Value(COLUMNNAME_AccessLevel);
 	}
 
 	/** Set Author.
@@ -382,16 +438,16 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 	public static final int DURATIONUNIT_AD_Reference_ID=299;
 	/** Day = D */
 	public static final String DURATIONUNIT_Day = "D";
+	/** Month = M */
+	public static final String DURATIONUNIT_Month = "M";
+	/** Year = Y */
+	public static final String DURATIONUNIT_Year = "Y";
 	/** hour = h */
 	public static final String DURATIONUNIT_Hour = "h";
 	/** minute = m */
 	public static final String DURATIONUNIT_Minute = "m";
-	/** Month = M */
-	public static final String DURATIONUNIT_Month = "M";
 	/** second = s */
 	public static final String DURATIONUNIT_Second = "s";
-	/** Year = Y */
-	public static final String DURATIONUNIT_Year = "Y";
 	/** Set Duration Unit.
 		@param DurationUnit Unit of Duration
 	*/
@@ -458,10 +514,10 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -523,7 +579,7 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -752,25 +808,6 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 		return ii.intValue();
 	}
 
-	/** Set Setup Time.
-		@param SetupTime Setup time before starting Production
-	*/
-	public void setSetupTime (int SetupTime)
-	{
-		set_Value (COLUMNNAME_SetupTime, Integer.valueOf(SetupTime));
-	}
-
-	/** Get Setup Time.
-		@return Setup time before starting Production
-	  */
-	public int getSetupTime()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_SetupTime);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException
 	{
 		return (org.compiere.model.I_S_Resource)MTable.get(getCtx(), org.compiere.model.I_S_Resource.Table_ID)
@@ -799,6 +836,25 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 		return ii.intValue();
 	}
 
+	/** Set Setup Time.
+		@param SetupTime Setup time before starting Production
+	*/
+	public void setSetupTime (int SetupTime)
+	{
+		set_Value (COLUMNNAME_SetupTime, Integer.valueOf(SetupTime));
+	}
+
+	/** Get Setup Time.
+		@return Setup time before starting Production
+	  */
+	public int getSetupTime()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SetupTime);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Units by Cycles.
 		@param UnitsCycles The Units by Cycles are defined for process type  Flow Repetitive Dedicated and  indicated the product to be manufactured on a production line for duration unit.
 	*/
@@ -816,21 +872,6 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
-	}
-
-	/** Set Validate Workflow.
-		@param ValidateWorkflow Validate Workflow
-	*/
-	public void setValidateWorkflow (String ValidateWorkflow)
-	{
-		set_Value (COLUMNNAME_ValidateWorkflow, ValidateWorkflow);
-	}
-
-	/** Get Validate Workflow.
-		@return Validate Workflow	  */
-	public String getValidateWorkflow()
-	{
-		return (String)get_Value(COLUMNNAME_ValidateWorkflow);
 	}
 
 	/** Set Valid from.
@@ -863,6 +904,21 @@ public class X_PP_Order_Workflow extends PO implements I_PP_Order_Workflow, I_Pe
 	public Timestamp getValidTo()
 	{
 		return (Timestamp)get_Value(COLUMNNAME_ValidTo);
+	}
+
+	/** Set Validate Workflow.
+		@param ValidateWorkflow Validate Workflow
+	*/
+	public void setValidateWorkflow (String ValidateWorkflow)
+	{
+		set_Value (COLUMNNAME_ValidateWorkflow, ValidateWorkflow);
+	}
+
+	/** Get Validate Workflow.
+		@return Validate Workflow	  */
+	public String getValidateWorkflow()
+	{
+		return (String)get_Value(COLUMNNAME_ValidateWorkflow);
 	}
 
 	/** Set Search Key.

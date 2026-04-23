@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Package_Exp_Detail
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Package_Exp_Detail")
-public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Detail, I_Persistent 
+public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Detail, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Package_Exp_Detail (Properties ctx, int AD_Package_Exp_Detail_ID, String trxName)
@@ -59,6 +59,32 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Package_Exp_Detail (Properties ctx, String AD_Package_Exp_Detail_UU, String trxName)
+    {
+      super (ctx, AD_Package_Exp_Detail_UU, trxName);
+      /** if (AD_Package_Exp_Detail_UU == null)
+        {
+			setAD_Package_Exp_Detail_ID (0);
+			setAD_Package_Exp_ID (0);
+			setProcessing (false);
+			setType (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Package_Exp_Detail (Properties ctx, String AD_Package_Exp_Detail_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Package_Exp_Detail_UU, trxName, virtualColumns);
+      /** if (AD_Package_Exp_Detail_UU == null)
+        {
+			setAD_Package_Exp_Detail_ID (0);
+			setAD_Package_Exp_ID (0);
+			setProcessing (false);
+			setType (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Package_Exp_Detail (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +92,7 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -335,7 +361,7 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_Package_Exp_Detail_ID()));
     }
@@ -729,21 +755,6 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 		return (String)get_Value(COLUMNNAME_ExecCode);
 	}
 
-	/** Set File_Directory.
-		@param File_Directory File_Directory
-	*/
-	public void setFile_Directory (String File_Directory)
-	{
-		set_Value (COLUMNNAME_File_Directory, File_Directory);
-	}
-
-	/** Get File_Directory.
-		@return File_Directory	  */
-	public String getFile_Directory()
-	{
-		return (String)get_Value(COLUMNNAME_File_Directory);
-	}
-
 	/** Set File Name.
 		@param FileName Name of the local file or URL
 	*/
@@ -758,6 +769,21 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	public String getFileName()
 	{
 		return (String)get_Value(COLUMNNAME_FileName);
+	}
+
+	/** Set File_Directory.
+		@param File_Directory File_Directory
+	*/
+	public void setFile_Directory (String File_Directory)
+	{
+		set_Value (COLUMNNAME_File_Directory, File_Directory);
+	}
+
+	/** Get File_Directory.
+		@return File_Directory	  */
+	public String getFile_Directory()
+	{
+		return (String)get_Value(COLUMNNAME_File_Directory);
 	}
 
 	/** Set Line No.
@@ -809,10 +835,10 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -831,10 +857,10 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -842,8 +868,6 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 
 	/** ReleaseNo AD_Reference_ID=50002 */
 	public static final int RELEASENO_AD_Reference_ID=50002;
-	/** No specific release = all */
-	public static final String RELEASENO_NoSpecificRelease = "all";
 	/** Release 2.5.2a = Release 2.5.2a */
 	public static final String RELEASENO_Release252a = "Release 2.5.2a";
 	/** Release 2.5.2b = Release 2.5.2b */
@@ -864,6 +888,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	public static final String RELEASENO_Release320 = "Release 3.2.0";
 	/** Release 3.3.0 = Release 3.3.0 */
 	public static final String RELEASENO_Release330 = "Release 3.3.0";
+	/** No specific release = all */
+	public static final String RELEASENO_NoSpecificRelease = "all";
 	/** Set Release No.
 		@param ReleaseNo Internal Release Number
 	*/

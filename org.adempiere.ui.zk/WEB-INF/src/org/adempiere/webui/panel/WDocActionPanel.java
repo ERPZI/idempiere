@@ -37,6 +37,7 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.compiere.model.GridTab;
+import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MClientInfo;
 import org.compiere.model.MDocType;
@@ -60,12 +61,13 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Vlayout;
 
-
-
+/**
+ * Document action dialog
+ */
 public class WDocActionPanel extends Window implements EventListener<Event>, DialogEvents
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3218367479851088526L;
 
@@ -90,11 +92,18 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
         logger = CLogger.getCLogger(WDocActionPanel.class);
     }
 
+    /**
+     * @param mgridTab
+     */
 	public WDocActionPanel(GridTab mgridTab)
 	{
 		this(mgridTab, false);
 	}
 
+	/**
+	 * @param mgridTab
+	 * @param fromMenu
+	 */
 	public WDocActionPanel(GridTab mgridTab, boolean fromMenu)
 	{
 		gridTab = mgridTab;
@@ -111,12 +120,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 	}
 
 	/**
-	 *	Dynamic Init - determine valid DocActions based on DocStatus for the different documents.
+	 * Dynamic Init - determine valid DocActions based on DocStatus for the different documents.
 	 * @param fromMenu 
 	 */
 	private void dynInit(boolean fromMenu)
 	{
-
 		//
 		Object Processing = gridTab.getValue("Processing");
 		String OrderType = Env.getContext(Env.getCtx(), gridTab.getWindowNo(), "OrderType");
@@ -124,7 +132,6 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 
 		if (DocStatus == null)
 		{
-			//message.setText("*** ERROR ***");
 			return;
 		}
 
@@ -171,12 +178,15 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		MTable table = MTable.get(Env.getCtx(), m_AD_Table_ID);
 		PO po = table.getPO(gridTab.getRecord_ID(), null);
 		boolean periodOpen = true;
-		if (po instanceof DocAction)
+		boolean isBackDateTrxAllowed = true;
+		if (po instanceof DocAction) {
 			periodOpen = MPeriod.isOpen(Env.getCtx(), m_AD_Table_ID, gridTab.getRecord_ID(), null);
+			isBackDateTrxAllowed = MAcctSchema.isBackDateTrxAllowed(Env.getCtx(), m_AD_Table_ID, gridTab.getRecord_ID(), null);
+		}
 
 		String[] docActionHolder = new String[]{DocAction};
 		index = DocumentEngine.getValidActions(DocStatus, Processing, OrderType, IsSOTrx,
-				m_AD_Table_ID, docActionHolder, options, periodOpen, po);
+				m_AD_Table_ID, docActionHolder, options, periodOpen, isBackDateTrxAllowed, po);
 
 		Integer doctypeId = (Integer)gridTab.getValue("C_DocTypeTarget_ID");
 		if(doctypeId==null || doctypeId.intValue()==0){
@@ -235,10 +245,19 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			DocAction = DocumentEngine.ACTION_Close;
 	}
 
+	/**
+	 * @return available document action items
+	 */
 	public List<Listitem> getDocActionItems() {
 		return (List<Listitem>)lstDocAction.getItems();
 	}
 	
+	/**
+	 * @param TableName
+	 * @param Record_ID
+	 * @param DocStatus
+	 * @return true if DocStatus match DocStatus from DB
+	 */
 	private boolean checkStatus (String TableName, int Record_ID, String DocStatus)
 	{
 		String sql = "SELECT 2 FROM " + TableName
@@ -248,6 +267,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		return result == 2;
 	}
 
+	/**
+	 * Create components
+	 */
 	private void initComponents()
 	{
 		lblDocAction = new Label();
@@ -267,6 +289,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
         ZKUpdateUtil.setVflex(confirmPanel, "true");
 	}
 
+	/**
+	 * Layout dialog
+	 */
 	private void init()
 	{
 		setSclass("popup-dialog doc-action-dialog");
@@ -274,7 +299,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		ZKUpdateUtil.setHflex(vlayout, "1");
 		this.appendChild(vlayout);
 		
-		setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentAction");
+		setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentAction");
 		Grid grid = GridFactory.newGridLayout();
         grid.setStyle("background-image: none;");
         LayoutUtils.addSclass("dialog-content", grid);
@@ -322,6 +347,7 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		return m_OKpressed;
 	}	//	isStartProcess
 
+	@Override
 	public void onEvent(Event event)
 	{
 
@@ -347,6 +373,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 	}
 
+	/**
+	 * Set selected document action item by value
+	 * @param value
+	 */
 	public void setSelectedItem(String value) {
 		lstDocAction.setSelectedIndex(-1);
 		List<Listitem> lst = (List<Listitem>)lstDocAction.getItems();
@@ -358,6 +388,10 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}
 	}
 	
+	/**
+	 * Handle onOk event
+	 * @param callback
+	 */
 	public void onOk(final Callback<Boolean> callback) {
 		MClientInfo clientInfo = MClientInfo.get(Env.getCtx());
 		if(clientInfo.isConfirmOnDocClose() || clientInfo.isConfirmOnDocVoid())
@@ -404,6 +438,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		}		
 	}
 
+	/**
+	 * Validate DocStatus not change by other, update GridTab and close dialog
+	 */
 	private void setValueAndClose() {
 		String statusSql = "SELECT DocStatus FROM " + gridTab.getTableName() 
 				+ " WHERE " + gridTab.getKeyColumnName() + " = ? ";
@@ -416,6 +453,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		detach();
 	}
 
+	/**
+	 * Update GridTab with selected DocAction value
+	 */
 	private void setValue()
 	{
 		int index = getSelectedIndex();
@@ -424,8 +464,11 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		gridTab.setValue("DocAction", s_value[index]);
 	}	//	save
 
-	 private void readReference()
-	 {
+	/**
+	 * Load document action list from AD_Ref_List  
+	 */
+	private void readReference()
+	{
 	        ArrayList<String> v_value = new ArrayList<String>();
     		ArrayList<String> v_name = new ArrayList<String>();
     		ArrayList<String> v_description = new ArrayList<String>();
@@ -445,6 +488,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 			}
 	 }   //  readReference
 
+	/**
+	 * @return selected index
+	 */
 	 public int getSelectedIndex()
 	 {
 		int index = 0;
@@ -464,6 +510,9 @@ public class WDocActionPanel extends Window implements EventListener<Event>, Dia
 		return index;
 	}	//	getSelectedIndex
 
+	 /**
+	  * @return number of document action items
+	  */
 	public int getNumberOfOptions() {
 		return lstDocAction != null ? lstDocAction.getItemCount() : 0;
 	}

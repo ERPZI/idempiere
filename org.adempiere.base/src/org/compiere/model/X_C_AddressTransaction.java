@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_AddressTransaction
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_AddressTransaction")
-public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction, I_Persistent 
+public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_AddressTransaction (Properties ctx, int C_AddressTransaction_ID, String trxName)
@@ -63,6 +63,36 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_AddressTransaction (Properties ctx, String C_AddressTransaction_UU, String trxName)
+    {
+      super (ctx, C_AddressTransaction_UU, trxName);
+      /** if (C_AddressTransaction_UU == null)
+        {
+			setC_AddressTransaction_ID (0);
+			setC_AddressValidation_ID (0);
+			setIsValid (false);
+// N
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_AddressTransaction (Properties ctx, String C_AddressTransaction_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_AddressTransaction_UU, trxName, virtualColumns);
+      /** if (C_AddressTransaction_UU == null)
+        {
+			setC_AddressTransaction_ID (0);
+			setC_AddressValidation_ID (0);
+			setIsValid (false);
+// N
+			setProcessed (false);
+// N
+        } */
+    }
+
     /** Load Constructor */
     public X_C_AddressTransaction (Properties ctx, ResultSet rs, String trxName)
     {
@@ -70,7 +100,7 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -234,30 +264,6 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
 		return ii.intValue();
 	}
 
-	/** Set City.
-		@param City Identifies a City
-	*/
-	public void setCity (String City)
-	{
-		set_Value (COLUMNNAME_City, City);
-	}
-
-	/** Get City.
-		@return Identifies a City
-	  */
-	public String getCity()
-	{
-		return (String)get_Value(COLUMNNAME_City);
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), getCity());
-    }
-
 	public I_C_Location getC_Location() throws RuntimeException
 	{
 		return (I_C_Location)MTable.get(getCtx(), I_C_Location.Table_ID)
@@ -285,6 +291,30 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
 			 return 0;
 		return ii.intValue();
 	}
+
+	/** Set City.
+		@param City Identifies a City
+	*/
+	public void setCity (String City)
+	{
+		set_Value (COLUMNNAME_City, City);
+	}
+
+	/** Get City.
+		@return Identifies a City
+	  */
+	public String getCity()
+	{
+		return (String)get_Value(COLUMNNAME_City);
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), getCity());
+    }
 
 	/** Set Comments.
 		@param Comments Comments or additional information
@@ -331,10 +361,10 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
 	public boolean isValid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsValid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -370,10 +400,10 @@ public class X_C_AddressTransaction extends PO implements I_C_AddressTransaction
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -19,19 +19,19 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for C_BP_Withholding
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_BP_Withholding")
-public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Persistent 
+public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_BP_Withholding (Properties ctx, int C_BP_Withholding_ID, String trxName)
@@ -59,6 +59,32 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_BP_Withholding (Properties ctx, String C_BP_Withholding_UU, String trxName)
+    {
+      super (ctx, C_BP_Withholding_UU, trxName);
+      /** if (C_BP_Withholding_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_Withholding_ID (0);
+			setIsMandatoryWithholding (false);
+			setIsTemporaryExempt (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BP_Withholding (Properties ctx, String C_BP_Withholding_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BP_Withholding_UU, trxName, virtualColumns);
+      /** if (C_BP_Withholding_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_Withholding_ID (0);
+			setIsMandatoryWithholding (false);
+			setIsTemporaryExempt (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_BP_Withholding (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +92,7 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -83,9 +109,24 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_BP_Withholding[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
+
+	/** Set C_BP_Withholding_UU.
+		@param C_BP_Withholding_UU C_BP_Withholding_UU
+	*/
+	public void setC_BP_Withholding_UU (String C_BP_Withholding_UU)
+	{
+		set_Value (COLUMNNAME_C_BP_Withholding_UU, C_BP_Withholding_UU);
+	}
+
+	/** Get C_BP_Withholding_UU.
+		@return C_BP_Withholding_UU	  */
+	public String getC_BP_Withholding_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_BP_Withholding_UU);
+	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
@@ -115,28 +156,13 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_BPartner_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getC_BPartner_ID()));
     }
-
-	/** Set C_BP_Withholding_UU.
-		@param C_BP_Withholding_UU C_BP_Withholding_UU
-	*/
-	public void setC_BP_Withholding_UU (String C_BP_Withholding_UU)
-	{
-		set_Value (COLUMNNAME_C_BP_Withholding_UU, C_BP_Withholding_UU);
-	}
-
-	/** Get C_BP_Withholding_UU.
-		@return C_BP_Withholding_UU	  */
-	public String getC_BP_Withholding_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_BP_Withholding_UU);
-	}
 
 	public org.compiere.model.I_C_Withholding getC_Withholding() throws RuntimeException
 	{
@@ -196,10 +222,10 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
 	public boolean isMandatoryWithholding()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMandatoryWithholding);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -219,10 +245,10 @@ public class X_C_BP_Withholding extends PO implements I_C_BP_Withholding, I_Pers
 	public boolean isTemporaryExempt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTemporaryExempt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

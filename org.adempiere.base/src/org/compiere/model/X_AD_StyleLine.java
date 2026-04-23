@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_StyleLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_StyleLine")
-public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent 
+public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_StyleLine (Properties ctx, int AD_StyleLine_ID, String trxName)
@@ -39,9 +39,9 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
       super (ctx, AD_StyleLine_ID, trxName);
       /** if (AD_StyleLine_ID == 0)
         {
-			setAD_Style_ID (0);
 			setAD_StyleLine_ID (0);
 			setAD_StyleLine_UU (null);
+			setAD_Style_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setInlineStyle (null);
@@ -56,9 +56,43 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
       super (ctx, AD_StyleLine_ID, trxName, virtualColumns);
       /** if (AD_StyleLine_ID == 0)
         {
-			setAD_Style_ID (0);
 			setAD_StyleLine_ID (0);
 			setAD_StyleLine_UU (null);
+			setAD_Style_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setInlineStyle (null);
+			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 FROM AD_StyleLine WHERE AD_Style_ID =@AD_Style_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_StyleLine (Properties ctx, String AD_StyleLine_UU, String trxName)
+    {
+      super (ctx, AD_StyleLine_UU, trxName);
+      /** if (AD_StyleLine_UU == null)
+        {
+			setAD_StyleLine_ID (0);
+			setAD_StyleLine_UU (null);
+			setAD_Style_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setInlineStyle (null);
+			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 FROM AD_StyleLine WHERE AD_Style_ID =@AD_Style_ID@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_StyleLine (Properties ctx, String AD_StyleLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_StyleLine_UU, trxName, virtualColumns);
+      /** if (AD_StyleLine_UU == null)
+        {
+			setAD_StyleLine_ID (0);
+			setAD_StyleLine_UU (null);
+			setAD_Style_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setInlineStyle (null);
@@ -74,7 +108,7 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -94,34 +128,6 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_AD_Style getAD_Style() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Style)MTable.get(getCtx(), org.compiere.model.I_AD_Style.Table_ID)
-			.getPO(getAD_Style_ID(), get_TrxName());
-	}
-
-	/** Set Style.
-		@param AD_Style_ID CSS style for field and label
-	*/
-	public void setAD_Style_ID (int AD_Style_ID)
-	{
-		if (AD_Style_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_Style_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_Style_ID, Integer.valueOf(AD_Style_ID));
-	}
-
-	/** Get Style.
-		@return CSS style for field and label
-	  */
-	public int getAD_Style_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Style_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Style Line.
 		@param AD_StyleLine_ID CSS Style Line
@@ -159,6 +165,34 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
 	public String getAD_StyleLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_StyleLine_UU);
+	}
+
+	public org.compiere.model.I_AD_Style getAD_Style() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Style)MTable.get(getCtx(), org.compiere.model.I_AD_Style.Table_ID)
+			.getPO(getAD_Style_ID(), get_TrxName());
+	}
+
+	/** Set Style.
+		@param AD_Style_ID CSS style for field and label
+	*/
+	public void setAD_Style_ID (int AD_Style_ID)
+	{
+		if (AD_Style_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_Style_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_Style_ID, Integer.valueOf(AD_Style_ID));
+	}
+
+	/** Get Style.
+		@return CSS style for field and label
+	  */
+	public int getAD_Style_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Style_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Display Logic.
@@ -234,7 +268,7 @@ public class X_AD_StyleLine extends PO implements I_AD_StyleLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }

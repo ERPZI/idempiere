@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySchedule
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_PaySchedule")
-public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent 
+public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_PaySchedule (Properties ctx, int C_PaySchedule_ID, String trxName)
@@ -41,8 +41,8 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
       super (ctx, C_PaySchedule_ID, trxName);
       /** if (C_PaySchedule_ID == 0)
         {
-			setC_PaymentTerm_ID (0);
 			setC_PaySchedule_ID (0);
+			setC_PaymentTerm_ID (0);
 			setDiscount (Env.ZERO);
 			setDiscountDays (0);
 			setGraceDays (0);
@@ -58,8 +58,42 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
       super (ctx, C_PaySchedule_ID, trxName, virtualColumns);
       /** if (C_PaySchedule_ID == 0)
         {
-			setC_PaymentTerm_ID (0);
 			setC_PaySchedule_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDiscount (Env.ZERO);
+			setDiscountDays (0);
+			setGraceDays (0);
+			setIsValid (false);
+			setNetDays (0);
+			setPercentage (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaySchedule (Properties ctx, String C_PaySchedule_UU, String trxName)
+    {
+      super (ctx, C_PaySchedule_UU, trxName);
+      /** if (C_PaySchedule_UU == null)
+        {
+			setC_PaySchedule_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDiscount (Env.ZERO);
+			setDiscountDays (0);
+			setGraceDays (0);
+			setIsValid (false);
+			setNetDays (0);
+			setPercentage (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaySchedule (Properties ctx, String C_PaySchedule_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_PaySchedule_UU, trxName, virtualColumns);
+      /** if (C_PaySchedule_UU == null)
+        {
+			setC_PaySchedule_ID (0);
+			setC_PaymentTerm_ID (0);
 			setDiscount (Env.ZERO);
 			setDiscountDays (0);
 			setGraceDays (0);
@@ -76,7 +110,7 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -95,42 +129,6 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
       StringBuilder sb = new StringBuilder ("X_C_PaySchedule[")
         .append(get_ID()).append("]");
       return sb.toString();
-    }
-
-	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_ID)
-			.getPO(getC_PaymentTerm_ID(), get_TrxName());
-	}
-
-	/** Set Payment Term.
-		@param C_PaymentTerm_ID The terms of Payment (timing, discount)
-	*/
-	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID)
-	{
-		if (C_PaymentTerm_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, Integer.valueOf(C_PaymentTerm_ID));
-	}
-
-	/** Get Payment Term.
-		@return The terms of Payment (timing, discount)
-	  */
-	public int getC_PaymentTerm_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaymentTerm_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_PaymentTerm_ID()));
     }
 
 	/** Set Payment Schedule.
@@ -169,6 +167,42 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
 	{
 		return (String)get_Value(COLUMNNAME_C_PaySchedule_UU);
 	}
+
+	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_PaymentTerm)MTable.get(getCtx(), org.compiere.model.I_C_PaymentTerm.Table_ID)
+			.getPO(getC_PaymentTerm_ID(), get_TrxName());
+	}
+
+	/** Set Payment Term.
+		@param C_PaymentTerm_ID The terms of Payment (timing, discount)
+	*/
+	public void setC_PaymentTerm_ID (int C_PaymentTerm_ID)
+	{
+		if (C_PaymentTerm_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_PaymentTerm_ID, Integer.valueOf(C_PaymentTerm_ID));
+	}
+
+	/** Get Payment Term.
+		@return The terms of Payment (timing, discount)
+	  */
+	public int getC_PaymentTerm_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaymentTerm_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getC_PaymentTerm_ID()));
+    }
 
 	/** Set Discount %.
 		@param Discount Discount in percent
@@ -241,10 +275,10 @@ public class X_C_PaySchedule extends PO implements I_C_PaySchedule, I_Persistent
 	public boolean isValid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsValid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

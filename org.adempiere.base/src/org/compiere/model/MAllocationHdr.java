@@ -34,10 +34,11 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
- *  Payment Allocation Model.
- * 	Allocation Trigger update C_BPartner
+ *  Allocation Model.
+ * 	Allocation Trigger update of C_BPartner balance.
  *
  *  @author 	Jorg Janke
  *  @version 	$Id: MAllocationHdr.java,v 1.3 2006/07/30 00:51:03 jjanke Exp $
@@ -52,7 +53,7 @@ import org.compiere.util.Msg;
 public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -7787519874581251920L;
 
@@ -60,8 +61,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Get Allocations of Payment
 	 *	@param ctx context
 	 *	@param C_Payment_ID payment
+	 *  @param trxName transaction
 	 *	@return allocations of payment
-	 *	@param trxName transaction
 	 */
 	public static MAllocationHdr[] getOfPayment (Properties ctx, int C_Payment_ID, String trxName)
 	{
@@ -98,8 +99,8 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Get Allocations of Invoice
 	 *	@param ctx context
 	 *	@param C_Invoice_ID payment
+	 *  @param trxName transaction
 	 *	@return allocations of payment
-	 *	@param trxName transaction
 	 */
 	public static MAllocationHdr[] getOfInvoice (Properties ctx, int C_Invoice_ID, String trxName)
 	{
@@ -132,13 +133,12 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		return retValue;
 	}	//	getOfInvoice
 	
-	//FR [ 1866214 ]
 	/**
 	 * 	Get Allocations of Cash
 	 *	@param ctx context
 	 *	@param C_Cash_ID Cash ID
+	 *  @param trxName transaction
 	 *	@return allocations of payment
-	 *	@param trxName transaction
 	 */
 	public static MAllocationHdr[] getOfCash (Properties ctx, int C_Cash_ID, String trxName)
 	{
@@ -157,9 +157,20 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	/**	Logger						*/
 	private static CLogger s_log = CLogger.getCLogger(MAllocationHdr.class);
-	
-	
-	/**************************************************************************
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_AllocationHdr_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAllocationHdr(Properties ctx, String C_AllocationHdr_UU, String trxName) {
+        super(ctx, C_AllocationHdr_UU, trxName);
+		if (Util.isEmpty(C_AllocationHdr_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param C_AllocationHdr_ID id
@@ -169,21 +180,26 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	{
 		super (ctx, C_AllocationHdr_ID, trxName);
 		if (C_AllocationHdr_ID == 0)
-		{
-			setDateTrx (new Timestamp(System.currentTimeMillis()));
-			setDateAcct (getDateTrx());
-			setDocAction (DOCACTION_Complete);
-			setDocStatus (DOCSTATUS_Drafted);
-			setApprovalAmt (Env.ZERO);
-			setIsApproved (false);
-			setIsManual (false);
-			//
-			setPosted (false);
-			setProcessed (false);
-			setProcessing(false);
-			setC_DocType_ID(MDocType.getDocType("CMA"));
-		}
+			setInitialDefaults();
 	}	//	MAllocation
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDateTrx (new Timestamp(System.currentTimeMillis()));
+		setDateAcct (getDateTrx());
+		setDocAction (DOCACTION_Complete);
+		setDocStatus (DOCSTATUS_Drafted);
+		setApprovalAmt (Env.ZERO);
+		setIsApproved (false);
+		setIsManual (false);
+		//
+		setPosted (false);
+		setProcessed (false);
+		setProcessing(false);
+		setC_DocType_ID(MDocType.getDocType("CMA"));
+	}
 
 	/**
 	 * 	Mandatory New Constructor
@@ -225,9 +241,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	private MAllocationLine[]	m_lines = null;
 	
 	/**
-	 * 	Get Lines
+	 * 	Get Allocation Lines
 	 *	@param requery if true requery
-	 *	@return lines
+	 *	@return allocation lines
 	 */
 	public MAllocationLine[] getLines (boolean requery)
 	{
@@ -271,6 +287,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Set Processed
 	 *	@param processed Processed
 	 */
+	@Override
 	public void setProcessed (boolean processed)
 	{
 		super.setProcessed (processed);
@@ -283,16 +300,11 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		m_lines = null;
 		if (log.isLoggable(Level.FINE)) log.fine(processed + " - #" + no);
 	}	//	setProcessed
-	
-	
-	/**************************************************************************
-	 * 	Before Save
-	 *	@param newRecord
-	 *	@return save
-	 */
+		
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	Changed from Not to Active
+		// Disallow re-activate of deactivated allocation
 		if (!newRecord && is_ValueChanged("IsActive") && isActive())
 		{
 			log.severe ("Cannot Re-Activate deactivated Allocations");
@@ -303,15 +315,13 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 	private List<Integer> m_bps_beforeDelete = new ArrayList<Integer>();
 
-	/**
-	 * 	Before Delete.
-	 *	@return true if acct was deleted
-	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		String trxName = get_TrxName();
 		if (trxName == null || trxName.length() == 0)
 			log.warning ("No transaction");
+		// Check is period open and delete posting records (Fact_Acct)
 		if (isPosted())
 		{
 			MPeriod.testPeriodOpen(getCtx(), getDateTrx(), MDocType.DOCBASETYPE_PaymentAllocation, getAD_Org_ID());
@@ -322,9 +332,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		setIsActive(false);		//	updated DB for line delete/process
 		this.saveEx();
 
-		//	Unlink
+		// Load allocation lines (m_lines)
 		getLines(true);
 		
+		// Save allocation line BP into a list and delete allocation line records
 		m_bps_beforeDelete.clear();
 		for (int i = 0; i < m_lines.length; i++)
 		{
@@ -339,6 +350,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 	@Override
 	protected boolean afterDelete(boolean success) {
+		// Update balance of business partner (list of BP capture in beforeDelete)
 		if (success) {
 			for (int C_BPartner_ID : m_bps_beforeDelete) {
 				MBPartner bpartner = new MBPartner(Env.getCtx(), C_BPartner_ID, get_TrxName());
@@ -351,21 +363,11 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}
 
 	/**
-	 * 	After Save
-	 *	@param newRecord
-	 *	@param success
-	 *	@return success
-	 */
-	protected boolean afterSave (boolean newRecord, boolean success)
-	{
-		return success;
-	}	//	afterSave
-	
-	/**************************************************************************
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed
 	 */
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -382,6 +384,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Unlock Document.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -393,6 +396,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Invalidate Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -404,6 +408,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 *	Prepare Document
 	 * 	@return new status (In Progress or Invalid) 
 	 */
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -483,6 +488,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Approve Document
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean  approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -494,6 +500,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Reject Approval
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -505,6 +512,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Complete Document
 	 * 	@return new status (Complete, In Progress, Invalid, Waiting ..)
 	 */
+	@Override
 	public String completeIt()
 	{
 		//	Re-Check
@@ -551,9 +559,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	/**
 	 * 	Void Document.
-	 * 	Same as Close.
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean voidIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -631,9 +639,9 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	/**
 	 * 	Close Document.
-	 * 	Cancel not delivered Qunatities
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -653,9 +661,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	closeIt
 	
 	/**
-	 * 	Reverse Correction
+	 * 	Reverse Correction (using original DateAcct)
 	 * 	@return true if success 
 	 */
+	@Override
 	public boolean reverseCorrectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -676,9 +685,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	reverseCorrectionIt
 	
 	/**
-	 * 	Reverse Accrual - none
+	 * 	Reverse Accrual (using current date as DateAcct)
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reverseAccrualIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -702,6 +712,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Re-activate
 	 * 	@return false 
 	 */
+	@Override
 	public boolean reActivateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -722,6 +733,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MAllocationHdr[");
@@ -733,6 +745,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Get Document Info
 	 *	@return document info (untranslated)
 	 */
+	@Override
 	public String getDocumentInfo()
 	{
 		StringBuilder msgreturn = new StringBuilder().append(Msg.getElement(getCtx(), "C_AllocationHdr_ID")).append(" ").append(getDocumentNo());
@@ -743,6 +756,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Create PDF
 	 *	@return File or null
 	 */
+	@Override
 	public File createPDF ()
 	{
 		try
@@ -759,22 +773,20 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	getPDF
 
 	/**
-	 * 	Create PDF file
+	 * 	Create PDF file. 
 	 *	@param file output file
-	 *	@return file if success
+	 *	@return not implemented, always return null
 	 */
 	public File createPDF (File file)
 	{
-	//	ReportEngine re = ReportEngine.get (getCtx(), ReportEngine.INVOICE, getC_Invoice_ID());
-	//	if (re == null)
-			return null;
-	//	return re.getPDF(file);
+		return null;
 	}	//	createPDF
 
-	/*************************************************************************
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
+	@Override
 	public String getSummary()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -793,6 +805,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Get Process Message
 	 *	@return clear text error message
 	 */
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
@@ -802,6 +815,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	 * 	Get Document Owner (Responsible)
 	 *	@return AD_User_ID
 	 */
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getCreatedBy();
@@ -820,9 +834,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 			setDescription(desc + " | " + description);
 	}	//	addDescription
 	
-	/**************************************************************************
+	/**
 	 * 	Reverse Allocation.
-	 * 	Period needs to be open
+	 * 	Period needs to be open.
+	 *  @param accrual true for reverse accrual (current date), false for reverse correct (original accounting date)
 	 *	@return true if reversed
 	 */
 	private boolean reverseIt(boolean accrual) 
@@ -930,6 +945,10 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 		return true;
 	}	//	reverse
 
+	/**
+	 * Update open balance of BP 
+	 * @return true if updated successfully
+	 */
 	private boolean updateBP()
 	{
 		List<Integer> bps = new ArrayList<Integer>();
@@ -947,7 +966,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	}	//	updateBP
 	
 	/**
-	 * 	Document Status is Complete or Closed
+	 * 	Document Status is Complete, Closed or Reversed
 	 *	@return true if CO, CL or RE
 	 */
 	public boolean isComplete()
@@ -960,7 +979,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 
 	/**
 	 * 	Create new Allocation by copying
-	 * 	@param from allocation
+	 * 	@param from source allocation to copy from
 	 * 	@param dateAcct date of the document accounting date
 	 *  @param dateTrx date of the document transaction.
 	 * 	@param trxName
@@ -996,7 +1015,7 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	/**
 	 * 	Copy Lines From other Allocation.
-	 *	@param otherAllocation allocation
+	 *	@param otherAllocation other allocation to copy from
 	 *	@return number of lines copied
 	 */
 	public int copyLinesFrom (MAllocationHdr otherAllocation)
@@ -1048,21 +1067,25 @@ public class MAllocationHdr extends X_C_AllocationHdr implements DocAction
 	
 	/**
 	 * 	Is Reversal
-	 *	@return reversal
+	 *	@return true if it is a reversal document
 	 */
 	private boolean isReversal()
 	{
 		return m_reversal;
 	}	//	isReversal
 
-	/** Returns a description parsing the bpartner defined in the Allocation form and then the allocation itself */
+	/** 
+	 * @param bpartnerID
+	 * @param trxName
+	 * @return Returns a description parsing the bpartner in allocation header and then the allocation document itself 
+	 */
 	public String getDescriptionForManualAllocation(int bpartnerID, String trxName)
 	{
 		String sysconfig_desc = MSysConfig.getValue(MSysConfig.ALLOCATION_DESCRIPTION, "@#AD_User_Name@", getAD_Client_ID());
 		String description = "";
 		if (sysconfig_desc.contains("@")) {
-			description = Env.parseVariable(sysconfig_desc, new MBPartner(getCtx(), bpartnerID, null), trxName, true);
-			description = Env.parseVariable(description, this, trxName, true);
+			description = Env.parseVariable(sysconfig_desc, new MBPartner(getCtx(), bpartnerID, null), trxName, false, false, true, true); // keep escape sequence
+			description = Env.parseVariable(description, this, trxName, false, false, true, false);
 			description = Msg.parseTranslation(getCtx(), description);
 		} else
 			description = Env.getContext(getCtx(), Env.AD_USER_NAME); // just to be sure

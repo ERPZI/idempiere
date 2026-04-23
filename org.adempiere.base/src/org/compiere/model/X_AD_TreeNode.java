@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_TreeNode
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_TreeNode")
-public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent 
+public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_TreeNode (Properties ctx, int AD_TreeNode_ID, String trxName)
@@ -56,6 +56,30 @@ public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_TreeNode (Properties ctx, String AD_TreeNode_UU, String trxName)
+    {
+      super (ctx, AD_TreeNode_UU, trxName);
+      /** if (AD_TreeNode_UU == null)
+        {
+			setAD_Tree_ID (0);
+			setNode_ID (0);
+			setSeqNo (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_TreeNode (Properties ctx, String AD_TreeNode_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_TreeNode_UU, trxName, virtualColumns);
+      /** if (AD_TreeNode_UU == null)
+        {
+			setAD_Tree_ID (0);
+			setNode_ID (0);
+			setSeqNo (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_TreeNode (Properties ctx, ResultSet rs, String trxName)
     {
@@ -63,7 +87,7 @@ public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -80,9 +104,24 @@ public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_AD_TreeNode[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
+
+	/** Set AD_TreeNode_UU.
+		@param AD_TreeNode_UU AD_TreeNode_UU
+	*/
+	public void setAD_TreeNode_UU (String AD_TreeNode_UU)
+	{
+		set_Value (COLUMNNAME_AD_TreeNode_UU, AD_TreeNode_UU);
+	}
+
+	/** Get AD_TreeNode_UU.
+		@return AD_TreeNode_UU	  */
+	public String getAD_TreeNode_UU()
+	{
+		return (String)get_Value(COLUMNNAME_AD_TreeNode_UU);
+	}
 
 	public org.compiere.model.I_AD_Tree getAD_Tree() throws RuntimeException
 	{
@@ -110,21 +149,6 @@ public class X_AD_TreeNode extends PO implements I_AD_TreeNode, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set AD_TreeNode_UU.
-		@param AD_TreeNode_UU AD_TreeNode_UU
-	*/
-	public void setAD_TreeNode_UU (String AD_TreeNode_UU)
-	{
-		set_Value (COLUMNNAME_AD_TreeNode_UU, AD_TreeNode_UU);
-	}
-
-	/** Get AD_TreeNode_UU.
-		@return AD_TreeNode_UU	  */
-	public String getAD_TreeNode_UU()
-	{
-		return (String)get_Value(COLUMNNAME_AD_TreeNode_UU);
 	}
 
 	/** Set Node.

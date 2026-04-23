@@ -30,12 +30,13 @@ import org.compiere.model.X_AD_PrintPaper;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
  *	AD_PrintPaper Print Paper Model
- *
+ *  <p>
  *  Change log:
  *  <ul>
  *  <li>2009-02-10 - armen - [ 2580531 ] Custom Paper Support - https://sourceforge.net/p/adempiere/feature-requests/655/
@@ -44,21 +45,21 @@ import org.idempiere.cache.ImmutablePOSupport;
  * 	@author 	Jorg Janke
  * 	@version 	$Id: MPrintPaper.java,v 1.3 2006/07/30 00:53:02 jjanke Exp $
  * 
- * @author Teo Sarca
+ *  @author Teo Sarca
  * 			<li>FR [ 2829019 ] Check PrintPaper on save
  * 			https://sourceforge.net/p/adempiere/feature-requests/782/
  */
 public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -4968342903056251506L;
 
 	/**
-	 * 	Get Paper from cache (immutable)
+	 * 	Get MPrintPaper from cache (immutable)
 	 * 	@param AD_PrintPaper_ID id
-	 * 	@return Paper
+	 * 	@return MPrintPaper
 	 */
 	static public MPrintPaper get (int AD_PrintPaper_ID)
 	{
@@ -76,10 +77,10 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}	//	get
 
 	/**
-	 * 	Create Paper and save
+	 * 	Create MPrintPaper and save
 	 * 	@param name name
 	 * 	@param landscape landscape
-	 * 	@return Paper
+	 * 	@return MPrintPaper
 	 */
 	static MPrintPaper create (String name, boolean landscape)
 	{
@@ -92,32 +93,49 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 
 	/**	Logger				*/
 	private static CLogger s_log = CLogger.getCLogger(MPrintPaper.class);
-	/** Cached Fonts						*/
+	/** Cached MPrintPaper						*/
 	static private ImmutableIntPOCache<Integer,MPrintPaper> s_papers 
 		= new ImmutableIntPOCache<Integer,MPrintPaper>(Table_Name, 5);
-	
-	
-	/**************************************************************************
-	 *	Constructor
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_PrintPaper_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MPrintPaper(Properties ctx, String AD_PrintPaper_UU, String trxName) {
+        super(ctx, AD_PrintPaper_UU, trxName);
+		if (Util.isEmpty(AD_PrintPaper_UU))
+			setInitialDefaults();
+    }
+
+	/**
+	 *	Create or load existing record.<br/>
+	 *  New record default to A4 (Code="iso-a4")
 	 *  @param ctx context
-	 *  @param AD_PrintPaper_ID ID if 0 A4
+	 *  @param AD_PrintPaper_ID 
 	 *  @param trxName transaction
 	 */
 	public MPrintPaper(Properties ctx, int AD_PrintPaper_ID, String trxName)
 	{
 		super(ctx, AD_PrintPaper_ID, trxName);
 		if (AD_PrintPaper_ID == 0)
-		{
-			setIsDefault (false);
-			setIsLandscape (true);
-			setCode ("iso-a4");
-			setMarginTop (36);
-			setMarginBottom (36);
-			setMarginLeft (36);
-			setMarginRight (36);
-		}
+			setInitialDefaults();
 	}	//	MPrintPaper
 	
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsDefault (false);
+		setIsLandscape (true);
+		setCode ("iso-a4");
+		setMarginTop (36);
+		setMarginBottom (36);
+		setMarginLeft (36);
+		setMarginRight (36);
+	}
+
 	/**
 	 * 	Load Constructor
 	 *	@param ctx context
@@ -130,7 +148,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}	//	MPrintPaper
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MPrintPaper(MPrintPaper copy) 
@@ -139,7 +157,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -149,7 +167,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -164,9 +182,9 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	/** Media Size			*/
 	private MediaSize		m_mediaSize = null;
 
-	/**************************************************************************
-	 * 	Get Media Size.
-	 *  The search is hard coded as the javax.print.MediaSize* info is private
+	/**
+	 * 	Get Media Size.<br/>
+	 *  The search is hard coded as the javax.print.MediaSize* info is private.
 	 * 	@return MediaSize from Code
 	 */
 	public MediaSize getMediaSize()
@@ -215,7 +233,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}	//	getMediaSize
 
 	/**
-	 * 	Get Media Size
+	 * 	Get Default Media Size
 	 * 	@return Default Media Size based on Language
 	 */
 	public MediaSize getMediaSizeDefault()
@@ -228,8 +246,8 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	}	//	getMediaSizeDefault
 
 	/**
-	 * 	Get Units Int
-	 *	@return units
+	 * 	Get Dimension Units
+	 *	@return dimension units (Size2DSyntax.MM or Size2DSyntax.INCH)
 	 */
 	public int getUnitsInt()
 	{
@@ -248,7 +266,6 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	 */
 	public CPaper getCPaper()
 	{
-		//Modify Lines By AA Goodwill : Custom Paper Support 
 		CPaper retValue;
 		if (getCode().toLowerCase().startsWith("custom"))
 		{
@@ -261,7 +278,6 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 			retValue = new CPaper (getMediaSize(), isLandscape(),
 					getMarginLeft(), getMarginTop(), getMarginRight(), getMarginBottom());
 		}
-		//End Of AA Goodwill
 		return retValue;
 	}	//	getCPaper
 	
@@ -291,7 +307,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 	static class CMediaSizeName extends MediaSizeName
 	{
 		/**
-		 * 
+		 * generated serial id
 		 */
 		private static final long serialVersionUID = 8561532175435930293L;
 
@@ -308,6 +324,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 		 * 	Get String Table
 		 *	@return string
 		 */
+	    @Override
 		public String[] getStringTable ()
 		{
 			return super.getStringTable ();
@@ -317,6 +334,7 @@ public class MPrintPaper extends X_AD_PrintPaper implements ImmutablePOSupport
 		 * 	Get Enum Value Table
 		 *	@return Media Sizes
 		 */
+	    @Override
 		public EnumSyntax[] getEnumValueTable ()
 		{
 			return super.getEnumValueTable ();

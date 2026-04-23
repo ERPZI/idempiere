@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for AD_LabelCategoryTable
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_LabelCategoryTable")
-public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTable, I_Persistent 
+public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTable, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_LabelCategoryTable (Properties ctx, int AD_LabelCategoryTable_ID, String trxName)
@@ -54,6 +54,28 @@ public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTab
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_LabelCategoryTable (Properties ctx, String AD_LabelCategoryTable_UU, String trxName)
+    {
+      super (ctx, AD_LabelCategoryTable_UU, trxName);
+      /** if (AD_LabelCategoryTable_UU == null)
+        {
+			setAD_LabelCategory_ID (0);
+			setAD_Table_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_LabelCategoryTable (Properties ctx, String AD_LabelCategoryTable_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_LabelCategoryTable_UU, trxName, virtualColumns);
+      /** if (AD_LabelCategoryTable_UU == null)
+        {
+			setAD_LabelCategory_ID (0);
+			setAD_Table_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_LabelCategoryTable (Properties ctx, ResultSet rs, String trxName)
     {
@@ -61,7 +83,7 @@ public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTab
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -81,34 +103,6 @@ public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTab
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_AD_LabelCategory getAD_LabelCategory() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_LabelCategory)MTable.get(getCtx(), org.compiere.model.I_AD_LabelCategory.Table_ID)
-			.getPO(getAD_LabelCategory_ID(), get_TrxName());
-	}
-
-	/** Set Label Category.
-		@param AD_LabelCategory_ID Category of a Label
-	*/
-	public void setAD_LabelCategory_ID (int AD_LabelCategory_ID)
-	{
-		if (AD_LabelCategory_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_LabelCategory_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_LabelCategory_ID, Integer.valueOf(AD_LabelCategory_ID));
-	}
-
-	/** Get Label Category.
-		@return Category of a Label
-	  */
-	public int getAD_LabelCategory_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_LabelCategory_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Label Category Table Access.
 		@param AD_LabelCategoryTable_ID Label Category Table Access
@@ -144,6 +138,34 @@ public class X_AD_LabelCategoryTable extends PO implements I_AD_LabelCategoryTab
 	public String getAD_LabelCategoryTable_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_LabelCategoryTable_UU);
+	}
+
+	public org.compiere.model.I_AD_LabelCategory getAD_LabelCategory() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_LabelCategory)MTable.get(getCtx(), org.compiere.model.I_AD_LabelCategory.Table_ID)
+			.getPO(getAD_LabelCategory_ID(), get_TrxName());
+	}
+
+	/** Set Label Category.
+		@param AD_LabelCategory_ID Category of a Label
+	*/
+	public void setAD_LabelCategory_ID (int AD_LabelCategory_ID)
+	{
+		if (AD_LabelCategory_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_LabelCategory_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_LabelCategory_ID, Integer.valueOf(AD_LabelCategory_ID));
+	}
+
+	/** Get Label Category.
+		@return Category of a Label
+	  */
+	public int getAD_LabelCategory_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_LabelCategory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException

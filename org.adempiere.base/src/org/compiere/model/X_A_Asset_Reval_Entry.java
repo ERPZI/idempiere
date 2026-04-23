@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Asset_Reval_Entry
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_Asset_Reval_Entry")
-public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, I_Persistent 
+public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_Asset_Reval_Entry (Properties ctx, int A_Asset_Reval_Entry_ID, String trxName)
@@ -42,10 +42,10 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
         {
 			setA_Asset_Reval_Entry_ID (0);
 			setA_Effective_Date (new Timestamp( System.currentTimeMillis() ));
+			setA_Rev_Code (null);
 			setA_Reval_Cal_Method (null);
 			setA_Reval_Effective_Date (null);
 			setA_Reval_Multiplier (null);
-			setA_Rev_Code (null);
 			setC_Currency_ID (0);
 			setDescription (null);
 			setDocumentNo (null);
@@ -63,10 +63,52 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
         {
 			setA_Asset_Reval_Entry_ID (0);
 			setA_Effective_Date (new Timestamp( System.currentTimeMillis() ));
+			setA_Rev_Code (null);
 			setA_Reval_Cal_Method (null);
 			setA_Reval_Effective_Date (null);
 			setA_Reval_Multiplier (null);
+			setC_Currency_ID (0);
+			setDescription (null);
+			setDocumentNo (null);
+			setPostingType (null);
+			setProcessed (false);
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Asset_Reval_Entry (Properties ctx, String A_Asset_Reval_Entry_UU, String trxName)
+    {
+      super (ctx, A_Asset_Reval_Entry_UU, trxName);
+      /** if (A_Asset_Reval_Entry_UU == null)
+        {
+			setA_Asset_Reval_Entry_ID (0);
+			setA_Effective_Date (new Timestamp( System.currentTimeMillis() ));
 			setA_Rev_Code (null);
+			setA_Reval_Cal_Method (null);
+			setA_Reval_Effective_Date (null);
+			setA_Reval_Multiplier (null);
+			setC_Currency_ID (0);
+			setDescription (null);
+			setDocumentNo (null);
+			setPostingType (null);
+			setProcessed (false);
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Asset_Reval_Entry (Properties ctx, String A_Asset_Reval_Entry_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_Asset_Reval_Entry_UU, trxName, virtualColumns);
+      /** if (A_Asset_Reval_Entry_UU == null)
+        {
+			setA_Asset_Reval_Entry_ID (0);
+			setA_Effective_Date (new Timestamp( System.currentTimeMillis() ));
+			setA_Rev_Code (null);
+			setA_Reval_Cal_Method (null);
+			setA_Reval_Effective_Date (null);
+			setA_Reval_Multiplier (null);
 			setC_Currency_ID (0);
 			setDescription (null);
 			setDocumentNo (null);
@@ -83,7 +125,7 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -128,7 +170,7 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getA_Asset_Reval_Entry_ID()));
     }
@@ -163,6 +205,30 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
 		return (Timestamp)get_Value(COLUMNNAME_A_Effective_Date);
 	}
 
+	/** A_Rev_Code AD_Reference_ID=53262 */
+	public static final int A_REV_CODE_AD_Reference_ID=53262;
+	/** Revaluation Code #1 = R01 */
+	public static final String A_REV_CODE_RevaluationCode1 = "R01";
+	/** Revaluation Code #2 = R02 */
+	public static final String A_REV_CODE_RevaluationCode2 = "R02";
+	/** Revaluation Code #3 = R03 */
+	public static final String A_REV_CODE_RevaluationCode3 = "R03";
+	/** Set Rev. Code.
+		@param A_Rev_Code Rev. Code
+	*/
+	public void setA_Rev_Code (String A_Rev_Code)
+	{
+
+		set_Value (COLUMNNAME_A_Rev_Code, A_Rev_Code);
+	}
+
+	/** Get Rev. Code.
+		@return Rev. Code	  */
+	public String getA_Rev_Code()
+	{
+		return (String)get_Value(COLUMNNAME_A_Rev_Code);
+	}
+
 	/** A_Reval_Cal_Method AD_Reference_ID=53259 */
 	public static final int A_REVAL_CAL_METHOD_AD_Reference_ID=53259;
 	/** Default = DFT */
@@ -189,8 +255,8 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
 
 	/** A_Reval_Effective_Date AD_Reference_ID=53261 */
 	public static final int A_REVAL_EFFECTIVE_DATE_AD_Reference_ID=53261;
-	/** Date Aquired = DA */
-	public static final String A_REVAL_EFFECTIVE_DATE_DateAquired = "DA";
+	/** Date Acquired = DA */
+	public static final String A_REVAL_EFFECTIVE_DATE_DateAcquired = "DA";
 	/** Revaluation Date = RD */
 	public static final String A_REVAL_EFFECTIVE_DATE_RevaluationDate = "RD";
 	/** Date Depreciation Started = SD */
@@ -231,30 +297,6 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
 	public String getA_Reval_Multiplier()
 	{
 		return (String)get_Value(COLUMNNAME_A_Reval_Multiplier);
-	}
-
-	/** A_Rev_Code AD_Reference_ID=53262 */
-	public static final int A_REV_CODE_AD_Reference_ID=53262;
-	/** Revaluation Code #1 = R01 */
-	public static final String A_REV_CODE_RevaluationCode1 = "R01";
-	/** Revaluation Code #2 = R02 */
-	public static final String A_REV_CODE_RevaluationCode2 = "R02";
-	/** Revaluation Code #3 = R03 */
-	public static final String A_REV_CODE_RevaluationCode3 = "R03";
-	/** Set Rev. Code.
-		@param A_Rev_Code Rev. Code
-	*/
-	public void setA_Rev_Code (String A_Rev_Code)
-	{
-
-		set_Value (COLUMNNAME_A_Rev_Code, A_Rev_Code);
-	}
-
-	/** Get Rev. Code.
-		@return Rev. Code	  */
-	public String getA_Rev_Code()
-	{
-		return (String)get_Value(COLUMNNAME_A_Rev_Code);
 	}
 
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
@@ -504,10 +546,10 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -526,10 +568,10 @@ public class X_A_Asset_Reval_Entry extends PO implements I_A_Asset_Reval_Entry, 
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

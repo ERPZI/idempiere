@@ -13,15 +13,79 @@
  *****************************************************************************/
 package org.compiere.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+/**
+ * Store provider interface for storage of image content
+ */
 public interface IImageStore {
 	
+	/**
+	 * Load image content
+	 * @param image
+	 * @param prov
+	 * @return byte[] image content
+	 */
 	public byte[] load(MImage image, MStorageProvider prov);
 
+	/**
+	 * Load image content as InputStream
+	 * @param image
+	 * @param prov
+	 * @return InputStream content of image, or null if no data
+	 */
+	default InputStream loadAsStream(MImage image, MStorageProvider prov) {
+		byte[] data = load(image, prov);
+		if (data == null || data.length == 0) {
+			return null;
+		}
+		return new ByteArrayInputStream(data);
+	}
+	
+	/**
+	 * Save image content
+	 * @param image
+	 * @param prov
+	 * @param inflatedData image content
+	 */
 	public void save(MImage image, MStorageProvider prov, byte[] inflatedData);
 	
+	/**
+	 * Save image content from InputStream
+	 * @param image
+	 * @param prov
+	 * @param inputStream InputStream content of image
+	 */
+	default void save(MImage image, MStorageProvider prov, InputStream inputStream) {
+		if (inputStream == null) {
+			throw new IllegalArgumentException("InputStream cannot be null");
+		}
+		try {
+			byte[] data = inputStream.readAllBytes();
+			save(image, prov, data);
+		} catch (Exception e) {
+			throw new RuntimeException("Error reading InputStream", e);
+		}
+	}
+	
+	/**
+	 * Delete stored image content
+	 * @param image
+	 * @param prov
+	 * @return true if deleted successfully
+	 */
 	public boolean delete(MImage image, MStorageProvider prov);
 
+	/**
+	 * @return true if image content is being buffered and pending flush to destination storage
+	 */
 	public boolean isPendingFlush();
 	
+	/**
+	 * Flush buffer image content to destination storage
+	 * @param image
+	 * @param prov
+	 */
 	public void flush(MImage image,MStorageProvider prov);
 }

@@ -32,7 +32,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
- *	Project Issue.
+ *	Posting for {@link MProjectIssue} document. DOCTYPE_ProjectIssue.<br/>
  *	Note:
  *		Will load the default GL Category.
  *		Set up a document type to set the GL Category.
@@ -62,6 +62,7 @@ public class Doc_ProjectIssue extends Doc
 	 *  Load Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails()
 	{
 		setC_Currency_ID(NO_CURRENCY);
@@ -72,6 +73,7 @@ public class Doc_ProjectIssue extends Doc
 		//	Pseudo Line
 		m_line = new DocLine (m_issue, this);
 		m_line.setQty (m_issue.getMovementQty(), true);    //  sets Trx and Storage Qty
+		m_line.setReversalLine_ID(m_issue.getReversal_ID());
 
 		//	Pseudo Line Check
 		if (m_line.getM_Product_ID() == 0)
@@ -84,6 +86,7 @@ public class Doc_ProjectIssue extends Doc
 	 * 	Get DocumentNo
 	 *	@return document no
 	 */
+	@Override
 	public String getDocumentNo ()
 	{
 		MProject p = m_issue.getParent();
@@ -99,6 +102,7 @@ public class Doc_ProjectIssue extends Doc
 	 *  Get Balance
 	 *  @return Zero (always balanced)
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -117,6 +121,7 @@ public class Doc_ProjectIssue extends Doc
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -163,11 +168,19 @@ public class Doc_ProjectIssue extends Doc
 			BigDecimal costDetailAmt = cost;
 			if (m_line.getQty().signum() != m_line.getProductCost().getQty().signum())
 				costDetailAmt = costDetailAmt.negate();
+			int Ref_CostDetail_ID = 0;
+			if (m_line.getReversalLine_ID() > 0 && m_line.get_ID() > m_line.getReversalLine_ID())
+			{
+				MCostDetail cd = MCostDetail.getProduction(as, m_line.getM_Product_ID(), m_line.getM_AttributeSetInstance_ID(),
+						m_line.getReversalLine_ID(), 0, getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}
 			if (!MCostDetail.createProjectIssue(as, m_line.getAD_Org_ID(),
 				m_line.getM_Product_ID(), m_line.getM_AttributeSetInstance_ID(),
 				m_line.get_ID(), 0,
 				costDetailAmt, costDetailQty,
-				m_line.getDescription(), getTrxName()))
+				m_line.getDescription(), m_line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 			{
 				p_Error = "Failed to create cost detail record";
 				return null;
@@ -230,7 +243,6 @@ public class Doc_ProjectIssue extends Doc
 	 *	@param as Account Schema
 	 *	@return Unit Labor Cost
 	 */
-
 	private BigDecimal getLaborCost(MAcctSchema as)
 	{
 		// Todor Lulov 30.01.2008

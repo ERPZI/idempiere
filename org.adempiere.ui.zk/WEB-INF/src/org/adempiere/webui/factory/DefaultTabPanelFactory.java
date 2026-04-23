@@ -19,11 +19,15 @@ import org.adempiere.webui.adwindow.IADTabpanel;
 import org.compiere.model.MTab;
 
 /**
+ * Default implementation of {@link IADTabPanelFactory}
  * @author Logilite Technologies
  */
 public class DefaultTabPanelFactory implements IADTabPanelFactory
 {
 
+	/**
+	 * Default implementation that support type sort and form (AD_Tab+AD_Field)
+	 */
 	@Override
 	public IADTabpanel getInstance(String type)
 	{

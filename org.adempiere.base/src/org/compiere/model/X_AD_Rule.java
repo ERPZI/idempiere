@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Rule
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Rule")
-public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent 
+public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Rule (Properties ctx, int AD_Rule_ID, String trxName)
@@ -65,6 +65,38 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Rule (Properties ctx, String AD_Rule_UU, String trxName)
+    {
+      super (ctx, AD_Rule_UU, trxName);
+      /** if (AD_Rule_UU == null)
+        {
+			setAD_Rule_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setEventType (null);
+			setName (null);
+			setRuleType (null);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Rule (Properties ctx, String AD_Rule_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Rule_UU, trxName, virtualColumns);
+      /** if (AD_Rule_UU == null)
+        {
+			setAD_Rule_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setEventType (null);
+			setName (null);
+			setRuleType (null);
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Rule (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +104,7 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -92,37 +124,6 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** AccessLevel AD_Reference_ID=5 */
-	public static final int ACCESSLEVEL_AD_Reference_ID=5;
-	/** Organization = 1 */
-	public static final String ACCESSLEVEL_Organization = "1";
-	/** Client only = 2 */
-	public static final String ACCESSLEVEL_ClientOnly = "2";
-	/** Client+Organization = 3 */
-	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
-	/** System only = 4 */
-	public static final String ACCESSLEVEL_SystemOnly = "4";
-	/** System+Client = 6 */
-	public static final String ACCESSLEVEL_SystemPlusClient = "6";
-	/** All = 7 */
-	public static final String ACCESSLEVEL_All = "7";
-	/** Set Data Access Level.
-		@param AccessLevel Access Level required
-	*/
-	public void setAccessLevel (String AccessLevel)
-	{
-
-		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
-	}
-
-	/** Get Data Access Level.
-		@return Access Level required
-	  */
-	public String getAccessLevel()
-	{
-		return (String)get_Value(COLUMNNAME_AccessLevel);
-	}
 
 	/** Set Rule.
 		@param AD_Rule_ID Rule
@@ -158,6 +159,37 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
 	public String getAD_Rule_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_Rule_UU);
+	}
+
+	/** AccessLevel AD_Reference_ID=5 */
+	public static final int ACCESSLEVEL_AD_Reference_ID=5;
+	/** Organization = 1 */
+	public static final String ACCESSLEVEL_Organization = "1";
+	/** Client only = 2 */
+	public static final String ACCESSLEVEL_ClientOnly = "2";
+	/** Client+Organization = 3 */
+	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
+	/** System only = 4 */
+	public static final String ACCESSLEVEL_SystemOnly = "4";
+	/** System+Client = 6 */
+	public static final String ACCESSLEVEL_SystemPlusClient = "6";
+	/** All = 7 */
+	public static final String ACCESSLEVEL_All = "7";
+	/** Set Data Access Level.
+		@param AccessLevel Access Level required
+	*/
+	public void setAccessLevel (String AccessLevel)
+	{
+
+		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
+	}
+
+	/** Get Data Access Level.
+		@return Access Level required
+	  */
+	public String getAccessLevel()
+	{
+		return (String)get_Value(COLUMNNAME_AccessLevel);
 	}
 
 	/** Set Description.
@@ -265,7 +297,7 @@ public class X_AD_Rule extends PO implements I_AD_Rule, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

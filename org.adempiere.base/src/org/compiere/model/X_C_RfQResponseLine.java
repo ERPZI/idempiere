@@ -22,16 +22,16 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 /** Generated Model for C_RfQResponseLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_RfQResponseLine")
-public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Persistent 
+public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_RfQResponseLine (Properties ctx, int C_RfQResponseLine_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
       /** if (C_RfQResponseLine_ID == 0)
         {
 			setC_RfQLine_ID (0);
-			setC_RfQResponse_ID (0);
 			setC_RfQResponseLine_ID (0);
+			setC_RfQResponse_ID (0);
 			setIsSelectedWinner (false);
 			setIsSelfService (false);
         } */
@@ -54,8 +54,36 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
       /** if (C_RfQResponseLine_ID == 0)
         {
 			setC_RfQLine_ID (0);
-			setC_RfQResponse_ID (0);
 			setC_RfQResponseLine_ID (0);
+			setC_RfQResponse_ID (0);
+			setIsSelectedWinner (false);
+			setIsSelfService (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_RfQResponseLine (Properties ctx, String C_RfQResponseLine_UU, String trxName)
+    {
+      super (ctx, C_RfQResponseLine_UU, trxName);
+      /** if (C_RfQResponseLine_UU == null)
+        {
+			setC_RfQLine_ID (0);
+			setC_RfQResponseLine_ID (0);
+			setC_RfQResponse_ID (0);
+			setIsSelectedWinner (false);
+			setIsSelfService (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_RfQResponseLine (Properties ctx, String C_RfQResponseLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_RfQResponseLine_UU, trxName, virtualColumns);
+      /** if (C_RfQResponseLine_UU == null)
+        {
+			setC_RfQLine_ID (0);
+			setC_RfQResponseLine_ID (0);
+			setC_RfQResponse_ID (0);
 			setIsSelectedWinner (false);
 			setIsSelfService (false);
         } */
@@ -68,7 +96,7 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -117,34 +145,6 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_RfQResponse getC_RfQResponse() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_RfQResponse)MTable.get(getCtx(), org.compiere.model.I_C_RfQResponse.Table_ID)
-			.getPO(getC_RfQResponse_ID(), get_TrxName());
-	}
-
-	/** Set RfQ Response.
-		@param C_RfQResponse_ID Request for Quotation Response from a potential Vendor
-	*/
-	public void setC_RfQResponse_ID (int C_RfQResponse_ID)
-	{
-		if (C_RfQResponse_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_RfQResponse_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_RfQResponse_ID, Integer.valueOf(C_RfQResponse_ID));
-	}
-
-	/** Get RfQ Response.
-		@return Request for Quotation Response from a potential Vendor
-	  */
-	public int getC_RfQResponse_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_RfQResponse_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set RfQ Response Line.
 		@param C_RfQResponseLine_ID Request for Quotation Response Line
 	*/
@@ -180,6 +180,34 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
 	public String getC_RfQResponseLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_RfQResponseLine_UU);
+	}
+
+	public org.compiere.model.I_C_RfQResponse getC_RfQResponse() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_RfQResponse)MTable.get(getCtx(), org.compiere.model.I_C_RfQResponse.Table_ID)
+			.getPO(getC_RfQResponse_ID(), get_TrxName());
+	}
+
+	/** Set RfQ Response.
+		@param C_RfQResponse_ID Request for Quotation Response from a potential Vendor
+	*/
+	public void setC_RfQResponse_ID (int C_RfQResponse_ID)
+	{
+		if (C_RfQResponse_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_RfQResponse_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_RfQResponse_ID, Integer.valueOf(C_RfQResponse_ID));
+	}
+
+	/** Get RfQ Response.
+		@return Request for Quotation Response from a potential Vendor
+	  */
+	public int getC_RfQResponse_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_RfQResponse_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Work Complete.
@@ -279,10 +307,10 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
 	public boolean isSelectedWinner()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelectedWinner);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -302,10 +330,10 @@ public class X_C_RfQResponseLine extends PO implements I_C_RfQResponseLine, I_Pe
 	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

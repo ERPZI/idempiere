@@ -17,6 +17,10 @@
 
 package org.adempiere.webui.component;
 
+import java.util.function.Function;
+
+import org.adempiere.webui.editor.WEditor;
+
 /**
  * Model for {@link WListbox} column
  * @author Andrew Kimball
@@ -46,6 +50,8 @@ public class WTableColumn
     protected String tooltipText;
 
 	private int AD_Reference_ID;
+
+	private Function<EditorProviderParameters, WEditor> editorProvider;
 
     /** 
      *  Default constructor
@@ -86,7 +92,7 @@ public class WTableColumn
     }
     
     /**
-     * Returns the <code>Object</code> used as the value for the header
+     * Get the <code>Object</code> used as the value for the header
      * renderer.
      *
      * @return	the <code>headerValue</code> property
@@ -190,6 +196,7 @@ public class WTableColumn
 	}
 
 	/**
+	 * Set column type
 	 * @param columnClass
 	 */
 	public void setColumnClass(Class<?> columnClass) 
@@ -223,5 +230,43 @@ public class WTableColumn
 	 */
 	public void setAD_Reference_ID(int AD_Reference_ID) {
 		this.AD_Reference_ID=AD_Reference_ID;
+	}
+	
+	/**
+	 * Set optional editor provider for column
+	 * @param provider Function&lt;EditorProviderParameters, WEditor&gt;
+	 */
+	public void setEditorProvider(Function<EditorProviderParameters, WEditor> provider) {
+		this.editorProvider = provider;
+	}
+	
+	/**
+	 * @return Function&lt;EditorProviderParameters, WEditor&gt; instance of null
+	 */
+	public Function<EditorProviderParameters, WEditor> getEditorProvider() {
+		return editorProvider;
+	}
+	
+	/**
+	 * Parameters for editor provider 
+	 */
+	public static class EditorProviderParameters {
+		public WListbox listbox;
+		public int rowIndex;
+		public int columnIndex;
+		public Object value;
+		
+		/**
+		 * @param listbox
+		 * @param rowIndex
+		 * @param columnIndex
+		 * @param value
+		 */
+		public EditorProviderParameters(WListbox listbox, int rowIndex, int columnIndex, Object value) {
+			this.listbox = listbox;
+			this.rowIndex = rowIndex;
+			this.columnIndex = columnIndex;
+			this.value = value;
+		}				
 	}
 }

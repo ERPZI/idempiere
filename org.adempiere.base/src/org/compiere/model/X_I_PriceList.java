@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for I_PriceList
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="I_PriceList")
-public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent 
+public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_I_PriceList (Properties ctx, int I_PriceList_ID, String trxName)
@@ -59,6 +59,30 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_I_PriceList (Properties ctx, String I_PriceList_UU, String trxName)
+    {
+      super (ctx, I_PriceList_UU, trxName);
+      /** if (I_PriceList_UU == null)
+        {
+			setI_IsImported (false);
+// N
+			setI_PriceList_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_PriceList (Properties ctx, String I_PriceList_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_PriceList_UU, trxName, virtualColumns);
+      /** if (I_PriceList_UU == null)
+        {
+			setI_IsImported (false);
+// N
+			setI_PriceList_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_I_PriceList (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +90,7 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -236,13 +260,29 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isEnforcePriceLimit()
 	{
 		Object oo = get_Value(COLUMNNAME_EnforcePriceLimit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set ISO Currency Code.
+		@param ISO_Code Three letter ISO 4217 Code of the Currency
+	*/
+	public void setISO_Code (String ISO_Code)
+	{
+		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
+	}
+
+	/** Get ISO Currency Code.
+		@return Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code()
+	{
+		return (String)get_Value(COLUMNNAME_ISO_Code);
 	}
 
 	/** Set Import Error Message.
@@ -275,10 +315,10 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -320,22 +360,6 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 		return (String)get_Value(COLUMNNAME_I_PriceList_UU);
 	}
 
-	/** Set ISO Currency Code.
-		@param ISO_Code Three letter ISO 4217 Code of the Currency
-	*/
-	public void setISO_Code (String ISO_Code)
-	{
-		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
-	}
-
-	/** Get ISO Currency Code.
-		@return Three letter ISO 4217 Code of the Currency
-	  */
-	public String getISO_Code()
-	{
-		return (String)get_Value(COLUMNNAME_ISO_Code);
-	}
-
 	/** Set Sales Price list.
 		@param IsSOPriceList This is a Sales Price List
 	*/
@@ -350,10 +374,10 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isSOPriceList()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOPriceList);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -373,10 +397,10 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isTaxIncluded()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -572,10 +596,10 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -594,10 +618,10 @@ public class X_I_PriceList extends PO implements I_I_PriceList, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

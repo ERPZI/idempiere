@@ -80,8 +80,6 @@ import org.zkoss.zul.South;
 //MPo, 26/5/18
 import org.compiere.model.MTable;
 //
-
-
 /**
  * Form to create allocation (C_AllocationHdr and C_AllocationLine).
  *
@@ -358,7 +356,7 @@ public class WAllocation extends Allocation
 		row.appendCellChild(organizationLabel.rightAlign());
 		ZKUpdateUtil.setHflex(organizationPick.getComponent(), "true");
 		row.appendCellChild(organizationPick.getComponent(),1);
-		organizationPick.showMenu();	
+		organizationPick.showMenu();		
 		//MPo, 26/5/18 add original change: 19/7/2016 Add PrCtr for Allocation Selection
 		row.appendCellChild(prctrLabel.rightAlign());
 		ZKUpdateUtil.setHflex(prctrSearch.getComponent(), "true");
@@ -499,7 +497,7 @@ public class WAllocation extends Allocation
 		organizationPick.addValueChangeListener(this);
 		
 		//MPo, 26/5/18 add original change: 20/8/2016 This is to avoid issues when AD_Column_ID is different in DEV,PROTO,UAT and PROD
-		AD_Column_ID = MTable.get(Env.getCtx(), "ZI_WarehouseToPrCtr").getColumn("User1_ID").getAD_Column_ID();
+		AD_Column_ID = MTable.get(Env.getCtx(), "C_Order").getColumn("User1_ID").getAD_Column_ID();
 		MLookup lookupPrCtr = MLookupFactory.get(Env.getCtx(), form.getWindowNo(), 0, AD_Column_ID, DisplayType.Search);
 		prctrSearch = new WSearchEditor("User1_ID", true, false, true, lookupPrCtr);
 		prctrSearch.addValueChangeListener(this);
@@ -603,7 +601,7 @@ public class WAllocation extends Allocation
 	}
 
 	/**
-	 *  Table Model Listener for {@link #paymentTable} and {@link #invoiceTable}
+	 *  Table Model Listener for {@link #paymentTable} and {@link #invoiceTable}<br/>
 	 *  - Recalculate Totals
 	 *  @param e event
 	 */

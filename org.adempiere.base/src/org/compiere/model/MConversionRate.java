@@ -35,6 +35,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 
 /**
  *	Currency Conversion Rate Model
@@ -45,7 +46,7 @@ import org.compiere.util.Trx;
 public class MConversionRate extends X_C_Conversion_Rate
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -3866898973541150020L;
 
@@ -71,7 +72,6 @@ public class MConversionRate extends X_C_Conversion_Rate
 		return convert (ctx, Amt, CurFrom_ID, MClient.get(ctx).getC_Currency_ID(), 
 			ConvDate, C_ConversionType_ID, AD_Client_ID, AD_Org_ID);
 	}	//	convertBase
-
 	
 	/**
 	 *  Convert an amount with today's default rate
@@ -148,7 +148,6 @@ public class MConversionRate extends X_C_Conversion_Rate
 			
 		return retValue;
 	}	//	convert
-
 	
 	/**
 	 * Sets system spot conversion rate for a single day.
@@ -286,9 +285,20 @@ public class MConversionRate extends X_C_Conversion_Rate
 			  + ", Org=" + AD_Org_ID);
 		return retValue;
 	}	//	getRate
-
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_Conversion_Rate_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MConversionRate(Properties ctx, String C_Conversion_Rate_UU, String trxName) {
+        super(ctx, C_Conversion_Rate_UU, trxName);
+		if (Util.isEmpty(C_Conversion_Rate_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param C_Conversion_Rate_ID id
@@ -298,12 +308,17 @@ public class MConversionRate extends X_C_Conversion_Rate
 	{
 		super(ctx, C_Conversion_Rate_ID, trxName);
 		if (C_Conversion_Rate_ID == 0)
-		{
-			super.setDivideRate (Env.ZERO);
-			super.setMultiplyRate (Env.ZERO);
-			setValidFrom (new Timestamp(System.currentTimeMillis()));
-		}
+			setInitialDefaults();
 	}	//	MConversionRate
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		super.setDivideRate (Env.ZERO);
+		super.setMultiplyRate (Env.ZERO);
+		setValidFrom (new Timestamp(System.currentTimeMillis()));
+	}
 
 	/**
 	 * 	Load Constructor
@@ -340,13 +355,19 @@ public class MConversionRate extends X_C_Conversion_Rate
 		setValidFrom(ValidFrom);
 	}	//	MConversionRate
 
+	/**
+	 * @param ctx
+	 * @param C_Conversion_Rate_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MConversionRate(Properties ctx, int C_Conversion_Rate_ID, String trxName, String... virtualColumns) {
 		super(ctx, C_Conversion_Rate_ID, trxName, virtualColumns);
 	}
 
 	/**
-	 * 	Set Multiply Rate
-	 * 	Sets also Divide Rate
+	 * 	Set Multiply Rate.
+	 * 	Sets also Divide Rate (calculate from multiply rate).
 	 *	@param MultiplyRate multiply rate
 	 */
 	public void setMultiplyRate (BigDecimal MultiplyRate)
@@ -368,7 +389,7 @@ public class MConversionRate extends X_C_Conversion_Rate
 
 	/**
 	 *	Set Divide Rate.
-	 *	Sets also Multiply Rate
+	 *	Sets also Multiply Rate (calculate from divide rate)
 	 *	@param	DivideRate divide rate
 	 */
 	public void setDivideRate (BigDecimal DivideRate)
@@ -392,6 +413,7 @@ public class MConversionRate extends X_C_Conversion_Rate
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("MConversionRate[");
@@ -405,34 +427,25 @@ public class MConversionRate extends X_C_Conversion_Rate
 		return sb.toString();
 	}	//	toString
 
-	
-	/**
-	 * 	Before Save.
-	 * 	- Same Currency
-	 * 	- Date Range Check
-	 * 	- Set To date to 2056
-	 *	@param newRecord new
-	 *	@return true if OK to save
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	From - To is the same
+		// Validate From and To currency not the same
 		if (getC_Currency_ID() == getC_Currency_ID_To())
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), "@C_Currency_ID@ = @C_Currency_ID@"));
 			return false;
 		}
-		//	Nothing to convert
+		// Multiply rate must > 0
 		if (getMultiplyRate().compareTo(Env.ZERO) <= 0)
 		{
 			log.saveError("Error", Msg.parseTranslation(getCtx(), "@MultiplyRate@ <= 0"));
 			return false;
 		}
 
-		//	Date Range Check
+		// Validate ValidTo is not null and > ValidFrom
 		Timestamp from = getValidFrom();
 		if (getValidTo() == null) {
-			// setValidTo (TimeUtil.getDay(2056, 1, 29));	//	 no exchange rates after my 100th birthday
 			log.saveError("FillMandatory", Msg.getElement(getCtx(), COLUMNNAME_ValidTo));
 			return false;
 		}
@@ -445,6 +458,7 @@ public class MConversionRate extends X_C_Conversion_Rate
 			return false;
 		}
 
+		// Validate the ValidFrom to ValidTo range has no overlap with other conversion rate records
 		if (isActive()) {
 			String whereClause = "(? BETWEEN ValidFrom AND ValidTo OR ? BETWEEN ValidFrom AND ValidTo) "
 					+ "AND C_Currency_ID=? AND C_Currency_ID_To=? "
@@ -468,10 +482,12 @@ public class MConversionRate extends X_C_Conversion_Rate
 		return true;
 	}	//	beforeSave
 
-	private volatile static boolean recursiveCall = false;
+	private static final ThreadLocal<Boolean> recursiveCallThreadLocal = new ThreadLocal<Boolean>();
+	
 	@Override
 	protected boolean afterSave(boolean newRecord, boolean success) {
-		if (success && !recursiveCall) {
+		if (success && !Boolean.TRUE.equals(recursiveCallThreadLocal.get())) {
+			// Find reverse/reciprocal conversion rate record with reverse from and to currency
 			String whereClause = "ValidFrom=? AND ValidTo=? "
 					+ "AND C_Currency_ID=? AND C_Currency_ID_To=? "
 					+ "AND C_ConversionType_ID=? "
@@ -483,7 +499,7 @@ public class MConversionRate extends X_C_Conversion_Rate
 							getAD_Client_ID(), getAD_Org_ID())
 					.firstOnly();
 			if (reciprocal == null) {
-				// create reciprocal rate
+				// Create reverse/reciprocal conversion rate
 				reciprocal = new MConversionRate(getCtx(), 0, get_TrxName());
 				reciprocal.setValidFrom(getValidFrom());
 				reciprocal.setValidTo(getValidTo());
@@ -497,11 +513,11 @@ public class MConversionRate extends X_C_Conversion_Rate
 			// avoid recalculation
 			reciprocal.set_Value(COLUMNNAME_DivideRate, getMultiplyRate());
 			reciprocal.set_Value(COLUMNNAME_MultiplyRate, getDivideRate());
-			recursiveCall = true;
+			recursiveCallThreadLocal.set(Boolean.TRUE);
 			try {
 				reciprocal.saveEx();
 			} finally {
-				recursiveCall = false;
+				recursiveCallThreadLocal.remove();
 			}
 		}
 		return success;

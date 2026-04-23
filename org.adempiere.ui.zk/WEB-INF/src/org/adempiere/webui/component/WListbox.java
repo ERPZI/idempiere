@@ -17,6 +17,7 @@
 
 package org.adempiere.webui.component;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +37,8 @@ import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
 import org.compiere.minigrid.IMiniTable;
+import org.compiere.minigrid.SelectableIDColumn;
+import org.compiere.minigrid.UUIDColumn;
 import org.compiere.model.MRole;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
@@ -57,7 +60,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	/**
 	 * generated serial id 
 	 */
-	private static final long serialVersionUID = -5501893389366975849L;
+	private static final long serialVersionUID = 3758442599469915640L;
 
 	/**	Logger. */
 	private static final CLogger logger = CLogger.getCLogger(WListbox.class);
@@ -138,6 +141,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	/**
 	 * Set ListModel
 	 */
+	@Override
     public void setModel(ListModel<?> model)
     {
     	if (getModel() == model)
@@ -220,6 +224,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *  @param column 	column index of cell
 	 *  @return true if cell is editable, false otherwise
 	 */
+	@Override
 	public boolean isCellEditable(int row, int column)
 	{
 		//  if the first column holds a boolean and it is false, it is not editable
@@ -237,8 +242,8 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		// F3P: If allowed, use idcolumn as a switch for read/write (Some logic as boolean)		
 		if(allowIDColumnForReadWrite 
 			&& column != 0
-			&& val instanceof IDColumn 
-			&& ((IDColumn)val).isSelected() == false)
+			&& val instanceof SelectableIDColumn 
+			&& ((SelectableIDColumn)val).isSelected() == false)
 		{
 			return false;
 		}
@@ -267,6 +272,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      * @param   column  the index of the column whose value is to be queried
      * @return  the Object at the specified cell
      */
+	@Override
     public Object getValueAt(int row, int column)
     {
         return getModel().getDataAt(row, convertColumnIndexToModel(column));
@@ -277,6 +283,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      *
      * @return The <code>ListModelTable</code> associated with this table.
      */
+	@Override
     public ListModelTable getModel()
     {
     	if (super.getModel() == null)
@@ -300,6 +307,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      * @param row    	the index of the row whose value is to be set
      * @param column	the index of the column whose value is to be set
 	 */
+	@Override
 	public void setValueAt(Object value, int row, int column)
 	{
 		getModel().setDataAt(value, row, convertColumnIndexToModel(column));
@@ -315,6 +323,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      * @param   viewColumnIndex     the index of the column in the view
      * @return  the index of the corresponding column in the model
      */
+	@Override
     public int convertColumnIndexToModel(int viewColumnIndex)
     {
     	return viewColumnIndex;
@@ -327,6 +336,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *  @param readOnly Read only value. If <code>true</code> column is read only,
 	 *  				if <code>false</code> column is read-write
 	 */
+	@Override
 	public void setColumnReadOnly (int index, boolean readOnly)
 	{
 		Integer indexObject = Integer.valueOf(index);
@@ -358,6 +368,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *  @param tableName 		table name
 	 *  @return SQL statement to use to get resultset to populate table
 	 */
+	@Override
 	public String prepareTable(ColumnInfo[] layout,
 							String from,
 							String where,
@@ -418,7 +429,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
             {
                 setColorColumn(columnIndex);
             }
-            if (layout[columnIndex].getColClass() == IDColumn.class)
+            if (layout[columnIndex].getColClass() == IDColumn.class || layout[columnIndex].getColClass() == UUIDColumn.class)
             {
                 m_keyColumnIndex = columnIndex;
             }
@@ -501,7 +512,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}   //  addColumn
 
 	/**
-	 * Set the attributes of the column.
+	 * Set the type of the column.
 	 *
 	 * @param index		The index of the column to be modified
 	 * @param classType	The class of data that the column will contain
@@ -510,6 +521,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 * @see #setColumnClass(int, Class, boolean)
 	 */
+	@Override
 	public void setColumnClass (int index, Class<?> classType, boolean readOnly, String header)
 	{
 		WListItemRenderer renderer = (WListItemRenderer)getItemRenderer();
@@ -527,7 +539,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}
 
     /**
-     * Set the attributes of the column.
+     * Set the type of the column.
      *
      * @param index     The index of the column to be modified
      * @param classType The class of data that the column will contain
@@ -535,6 +547,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      *
      * @see #setColumnClass(int, Class, boolean, String)
      */
+	@Override
     public void setColumnClass (int index, Class<?> classType, boolean readOnly)
     {
         setColumnReadOnly(index, readOnly);
@@ -578,12 +591,13 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}   //  setColorColumn
 
 	/**
-	 *	Populate Table from ResultSet - The ResultSet is not closed.
+	 *	Populate Table from ResultSet, note that ResultSet is not closed at the end of this method.
 	 *
-	 *  @param rs 	ResultSet containing data to enter into the table.
+	 *  @param rs 	ResultSet containing data to enter into the table.<br/>
 	 *  			The contents must conform to the column layout defined in
 	 *  			{@link #prepareTable(ColumnInfo[], String, String, boolean, String)}
 	 */
+	@Override
 	public void loadTable(ResultSet rs)
 	{
 		int row = 0; // model row
@@ -625,6 +639,10 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					if (columnClass == IDColumn.class)
 					{
 						data = new IDColumn(rs.getInt(rsColIndex));
+					}
+					else if (columnClass == UUIDColumn.class)
+					{
+						data = new UUIDColumn(rs.getString(rsColIndex));
 					}
 					else if (columnClass == Boolean.class)
 					{
@@ -696,6 +714,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *	Populate Table from PO Array.
 	 *  @param pos array of Persistent Objects
 	 */
+	@Override
 	public void loadTable(PO[] pos)
 	{
 		int row = 0;
@@ -739,6 +758,10 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 					{
 						data = new IDColumn(((Integer)data).intValue());
 					}
+					else if (columnClass == UUIDColumn.class)
+					{
+						data = new UUIDColumn(data.toString());
+					}
 					else if (columnClass == Double.class)
 					{
 						data = Double.valueOf(((BigDecimal)data).doubleValue());
@@ -768,9 +791,10 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *  Get the key of currently selected row based on layout defined in
 	 *  {@link #prepareTable(ColumnInfo[], String, String, boolean, String)}.
 	 *
-	 *  @return ID if key
+	 *  @return ID (int) or UUID (String) - if key
 	 */
-	public Integer getSelectedRowKey()
+	@Override
+	public <T extends Serializable> T getSelectedRowKey()
 	{
 		if (m_layout == null)
 		{
@@ -787,28 +811,28 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 * IDEMPIERE-1334
 	 * get key of record at index
 	 * @param index
-	 * @return
+	 * @return ID (int) or UUID (String)
 	 */
-	public Integer getRowKeyAt (int index){
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> T getRowKeyAt (int index){
 		if (index < 0 || m_keyColumnIndex < 0)
 			return null;
 				
 		Object data = getModel().getDataAt(index, m_keyColumnIndex);
 
 		if (data instanceof IDColumn)
-		{
 			data = ((IDColumn)data).getRecord_ID();
-		}
-		if (data instanceof Integer)
-		{
-			return (Integer)data;
-		}
+		else if (data instanceof UUIDColumn)
+			data = ((UUIDColumn)data).getRecord_UU();
+
+		if (data instanceof Integer || data instanceof String)
+			return (T) data;
 		return null;
 	}
 
 	/**
 	 * IDEMPIERE-1334.<br/>
-	 * deselect all current select, set all record have key in lsKey as selected.<br/>
+	 * De-select all current select, set all record with key in lsKey as selected.<br/>
 	 * If table has no key column, just return.
 	 * @param lsKey
 	 */
@@ -819,7 +843,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		ListModelTable model = getModel();
 		List<Object> lsSelectedItem = new ArrayList<Object> ();  
 		for (int index = 0; index < model.getSize(); index++){
-			Integer key = getRowKeyAt(index);
+			Object key = getRowKeyAt(index);
 			if (key == null)
 				continue;
 			
@@ -831,9 +855,10 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}
 
 	/**
+	 * Get key of first row
 	 * @return key for first row (row 0). null if table is empty.
 	 */
-	public Integer getFirstRowKey()
+	public <T extends Serializable> T getFirstRowKey()
 	{
 		if (m_layout == null)
 		{
@@ -850,10 +875,11 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}
 	
 	/**
-     * Returns the index of the first selected row, -1 if no row is selected.
+     * Get index of the first selected row, -1 if no row is selected.
      *
      * @return the index of the first selected row
      */
+	@Override
     public int getSelectedRow()
     {
     	return this.getSelectedIndex();
@@ -864,6 +890,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 *  @param rowCount	number of rows
 	 */
+	@Override
 	public void setRowCount (int rowCount)
 	{
 		getModel().setNoRows(rowCount);
@@ -889,6 +916,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 *  @return Array of ColumnInfo
 	 */
+	@Override
 	public ColumnInfo[] getLayoutInfo()
 	{
 		return getLayout();
@@ -896,7 +924,6 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 
 	/**
 	 * Removes all data stored in the underlying model.
-	 *
 	 */
 	public void clearTable()
 	{
@@ -922,8 +949,8 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
      * Get the number of rows in this table's model.
      *
      * @return the number of rows in this table's model
-     *
      */
+	@Override
     public int getRowCount()
     {
         return getModel().getSize();
@@ -935,6 +962,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 *  @param multiSelection are multiple selections allowed
 	 */
+	@Override
 	public void setMultiSelection(boolean multiSelection)
 	{
 		this.setMultiple(multiSelection);
@@ -946,6 +974,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 *  @return true if multiple rows can be selected
 	 */
+	@Override
 	public boolean isMultiSelection()
 	{
 		return this.isMultiple();
@@ -955,12 +984,14 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *  Set if Totals is Show
 	 *  @param show
 	 */
+	@Override
 	public void setShowTotals(boolean show)
 	{
 		showTotals= show;
 	}
 	
 	/**
+	 * Is show total
 	 * @return true if Totals is Show
 	 */
 	public boolean getShowTotals()
@@ -973,6 +1004,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 *
 	 *  @param dataCompare object encapsulating comparison criteria
 	 */
+	@Override
 	public void setColorCompare (Object dataCompare)
 	{
 		m_colorDataCompare = dataCompare;
@@ -991,6 +1023,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	 * @param row row
 	 * @return color code
 	 */
+	@Override
 	public int getColorCode (int row)
 	{
 		// TODO expose these through interface
@@ -1066,21 +1099,20 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		int col = event.getColumn(); // column of table field which caused the event
 		int row = event.getRow(); // row of table field which caused the event
 		boolean newBoolean;
-		IDColumn idColumn;
 
 		// if the event was caused by an ID Column and the value is a boolean
 		// then set the IDColumn's select field
 		if (col >= 0 && row >=0)
 		{
-			if (this.getValueAt(row, col) instanceof IDColumn
+			if (this.getValueAt(row, col) instanceof SelectableIDColumn
 				&& event.getNewValue() instanceof Boolean)
 			{
 				newBoolean = ((Boolean)event.getNewValue()).booleanValue();
-				idColumn = (IDColumn)this.getValueAt(row, col);
+				SelectableIDColumn idColumn = (SelectableIDColumn)this.getValueAt(row, col);
 				idColumn.setSelected(newBoolean);
 				this.setValueAt(idColumn, row, col);
 			}
-			// othewise just set the value in the model to the new value
+			// otherwise just set the value in the model to the new value
 			else
 			{
 				this.setValueAt(event.getNewValue(), row, col);
@@ -1088,10 +1120,10 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		}
 	}
 
-
 	/**
 	 * Repaint the Table.
 	 */
+	@Override
 	public void repaint()
 	{
 	    // create header (if needed)
@@ -1170,6 +1202,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	/**
 	 * @return number of columns	 
 	 */
+	@Override
 	public int getColumnCount() {
 		return getModel() != null ? getModel().getNoColumns() : 0;
 	}
@@ -1224,7 +1257,19 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 						if(amt == null )
 							amt = Double.valueOf(0);
 						total[col] = subtotal + amt;
+					}		
+					else if (c == Integer.class)
+					{
+						Integer subtotal = Integer.valueOf(0);
+						if(total[col] != null)
+							subtotal = (Integer)(total[col]);
 						
+						Integer amt =  (Integer) data;
+						if(subtotal == null)
+							subtotal = Integer.valueOf(0);
+						if(amt == null )
+							amt = Integer.valueOf(0);
+						total[col] = subtotal + amt;
 					}		
 				}	
 		}
@@ -1236,13 +1281,9 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 		for (int col = 0; col < layout.length; col++)
 		{
 			Class<?> c = layout[col].getColClass();
-			if (c == BigDecimal.class)
+			if (c == BigDecimal.class || c == Double.class || c == Integer.class)
 			{	
 				setValueAt(total[col] , row - 1, col);
-			}
-			else if (c == Double.class)
-			{
-				setValueAt(total[col] , row -1 , col);
 			}
 			else
 			{	
@@ -1333,7 +1374,7 @@ public class WListbox extends Listbox implements IMiniTable, TableValueChangeLis
 	}
 
 	/**
-     * Save the width of all the columns  
+     * Save the width of all the columns to {@link MWlistboxCustomization}  
      */
 	public void saveColumnWidth() 
 	{

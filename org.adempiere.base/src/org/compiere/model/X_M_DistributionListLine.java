@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_DistributionListLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_DistributionListLine")
-public class X_M_DistributionListLine extends PO implements I_M_DistributionListLine, I_Persistent 
+public class X_M_DistributionListLine extends PO implements I_M_DistributionListLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_DistributionListLine (Properties ctx, int M_DistributionListLine_ID, String trxName)
@@ -43,8 +43,8 @@ public class X_M_DistributionListLine extends PO implements I_M_DistributionList
         {
 			setC_BPartner_ID (0);
 			setC_BPartner_Location_ID (0);
-			setM_DistributionList_ID (0);
 			setM_DistributionListLine_ID (0);
+			setM_DistributionList_ID (0);
 			setMinQty (Env.ZERO);
         } */
     }
@@ -57,8 +57,36 @@ public class X_M_DistributionListLine extends PO implements I_M_DistributionList
         {
 			setC_BPartner_ID (0);
 			setC_BPartner_Location_ID (0);
-			setM_DistributionList_ID (0);
 			setM_DistributionListLine_ID (0);
+			setM_DistributionList_ID (0);
+			setMinQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DistributionListLine (Properties ctx, String M_DistributionListLine_UU, String trxName)
+    {
+      super (ctx, M_DistributionListLine_UU, trxName);
+      /** if (M_DistributionListLine_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setM_DistributionListLine_ID (0);
+			setM_DistributionList_ID (0);
+			setMinQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DistributionListLine (Properties ctx, String M_DistributionListLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_DistributionListLine_UU, trxName, virtualColumns);
+      /** if (M_DistributionListLine_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setM_DistributionListLine_ID (0);
+			setM_DistributionList_ID (0);
 			setMinQty (Env.ZERO);
         } */
     }
@@ -70,7 +98,7 @@ public class X_M_DistributionListLine extends PO implements I_M_DistributionList
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -163,42 +191,6 @@ public class X_M_DistributionListLine extends PO implements I_M_DistributionList
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
-	public org.compiere.model.I_M_DistributionList getM_DistributionList() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_DistributionList)MTable.get(getCtx(), org.compiere.model.I_M_DistributionList.Table_ID)
-			.getPO(getM_DistributionList_ID(), get_TrxName());
-	}
-
-	/** Set Distribution List.
-		@param M_DistributionList_ID Distribution Lists allow to distribute products to a selected list of partners
-	*/
-	public void setM_DistributionList_ID (int M_DistributionList_ID)
-	{
-		if (M_DistributionList_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_DistributionList_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_DistributionList_ID, Integer.valueOf(M_DistributionList_ID));
-	}
-
-	/** Get Distribution List.
-		@return Distribution Lists allow to distribute products to a selected list of partners
-	  */
-	public int getM_DistributionList_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_DistributionList_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getM_DistributionList_ID()));
-    }
-
 	/** Set Distribution List Line.
 		@param M_DistributionListLine_ID Distribution List Line with Business Partner and Quantity/Percentage
 	*/
@@ -235,6 +227,42 @@ public class X_M_DistributionListLine extends PO implements I_M_DistributionList
 	{
 		return (String)get_Value(COLUMNNAME_M_DistributionListLine_UU);
 	}
+
+	public org.compiere.model.I_M_DistributionList getM_DistributionList() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_DistributionList)MTable.get(getCtx(), org.compiere.model.I_M_DistributionList.Table_ID)
+			.getPO(getM_DistributionList_ID(), get_TrxName());
+	}
+
+	/** Set Distribution List.
+		@param M_DistributionList_ID Distribution Lists allow to distribute products to a selected list of partners
+	*/
+	public void setM_DistributionList_ID (int M_DistributionList_ID)
+	{
+		if (M_DistributionList_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_DistributionList_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_DistributionList_ID, Integer.valueOf(M_DistributionList_ID));
+	}
+
+	/** Get Distribution List.
+		@return Distribution Lists allow to distribute products to a selected list of partners
+	  */
+	public int getM_DistributionList_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_DistributionList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getM_DistributionList_ID()));
+    }
 
 	/** Set Minimum Quantity.
 		@param MinQty Minimum quantity for the business partner

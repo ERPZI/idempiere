@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Asset_Info_Ins
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_Asset_Info_Ins")
-public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Persistent 
+public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_Asset_Info_Ins (Properties ctx, int A_Asset_Info_Ins_ID, String trxName)
@@ -58,6 +58,28 @@ public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_A_Asset_Info_Ins (Properties ctx, String A_Asset_Info_Ins_UU, String trxName)
+    {
+      super (ctx, A_Asset_Info_Ins_UU, trxName);
+      /** if (A_Asset_Info_Ins_UU == null)
+        {
+			setA_Asset_ID (0);
+			setA_Asset_Info_Ins_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Asset_Info_Ins (Properties ctx, String A_Asset_Info_Ins_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_Asset_Info_Ins_UU, trxName, virtualColumns);
+      /** if (A_Asset_Info_Ins_UU == null)
+        {
+			setA_Asset_ID (0);
+			setA_Asset_Info_Ins_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_A_Asset_Info_Ins (Properties ctx, ResultSet rs, String trxName)
     {
@@ -65,7 +87,7 @@ public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -132,7 +154,7 @@ public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Pers
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getA_Asset_Info_Ins_ID()));
     }
@@ -170,21 +192,6 @@ public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Pers
 		return bd;
 	}
 
-	/** Set Insurance Company.
-		@param A_Insurance_Co Insurance Company
-	*/
-	public void setA_Insurance_Co (String A_Insurance_Co)
-	{
-		set_Value (COLUMNNAME_A_Insurance_Co, A_Insurance_Co);
-	}
-
-	/** Get Insurance Company.
-		@return Insurance Company	  */
-	public String getA_Insurance_Co()
-	{
-		return (String)get_Value(COLUMNNAME_A_Insurance_Co);
-	}
-
 	/** Set Asset Insurance Value.
 		@param A_Ins_Value Asset Insurance Value
 	*/
@@ -201,6 +208,21 @@ public class X_A_Asset_Info_Ins extends PO implements I_A_Asset_Info_Ins, I_Pers
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Insurance Company.
+		@param A_Insurance_Co Insurance Company
+	*/
+	public void setA_Insurance_Co (String A_Insurance_Co)
+	{
+		set_Value (COLUMNNAME_A_Insurance_Co, A_Insurance_Co);
+	}
+
+	/** Get Insurance Company.
+		@return Insurance Company	  */
+	public String getA_Insurance_Co()
+	{
+		return (String)get_Value(COLUMNNAME_A_Insurance_Co);
 	}
 
 	/** Set Asset Policy No.

@@ -61,7 +61,6 @@ import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MPaySelectionCheck;
 import org.compiere.util.DB;
-import org.compiere.model.X_C_Order;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
@@ -165,7 +164,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	protected Label lSumPayments = new Label();
 	/** Sum of C_PaySelectionCheck.PayAmt */
 	protected WNumberEditor fSumPayments = new WNumberEditor();
-
 	
 	/**
 	 *  Layout {@link #form}
@@ -287,7 +285,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		paySelectSearch.setValue(Integer.valueOf(m_C_PaySelection_ID));
 		loadPaySelectInfo();
 	}	//	setsetPaySelection
-
 
 	/**
 	 * Event Listener
@@ -533,7 +530,7 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 				//  Get File Info
 				// MPo, 13/10/23
 				makeFile();
-				//tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), m_PaymentExport.getFilenameSuffix());
+				//tempFile = File.createTempFile(m_PaymentExport.getFilenamePrefix(), null);
 				//filenameForDownload = m_PaymentExport.getFilenamePrefix() + m_PaymentExport.getFilenameSuffix();
 				
 				//no = m_PaymentExport.exportToFile(m_checks,(Boolean) fDepositBatch.getValue(),PaymentRule, tempFile, err);
@@ -715,7 +712,6 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			}
 		});
 	}   //  cmd_print
-
 
 	/**
 	 *  Get Checks

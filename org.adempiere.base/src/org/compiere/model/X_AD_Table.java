@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Table
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Table")
-public class X_AD_Table extends PO implements I_AD_Table, I_Persistent 
+public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Table (Properties ctx, int AD_Table_ID, String trxName)
@@ -39,9 +39,9 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
       super (ctx, AD_Table_ID, trxName);
       /** if (AD_Table_ID == 0)
         {
+			setAD_Table_ID (0);
 			setAccessLevel (null);
 // 4
-			setAD_Table_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsChangeLog (true);
@@ -49,6 +49,8 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 			setIsDeleteable (true);
 // Y
 			setIsHighVolume (false);
+			setIsPartition (false);
+// N
 			setIsSecurityEnabled (false);
 			setIsView (false);
 // N
@@ -65,9 +67,9 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
       super (ctx, AD_Table_ID, trxName, virtualColumns);
       /** if (AD_Table_ID == 0)
         {
+			setAD_Table_ID (0);
 			setAccessLevel (null);
 // 4
-			setAD_Table_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsChangeLog (true);
@@ -75,6 +77,64 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 			setIsDeleteable (true);
 // Y
 			setIsHighVolume (false);
+			setIsPartition (false);
+// N
+			setIsSecurityEnabled (false);
+			setIsView (false);
+// N
+			setName (null);
+			setReplicationType (null);
+// L
+			setTableName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Table (Properties ctx, String AD_Table_UU, String trxName)
+    {
+      super (ctx, AD_Table_UU, trxName);
+      /** if (AD_Table_UU == null)
+        {
+			setAD_Table_ID (0);
+			setAccessLevel (null);
+// 4
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsChangeLog (true);
+// Y
+			setIsDeleteable (true);
+// Y
+			setIsHighVolume (false);
+			setIsPartition (false);
+// N
+			setIsSecurityEnabled (false);
+			setIsView (false);
+// N
+			setName (null);
+			setReplicationType (null);
+// L
+			setTableName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Table (Properties ctx, String AD_Table_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Table_UU, trxName, virtualColumns);
+      /** if (AD_Table_UU == null)
+        {
+			setAD_Table_ID (0);
+			setAccessLevel (null);
+// 4
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsChangeLog (true);
+// Y
+			setIsDeleteable (true);
+// Y
+			setIsHighVolume (false);
+			setIsPartition (false);
+// N
 			setIsSecurityEnabled (false);
 			setIsView (false);
 // N
@@ -92,7 +152,7 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -112,37 +172,6 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** AccessLevel AD_Reference_ID=5 */
-	public static final int ACCESSLEVEL_AD_Reference_ID=5;
-	/** Organization = 1 */
-	public static final String ACCESSLEVEL_Organization = "1";
-	/** Client only = 2 */
-	public static final String ACCESSLEVEL_ClientOnly = "2";
-	/** Client+Organization = 3 */
-	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
-	/** System only = 4 */
-	public static final String ACCESSLEVEL_SystemOnly = "4";
-	/** System+Client = 6 */
-	public static final String ACCESSLEVEL_SystemPlusClient = "6";
-	/** All = 7 */
-	public static final String ACCESSLEVEL_All = "7";
-	/** Set Data Access Level.
-		@param AccessLevel Access Level required
-	*/
-	public void setAccessLevel (String AccessLevel)
-	{
-
-		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
-	}
-
-	/** Get Data Access Level.
-		@return Access Level required
-	  */
-	public String getAccessLevel()
-	{
-		return (String)get_Value(COLUMNNAME_AccessLevel);
-	}
 
 	/** Set Table.
 		@param AD_Table_ID Database Table information
@@ -237,6 +266,37 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 		return ii.intValue();
 	}
 
+	/** AccessLevel AD_Reference_ID=5 */
+	public static final int ACCESSLEVEL_AD_Reference_ID=5;
+	/** Organization = 1 */
+	public static final String ACCESSLEVEL_Organization = "1";
+	/** Client only = 2 */
+	public static final String ACCESSLEVEL_ClientOnly = "2";
+	/** Client+Organization = 3 */
+	public static final String ACCESSLEVEL_ClientPlusOrganization = "3";
+	/** System only = 4 */
+	public static final String ACCESSLEVEL_SystemOnly = "4";
+	/** System+Client = 6 */
+	public static final String ACCESSLEVEL_SystemPlusClient = "6";
+	/** All = 7 */
+	public static final String ACCESSLEVEL_All = "7";
+	/** Set Data Access Level.
+		@param AccessLevel Access Level required
+	*/
+	public void setAccessLevel (String AccessLevel)
+	{
+
+		set_Value (COLUMNNAME_AccessLevel, AccessLevel);
+	}
+
+	/** Get Data Access Level.
+		@return Access Level required
+	  */
+	public String getAccessLevel()
+	{
+		return (String)get_Value(COLUMNNAME_AccessLevel);
+	}
+
 	/** Set Copy Columns From Table.
 		@param CopyColumnsFromTable Copy Columns From Table
 	*/
@@ -265,6 +325,22 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public String getCopyComponentsFromView()
 	{
 		return (String)get_Value(COLUMNNAME_CopyComponentsFromView);
+	}
+
+	/** Set Create/update partition.
+		@param CreatePartition Process which create or update table partitions based on the table and column records
+	*/
+	public void setCreatePartition (String CreatePartition)
+	{
+		set_Value (COLUMNNAME_CreatePartition, CreatePartition);
+	}
+
+	/** Get Create/update partition.
+		@return Process which create or update table partitions based on the table and column records
+	  */
+	public String getCreatePartition()
+	{
+		return (String)get_Value(COLUMNNAME_CreatePartition);
 	}
 
 	/** Set Create Window From Table.
@@ -378,10 +454,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isCentrallyMaintained()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCentrallyMaintained);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -401,10 +477,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isChangeLog()
 	{
 		Object oo = get_Value(COLUMNNAME_IsChangeLog);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -424,10 +500,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isDeleteable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDeleteable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -447,10 +523,33 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isHighVolume()
 	{
 		Object oo = get_Value(COLUMNNAME_IsHighVolume);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Partition.
+		@param IsPartition This is a partitioned table
+	*/
+	public void setIsPartition (boolean IsPartition)
+	{
+		set_Value (COLUMNNAME_IsPartition, Boolean.valueOf(IsPartition));
+	}
+
+	/** Get Partition.
+		@return This is a partitioned table
+	  */
+	public boolean isPartition()
+	{
+		Object oo = get_Value(COLUMNNAME_IsPartition);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -470,10 +569,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isSecurityEnabled()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSecurityEnabled);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -493,10 +592,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isShowInDrillOptions()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowInDrillOptions);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -516,10 +615,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isView()
 	{
 		Object oo = get_Value(COLUMNNAME_IsView);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -600,10 +699,10 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -655,7 +754,7 @@ public class X_AD_Table extends PO implements I_AD_Table, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getTableName());
     }

@@ -24,7 +24,6 @@
  * Contributors:                                                       *
  * - Carlos Ruiz                                                       *
  **********************************************************************/
-
 package org.compiere.process;
 
 import java.util.ArrayList;
@@ -33,12 +32,11 @@ import java.util.logging.Level;
 
 import org.compiere.model.MMFARegisteredDevice;
 import org.compiere.model.MProcessPara;
-import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.util.Env;
 
 /**
- *	IDEMPIERE-4782
+ *	IDEMPIERE-4782 Multi-factor authentication
  * 	@author Carlos Ruiz - globalqss - BX Service
  */
 @org.adempiere.base.annotation.Process
@@ -89,12 +87,7 @@ public class MFARevokeDevice extends SvrProcess {
 				.list();
 		for (MMFARegisteredDevice rd : rds) {
 			rd.setIsActive(false);
-			try {
-				PO.setCrossTenantSafe();
-				rd.saveEx();
-			} finally {
-				PO.clearCrossTenantSafe();
-			}
+			rd.saveCrossTenantSafeEx();
 		}
 
 		return "@OK@";

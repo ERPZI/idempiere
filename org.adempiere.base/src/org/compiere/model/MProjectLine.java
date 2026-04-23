@@ -25,6 +25,7 @@ import org.adempiere.base.Core;
 import org.adempiere.base.IProductPricing;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * 	Project Line Model
@@ -35,9 +36,21 @@ import org.compiere.util.Env;
 public class MProjectLine extends X_C_ProjectLine
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 2668549463273628848L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_ProjectLine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MProjectLine(Properties ctx, String C_ProjectLine_UU, String trxName) {
+        super(ctx, C_ProjectLine_UU, trxName);
+		if (Util.isEmpty(C_ProjectLine_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -50,21 +63,32 @@ public class MProjectLine extends X_C_ProjectLine
 		this (ctx, C_ProjectLine_ID, trxName, (String[]) null);
 	}	//	MProjectLine
 
+	/**
+	 * @param ctx
+	 * @param C_ProjectLine_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MProjectLine(Properties ctx, int C_ProjectLine_ID, String trxName, String... virtualColumns) {
 		super(ctx, C_ProjectLine_ID, trxName, virtualColumns);
 		if (C_ProjectLine_ID == 0)
-		{
-			setLine (0);
-			setIsPrinted(true);
-			setProcessed(false);
-			setInvoicedAmt (Env.ZERO);
-			setInvoicedQty (Env.ZERO);
-			//
-			setPlannedAmt (Env.ZERO);
-			setPlannedMarginAmt (Env.ZERO);
-			setPlannedPrice (Env.ZERO);
-			setPlannedQty (Env.ONE);
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setLine (0);
+		setIsPrinted(true);
+		setProcessed(false);
+		setInvoicedAmt (Env.ZERO);
+		setInvoicedQty (Env.ZERO);
+		//
+		setPlannedAmt (Env.ZERO);
+		setPlannedMarginAmt (Env.ZERO);
+		setPlannedPrice (Env.ZERO);
+		setPlannedQty (Env.ONE);
 	}
 
 	/**
@@ -94,7 +118,7 @@ public class MProjectLine extends X_C_ProjectLine
 	private MProject	m_parent = null;
 	
 	/**
-	 *	Get the next Line No
+	 *	Get and set next Line No
 	 */
 	private void setLine()
 	{
@@ -116,8 +140,8 @@ public class MProjectLine extends X_C_ProjectLine
 	}	//	setMProjectIssue
 
 	/**
-	 *	Set PO
-	 *	@param C_OrderPO_ID po id
+	 *	Set purchase order
+	 *	@param C_OrderPO_ID purchase order id
 	 */
 	public void setC_OrderPO_ID (int C_OrderPO_ID)
 	{
@@ -141,7 +165,7 @@ public class MProjectLine extends X_C_ProjectLine
 	
 	/**
 	 * 	Get Limit Price if exists
-	 *	@return limit
+	 *	@return limit price (limit price of product or planned price of this record)
 	 */
 	public BigDecimal getLimitPrice()
 	{
@@ -162,6 +186,7 @@ public class MProjectLine extends X_C_ProjectLine
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MProjectLine[");
@@ -177,20 +202,16 @@ public class MProjectLine extends X_C_ProjectLine
 		return sb.toString ();
 	}	//	toString
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getLine() == 0)
 			setLine();
 		
-		//	Planned Amount
+		// Calculate Planned Amount
 		setPlannedAmt(getPlannedQty().multiply(getPlannedPrice()));
 		
-		//	Planned Margin
+		// Calculate Planned Margin
 		if (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Product_Category_ID")
 			|| is_ValueChanged("PlannedQty") || is_ValueChanged("PlannedPrice"))
 		{
@@ -207,7 +228,7 @@ public class MProjectLine extends X_C_ProjectLine
 			}
 		}
 		
-		//	Phase/Task
+		//	Set C_ProjectPhase_ID from C_ProjectTask 
 		if (is_ValueChanged("C_ProjectTask_ID") && getC_ProjectTask_ID() != 0)
 		{
 			MProjectTask pt = new MProjectTask(getCtx(), getC_ProjectTask_ID(), get_TrxName());
@@ -219,6 +240,7 @@ public class MProjectLine extends X_C_ProjectLine
 			else
 				setC_ProjectPhase_ID(pt.getC_ProjectPhase_ID());
 		}
+		// Set C_Project_ID from C_ProjectPhase 
 		if (is_ValueChanged("C_ProjectPhase_ID") && getC_ProjectPhase_ID() != 0)
 		{
 			MProjectPhase pp = new MProjectPhase(getCtx(), getC_ProjectPhase_ID(), get_TrxName());
@@ -232,15 +254,9 @@ public class MProjectLine extends X_C_ProjectLine
 		}
 		
 		return true;
-	}	//	beforeSave
-	
+	}	//	beforeSave	
 		
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
@@ -248,13 +264,8 @@ public class MProjectLine extends X_C_ProjectLine
 		updateHeader();
 		return success;
 	}	//	afterSave
-	
-	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
+		
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (!success)
@@ -264,7 +275,7 @@ public class MProjectLine extends X_C_ProjectLine
 	}	//	afterDelete
 	
 	/**
-	 * 	Update Header
+	 * 	Update Header (C_Project, C_ProjectPhase and C_ProjectTask)
 	 */
 	private void updateHeader()
 	{
@@ -314,7 +325,6 @@ public class MProjectLine extends X_C_ProjectLine
 			if (no != 1)
 				log.log(Level.SEVERE, "updateHeader project task - #" + no);
 		}
-		/*onhate + globalqss BF 3060367*/		
 	} // updateHeader
 
 } // MProjectLine

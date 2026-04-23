@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
  
 /**
  *	Bank Statement Line Model
@@ -41,10 +42,22 @@ import org.compiere.util.Msg;
  */
  public class MBankStatementLine extends X_C_BankStatementLine
  {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -4479911757321927051L;
+	private static final long serialVersionUID = 2604381588523683439L;
+
+	/**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_BankStatementLine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MBankStatementLine(Properties ctx, String C_BankStatementLine_UU, String trxName) {
+        super(ctx, C_BankStatementLine_UU, trxName);
+		if (Util.isEmpty(C_BankStatementLine_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -56,15 +69,20 @@ import org.compiere.util.Msg;
 	{
 		super (ctx, C_BankStatementLine_ID, trxName);
 		if (C_BankStatementLine_ID == 0)
-		{
-			setStmtAmt(Env.ZERO);
-			setTrxAmt(Env.ZERO);
-			setInterestAmt(Env.ZERO);
-			setChargeAmt(Env.ZERO);
-			setIsReversal (false);
-		}
+			setInitialDefaults();
 	}	//	MBankStatementLine
-	
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setStmtAmt(Env.ZERO);
+		setTrxAmt(Env.ZERO);
+		setInterestAmt(Env.ZERO);
+		setChargeAmt(Env.ZERO);
+		setIsReversal (false);
+	}
+
 	/**
 	 *	Load Constructor
 	 *	@param ctx context
@@ -99,6 +117,12 @@ import org.compiere.util.Msg;
 		setLine(lineNo);
 	}	//	MBankStatementLine
 
+	/**
+	 * @param ctx
+	 * @param C_BankStatementLine_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MBankStatementLine(Properties ctx, int C_BankStatementLine_ID, String trxName, String... virtualColumns) {
 		super(ctx, C_BankStatementLine_ID, trxName, virtualColumns);
 	}
@@ -107,6 +131,7 @@ import org.compiere.util.Msg;
 	 * 	Set Statement Line Date and all other dates (Valuta, Acct)
 	 *	@param StatementLineDate date
 	 */
+	@Override
 	public void setStatementLineDate(Timestamp StatementLineDate)
 	{
 		super.setStatementLineDate(StatementLineDate);
@@ -150,13 +175,8 @@ import org.compiere.util.Msg;
 			setDescription(msgsd.toString());
 		}
 	}	//	addDescription
-
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (newRecord && getParent().isProcessed()) {
@@ -171,20 +191,30 @@ import org.compiere.util.Msg;
 				return false;				
 			}
 		}
+		
+		if (getC_Payment_ID() != 0 && getC_DepositBatch_ID() != 0) {
+			log.saveError("SaveError", Msg.translate(getCtx(), "EitherPaymentOrDepositBatch"));
+			return false;
+		}
+		
+		if (getC_DepositBatch_ID() != 0 && !getC_DepositBatch().isProcessed()) {
+			log.saveError("SaveError", Msg.getMsg(getCtx(), "DepositBatchIsNotProcessed") + getC_DepositBatch());
+			return false;
+		}
 
-		//	Calculate Charge = Statement - trx - Interest  
+		//	Calculate Charge = Statement - Trx - Interest  
 		BigDecimal amt = getStmtAmt();
 		amt = amt.subtract(getTrxAmt());
 		amt = amt.subtract(getInterestAmt());
 		if (amt.compareTo(getChargeAmt()) != 0)
 			setChargeAmt (amt);
-		//
+		// Charge is mandatory if charge amount is not zero
 		if (getChargeAmt().signum() != 0 && getC_Charge_ID() == 0)
 		{
 			log.saveError("FillMandatory", Msg.getElement(getCtx(), "C_Charge_ID"));
 			return false;
 		}
-		// Un-link Payment if TrxAmt is zero - teo_sarca BF [ 1896880 ] 
+		// Reset Payment and Invoice field to 0 if TrxAmt is zero 
 		if (getTrxAmt().signum() == 0 && getC_Payment_ID() > 0)
 		{
 			setC_Payment_ID(I_ZERO);
@@ -198,7 +228,7 @@ import org.compiere.util.Msg;
 			setLine (ii);
 		}
 		
-		//	Set References
+		//	Set business partner and invoice from payment
 		if (getC_Payment_ID() != 0 && getC_BPartner_ID() == 0)
 		{
 			MPayment payment = new MPayment (getCtx(), getC_Payment_ID(), get_TrxName());
@@ -206,6 +236,7 @@ import org.compiere.util.Msg;
 			if (payment.getC_Invoice_ID() != 0)
 				setC_Invoice_ID(payment.getC_Invoice_ID());
 		}
+		// Set business partner from invoice
 		if (getC_Invoice_ID() != 0 && getC_BPartner_ID() == 0)
 		{
 			MInvoice invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
@@ -229,12 +260,7 @@ import org.compiere.util.Msg;
 		return m_parent;
 	}	//	getParent
 	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
@@ -242,11 +268,7 @@ import org.compiere.util.Msg;
 		return updateHeader();
 	}	//	afterSave
 	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (!success)
@@ -255,7 +277,9 @@ import org.compiere.util.Msg;
 	}	//	afterSave
 
 	/**
-	 * 	Update Header
+	 * Update Header (Bank Statement)<br/>
+	 * - Statement difference<br/>
+	 * - Ending balance
 	 */
 	protected boolean updateHeader()
 	{
@@ -279,18 +303,32 @@ import org.compiere.util.Msg;
 		return true;
 	}	//	updateHeader
 
-
 	/**
-	 * If the posting is based on the date of the line (ie SysConfig BANK_STATEMENT_POST_WITH_DATE_FROM_LINE = Y), make sure line and header dates are on the same period
+	 * If the posting is based on the date of the line (ie SysConfig BANK_STATEMENT_POST_WITH_DATE_FROM_LINE = Y), make sure line and header dates are in the same financial period
+	 * @return true if not using date from statement line or header and line is in the same financial period
 	 */
 	public boolean isDateConsistentIfUsedForPosting() {
+		return isDateConsistentIfUsedForPosting(getParent().getDateAcct());
+	}
+
+	/**
+	 * If the posting is based on the date of the line (ie SysConfig BANK_STATEMENT_POST_WITH_DATE_FROM_LINE = Y), make sure line and header dates are in the same financial period
+	 * @param headerDateAcct
+	 * @return true if not using date from statement line or header and line is in the same financial period
+	 */
+	public boolean isDateConsistentIfUsedForPosting(Timestamp headerDateAcct) {
 		if (MBankStatement.isPostWithDateFromLine(getAD_Client_ID())) {
-			MPeriod headerPeriod = MPeriod.get(getCtx(), getParent().getDateAcct(), getParent().getAD_Org_ID(), get_TrxName());
+			MPeriod headerPeriod = MPeriod.get(getCtx(), headerDateAcct, getParent().getAD_Org_ID(), get_TrxName());
 			MPeriod linePeriod = MPeriod.get(getCtx(), getDateAcct(), getParent().getAD_Org_ID(), get_TrxName());
 
 			return headerPeriod != null && linePeriod != null && headerPeriod.getC_Period_ID() == linePeriod.getC_Period_ID();	
 		}
 		return true;
+	}
+	
+	@Override
+	public MDepositBatch getC_DepositBatch() throws RuntimeException {
+		return getC_DepositBatch_ID() > 0 ? new MDepositBatch(getCtx(), getC_DepositBatch_ID(), get_TrxName()) : null;
 	}
 	
  }	//	MBankStatementLine

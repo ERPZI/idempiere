@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Opportunity
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_Opportunity")
-public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent 
+public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_Opportunity (Properties ctx, int C_Opportunity_ID, String trxName)
@@ -72,6 +72,42 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_Opportunity (Properties ctx, String C_Opportunity_UU, String trxName)
+    {
+      super (ctx, C_Opportunity_UU, trxName);
+      /** if (C_Opportunity_UU == null)
+        {
+			setC_BPartner_ID (0);
+// @C_BPartner_ID@
+			setC_Currency_ID (0);
+			setC_Opportunity_ID (0);
+			setC_SalesStage_ID (0);
+			setDocumentNo (null);
+			setExpectedCloseDate (new Timestamp( System.currentTimeMillis() ));
+			setOpportunityAmt (Env.ZERO);
+			setProbability (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Opportunity (Properties ctx, String C_Opportunity_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Opportunity_UU, trxName, virtualColumns);
+      /** if (C_Opportunity_UU == null)
+        {
+			setC_BPartner_ID (0);
+// @C_BPartner_ID@
+			setC_Currency_ID (0);
+			setC_Opportunity_ID (0);
+			setC_SalesStage_ID (0);
+			setDocumentNo (null);
+			setExpectedCloseDate (new Timestamp( System.currentTimeMillis() ));
+			setOpportunityAmt (Env.ZERO);
+			setProbability (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_Opportunity (Properties ctx, ResultSet rs, String trxName)
     {
@@ -79,7 +115,7 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -212,38 +248,6 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Close Date.
-		@param CloseDate Close Date
-	*/
-	public void setCloseDate (Timestamp CloseDate)
-	{
-		set_Value (COLUMNNAME_CloseDate, CloseDate);
-	}
-
-	/** Get Close Date.
-		@return Close Date
-	  */
-	public Timestamp getCloseDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_CloseDate);
-	}
-
-	/** Set Comments.
-		@param Comments Comments or additional information
-	*/
-	public void setComments (String Comments)
-	{
-		set_Value (COLUMNNAME_Comments, Comments);
-	}
-
-	/** Get Comments.
-		@return Comments or additional information
-	  */
-	public String getComments()
-	{
-		return (String)get_Value(COLUMNNAME_Comments);
-	}
-
 	/** Set Sales Opportunity.
 		@param C_Opportunity_ID Sales Opportunity
 	*/
@@ -308,25 +312,6 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Cost.
-		@param Cost Cost information
-	*/
-	public void setCost (BigDecimal Cost)
-	{
-		set_Value (COLUMNNAME_Cost, Cost);
-	}
-
-	/** Get Cost.
-		@return Cost information
-	  */
-	public BigDecimal getCost()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Cost);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_SalesStage getC_SalesStage() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_SalesStage)MTable.get(getCtx(), org.compiere.model.I_C_SalesStage.Table_ID)
@@ -353,6 +338,57 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Close Date.
+		@param CloseDate Close Date
+	*/
+	public void setCloseDate (Timestamp CloseDate)
+	{
+		set_Value (COLUMNNAME_CloseDate, CloseDate);
+	}
+
+	/** Get Close Date.
+		@return Close Date
+	  */
+	public Timestamp getCloseDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_CloseDate);
+	}
+
+	/** Set Comments.
+		@param Comments Comments or additional information
+	*/
+	public void setComments (String Comments)
+	{
+		set_Value (COLUMNNAME_Comments, Comments);
+	}
+
+	/** Get Comments.
+		@return Comments or additional information
+	  */
+	public String getComments()
+	{
+		return (String)get_Value(COLUMNNAME_Comments);
+	}
+
+	/** Set Cost.
+		@param Cost Cost information
+	*/
+	public void setCost (BigDecimal Cost)
+	{
+		set_Value (COLUMNNAME_Cost, Cost);
+	}
+
+	/** Get Cost.
+		@return Cost information
+	  */
+	public BigDecimal getCost()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Cost);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Description.
@@ -390,7 +426,7 @@ public class X_C_Opportunity extends PO implements I_C_Opportunity, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }

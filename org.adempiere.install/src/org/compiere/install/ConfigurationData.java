@@ -52,12 +52,14 @@ import org.compiere.Adempiere;
 import org.compiere.db.CConnection;
 import org.compiere.db.Database;
 import org.compiere.model.MSystem;
+import org.compiere.model.SystemProperties;
 import org.compiere.util.CLogMgt;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.EMail;
 import org.compiere.util.EMailAuthenticator;
 import org.compiere.util.Ini;
+import org.compiere.util.Util;
 import org.eclipse.jetty.util.security.Password;
 
 
@@ -108,7 +110,7 @@ public class ConfigurationData
 	public static final String	IDEMPIERE_ENV_FILE		= "idempiereEnv.properties";
 
 	/** Adempiere Home					*/
-	public static final String	IDEMPIERE_HOME 			= "IDEMPIERE_HOME";
+	public static final String	IDEMPIERE_HOME 			= Ini.IDEMPIERE_HOME;
 	/** 				*/
 	public static final String	JAVA_HOME 				= "JAVA_HOME";
 	/** 				*/
@@ -224,7 +226,7 @@ public class ConfigurationData
 	public boolean load()
 	{
 		//	Load idempiereEnv.properties
-		String adempiereHome = System.getProperty(IDEMPIERE_HOME);
+		String adempiereHome = SystemProperties.getIdempiereHome();
 		if (adempiereHome == null || adempiereHome.length() == 0)
 			adempiereHome = System.getProperty("user.dir");
 
@@ -792,11 +794,9 @@ public class ConfigurationData
 	protected boolean testServerPort (int port)
 	{
 		System.out.println("testServerPort: " + port);
-		try
-		{
-			ServerSocket ss = new ServerSocket (port);
+		try (ServerSocket ss = new ServerSocket (port))
+		{			
 			if (log.isLoggable(Level.FINE)) log.fine(ss.getInetAddress() + ":" + ss.getLocalPort() + " - created");
-			ss.close();
 		}
 		catch (Exception ex)
 		{
@@ -829,6 +829,13 @@ public class ConfigurationData
 			else
 				if (log.isLoggable(Level.FINE)) log.fine(host + ":" + port + " - " + e.getMessage());
 			return false;
+		}
+		finally
+		{
+			if (pingSocket != null)
+				try {
+					pingSocket.close();
+				} catch (IOException e) {}
 		}
 		if (!shouldBeUsed)
 			log.warning("Open Socket " + host + ":" + port + " - " + pingSocket);
@@ -883,6 +890,14 @@ public class ConfigurationData
 					p_properties.remove(secretVar);
 				}
 			}
+
+			// store ADEMPIERE_DB_SYSTEM_USER
+			if (SystemProperties.getAdempiereDBSystemUser() != null) {
+				p_properties.put(SystemProperties.ADEMPIERE_DB_SYSTEM_USER, SystemProperties.getAdempiereDBSystemUser());
+			} else {
+				p_properties.put(SystemProperties.ADEMPIERE_DB_SYSTEM_USER, "");
+			}
+
 			// obfuscate keystore pass
 			String keystorePass = p_properties.getProperty(ADEMPIERE_KEYSTOREPASS);
 			String obfKeystorePass = Password.obfuscate(keystorePass);
@@ -896,6 +911,7 @@ public class ConfigurationData
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			log.severe("Cannot save Properties to " + fileName + " - " + e.toString());
 			if (p_panel != null)
 				JOptionPane.showConfirmDialog(p_panel,
@@ -908,6 +924,7 @@ public class ConfigurationData
 		}
 		catch (Throwable t)
 		{
+			t.printStackTrace();
 			log.severe("Cannot save Properties to " + fileName + " - " + t.toString());
 			if (p_panel != null)
 				JOptionPane.showConfirmDialog(p_panel,
@@ -973,6 +990,11 @@ public class ConfigurationData
 		} else {
 			Ini.setProperty(Ini.P_CONNECTION, cc.toStringLong(true));
 		}
+		
+		// default to ignore jetty annotations parser warnings
+		Arrays.asList("org.eclipse.jetty.ee8.annotations.AnnotationParser.TraceLevel", "org.eclipse.jetty.ee8.osgi.annotations.AnnotationParser.TraceLevel")
+			.forEach(p -> {if (Util.isEmpty(Ini.getProperty(p),true)) Ini.setProperty(p, "SEVERE");});
+
 		Ini.saveProperties(false);
 		return true;
 	}	//	saveIni

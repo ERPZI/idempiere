@@ -15,7 +15,7 @@ import java.util.Vector;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
 import org.compiere.model.GridTable;
-import org.compiere.util.Env;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.Evaluatee;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.ValueNamePair;
@@ -28,7 +28,7 @@ public class GridRowCtx extends Properties
 implements Evaluatee
 {
 	/**
-	 *
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 8163657930039348267L;
 
@@ -37,11 +37,20 @@ implements Evaluatee
 	private final int windowNo;
 	private final int row;
 
+	/**
+	 * @param ctx
+	 * @param tab
+	 */
 	public GridRowCtx(Properties ctx, GridTab tab)
 	{
 		this(ctx, tab, -1);
 	}
 	
+	/**
+	 * @param ctx
+	 * @param tab
+	 * @param row
+	 */
 	public GridRowCtx(Properties ctx, GridTab tab, int row)
 	{
 		super();
@@ -51,6 +60,11 @@ implements Evaluatee
 		this.row = row;
 	}
 
+	/**
+	 * Get column name from context property
+	 * @param key context property
+	 * @return column name
+	 */
 	private String getColumnName(Object key)
 	{
 		if (! (key instanceof String) )
@@ -104,6 +118,9 @@ implements Evaluatee
 		return value.toString();
 	}
 
+	/**
+	 * @return current row
+	 */
 	private int getRow() {
 		return row >= 0 ? row : gridTab.getCurrentRow();
 	}
@@ -259,8 +276,10 @@ implements Evaluatee
 		return oval == null ? null : oval.toString();
 	}
 
+	@Override
 	public String get_ValueAsString(String variableName)
 	{
-		return Env.getContext (this, windowNo, variableName, true);
+		DefaultEvaluatee evaluatee = new DefaultEvaluatee(gridTab, windowNo, -1);
+		return evaluatee.get_ValueAsString(this, variableName);
 	}
 }

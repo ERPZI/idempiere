@@ -16,8 +16,11 @@
  *****************************************************************************/
 package org.adempiere.webui.apps;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.IProcessUI;
 import org.adempiere.webui.ISupportMask;
 import org.adempiere.webui.LayoutUtils;
@@ -34,8 +37,11 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.NamePair;
 import org.compiere.util.Trx;
+import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 
@@ -44,7 +50,6 @@ import org.zkoss.zk.ui.event.EventListener;
  * 
  * @author hengsin
  * @contributor red1 IDEMPIERE-1711 with final review by Hengsin
- *
  */
 public class WProcessCtl extends AbstractProcessCtl {
 	
@@ -82,10 +87,12 @@ public class WProcessCtl extends AbstractProcessCtl {
 			MPInstance instance = null;
 			try
 			{
-				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getRecord_ID());
+				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getTable_ID(), pi.getRecord_ID(), pi.getRecord_UU());
 			}
 			catch (Exception e)
 			{
+				if (Env.isReadOnlySession())
+					throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReadOnlySession"));
 				pi.setSummary (e.getLocalizedMessage());
 				pi.setError (true);
 				log.warning(pi.toString());
@@ -132,7 +139,7 @@ public class WProcessCtl extends AbstractProcessCtl {
 				para.setAttribute(Window.MODE_KEY, Window.MODE_HIGHLIGHTED);
 				AEnv.showWindow(para);
 			}
-			
+			Executions.schedule(para.getDesktop(), e -> para.focus(), new Event("onPostShowProcessModalDialog"));
 		}
 	}	//	execute
 	
@@ -159,10 +166,12 @@ public class WProcessCtl extends AbstractProcessCtl {
 		if (pi.getAD_PInstance_ID() < 1) { //red1 bypass if PInstance exists
 			try
 			{
-				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getRecord_ID());
+				instance = new MPInstance(Env.getCtx(), pi.getAD_Process_ID(), pi.getTable_ID(), pi.getRecord_ID(), pi.getRecord_UU());
 			}
 			catch (Exception e)
 			{
+				if (Env.isReadOnlySession())
+					throw new AdempiereException(Msg.getMsg(Env.getCtx(), "ReadOnlySession"));
 				pi.setSummary (e.getLocalizedMessage());
 				pi.setError (true);
 				log.warning(pi.toString());
@@ -196,12 +205,21 @@ public class WProcessCtl extends AbstractProcessCtl {
 			}
 		}
 
-		if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0)
-		{
+		if (pi.getRecord_UUs() != null && pi.getRecord_UUs().size() > 0) {
+			Collection<NamePair> vnps = new ArrayList<NamePair>();
+			for (String uuid : pi.getRecord_UUs()) {
+				vnps.add(new ValueNamePair(uuid, ""));
+			}
+			DB.createT_SelectionNewNP(pi.getAD_PInstance_ID(), vnps, null);
+			MPInstancePara ip = instance.createParameter(-1, "*RecordUUs*", pi.getRecord_UUs().toString());
+			ip.saveEx();
+		} else if (pi.getRecord_IDs() != null && pi.getRecord_IDs().size() > 0) {
 			DB.createT_Selection(pi.getAD_PInstance_ID(), pi.getRecord_IDs(), null);
 			MPInstancePara ip = instance.createParameter(-1, "*RecordIDs*", pi.getRecord_IDs().toString());
 			ip.saveEx();
 		}
+		
+
 		
 		//	execute
 		WProcessCtl worker = new WProcessCtl(aProcessUI, WindowNo, pi, trx);

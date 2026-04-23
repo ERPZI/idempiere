@@ -47,10 +47,9 @@ import org.zkoss.zk.ui.util.ExecutionCleanup;
 import org.zkoss.zk.ui.util.ExecutionInit;
 
 /**
- *
+ * Zk listener to manage environment context for execution and session
  * @author <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public class SessionContextListener implements ExecutionInit,
         ExecutionCleanup, EventThreadInit, DesktopCleanup, DesktopInit
@@ -59,7 +58,7 @@ public class SessionContextListener implements ExecutionInit,
     public static final String SESSION_CTX = "WebUISessionContext";
 
     /**
-     * get servlet thread local context from session
+     * Get environment context from session cache or create a new one (if no cache context or cache context is invalid)
      * @param exec
      */
     public static void setupExecutionContextFromSession(Execution exec) {
@@ -183,6 +182,10 @@ public class SessionContextListener implements ExecutionInit,
 		return true;
     }
 
+    /**
+     * Is current context valid
+     * @return true if current context is valid
+     */
 	public static boolean isContextValid() {
 		Execution exec = Executions.getCurrent();
 		Properties ctx = ServerContext.getCurrentInstance();
@@ -275,6 +278,12 @@ public class SessionContextListener implements ExecutionInit,
 		}
 	}
 
+	/**
+	 * Is session has zero active Zk desktop
+	 * @param list
+	 * @param session
+	 * @return true if session has no active desktop
+	 */
 	private boolean isEmpty(List<String> list, Session session) {
 		if (list.isEmpty())
 			return true;
@@ -313,11 +322,13 @@ public class SessionContextListener implements ExecutionInit,
 			return;
 		
 		desktop.addListener(new ValidateReadonlyComponent());
-		
+		//validate current context
 		if (ServerContext.getCurrentInstance().isEmpty() || !isContextValid())
     	{
 			setupExecutionContextFromSession(Executions.getCurrent());
     	}
+		
+		//check is current MSession processed
 		MSession mSession = MSession.get(Env.getCtx());
 		if(mSession!=null){
 			if (mSession.isProcessed()) {
@@ -329,6 +340,11 @@ public class SessionContextListener implements ExecutionInit,
 		} 
 	}
 	
+	/**
+	 * Add dtid to session context
+	 * @param AD_Session_ID
+	 * @param dtid desktop id
+	 */
 	public static synchronized void addDesktopId(int AD_Session_ID, String dtid)
 	{
 		String key = getSessionDesktopListKey(AD_Session_ID);
@@ -345,6 +361,7 @@ public class SessionContextListener implements ExecutionInit,
 	}
 	
 	/**
+	 * Get context attribute key for session desktop list
 	 * @param AD_Session_ID
 	 * @return desktop list key
 	 */

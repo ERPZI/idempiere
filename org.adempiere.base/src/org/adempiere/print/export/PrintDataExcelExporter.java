@@ -52,8 +52,7 @@ import org.compiere.util.Util;
  * 			<li>BF [ 1939010 ] Excel Export ERROR - java.sql.Date - integrated Mario Grigioni's fix
  * 			<li>BF [ 1974309 ] Exporting a report to XLS is not setting page format
  */
-public class PrintDataExcelExporter
-extends AbstractExcelExporter
+public class PrintDataExcelExporter extends AbstractExcelExporter
 {
 	//constant for form rendering
 	private static final int COLUMN_WIDTH_DIVISOR = 64;
@@ -73,14 +72,31 @@ extends AbstractExcelExporter
 	private int m_previousFormCol = -1;
 	private String m_previousAreaType = null;
 	
+	/**
+	 * @param printData
+	 * @param printFormat
+	 */
 	public PrintDataExcelExporter(PrintData printData, MPrintFormat printFormat) {
 		this(printData, printFormat, null, null);
 	}
 	
+	/**
+	 * @param printData
+	 * @param printFormat
+	 * @param childPrintFormatDetails
+	 * @param colSuppressRepeats
+	 */
 	public PrintDataExcelExporter(PrintData printData, MPrintFormat printFormat, Map<MPrintFormatItem, PrintData> childPrintFormatDetails, Boolean[] colSuppressRepeats) {
 		this(printData, printFormat, childPrintFormatDetails, colSuppressRepeats, null);
 	}
 	
+	/**
+	 * @param printData
+	 * @param printFormat
+	 * @param childPrintFormatDetails
+	 * @param colSuppressRepeats
+	 * @param query
+	 */
 	public PrintDataExcelExporter(PrintData printData, MPrintFormat printFormat, Map<MPrintFormatItem, PrintData> childPrintFormatDetails, Boolean[] colSuppressRepeats, MQuery query) {
 		super();
 		this.m_printData = printData;
@@ -95,6 +111,11 @@ extends AbstractExcelExporter
 		return columns.size();
 	}
 
+	/**
+	 * @param row
+	 * @param col
+	 * @return PrintDataElement for row and col or null
+	 */
 	private PrintDataElement getPDE(int row, int col) {
 		if (m_printData.getRowIndex() != row)
 			m_printData.setRowIndex(row);
@@ -123,6 +144,7 @@ extends AbstractExcelExporter
 		}
 		return null;
 	}
+	
 	@Override
 	public int getDisplayType(int row, int col) {
 		PrintDataElement pde = getPDE(row, col);
@@ -236,6 +258,7 @@ extends AbstractExcelExporter
 		m_printData.setRowIndex(row);
 	}
 
+	@Override
 	protected int getCurrentRow() {
 		return m_printData.getRowIndex();
 	}
@@ -379,22 +402,22 @@ extends AbstractExcelExporter
 							font.setBold(true);
 							style.setFont(font);
 							cell.setCellStyle(style);
-							String value = Util.stripDiacritics(Msg.getMsg(getCtx(), "Parameter") + ":");
+							String value = Msg.getMsg(getCtx(), "Parameter") + ":";
 							cell.setCellValue(new HSSFRichTextString(value));
 						}
 						HSSFCell cell = row.createCell(1);
 						cell.setCellStyle(parameterStyle);
-						String value = Util.stripDiacritics(query.getInfoName(r));
+						String value = query.getInfoName(r);
 						cell.setCellValue(new HSSFRichTextString(value));
 						
 						cell = row.createCell(2);
 						cell.setCellStyle(parameterStyle);
-						value = Util.stripDiacritics(query.getInfoOperator(r));
+						value = query.getInfoOperator(r);
 						cell.setCellValue(new HSSFRichTextString(value));
 						
 						cell = row.createCell(3);
 						cell.setCellStyle(parameterStyle);
-						value = Util.stripDiacritics(query.getInfoDisplayAll(r));
+						value = query.getInfoDisplayAll(r);
 						cell.setCellValue(new HSSFRichTextString(value));
 					}
 				}

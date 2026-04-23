@@ -23,7 +23,6 @@ import org.compiere.util.Env;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
-
 /**
  *	Form Model
  *	
@@ -33,12 +32,12 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MForm extends X_AD_Form implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = -3617225890452735325L;
 	
 	/**	Cache						*/
-	private static ImmutableIntPOCache<Integer,MForm> s_cache = new ImmutableIntPOCache<Integer,MForm>(Table_Name, 20);
+	private static ImmutableIntPOCache<Integer,MForm> s_cache = new ImmutableIntPOCache<Integer,MForm>(Table_Name, 20, 0, false, 0);
 	
 	/**
 	 * 	Get MForm from Cache (immutable)
@@ -71,6 +70,16 @@ public class MForm extends X_AD_Form implements ImmutablePOSupport
 		return null;
 	}	//	get
 	
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Form_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MForm(Properties ctx, String AD_Form_UU, String trxName) {
+        super(ctx, AD_Form_UU, trxName);
+    }
+
 	/**
 	 * 	Default Constructor
 	 *	@param ctx context
@@ -94,7 +103,7 @@ public class MForm extends X_AD_Form implements ImmutablePOSupport
 	}	//	MForm
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -103,7 +112,7 @@ public class MForm extends X_AD_Form implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -114,18 +123,14 @@ public class MForm extends X_AD_Form implements ImmutablePOSupport
 		copyPO(copy);
 	}
 	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
 		if (newRecord)
 		{
+			// Create form access record for login role
 			int AD_Role_ID = Env.getAD_Role_ID(getCtx());
 			MFormAccess pa = new MFormAccess(this, AD_Role_ID);
 			pa.saveEx();
@@ -134,6 +139,7 @@ public class MForm extends X_AD_Form implements ImmutablePOSupport
 		else if (is_ValueChanged("IsActive") || is_ValueChanged("Name") 
 			|| is_ValueChanged("Description"))
 		{
+			// Update menu
 			MMenu[] menues = MMenu.get(getCtx(), "AD_Form_ID=" + getAD_Form_ID(), get_TrxName());
 			for (int i = 0; i < menues.length; i++)
 			{

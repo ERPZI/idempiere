@@ -27,17 +27,27 @@ import org.compiere.model.MAttachmentEntry;
 import org.compiere.model.MShipperLabels;
 
 /**
- * 
+ * Default implementation of {@link IPrintShippingLabel}
  * @author Elaine
- *
  */
 public class DefaultPrintShippingLabel implements IPrintShippingLabel
 {
+	/**
+	 * @param attachment
+	 * @param labelType
+	 */
+	@Override
 	public String printToLabelPrinter(MAttachment attachment, MShipperLabels labelType) throws Exception
 	{
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @param attachment
+	 * @param labelType
+	 * @param title
+	 */
+	@Override
 	public String printImageLabel(MAttachment attachment, MShipperLabels labelType, String title) throws Exception
 	{
 		MAttachmentEntry[] entries = attachment.getEntries();

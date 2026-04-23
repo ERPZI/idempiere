@@ -25,9 +25,11 @@ import java.util.zip.ZipOutputStream;
 
 import org.compiere.util.CLogger;
 
+/**
+ * DB backed implementation of {@link IAttachmentStore}
+ */
 public class AttachmentDBSystem implements IAttachmentStore 
-{
-	
+{	
 	/** Indicator for zip data  */
 	public static final String 	ZIP = "zip";
 	private static final CLogger log = CLogger.getCLogger(AttachmentDBSystem.class);
@@ -35,7 +37,7 @@ public class AttachmentDBSystem implements IAttachmentStore
 
 	@Override
 	public boolean loadLOBData(MAttachment attach, MStorageProvider prov) {
-//		Reset
+		//	Reset
 		attach.m_items = new ArrayList<MAttachmentEntry>();
 			//
 			byte[] data = attach.getBinaryData();
@@ -70,7 +72,7 @@ public class AttachmentDBSystem implements IAttachmentStore
 					}
 					//
 					byte[] dataEntry = out.toByteArray();
-					if (log.isLoggable(Level.FINE)) log.fine(name 
+					if (log.isLoggable(Level.FINE)) log.fine(name
 						+ " - size=" + dataEntry.length + " - zip="
 						+ entry.getCompressedSize() + "(" + entry.getSize() + ") "
 						+ (entry.getCompressedSize()*100/entry.getSize())+ "%");
@@ -97,7 +99,7 @@ public class AttachmentDBSystem implements IAttachmentStore
 			attach.setBinaryData(null);
 			return true;
 		}
-		ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ZipOutputStream zip = new ZipOutputStream(out);
 		zip.setMethod(ZipOutputStream.DEFLATED);
 		zip.setLevel(Deflater.BEST_COMPRESSION);
@@ -119,7 +121,6 @@ public class AttachmentDBSystem implements IAttachmentStore
 					+ entry.getCompressedSize() + " (" + entry.getSize() + ") "
 					+ (entry.getCompressedSize()*100/entry.getSize())+ "%");
 			}
-		//	zip.finish();
 			zip.close();
 			byte[] zipData = out.toByteArray();
 			if (log.isLoggable(Level.FINE)) log.fine("Length=" +  zipData.length);

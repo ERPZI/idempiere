@@ -37,18 +37,23 @@ import org.adempiere.webui.adwindow.ADWindow;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.BusyDialog;
 import org.adempiere.webui.apps.ProcessDialog;
+import org.adempiere.webui.component.Anchorchildren;
+import org.adempiere.webui.component.Anchorlayout;
 import org.adempiere.webui.component.Tab;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.dashboard.DashboardPanel;
 import org.adempiere.webui.event.MenuListener;
 import org.adempiere.webui.event.ZKBroadCastManager;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.panel.BroadcastMessageWindow;
 import org.adempiere.webui.panel.HeaderPanel;
 import org.adempiere.webui.panel.HelpController;
+import org.adempiere.webui.panel.InfoPanel;
 import org.adempiere.webui.panel.TimeoutPanel;
+import org.adempiere.webui.part.ITabOnSelectHandler;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.UserPreference;
@@ -90,8 +95,6 @@ import org.zkoss.zk.ui.event.SwipeEvent;
 import org.zkoss.zk.ui.metainfo.PageDefinition;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.DesktopCleanup;
-import org.zkoss.zul.Anchorchildren;
-import org.zkoss.zul.Anchorlayout;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.East;
@@ -100,20 +103,18 @@ import org.zkoss.zul.Popup;
 import org.zkoss.zul.West;
 
 /**
- *
  * Default {@link IDesktop} implementation.
  * @author <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @author <a href="mailto:hengsin@gmail.com">Low Heng Sin</a>
  * @date Mar 2, 2007
- * @version $Revision: 0.10 $
  * @author Deepak Pansheriya/Vivek - Adding support for message broadcasting
  */
 public class DefaultDesktop extends TabbedDesktop implements MenuListener, Serializable, EventListener<Event>, EventHandler, DesktopCleanup
 {		
-	/**
-	 * generated serial id 
+    /**
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 7189914859100400758L;
+	private static final long serialVersionUID = 1019213060161640026L;
 
 	private static final String IMAGES_UPARROW_PNG = "images/collapse-header.png";
 
@@ -315,7 +316,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         //Set preference width
         if( westWidth != null || eastWidth != null ){
         	
-        	//If both panels have prefered size check that the sum is not bigger than the browser
+        	//If both panels have preferred size check that the sum is not bigger than the browser
         	if( westWidth != null && eastWidth != null ){
             	ClientInfo browserInfo = getClientInfo();
         		int browserWidth = browserInfo.desktopWidth;
@@ -604,6 +605,13 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 		dashboardController.render(homeTab, this, true);
 		
+		if (homeTab.getFirstChild() != null) {
+			ITabOnSelectHandler handler = () -> {
+				invalidateDashboardPanel(homeTab.getFirstChild().getChildren());
+			};
+			homeTab.getFirstChild().setAttribute(ITabOnSelectHandler.ATTRIBUTE_KEY, handler);
+		}
+						
 		homeTab.setAttribute(HOME_TAB_RENDER_ATTR, Boolean.TRUE);
 	
 		West w = layout.getWest();
@@ -654,6 +662,20 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		}
 		
 		homeTab.invalidate();	
+	}
+
+	/**
+	 * Redraw dashboard panel after switching back to home tab
+	 * @param childrens
+	 */
+	private void invalidateDashboardPanel(List<Component> childrens) {
+		for (Component children : childrens) {
+			if (children instanceof DashboardPanel) {
+				children.invalidate();
+			} else {
+				invalidateDashboardPanel(children.getChildren());
+			}
+		}
 	}
 
 	/**
@@ -799,6 +821,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	/**
 	 * @param page
 	 */
+	@Override
 	public void setPage(Page page) {
 		if (this.page != page) {
 			layout.setPage(page);
@@ -818,6 +841,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	 * Get the root component
 	 * @return Component
 	 */
+	@Override
 	public Component getComponent() {
 		return layout;
 	}
@@ -1005,6 +1029,11 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 
 	@Override
 	public void updateHelpContext(String ctxType, int recordId) {
+		this.updateHelpContext(ctxType, recordId, null);
+	}
+	
+	@Override
+	public void updateHelpContext(String ctxType, int recordId, InfoPanel infoPanel) {
 		// don't show context for SetupWizard Form, is managed internally using wf and node ctxhelp
 		if (recordId == SystemIDs.FORM_SETUP_WIZARD && X_AD_CtxHelp.CTXTYPE_Form.equals(ctxType))
 			return;
@@ -1018,7 +1047,10 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		if (adwindow != null) {
             gridTab = adwindow.getADWindowContent().getActiveGridTab();
 		}
-		updateHelpQuickInfo(gridTab);
+		if(X_AD_CtxHelp.CTXTYPE_Info.equals(ctxType))
+			updateHelpQuickInfo(infoPanel);
+		else
+			updateHelpQuickInfo(gridTab);
 	}
 
 	@Override
@@ -1027,10 +1059,16 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	}
 
 	@Override
-	public void updateHelpTooltip(String hdr, String  desc, String help, String otherContent) {		
-		helpController.renderToolTip(hdr, desc, help, otherContent);
+	public void updateHelpTooltip(String hdr, String  desc, String help, String otherContent,String entityType) {		
+		helpController.renderToolTip(hdr, desc, help, otherContent, entityType);
 	}
 
+	@Override
+	public void updateHelpQuickInfo(InfoPanel infoPanel) {
+		if (isQuickInfoOpen)
+            helpController.renderQuickInfo(infoPanel);
+	}
+	
 	@Override
 	public void updateHelpQuickInfo(GridTab gridTab) {
         this.gridTab = gridTab;
@@ -1050,12 +1088,6 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		ADForm form = super.openForm(formId);
 		updateHelpContext(X_AD_CtxHelp.CTXTYPE_Form, formId);
 		return form;
-	}
-
-	@Override
-	public void openInfo(int infoId) {
-		super.openInfo(infoId);
-		updateHelpContext(X_AD_CtxHelp.CTXTYPE_Info, infoId);
 	}
 
 	@Override

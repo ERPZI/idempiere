@@ -19,7 +19,6 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
-
 /**
  *	Campaign model
  *	
@@ -28,11 +27,20 @@ import java.util.Properties;
  */
 public class MCampaign extends X_C_Campaign
 {
-
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = -5881057827687596119L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_Campaign_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MCampaign(Properties ctx, String C_Campaign_UU, String trxName) {
+        super(ctx, C_Campaign_UU, trxName);
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -56,36 +64,28 @@ public class MCampaign extends X_C_Campaign
 		super(ctx, rs, trxName);
 	}	//	MCampaign
 	
-	/**
-	 * 	After Save.
-	 * 	Insert
-	 * 	- create tree
-	 *	@param newRecord insert
-	 *	@param success save success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
+		// Create Tree Record
 		if (newRecord)
 			insert_Tree(MTree_Base.TREETYPE_Campaign);
+		// Update Driven by Value Tree
 		if (newRecord || is_ValueChanged(COLUMNNAME_Value))
 			update_Tree(MTree_Base.TREETYPE_Campaign);
-		//	Value/Name change
+		//	Value/Name change, update Combination and Description of C_ValidCombination
 		if (!newRecord && (is_ValueChanged("Value") || is_ValueChanged("Name")))
 			MAccount.updateValueDescription(getCtx(), "C_Campaign_ID=" + getC_Campaign_ID(), get_TrxName());
 
 		return true;
 	}	//	afterSave
 
-	/**
-	 * 	After Delete
-	 *	@param success
-	 *	@return deleted
-	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
+		// Delete tree record
 		if (success)
 			delete_Tree(MTree_Base.TREETYPE_Campaign);
 		return success;

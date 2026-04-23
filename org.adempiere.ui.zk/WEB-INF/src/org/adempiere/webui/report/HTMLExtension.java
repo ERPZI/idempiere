@@ -29,8 +29,10 @@ import org.compiere.model.MSysConfig;
 import org.compiere.print.IHTMLExtension;
 import org.compiere.print.PrintData;
 import org.compiere.print.PrintDataElement;
+import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.Executions;
 
 /**
@@ -39,6 +41,9 @@ import org.zkoss.zk.ui.Executions;
  */
 public class HTMLExtension implements IHTMLExtension {
 
+	/**	Logger				*/
+	private static CLogger log = CLogger.getCLogger(HTMLExtension.class);
+			
 	private String classPrefix;
 	private String componentId;
 	private String scriptURL;
@@ -59,19 +64,20 @@ public class HTMLExtension implements IHTMLExtension {
 	 * @param contextPath
 	 * @param classPrefix
 	 * @param componentId
+	 * @param processID
 	 */
 	public HTMLExtension(String contextPath, String classPrefix, String componentId, String processID) {
 
 		String theme = MSysConfig.getValue(MSysConfig.HTML_REPORT_THEME, "/", Env.getAD_Client_ID(Env.getCtx()));
 
-		if (! theme.startsWith("/") && !theme.startsWith("~./"))
+		if (!theme.startsWith("/") && !theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
 			theme = "/" + theme;
 		if (! theme.endsWith("/"))
 			theme = theme + "/";
 
 		this.classPrefix = classPrefix;
 		this.componentId = componentId;
-		if (theme.startsWith("~./")) {
+		if (theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE)) {
 			if (Executions.getCurrent() != null) {
 				this.styleURL = Executions.encodeURL(theme + "css/report.css");
 			}
@@ -196,11 +202,26 @@ public class HTMLExtension implements IHTMLExtension {
 	@Override
 	public String getFullPathStyle() {
 		String theme = MSysConfig.getValue(MSysConfig.HTML_REPORT_THEME, "/", Env.getAD_Client_ID(Env.getCtx()));
-		if (! theme.startsWith("/"))
+		if (!theme.startsWith("/") && !theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
 			theme = "/" + theme;
-		if (! theme.endsWith("/"))
+		if (!theme.endsWith("/"))
 			theme = theme + "/";
 		String resFile = theme + "css/report.css";
+		
+		// Support to Parse Context Variable
+		if (resFile.contains("@"))
+		{
+			resFile = Env.parseContext(Env.getCtx(), 0, resFile, false);
+			if (Util.isEmpty(resFile))
+			{
+				log.warning("Report theme URL '"+ theme +"' failed to parse, Defaulting to default report.css url");
+				resFile = "/css/report.css"; // default
+			}
+		}
+		
+		// translate ~./ url to classpath url
+		if (theme.startsWith(ThemeManager.ZK_URL_PREFIX_FOR_CLASSPATH_RESOURCE))
+			resFile = ThemeManager.toClassPathResourcePath(resFile);
 		
 		URL urlFile = this.getClass().getResource(resFile);
 		if (urlFile == null) {

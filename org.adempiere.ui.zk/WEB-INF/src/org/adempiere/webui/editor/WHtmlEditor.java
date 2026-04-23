@@ -41,12 +41,10 @@ import org.zkoss.zul.Html;
 
 
 /**
- * HTML Editor
- * <p> Implementation of an editor to show HTML content </p>
- *
- * Based on contribution from
+ * Default editor for html (AD_Field.IsHtml=Y) text display type (String, PrinterName, Text, TextLong and Memo). <br/>
+ * Implemented with {@link Html} component and html editor dialog ({@link WTextEditorDialog}) to show and edit HTML content.
+ * 
  * @author muriloht (muriloht@devcoffee.com.br, http://www.devcoffee.com.br)
- * @version $Id: WHTMLEditor.java, v1.0 11/11/2014 20:25:06, muriloht Exp $
  */
 public class WHtmlEditor extends WEditor implements ContextMenuListener
 {
@@ -55,7 +53,7 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
 
 	private AbstractADWindowContent adwindowContent;
 
-    /** HTML Model         */
+    /** HTML component         */
 	private Html  box = null;
 
     private boolean m_mandatory;
@@ -91,6 +89,9 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
     	return (Div) component;
     }
 
+    /**
+     * Init component and context menu.
+     */
     private void init()
     {
     	if (log.isLoggable(Level.INFO)) log.info("Initializing component");
@@ -132,7 +133,6 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
     {
         return m_mandatory;
     }
-
 
     @Override
     public void setMandatory(boolean mandatory)
@@ -198,6 +198,9 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
 		}
 	}
 
+	/**
+	 * Open text and html editor dialog ({@link WTextEditorDialog}.
+	 */
 	private void editorEvent() {
 		adwindowContent = findADWindowContent();
 		final WTextEditorDialog dialog = new WTextEditorDialog(gridField.getVO().Header, getDisplay(),
@@ -230,6 +233,9 @@ public class WHtmlEditor extends WEditor implements ContextMenuListener
 		dialog.focus();
 	}
 
+	/**
+	 * @return AbstractADWindowContent that own the component of this editor instance
+	 */
 	private AbstractADWindowContent findADWindowContent() {
 		Component parent = getComponent().getParent();
 		while(parent != null) {

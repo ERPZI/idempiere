@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelectionLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_PaySelectionLine")
-public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_Persistent 
+public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_PaySelectionLine (Properties ctx, int C_PaySelectionLine_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
       /** if (C_PaySelectionLine_ID == 0)
         {
 			setC_Invoice_ID (0);
-			setC_PaySelection_ID (0);
 			setC_PaySelectionLine_ID (0);
+			setC_PaySelection_ID (0);
 			setDifferenceAmt (Env.ZERO);
 			setDiscountAmt (Env.ZERO);
 			setIsManual (false);
@@ -69,8 +69,8 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
       /** if (C_PaySelectionLine_ID == 0)
         {
 			setC_Invoice_ID (0);
-			setC_PaySelection_ID (0);
 			setC_PaySelectionLine_ID (0);
+			setC_PaySelection_ID (0);
 			setDifferenceAmt (Env.ZERO);
 			setDiscountAmt (Env.ZERO);
 			setIsManual (false);
@@ -89,14 +89,66 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
         } */
     }
 
-     /** Load Constructor */
+    /** Standard Constructor */
+    public X_C_PaySelectionLine (Properties ctx, String C_PaySelectionLine_UU, String trxName)
+    {
+      super (ctx, C_PaySelectionLine_UU, trxName);
+      /** if (C_PaySelectionLine_UU == null)
+        {
+			setC_Invoice_ID (0);
+			setC_PaySelectionLine_ID (0);
+			setC_PaySelection_ID (0);
+			setDifferenceAmt (Env.ZERO);
+			setDiscountAmt (Env.ZERO);
+			setIsManual (false);
+			setIsSOTrx (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_PaySelectionLine WHERE C_PaySelection_ID=@C_PaySelection_ID@
+			setOpenAmt (Env.ZERO);
+			setPayAmt (Env.ZERO);
+			setPaymentRule (null);
+// S
+			setProcessed (false);
+// N
+			setWriteOffAmt (Env.ZERO);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaySelectionLine (Properties ctx, String C_PaySelectionLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_PaySelectionLine_UU, trxName, virtualColumns);
+      /** if (C_PaySelectionLine_UU == null)
+        {
+			setC_Invoice_ID (0);
+			setC_PaySelectionLine_ID (0);
+			setC_PaySelection_ID (0);
+			setDifferenceAmt (Env.ZERO);
+			setDiscountAmt (Env.ZERO);
+			setIsManual (false);
+			setIsSOTrx (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM C_PaySelectionLine WHERE C_PaySelection_ID=@C_PaySelection_ID@
+			setOpenAmt (Env.ZERO);
+			setPayAmt (Env.ZERO);
+			setPaymentRule (null);
+// S
+			setProcessed (false);
+// N
+			setWriteOffAmt (Env.ZERO);
+// 0
+        } */
+    }
+
+    /** Load Constructor */
     public X_C_PaySelectionLine (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -173,6 +225,51 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 		return ii.intValue();
 	}
 
+	/** Set Payment Selection Line.
+		@param C_PaySelectionLine_ID Payment Selection Line
+	*/
+	public void setC_PaySelectionLine_ID (int C_PaySelectionLine_ID)
+	{
+		if (C_PaySelectionLine_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_PaySelectionLine_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_PaySelectionLine_ID, Integer.valueOf(C_PaySelectionLine_ID));
+	}
+
+	/** Get Payment Selection Line.
+		@return Payment Selection Line
+	  */
+	public int getC_PaySelectionLine_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaySelectionLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getC_PaySelectionLine_ID()));
+    }
+
+	/** Set C_PaySelectionLine_UU.
+		@param C_PaySelectionLine_UU C_PaySelectionLine_UU
+	*/
+	public void setC_PaySelectionLine_UU (String C_PaySelectionLine_UU)
+	{
+		set_Value (COLUMNNAME_C_PaySelectionLine_UU, C_PaySelectionLine_UU);
+	}
+
+	/** Get C_PaySelectionLine_UU.
+		@return C_PaySelectionLine_UU	  */
+	public String getC_PaySelectionLine_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_PaySelectionLine_UU);
+	}
+
 	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_PaySelection)MTable.get(getCtx(), org.compiere.model.I_C_PaySelection.Table_ID)
@@ -199,51 +296,6 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Payment Selection Line.
-		@param C_PaySelectionLine_ID Payment Selection Line
-	*/
-	public void setC_PaySelectionLine_ID (int C_PaySelectionLine_ID)
-	{
-		if (C_PaySelectionLine_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_PaySelectionLine_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_PaySelectionLine_ID, Integer.valueOf(C_PaySelectionLine_ID));
-	}
-
-	/** Get Payment Selection Line.
-		@return Payment Selection Line
-	  */
-	public int getC_PaySelectionLine_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaySelectionLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_PaySelectionLine_ID()));
-    }
-
-	/** Set C_PaySelectionLine_UU.
-		@param C_PaySelectionLine_UU C_PaySelectionLine_UU
-	*/
-	public void setC_PaySelectionLine_UU (String C_PaySelectionLine_UU)
-	{
-		set_Value (COLUMNNAME_C_PaySelectionLine_UU, C_PaySelectionLine_UU);
-	}
-
-	/** Get C_PaySelectionLine_UU.
-		@return C_PaySelectionLine_UU	  */
-	public String getC_PaySelectionLine_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_PaySelectionLine_UU);
 	}
 
 	/** Set Description.
@@ -314,10 +366,10 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public boolean isManual()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManual);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -337,10 +389,10 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -460,10 +512,10 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

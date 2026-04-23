@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_DunningLevel
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_DunningLevel")
-public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persistent 
+public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_DunningLevel (Properties ctx, int C_DunningLevel_ID, String trxName)
@@ -41,8 +41,8 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
       super (ctx, C_DunningLevel_ID, trxName);
       /** if (C_DunningLevel_ID == 0)
         {
-			setC_Dunning_ID (0);
 			setC_DunningLevel_ID (0);
+			setC_Dunning_ID (0);
 			setChargeFee (false);
 			setChargeInterest (false);
 			setDaysAfterDue (Env.ZERO);
@@ -64,8 +64,54 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
       super (ctx, C_DunningLevel_ID, trxName, virtualColumns);
       /** if (C_DunningLevel_ID == 0)
         {
-			setC_Dunning_ID (0);
 			setC_DunningLevel_ID (0);
+			setC_Dunning_ID (0);
+			setChargeFee (false);
+			setChargeInterest (false);
+			setDaysAfterDue (Env.ZERO);
+			setDaysBetweenDunning (0);
+			setIsSetCreditStop (false);
+			setIsSetPaymentTerm (false);
+			setIsShowAllDue (false);
+			setIsShowNotDue (false);
+			setIsStatement (false);
+// N
+			setName (null);
+			setPrintName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_DunningLevel (Properties ctx, String C_DunningLevel_UU, String trxName)
+    {
+      super (ctx, C_DunningLevel_UU, trxName);
+      /** if (C_DunningLevel_UU == null)
+        {
+			setC_DunningLevel_ID (0);
+			setC_Dunning_ID (0);
+			setChargeFee (false);
+			setChargeInterest (false);
+			setDaysAfterDue (Env.ZERO);
+			setDaysBetweenDunning (0);
+			setIsSetCreditStop (false);
+			setIsSetPaymentTerm (false);
+			setIsShowAllDue (false);
+			setIsShowNotDue (false);
+			setIsStatement (false);
+// N
+			setName (null);
+			setPrintName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_DunningLevel (Properties ctx, String C_DunningLevel_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_DunningLevel_UU, trxName, virtualColumns);
+      /** if (C_DunningLevel_UU == null)
+        {
+			setC_DunningLevel_ID (0);
+			setC_Dunning_ID (0);
 			setChargeFee (false);
 			setChargeInterest (false);
 			setDaysAfterDue (Env.ZERO);
@@ -88,7 +134,7 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -108,34 +154,6 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_C_Dunning getC_Dunning() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Dunning)MTable.get(getCtx(), org.compiere.model.I_C_Dunning.Table_ID)
-			.getPO(getC_Dunning_ID(), get_TrxName());
-	}
-
-	/** Set Dunning.
-		@param C_Dunning_ID Dunning Rules for overdue invoices
-	*/
-	public void setC_Dunning_ID (int C_Dunning_ID)
-	{
-		if (C_Dunning_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, Integer.valueOf(C_Dunning_ID));
-	}
-
-	/** Get Dunning.
-		@return Dunning Rules for overdue invoices
-	  */
-	public int getC_Dunning_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Dunning_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Dunning Level.
 		@param C_DunningLevel_ID Dunning Level
@@ -173,50 +191,32 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 		return (String)get_Value(COLUMNNAME_C_DunningLevel_UU);
 	}
 
-	/** Set Charge fee.
-		@param ChargeFee Indicates if fees will be charged for overdue invoices
+	public org.compiere.model.I_C_Dunning getC_Dunning() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Dunning)MTable.get(getCtx(), org.compiere.model.I_C_Dunning.Table_ID)
+			.getPO(getC_Dunning_ID(), get_TrxName());
+	}
+
+	/** Set Dunning.
+		@param C_Dunning_ID Dunning Rules for overdue invoices
 	*/
-	public void setChargeFee (boolean ChargeFee)
+	public void setC_Dunning_ID (int C_Dunning_ID)
 	{
-		set_Value (COLUMNNAME_ChargeFee, Boolean.valueOf(ChargeFee));
+		if (C_Dunning_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, Integer.valueOf(C_Dunning_ID));
 	}
 
-	/** Get Charge fee.
-		@return Indicates if fees will be charged for overdue invoices
+	/** Get Dunning.
+		@return Dunning Rules for overdue invoices
 	  */
-	public boolean isChargeFee()
+	public int getC_Dunning_ID()
 	{
-		Object oo = get_Value(COLUMNNAME_ChargeFee);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Charge Interest.
-		@param ChargeInterest Indicates if interest will be charged on overdue invoices
-	*/
-	public void setChargeInterest (boolean ChargeInterest)
-	{
-		set_Value (COLUMNNAME_ChargeInterest, Boolean.valueOf(ChargeInterest));
-	}
-
-	/** Get Charge Interest.
-		@return Indicates if interest will be charged on overdue invoices
-	  */
-	public boolean isChargeInterest()
-	{
-		Object oo = get_Value(COLUMNNAME_ChargeInterest);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Dunning_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_PaymentTerm getC_PaymentTerm() throws RuntimeException
@@ -245,6 +245,52 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Charge fee.
+		@param ChargeFee Indicates if fees will be charged for overdue invoices
+	*/
+	public void setChargeFee (boolean ChargeFee)
+	{
+		set_Value (COLUMNNAME_ChargeFee, Boolean.valueOf(ChargeFee));
+	}
+
+	/** Get Charge fee.
+		@return Indicates if fees will be charged for overdue invoices
+	  */
+	public boolean isChargeFee()
+	{
+		Object oo = get_Value(COLUMNNAME_ChargeFee);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Charge Interest.
+		@param ChargeInterest Indicates if interest will be charged on overdue invoices
+	*/
+	public void setChargeInterest (boolean ChargeInterest)
+	{
+		set_Value (COLUMNNAME_ChargeInterest, Boolean.valueOf(ChargeInterest));
+	}
+
+	/** Get Charge Interest.
+		@return Indicates if interest will be charged on overdue invoices
+	  */
+	public boolean isChargeInterest()
+	{
+		Object oo = get_Value(COLUMNNAME_ChargeInterest);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Days after due date.
@@ -408,10 +454,10 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 	public boolean isSetCreditStop()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSetCreditStop);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -431,10 +477,10 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 	public boolean isSetPaymentTerm()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSetPaymentTerm);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -454,10 +500,10 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 	public boolean isShowAllDue()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowAllDue);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -477,10 +523,10 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 	public boolean isShowNotDue()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowNotDue);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -500,10 +546,10 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
 	public boolean isStatement()
 	{
 		Object oo = get_Value(COLUMNNAME_IsStatement);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -528,7 +574,7 @@ public class X_C_DunningLevel extends PO implements I_C_DunningLevel, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

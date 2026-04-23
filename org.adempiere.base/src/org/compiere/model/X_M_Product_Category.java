@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_Product_Category
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_Product_Category")
-public class X_M_Product_Category extends PO implements I_M_Product_Category, I_Persistent 
+public class X_M_Product_Category extends PO implements I_M_Product_Category, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_Product_Category (Properties ctx, int M_Product_Category_ID, String trxName)
@@ -71,6 +71,42 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Product_Category (Properties ctx, String M_Product_Category_UU, String trxName)
+    {
+      super (ctx, M_Product_Category_UU, trxName);
+      /** if (M_Product_Category_UU == null)
+        {
+			setIsDefault (false);
+			setIsSelfService (true);
+// Y
+			setMMPolicy (null);
+// F
+			setM_Product_Category_ID (0);
+			setName (null);
+			setPlannedMargin (Env.ZERO);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Product_Category (Properties ctx, String M_Product_Category_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Product_Category_UU, trxName, virtualColumns);
+      /** if (M_Product_Category_UU == null)
+        {
+			setIsDefault (false);
+			setIsSelfService (true);
+// Y
+			setMMPolicy (null);
+// F
+			setM_Product_Category_ID (0);
+			setName (null);
+			setPlannedMargin (Env.ZERO);
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Product_Category (Properties ctx, ResultSet rs, String trxName)
     {
@@ -78,7 +114,7 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -98,34 +134,6 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_A_Asset_Group getA_Asset_Group() throws RuntimeException
-	{
-		return (org.compiere.model.I_A_Asset_Group)MTable.get(getCtx(), org.compiere.model.I_A_Asset_Group.Table_ID)
-			.getPO(getA_Asset_Group_ID(), get_TrxName());
-	}
-
-	/** Set Asset Group.
-		@param A_Asset_Group_ID Group of Assets
-	*/
-	public void setA_Asset_Group_ID (int A_Asset_Group_ID)
-	{
-		if (A_Asset_Group_ID < 1)
-			set_Value (COLUMNNAME_A_Asset_Group_ID, null);
-		else
-			set_Value (COLUMNNAME_A_Asset_Group_ID, Integer.valueOf(A_Asset_Group_ID));
-	}
-
-	/** Get Asset Group.
-		@return Group of Assets
-	  */
-	public int getA_Asset_Group_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_Group_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_AD_PrintColor getAD_PrintColor() throws RuntimeException
 	{
@@ -150,6 +158,34 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
 	public int getAD_PrintColor_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_PrintColor_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_A_Asset_Group getA_Asset_Group() throws RuntimeException
+	{
+		return (org.compiere.model.I_A_Asset_Group)MTable.get(getCtx(), org.compiere.model.I_A_Asset_Group.Table_ID)
+			.getPO(getA_Asset_Group_ID(), get_TrxName());
+	}
+
+	/** Set Asset Group.
+		@param A_Asset_Group_ID Group of Assets
+	*/
+	public void setA_Asset_Group_ID (int A_Asset_Group_ID)
+	{
+		if (A_Asset_Group_ID < 1)
+			set_Value (COLUMNNAME_A_Asset_Group_ID, null);
+		else
+			set_Value (COLUMNNAME_A_Asset_Group_ID, Integer.valueOf(A_Asset_Group_ID));
+	}
+
+	/** Get Asset Group.
+		@return Group of Assets
+	  */
+	public int getA_Asset_Group_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_Group_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -185,10 +221,10 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -208,10 +244,10 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
 	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -323,7 +359,7 @@ public class X_M_Product_Category extends PO implements I_M_Product_Category, I_
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

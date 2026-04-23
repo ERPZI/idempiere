@@ -40,10 +40,12 @@ import org.compiere.model.MAllocationHdr;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MBPartner;
 import org.compiere.model.MClient;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInOutLineMA;
 import org.compiere.model.MInvoice;
+import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MOrderTax;
@@ -449,7 +451,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertEquals(1, line1.getQtyReserved().intValue());
 		
 		int AD_Process_ID = PROCESS_M_INOUT_GENERATE_MANUAL;
-		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 		
 		String insert = "INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID) Values (?, ?)";
@@ -497,7 +499,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		line1.load(getTrxName());
 		assertEquals(1, line1.getQtyReserved().intValue());
 		
-		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 		DB.executeUpdateEx(insert, new Object[] {instance.getAD_PInstance_ID(), order1.getC_Order_ID()}, null);
 		
@@ -545,7 +547,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertEquals(DocAction.STATUS_Completed, payment.getDocStatus());
 		
 		//call process with payment
-		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 		DB.executeUpdateEx(insert, new Object[] {instance.getAD_PInstance_ID(), order1.getC_Order_ID()}, null);
 		pi = new ProcessInfo ("InOutGen", AD_Process_ID);
@@ -588,7 +590,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertEquals(1, line1.getQtyReserved().intValue());
 		
 		//create invoice
-		instance = new MPInstance(Env.getCtx(), SystemIDs.PROCESS_C_INVOICE_GENERATE_MANUAL, 0);
+		instance = new MPInstance(Env.getCtx(), SystemIDs.PROCESS_C_INVOICE_GENERATE_MANUAL, 0, 0, null);
 		instance.saveEx();
 		DB.executeUpdateEx(insert, new Object[] {instance.getAD_PInstance_ID(), order2.getC_Order_ID()}, null);		
 		pi = new ProcessInfo ("InvoiceGenerateManual", AD_Process_ID);
@@ -629,7 +631,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertEquals(DocAction.STATUS_Completed, payment.getDocStatus());
 		
 		//call process with payment
-		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 		DB.executeUpdateEx(insert, new Object[] {instance.getAD_PInstance_ID(), order2.getC_Order_ID()}, null);
 		pi = new ProcessInfo ("InOutGen", AD_Process_ID);
@@ -732,7 +734,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		
 		//generate shipment
 		int AD_Process_ID = PROCESS_M_INOUT_GENERATE_MANUAL;
-		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 		
 		String insert = "INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID) Values (?, ?)";
@@ -1028,7 +1030,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		line1.saveEx();		
 		
 		ProcessInfo info = MWorkflow.runDocumentActionWorkflow(order, DocAction.ACTION_Complete);
-		assertFalse(info.isError());
+		assertFalse(info.isError(), info.getSummary());
 		order.load(getTrxName());		
 		assertEquals(DocAction.STATUS_Completed, order.getDocStatus(), "Unexpected Order document status");
 		line1.load(getTrxName());
@@ -1566,7 +1568,7 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertEquals(DocAction.STATUS_Completed, order.getDocStatus());
 
 		int AD_Process_ID = PROCESS_M_INOUT_GENERATE_MANUAL;
-		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0);
+		MPInstance instance = new MPInstance(Env.getCtx(), AD_Process_ID, 0, 0, null);
 		instance.saveEx();
 
 		String insert = "INSERT INTO T_SELECTION(AD_PINSTANCE_ID, T_SELECTION_ID) Values (?, ?)";
@@ -1596,4 +1598,245 @@ public class SalesOrderTest extends AbstractTestCase {
 		assertFalse(pi.isError(), pi.getSummary());
 	}
 
+	/**
+	 * Test cases for Credit Check
+	 */
+	@Test
+	public void testCreditCheckOrder()
+	{
+		Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
+		// Joe Block
+		MBPartner bp = MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id, getTrxName());
+		bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_CreditHold);
+		bp.saveEx();
+		
+		// test 2 - credit Check
+		MOrder order = new MOrder(Env.getCtx(), 0, getTrxName());
+		order.setM_Warehouse_ID(DictionaryIDs.AD_Org.HQ.id);
+		order.setBPartner(bp);
+		order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Standard);
+		order.setDeliveryRule(MOrder.DELIVERYRULE_Availability);
+		order.setM_Warehouse_ID(DictionaryIDs.M_Warehouse.HQ.id);
+		order.setDocStatus(DocAction.STATUS_Drafted);
+		order.setDocAction(DocAction.ACTION_Prepare);
+		order.setDatePromised(today);
+		order.saveEx();
+
+		MOrderLine line1 = new MOrderLine(order);
+		line1.setLine(10);
+		// Azalea Bush
+		line1.setProduct(MProduct.get(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id));
+		line1.setQty(new BigDecimal("1"));
+		line1.setDatePromised(today);
+		line1.saveEx();
+
+		order.load(getTrxName());
+		ProcessInfo info = MWorkflow.runDocumentActionWorkflow(order, DocAction.ACTION_Prepare);
+		assertTrue(info.isError(), info.getSummary());
+		assertEquals(DocAction.STATUS_Invalid, order.getDocStatus());
+		
+		bp.setSOCreditStatus(MBPartner.SOCREDITSTATUS_CreditStop);
+		bp.saveEx();
+		
+		info = MWorkflow.runDocumentActionWorkflow(order, DocAction.ACTION_Prepare);
+		assertTrue(info.isError(), info.getSummary());
+		assertEquals(DocAction.STATUS_Invalid, order.getDocStatus());
+	}
+	
+	/**
+	 * Test cases for Prepay Order - auto generate Shipment and Invoice
+	 */
+	@Test
+	public void testPrepayOrderAutoGenerate() {
+		MDocType doctype = null;
+		Boolean isAutoGenerateInout_old = null;
+	    Boolean isAutoGenerateInvoice_old = null;
+	    try {
+			Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
+		    	    
+		    // Create an order
+		    MOrder order = new MOrder(Env.getCtx(), 0, getTrxName());
+		    order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Prepay);
+		    order.setBPartner(MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id));
+		    order.setDeliveryRule(MOrder.DELIVERYRULE_CompleteOrder);
+		    order.setDocStatus(DocAction.STATUS_Drafted);
+		    order.setDocAction(DocAction.ACTION_Complete);
+		    order.setDateOrdered(today);
+		    order.setDatePromised(today);
+		    order.saveEx();
+	
+		    // Add an order line
+		    MOrderLine line1 = new MOrderLine(order);
+		    line1.setLine(10);
+		    line1.setProduct(MProduct.get(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id));
+		    line1.setQty(Env.ONE);
+		    line1.setDatePromised(today);
+		    line1.saveEx();
+		    
+		    // Set both IsAutoGenerateInout and IsAutoGenerateInvoice
+		    doctype = new MDocType(Env.getCtx(), order.getC_DocTypeTarget_ID(), null); // outside of trx
+		    isAutoGenerateInout_old = doctype.isAutoGenerateInout();
+			isAutoGenerateInvoice_old = doctype.isAutoGenerateInvoice();
+		    doctype.setIsAutoGenerateInout(true);
+		    doctype.setIsAutoGenerateInvoice(true);
+		    doctype.saveEx();
+	
+		    // Complete the order
+		    ProcessInfo info = MWorkflow.runDocumentActionWorkflow(order, DocAction.ACTION_Complete);
+		    assertFalse(info.isError(), info.getSummary());
+		    order.load(getTrxName());
+		    assertEquals(DocAction.STATUS_WaitingPayment, order.getDocStatus());
+		    order.saveEx();
+	
+		    // Create the payment
+		    MPayment payment = new MPayment(Env.getCtx(), 0, getTrxName());
+		    payment.setC_Order_ID(order.getC_Order_ID());
+		    payment.setC_BPartner_ID(order.getC_BPartner_ID());
+		    payment.setPayAmt(order.getGrandTotal());
+		    payment.setC_Currency_ID(order.getC_Currency_ID());
+		    payment.setDocAction(DocAction.ACTION_Complete);
+		    payment.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
+		    payment.saveEx();
+	
+		    // Complete the payment
+		    info = MWorkflow.runDocumentActionWorkflow(payment, DocAction.ACTION_Complete);
+		    assertFalse(info.isError(), info.getSummary());
+		    payment.load(getTrxName());
+		    assertEquals(DocAction.STATUS_Completed, payment.getDocStatus());
+	
+		    // Check if a Shipment was generated
+		    MInOut[] shipments = order.getShipments();
+		    assertTrue(shipments.length > 0, "No shipment was generated");
+	
+		    // Check if an Invoice was generated and paid
+		    MInvoice[] invoices = order.getInvoices();
+		    assertTrue(invoices.length > 0, "No invoice was generated");
+		    assertEquals(true, invoices[0].isPaid(), "Invoice is not paid");
+
+		    // Check if Allocation was created for Invoice
+			MAllocationHdr[] allocs = MAllocationHdr.getOfInvoice(Env.getCtx(), invoices[0].getC_Invoice_ID(), getTrxName());
+			assertEquals(1, allocs.length);
+			assertEquals(DocAction.STATUS_Completed, allocs[0].getDocStatus());
+
+			// Check if Payment was allocated
+			assertEquals(true, payment.isAllocated(), "Payment is not allocated");
+	    }
+	    finally {
+	    	if(doctype != null && isAutoGenerateInout_old != null && isAutoGenerateInvoice_old != null) {
+		    	doctype.setIsAutoGenerateInout(isAutoGenerateInout_old);
+		    	doctype.setIsAutoGenerateInvoice(isAutoGenerateInvoice_old);
+		    	doctype.saveEx();
+			}
+	    }
+	}
+	
+	/**
+	 * Test cases for Prepay Order - if the invoice is not auto-generated, allocate for order
+	 */
+	@Test
+	public void testPrepayOrderAllocateFromOrder() {
+		MDocType doctype = null;
+		Boolean isAutoGenerateInout_old = null;
+	    Boolean isAutoGenerateInvoice_old = null;
+	    try {
+			Timestamp today = TimeUtil.getDay(System.currentTimeMillis());
+			MProduct product = MProduct.get(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id);
+		    
+		    // Create an order
+		    MOrder order = new MOrder(Env.getCtx(), 0, getTrxName());
+		    order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Prepay);
+		    order.setBPartner(MBPartner.get(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id));
+		    order.setDeliveryRule(MOrder.DELIVERYRULE_CompleteOrder);
+		    order.setDocStatus(DocAction.STATUS_Drafted);
+		    order.setDocAction(DocAction.ACTION_Complete);
+		    order.setDateOrdered(today);
+		    order.setDatePromised(today);
+		    order.saveEx();
+		    
+		    // Add an order line
+		    MOrderLine line1 = new MOrderLine(order);
+		    line1.setLine(10);
+		    line1.setProduct(product);
+		    line1.setQty(Env.ONE);
+		    line1.setDatePromised(today);
+		    line1.saveEx();
+		    
+		    // Do not auto-generate Shipment nor Invoice
+		    doctype = new MDocType(Env.getCtx(), order.getC_DocTypeTarget_ID(), null); // outside of trx
+		    doctype.setIsAutoGenerateInout(false);
+		    doctype.setIsAutoGenerateInvoice(false);
+		    doctype.saveEx();
+	
+		    // Complete the order
+		    ProcessInfo info = MWorkflow.runDocumentActionWorkflow(order, DocAction.ACTION_Complete);
+		    assertFalse(info.isError(), info.getSummary());
+		    order.load(getTrxName());
+		    assertEquals(DocAction.STATUS_WaitingPayment, order.getDocStatus());
+		    order.saveEx();
+		    
+		    // Create the payment
+		    MPayment payment = new MPayment(Env.getCtx(), 0, getTrxName());
+		    payment.setC_Order_ID(order.getC_Order_ID());
+		    payment.setC_BPartner_ID(order.getC_BPartner_ID());
+		    payment.setPayAmt(order.getGrandTotal());
+		    payment.setC_Currency_ID(order.getC_Currency_ID());
+		    payment.setDocAction(DocAction.ACTION_Complete);
+		    payment.setC_BankAccount_ID(DictionaryIDs.C_BankAccount.ACCOUNT_1234.id);
+		    payment.saveEx();
+
+		    info = MWorkflow.runDocumentActionWorkflow(payment, DocAction.ACTION_Complete);
+		    assertFalse(info.isError(), info.getSummary());
+		    payment.load(getTrxName());
+		    assertEquals(DocAction.STATUS_Completed, payment.getDocStatus());
+		    payment.saveEx();
+		    
+		    // No Invoice should be created yet
+		    MInvoice[] invoices = order.getInvoices();
+		    assertTrue(invoices.length == 0, "Invoice already exists");
+		    
+		    // No Shipment should be created
+		    MInOut[] shipments = order.getShipments();
+		    assertTrue(shipments.length == 0, "Shipment already exists");
+			
+		    // Create the Invoice
+		    MInvoice invoice = new MInvoice(Env.getCtx(), 0, getTrxName());
+			invoice.setOrder(order);
+			invoice.setDateAcct(order.getDateOrdered());
+			invoice.setSalesRep_ID(order.getSalesRep_ID());
+			invoice.setC_BPartner_ID(order.getBill_BPartner_ID());
+			invoice.setC_BPartner_Location_ID(order.getBill_Location_ID());
+			invoice.setAD_User_ID(order.getBill_User_ID());
+			invoice.setC_DocTypeTarget_ID(MDocType.DOCBASETYPE_ARInvoice);
+			invoice.setDocStatus(DocAction.STATUS_Drafted);
+			invoice.setDocAction(DocAction.ACTION_Complete);
+			invoice.saveEx();
+			
+			// Add an Invoice Line
+			MInvoiceLine invoiceLine = new MInvoiceLine(invoice);
+			invoiceLine.setC_OrderLine_ID(line1.get_ID());
+			invoiceLine.setLine(10);
+			invoiceLine.setProduct(product);
+			invoiceLine.setQty(Env.ONE);
+			invoiceLine.saveEx();
+			
+			// Complete the Invoice
+			info = MWorkflow.runDocumentActionWorkflow(invoice, DocAction.ACTION_Complete);
+			invoice.load(getTrxName());
+			assertFalse(info.isError(), info.getSummary());
+			assertEquals(DocAction.STATUS_Completed, invoice.getDocStatus());
+			
+			// Test the allocation
+			assertEquals(true, invoice.isPaid(), "Invoice is not paid");
+			MAllocationHdr[] allocs = MAllocationHdr.getOfInvoice(Env.getCtx(), invoice.getC_Invoice_ID(), getTrxName());
+			assertEquals(1, allocs.length);
+			assertEquals(DocAction.STATUS_Completed, allocs[0].getDocStatus());
+		}
+		finally {
+			if(doctype != null && isAutoGenerateInout_old != null && isAutoGenerateInvoice_old != null) {
+		    	doctype.setIsAutoGenerateInout(isAutoGenerateInout_old);
+		    	doctype.setIsAutoGenerateInvoice(isAutoGenerateInvoice_old);
+		    	doctype.saveEx();
+			}
+	    }
+	}
 }

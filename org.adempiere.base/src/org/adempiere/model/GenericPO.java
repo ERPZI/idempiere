@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.adempiere.util.ServerContextPropertiesWrapper;
 import org.compiere.model.MTable;
 import org.compiere.model.PO;
 import org.compiere.model.POInfo;
@@ -34,7 +35,7 @@ import org.compiere.process.DocAction;
 /**
  * Generic PO implementation, this can be use together with ModelValidator as alternative to the classic 
  * generated model class and extend ( X_ and M_ ) approach.
- * 
+ * <p>
  * Originally for used to insert/update data from adempieredata.xml file in 2pack.
  * @author Marco LOMBARDO
  * @contributor Low Heng Sin
@@ -43,8 +44,8 @@ public class GenericPO extends PO implements DocAction {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 3180937588404433030L;
-	
+	private static final long serialVersionUID = -5727439960128102430L;
+
 	private DocActionDelegate<GenericPO> docActionDelegate = new DocActionDelegate<>(this);
 	
 	/**
@@ -54,6 +55,15 @@ public class GenericPO extends PO implements DocAction {
 	 */
 	public GenericPO(String tableName, Properties ctx, int ID) {
 		super(new PropertiesWrapper(ctx, tableName), ID, null, (String[]) null);
+	}
+
+	/**
+	 * @param tableName
+	 * @param ctx
+	 * @param ID
+	 */
+	public GenericPO(String tableName, Properties ctx, String UUID) {
+		super(new PropertiesWrapper(ctx, tableName), UUID, null, (String[]) null);
 	}
 
 	/**
@@ -73,6 +83,16 @@ public class GenericPO extends PO implements DocAction {
 	 */
 	public GenericPO(String tableName, Properties ctx, int ID, String trxName) {
 		super(new PropertiesWrapper(ctx, tableName), ID, trxName, (String[]) null);
+	}
+
+	/**
+	 * @param tableName
+	 * @param ctx
+	 * @param ID
+	 * @param trxName
+	 */
+	public GenericPO(String tableName, Properties ctx, String UUID, String trxName) {
+		super(new PropertiesWrapper(ctx, tableName), UUID, trxName, (String[]) null);
 	}
 
 	/**
@@ -135,8 +155,6 @@ public class GenericPO extends PO implements DocAction {
 		return Integer.parseInt(p_info.getAccessLevel());
 	}
 
-
-
 	/* METHODS TO USE GenericPO in Documents */
 
 	/**
@@ -157,7 +175,7 @@ public class GenericPO extends PO implements DocAction {
 		return docActionDelegate.getDocStatus();
 	}
 
-	/**************************************************************************
+	/**
 	 * 	Process document
 	 *	@param processAction document action
 	 *	@return true if performed
@@ -282,7 +300,7 @@ public class GenericPO extends PO implements DocAction {
 		return docActionDelegate.reActivateIt();
 	}	//	reActivateIt
 
-	/*************************************************************************
+	/**
 	 * 	Get Summary
 	 *	@return Summary of Document
 	 */
@@ -348,9 +366,9 @@ public class GenericPO extends PO implements DocAction {
  * @author Low Heng Sin
  *
  */
-class PropertiesWrapper extends Properties {
+class PropertiesWrapper extends ServerContextPropertiesWrapper {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 8887531951501323594L;
 	protected Properties source;

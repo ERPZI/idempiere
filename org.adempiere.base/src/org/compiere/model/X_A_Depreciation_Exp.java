@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Depreciation_Exp
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_Depreciation_Exp")
-public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_Persistent 
+public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_Depreciation_Exp (Properties ctx, int A_Depreciation_Exp_ID, String trxName)
@@ -88,6 +88,58 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_A_Depreciation_Exp (Properties ctx, String A_Depreciation_Exp_UU, String trxName)
+    {
+      super (ctx, A_Depreciation_Exp_UU, trxName);
+      /** if (A_Depreciation_Exp_UU == null)
+        {
+			setA_Accumulated_Depr_Delta (Env.ZERO);
+// 0
+			setA_Accumulated_Depr_F_Delta (Env.ZERO);
+// 0
+			setA_Asset_Cost_Delta (Env.ZERO);
+// 0
+			setA_Asset_ID (0);
+			setA_Depreciation_Exp_ID (0);
+			setA_Entry_Type (null);
+			setA_Period (0);
+			setDescription (null);
+			setExpense (Env.ZERO);
+// 0
+			setExpense_F (Env.ZERO);
+// 0
+			setIsDepreciated (false);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Depreciation_Exp (Properties ctx, String A_Depreciation_Exp_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_Depreciation_Exp_UU, trxName, virtualColumns);
+      /** if (A_Depreciation_Exp_UU == null)
+        {
+			setA_Accumulated_Depr_Delta (Env.ZERO);
+// 0
+			setA_Accumulated_Depr_F_Delta (Env.ZERO);
+// 0
+			setA_Asset_Cost_Delta (Env.ZERO);
+// 0
+			setA_Asset_ID (0);
+			setA_Depreciation_Exp_ID (0);
+			setA_Entry_Type (null);
+			setA_Period (0);
+			setDescription (null);
+			setExpense (Env.ZERO);
+// 0
+			setExpense_F (Env.ZERO);
+// 0
+			setIsDepreciated (false);
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_A_Depreciation_Exp (Properties ctx, ResultSet rs, String trxName)
     {
@@ -95,7 +147,7 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -417,7 +469,7 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getA_Depreciation_Exp_ID()));
     }
@@ -485,6 +537,34 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 		return ii.intValue();
 	}
 
+	public I_C_ValidCombination getCR_Account() throws RuntimeException
+	{
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
+			.getPO(getCR_Account_ID(), get_TrxName());
+	}
+
+	/** Set Account (credit).
+		@param CR_Account_ID Account used
+	*/
+	public void setCR_Account_ID (int CR_Account_ID)
+	{
+		if (CR_Account_ID < 1)
+			set_Value (COLUMNNAME_CR_Account_ID, null);
+		else
+			set_Value (COLUMNNAME_CR_Account_ID, Integer.valueOf(CR_Account_ID));
+	}
+
+	/** Get Account (credit).
+		@return Account used
+	  */
+	public int getCR_Account_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_CR_Account_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_AcctSchema)MTable.get(getCtx(), org.compiere.model.I_C_AcctSchema.Table_ID)
@@ -513,29 +593,29 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 		return ii.intValue();
 	}
 
-	public I_C_ValidCombination getCR_Account() throws RuntimeException
+	public I_C_ValidCombination getDR_Account() throws RuntimeException
 	{
 		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
-			.getPO(getCR_Account_ID(), get_TrxName());
+			.getPO(getDR_Account_ID(), get_TrxName());
 	}
 
-	/** Set Account (credit).
-		@param CR_Account_ID Account used
+	/** Set Account (debit).
+		@param DR_Account_ID Account used
 	*/
-	public void setCR_Account_ID (int CR_Account_ID)
+	public void setDR_Account_ID (int DR_Account_ID)
 	{
-		if (CR_Account_ID < 1)
-			set_Value (COLUMNNAME_CR_Account_ID, null);
+		if (DR_Account_ID < 1)
+			set_Value (COLUMNNAME_DR_Account_ID, null);
 		else
-			set_Value (COLUMNNAME_CR_Account_ID, Integer.valueOf(CR_Account_ID));
+			set_Value (COLUMNNAME_DR_Account_ID, Integer.valueOf(DR_Account_ID));
 	}
 
-	/** Get Account (credit).
+	/** Get Account (debit).
 		@return Account used
 	  */
-	public int getCR_Account_ID()
+	public int getDR_Account_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_CR_Account_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_DR_Account_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -571,34 +651,6 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 	public String getDescription()
 	{
 		return (String)get_Value(COLUMNNAME_Description);
-	}
-
-	public I_C_ValidCombination getDR_Account() throws RuntimeException
-	{
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
-			.getPO(getDR_Account_ID(), get_TrxName());
-	}
-
-	/** Set Account (debit).
-		@param DR_Account_ID Account used
-	*/
-	public void setDR_Account_ID (int DR_Account_ID)
-	{
-		if (DR_Account_ID < 1)
-			set_Value (COLUMNNAME_DR_Account_ID, null);
-		else
-			set_Value (COLUMNNAME_DR_Account_ID, Integer.valueOf(DR_Account_ID));
-	}
-
-	/** Get Account (debit).
-		@return Account used
-	  */
-	public int getDR_Account_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_DR_Account_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Expense.
@@ -667,10 +719,10 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 	public boolean isDepreciated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDepreciated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -719,10 +771,10 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -741,10 +793,10 @@ public class X_A_Depreciation_Exp extends PO implements I_A_Depreciation_Exp, I_
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

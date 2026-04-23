@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Invoice
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_Invoice")
-public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent 
+public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_Invoice (Properties ctx, int C_Invoice_ID, String trxName)
@@ -46,9 +46,9 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 			setC_BPartner_Location_ID (0);
 			setC_Currency_ID (0);
 // @C_Currency_ID@
+			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
 // 0
-			setC_DocTypeTarget_ID (0);
 			setC_Invoice_ID (0);
 			setC_PaymentTerm_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
@@ -71,9 +71,9 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 			setIsPaid (false);
 			setIsPayScheduleValid (false);
 			setIsPrinted (false);
-			setIsSelfService (false);
 			setIsSOTrx (false);
 // @IsSOTrx@
+			setIsSelfService (false);
 			setIsTaxIncluded (false);
 			setIsTransferred (false);
 			setM_PriceList_ID (0);
@@ -98,9 +98,9 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 			setC_BPartner_Location_ID (0);
 			setC_Currency_ID (0);
 // @C_Currency_ID@
+			setC_DocTypeTarget_ID (0);
 			setC_DocType_ID (0);
 // 0
-			setC_DocTypeTarget_ID (0);
 			setC_Invoice_ID (0);
 			setC_PaymentTerm_ID (0);
 			setDateAcct (new Timestamp( System.currentTimeMillis() ));
@@ -123,9 +123,111 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 			setIsPaid (false);
 			setIsPayScheduleValid (false);
 			setIsPrinted (false);
-			setIsSelfService (false);
 			setIsSOTrx (false);
 // @IsSOTrx@
+			setIsSelfService (false);
+			setIsTaxIncluded (false);
+			setIsTransferred (false);
+			setM_PriceList_ID (0);
+			setPaymentRule (null);
+// P
+			setPosted (false);
+// N
+			setProcessed (false);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Invoice (Properties ctx, String C_Invoice_UU, String trxName)
+    {
+      super (ctx, C_Invoice_UU, trxName);
+      /** if (C_Invoice_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocTypeTarget_ID (0);
+			setC_DocType_ID (0);
+// 0
+			setC_Invoice_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateInvoiced (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setIsApproved (false);
+// N
+			setIsDiscountPrinted (false);
+			setIsInDispute (false);
+// N
+			setIsOverrideCurrencyRate (false);
+// N
+			setIsPaid (false);
+			setIsPayScheduleValid (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsSelfService (false);
+			setIsTaxIncluded (false);
+			setIsTransferred (false);
+			setM_PriceList_ID (0);
+			setPaymentRule (null);
+// P
+			setPosted (false);
+// N
+			setProcessed (false);
+			setSendEMail (false);
+			setTotalLines (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Invoice (Properties ctx, String C_Invoice_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Invoice_UU, trxName, virtualColumns);
+      /** if (C_Invoice_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_Currency_ID (0);
+// @C_Currency_ID@
+			setC_DocTypeTarget_ID (0);
+			setC_DocType_ID (0);
+// 0
+			setC_Invoice_ID (0);
+			setC_PaymentTerm_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDateInvoiced (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setIsApproved (false);
+// N
+			setIsDiscountPrinted (false);
+			setIsInDispute (false);
+// N
+			setIsOverrideCurrencyRate (false);
+// N
+			setIsPaid (false);
+			setIsPayScheduleValid (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setIsSelfService (false);
 			setIsTaxIncluded (false);
 			setIsTransferred (false);
 			setM_PriceList_ID (0);
@@ -146,7 +248,7 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -468,34 +570,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
-			.getPO(getC_DocType_ID(), get_TrxName());
-	}
-
-	/** Set Document Type.
-		@param C_DocType_ID Document type or rules
-	*/
-	public void setC_DocType_ID (int C_DocType_ID)
-	{
-		if (C_DocType_ID < 0)
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
-	}
-
-	/** Get Document Type.
-		@return Document type or rules
-	  */
-	public int getC_DocType_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_DocType getC_DocTypeTarget() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -519,6 +593,34 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public int getC_DocTypeTarget_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocTypeTarget_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocType_ID(), get_TrxName());
+	}
+
+	/** Set Document Type.
+		@param C_DocType_ID Document type or rules
+	*/
+	public void setC_DocType_ID (int C_DocType_ID)
+	{
+		if (C_DocType_ID < 0)
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+	}
+
+	/** Get Document Type.
+		@return Document type or rules
+	  */
+	public int getC_DocType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -549,25 +651,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Charge amount.
-		@param ChargeAmt Charge Amount
-	*/
-	public void setChargeAmt (BigDecimal ChargeAmt)
-	{
-		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
-	}
-
-	/** Get Charge amount.
-		@return Charge Amount
-	  */
-	public BigDecimal getChargeAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
 	}
 
 	/** Set Invoice.
@@ -607,22 +690,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		return (String)get_Value(COLUMNNAME_C_Invoice_UU);
 	}
 
-	/** Set Copy From.
-		@param CopyFrom Copy From Record
-	*/
-	public void setCopyFrom (String CopyFrom)
-	{
-		set_Value (COLUMNNAME_CopyFrom, CopyFrom);
-	}
-
-	/** Get Copy From.
-		@return Copy From Record
-	  */
-	public String getCopyFrom()
-	{
-		return (String)get_Value(COLUMNNAME_CopyFrom);
-	}
-
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
@@ -646,34 +713,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public int getC_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
-			.getPO(getC_Payment_ID(), get_TrxName());
-	}
-
-	/** Set Payment.
-		@param C_Payment_ID Payment identifier
-	*/
-	public void setC_Payment_ID (int C_Payment_ID)
-	{
-		if (C_Payment_ID < 1)
-			set_Value (COLUMNNAME_C_Payment_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
-	}
-
-	/** Get Payment.
-		@return Payment identifier
-	  */
-	public int getC_Payment_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -707,6 +746,34 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
+			.getPO(getC_Payment_ID(), get_TrxName());
+	}
+
+	/** Set Payment.
+		@param C_Payment_ID Payment identifier
+	*/
+	public void setC_Payment_ID (int C_Payment_ID)
+	{
+		if (C_Payment_ID < 1)
+			set_Value (COLUMNNAME_C_Payment_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+	}
+
+	/** Get Payment.
+		@return Payment identifier
+	  */
+	public int getC_Payment_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -733,6 +800,41 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Charge amount.
+		@param ChargeAmt Charge Amount
+	*/
+	public void setChargeAmt (BigDecimal ChargeAmt)
+	{
+		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
+	}
+
+	/** Get Charge amount.
+		@return Charge Amount
+	  */
+	public BigDecimal getChargeAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set Copy From.
+		@param CopyFrom Copy From Record
+	*/
+	public void setCopyFrom (String CopyFrom)
+	{
+		set_Value (COLUMNNAME_CopyFrom, CopyFrom);
+	}
+
+	/** Get Copy From.
+		@return Copy From Record
+	  */
+	public String getCopyFrom()
+	{
+		return (String)get_Value(COLUMNNAME_CopyFrom);
 	}
 
 	/** Set Create lines from.
@@ -1057,7 +1159,7 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -1167,10 +1269,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1190,10 +1292,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isDiscountPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDiscountPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1212,10 +1314,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isFixedAssetInvoice()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFixedAssetInvoice);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1235,10 +1337,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isInDispute()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInDispute);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1258,17 +1360,17 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isOverrideCurrencyRate()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOverrideCurrencyRate);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
 	/** Set Paid.
-		@param IsPaid The document is paid
+		@param IsPaid The document is fully paid
 	*/
 	public void setIsPaid (boolean IsPaid)
 	{
@@ -1276,15 +1378,15 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	}
 
 	/** Get Paid.
-		@return The document is paid
+		@return The document is fully paid
 	  */
 	public boolean isPaid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPaid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1304,10 +1406,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isPayScheduleValid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPayScheduleValid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1327,33 +1429,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Self-Service.
-		@param IsSelfService This is a Self-Service entry or this entry can be changed via Self-Service
-	*/
-	public void setIsSelfService (boolean IsSelfService)
-	{
-		set_Value (COLUMNNAME_IsSelfService, Boolean.valueOf(IsSelfService));
-	}
-
-	/** Get Self-Service.
-		@return This is a Self-Service entry or this entry can be changed via Self-Service
-	  */
-	public boolean isSelfService()
-	{
-		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1373,10 +1452,33 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Self-Service.
+		@param IsSelfService This is a Self-Service entry or this entry can be changed via Self-Service
+	*/
+	public void setIsSelfService (boolean IsSelfService)
+	{
+		set_Value (COLUMNNAME_IsSelfService, Boolean.valueOf(IsSelfService));
+	}
+
+	/** Get Self-Service.
+		@return This is a Self-Service entry or this entry can be changed via Self-Service
+	  */
+	public boolean isSelfService()
+	{
+		Object oo = get_Value(COLUMNNAME_IsSelfService);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1396,10 +1498,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isTaxIncluded()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1419,10 +1521,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isTransferred()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTransferred);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1484,6 +1586,22 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Order Reference.
+		@param POReference Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	*/
+	public void setPOReference (String POReference)
+	{
+		set_Value (COLUMNNAME_POReference, POReference);
+	}
+
+	/** Get Order Reference.
+		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
+	  */
+	public String getPOReference()
+	{
+		return (String)get_Value(COLUMNNAME_POReference);
+	}
+
 	/** PaymentRule AD_Reference_ID=195 */
 	public static final int PAYMENTRULE_AD_Reference_ID=195;
 	/** Cash = B */
@@ -1525,22 +1643,6 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
-	/** Set Order Reference.
-		@param POReference Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
-	*/
-	public void setPOReference (String POReference)
-	{
-		set_Value (COLUMNNAME_POReference, POReference);
-	}
-
-	/** Get Order Reference.
-		@return Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
-	  */
-	public String getPOReference()
-	{
-		return (String)get_Value(COLUMNNAME_POReference);
-	}
-
 	/** Set Posted.
 		@param Posted Posting status
 	*/
@@ -1555,10 +1657,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1578,10 +1680,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1619,10 +1721,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1746,10 +1848,10 @@ public class X_C_Invoice extends PO implements I_C_Invoice, I_Persistent
 	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

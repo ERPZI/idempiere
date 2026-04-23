@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for C_OrderTax
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_OrderTax")
-public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent 
+public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_OrderTax (Properties ctx, int C_OrderTax_ID, String trxName)
@@ -64,6 +64,36 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_OrderTax (Properties ctx, String C_OrderTax_UU, String trxName)
+    {
+      super (ctx, C_OrderTax_UU, trxName);
+      /** if (C_OrderTax_UU == null)
+        {
+			setC_Order_ID (0);
+			setC_Tax_ID (0);
+			setIsTaxIncluded (false);
+			setProcessed (false);
+			setTaxAmt (Env.ZERO);
+			setTaxBaseAmt (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_OrderTax (Properties ctx, String C_OrderTax_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_OrderTax_UU, trxName, virtualColumns);
+      /** if (C_OrderTax_UU == null)
+        {
+			setC_Order_ID (0);
+			setC_Tax_ID (0);
+			setIsTaxIncluded (false);
+			setProcessed (false);
+			setTaxAmt (Env.ZERO);
+			setTaxBaseAmt (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_OrderTax (Properties ctx, ResultSet rs, String trxName)
     {
@@ -71,7 +101,7 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -88,9 +118,24 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_OrderTax[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
+
+	/** Set C_OrderTax_UU.
+		@param C_OrderTax_UU C_OrderTax_UU
+	*/
+	public void setC_OrderTax_UU (String C_OrderTax_UU)
+	{
+		set_Value (COLUMNNAME_C_OrderTax_UU, C_OrderTax_UU);
+	}
+
+	/** Get C_OrderTax_UU.
+		@return C_OrderTax_UU	  */
+	public String getC_OrderTax_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_OrderTax_UU);
+	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
 	{
@@ -115,49 +160,6 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
 	public int getC_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set C_OrderTax_UU.
-		@param C_OrderTax_UU C_OrderTax_UU
-	*/
-	public void setC_OrderTax_UU (String C_OrderTax_UU)
-	{
-		set_Value (COLUMNNAME_C_OrderTax_UU, C_OrderTax_UU);
-	}
-
-	/** Get C_OrderTax_UU.
-		@return C_OrderTax_UU	  */
-	public String getC_OrderTax_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_OrderTax_UU);
-	}
-
-	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_ID)
-			.getPO(getC_Tax_ID(), get_TrxName());
-	}
-
-	/** Set Tax.
-		@param C_Tax_ID Tax identifier
-	*/
-	public void setC_Tax_ID (int C_Tax_ID)
-	{
-		if (C_Tax_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
-	}
-
-	/** Get Tax.
-		@return Tax identifier
-	  */
-	public int getC_Tax_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Tax_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -190,6 +192,34 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Tax getC_Tax() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Tax)MTable.get(getCtx(), org.compiere.model.I_C_Tax.Table_ID)
+			.getPO(getC_Tax_ID(), get_TrxName());
+	}
+
+	/** Set Tax.
+		@param C_Tax_ID Tax identifier
+	*/
+	public void setC_Tax_ID (int C_Tax_ID)
+	{
+		if (C_Tax_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Tax_ID, Integer.valueOf(C_Tax_ID));
+	}
+
+	/** Get Tax.
+		@return Tax identifier
+	  */
+	public int getC_Tax_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Tax_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Price includes Tax.
 		@param IsTaxIncluded Tax is included in the price 
 	*/
@@ -204,10 +234,10 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
 	public boolean isTaxIncluded()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTaxIncluded);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -227,10 +257,10 @@ public class X_C_OrderTax extends PO implements I_C_OrderTax, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for GL_JournalBatch
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="GL_JournalBatch")
-public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persistent 
+public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_GL_JournalBatch (Properties ctx, int GL_JournalBatch_ID, String trxName)
@@ -82,6 +82,52 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
         } */
     }
 
+    /** Standard Constructor */
+    public X_GL_JournalBatch (Properties ctx, String GL_JournalBatch_UU, String trxName)
+    {
+      super (ctx, GL_JournalBatch_UU, trxName);
+      /** if (GL_JournalBatch_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDescription (null);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setGL_JournalBatch_ID (0);
+			setPostingType (null);
+// A
+			setProcessed (false);
+			setProcessing (false);
+			setTotalCr (Env.ZERO);
+			setTotalDr (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_GL_JournalBatch (Properties ctx, String GL_JournalBatch_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, GL_JournalBatch_UU, trxName, virtualColumns);
+      /** if (GL_JournalBatch_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDescription (null);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setGL_JournalBatch_ID (0);
+			setPostingType (null);
+// A
+			setProcessed (false);
+			setProcessing (false);
+			setTotalCr (Env.ZERO);
+			setTotalDr (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_GL_JournalBatch (Properties ctx, ResultSet rs, String trxName)
     {
@@ -89,7 +135,7 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -166,6 +212,34 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Period getC_Period() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Period)MTable.get(getCtx(), org.compiere.model.I_C_Period.Table_ID)
+			.getPO(getC_Period_ID(), get_TrxName());
+	}
+
+	/** Set Period.
+		@param C_Period_ID Period of the Calendar
+	*/
+	public void setC_Period_ID (int C_Period_ID)
+	{
+		if (C_Period_ID < 1)
+			set_Value (COLUMNNAME_C_Period_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Period_ID, Integer.valueOf(C_Period_ID));
+	}
+
+	/** Get Period.
+		@return Period of the Calendar
+	  */
+	public int getC_Period_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Period_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Control Amount.
 		@param ControlAmt If not zero, the Debit amount of the document must be equal this amount
 	*/
@@ -199,34 +273,6 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
 	public String getCopyFrom()
 	{
 		return (String)get_Value(COLUMNNAME_CopyFrom);
-	}
-
-	public org.compiere.model.I_C_Period getC_Period() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Period)MTable.get(getCtx(), org.compiere.model.I_C_Period.Table_ID)
-			.getPO(getC_Period_ID(), get_TrxName());
-	}
-
-	/** Set Period.
-		@param C_Period_ID Period of the Calendar
-	*/
-	public void setC_Period_ID (int C_Period_ID)
-	{
-		if (C_Period_ID < 1)
-			set_Value (COLUMNNAME_C_Period_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Period_ID, Integer.valueOf(C_Period_ID));
-	}
-
-	/** Get Period.
-		@return Period of the Calendar
-	  */
-	public int getC_Period_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Period_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Account Date.
@@ -386,7 +432,7 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -470,10 +516,10 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -522,10 +568,10 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -544,10 +590,10 @@ public class X_GL_JournalBatch extends PO implements I_GL_JournalBatch, I_Persis
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

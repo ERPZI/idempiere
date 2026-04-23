@@ -30,9 +30,19 @@ import org.compiere.util.TimeUtil;
 public class MTaxDeclaration extends X_C_TaxDeclaration
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 560499885058913281L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_TaxDeclaration_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MTaxDeclaration(Properties ctx, String C_TaxDeclaration_UU, String trxName) {
+        super(ctx, C_TaxDeclaration_UU, trxName);
+    }
 
 	/**
 	 * 	Standard Constructors
@@ -56,13 +66,10 @@ public class MTaxDeclaration extends X_C_TaxDeclaration
 		super (ctx, rs, trxName);
 	}	//	MTaxDeclaration
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
+		// Truncate date
 		if (is_ValueChanged("DateFrom"))
 			setDateFrom(TimeUtil.getDay(getDateFrom()));
 		if (is_ValueChanged("DateTo"))

@@ -6,14 +6,13 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			classpath:/META-INF/cxf/services.xml
-			classpath:/META-INF/cxf/rest-context.xml
+			classpath:/org/idempiere/webservices/xml/services.xml
+			classpath:/org/idempiere/webservices/xml/rest-context.xml
 		</param-value>
 	</context-param>
-
 	<listener>
 		<listener-class>
-			com.trekglobal.ws.ContextLoaderListener
+			org.idempiere.webservices.resources.ContextLoaderListener
 		</listener-class>
 	</listener>
 
@@ -26,7 +25,7 @@
 	</servlet>
 	<servlet>
     	<servlet-name>default</servlet-name>
-    	<servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+    	<servlet-class>org.eclipse.jetty.ee8.servlet.DefaultServlet</servlet-class>
     	<init-param>
       		<param-name>dirAllowed</param-name>
       		<param-value>false</param-value>

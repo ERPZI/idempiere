@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for R_RequestProcessor
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="R_RequestProcessor")
-public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_Persistent 
+public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_R_RequestProcessor (Properties ctx, int R_RequestProcessor_ID, String trxName)
@@ -50,9 +50,9 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
 // 0
 			setOverdueAssignDays (0);
 // 0
+			setR_RequestProcessor_ID (0);
 			setRemindDays (0);
 // 0
-			setR_RequestProcessor_ID (0);
 			setSupervisor_ID (0);
         } */
     }
@@ -73,9 +73,55 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
 // 0
 			setOverdueAssignDays (0);
 // 0
+			setR_RequestProcessor_ID (0);
 			setRemindDays (0);
 // 0
+			setSupervisor_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_RequestProcessor (Properties ctx, String R_RequestProcessor_UU, String trxName)
+    {
+      super (ctx, R_RequestProcessor_UU, trxName);
+      /** if (R_RequestProcessor_UU == null)
+        {
+			setAD_Schedule_ID (0);
+			setInactivityAlertDays (0);
+// 0
+			setKeepLogDays (0);
+// 7
+			setName (null);
+			setOverdueAlertDays (0);
+// 0
+			setOverdueAssignDays (0);
+// 0
 			setR_RequestProcessor_ID (0);
+			setRemindDays (0);
+// 0
+			setSupervisor_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_RequestProcessor (Properties ctx, String R_RequestProcessor_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, R_RequestProcessor_UU, trxName, virtualColumns);
+      /** if (R_RequestProcessor_UU == null)
+        {
+			setAD_Schedule_ID (0);
+			setInactivityAlertDays (0);
+// 0
+			setKeepLogDays (0);
+// 7
+			setName (null);
+			setOverdueAlertDays (0);
+// 0
+			setOverdueAssignDays (0);
+// 0
+			setR_RequestProcessor_ID (0);
+			setRemindDays (0);
+// 0
 			setSupervisor_ID (0);
         } */
     }
@@ -87,7 +133,7 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -240,7 +286,7 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -296,32 +342,13 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Reminder Days.
-		@param RemindDays Days between sending Reminder Emails for a due or inactive Document
-	*/
-	public void setRemindDays (int RemindDays)
-	{
-		set_Value (COLUMNNAME_RemindDays, Integer.valueOf(RemindDays));
-	}
-
-	/** Get Reminder Days.
-		@return Days between sending Reminder Emails for a due or inactive Document
-	  */
-	public int getRemindDays()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_RemindDays);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Request Processor.
@@ -384,6 +411,25 @@ public class X_R_RequestProcessor extends PO implements I_R_RequestProcessor, I_
 	public int getR_RequestType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_R_RequestType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Reminder Days.
+		@param RemindDays Days between sending Reminder Emails for a due or inactive Document
+	*/
+	public void setRemindDays (int RemindDays)
+	{
+		set_Value (COLUMNNAME_RemindDays, Integer.valueOf(RemindDays));
+	}
+
+	/** Get Reminder Days.
+		@return Days between sending Reminder Emails for a due or inactive Document
+	  */
+	public int getRemindDays()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_RemindDays);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

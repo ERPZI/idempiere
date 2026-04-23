@@ -36,17 +36,35 @@ import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.Popup;
 
 /**
- *	Handle Request Button Action.
- *	Show Popup Menu.
+ *	Handle Request Button Action. <br/>
+ *	Create and Show Popup Menu.
  *	
  *  @author Jorg Janke
- *  @version $Id: ARequest.java,v 1.2 2006/07/30 00:51:27 jjanke Exp $
  * 
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+ *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 			<li>BF [ 1904928 ] Request: Related Request field not filled
  */
 public class WRequest implements EventListener<Event>
 {
+	/**
+	 * 	Constructor
+	 *	@param invoker invoker button
+	 *	@param AD_Table_ID table
+	 *	@param Record_ID record ID
+	 *	@param Record_UU record UUID
+	 *	@param C_BPartner_ID optional bp
+	 */
+	public WRequest (Component invoker, int AD_Table_ID, int Record_ID, String Record_UU, int C_BPartner_ID)
+	{
+		if (log.isLoggable(Level.CONFIG)) log.config("AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID + ", Record_UU=" + Record_UU);
+		m_AD_Table_ID = AD_Table_ID;
+		m_Record_ID = Record_ID;
+		m_Record_UU = Record_UU;
+		m_C_BPartner_ID = C_BPartner_ID;
+		getRequests(invoker);
+		
+	}	//	WRequest
+
 	/**
 	 * 	Constructor
 	 *	@param invoker invoker button
@@ -56,18 +74,15 @@ public class WRequest implements EventListener<Event>
 	 */
 	public WRequest (Component invoker, int AD_Table_ID, int Record_ID, int C_BPartner_ID)
 	{
-		if (log.isLoggable(Level.CONFIG)) log.config("AD_Table_ID=" + AD_Table_ID + ", Record_ID=" + Record_ID);
-		m_AD_Table_ID = AD_Table_ID;
-		m_Record_ID = Record_ID;
-		m_C_BPartner_ID = C_BPartner_ID;
-		getRequests(invoker);
-		
+		this(invoker, AD_Table_ID, Record_ID, null, C_BPartner_ID);
 	}	//	WRequest
 
 	/**	The Table						*/
 	private int			m_AD_Table_ID;
-	/** The Record						*/
+	/** The Record ID					*/
 	private int			m_Record_ID;
+	/** The Record UUID					*/
+	private String		m_Record_UU;
 	/** BPartner						*/
 	private int			m_C_BPartner_ID;
 	
@@ -97,7 +112,7 @@ public class WRequest implements EventListener<Event>
 		m_popup.appendChild(m_new);
 		//
 		m_where = new StringBuilder();
-		int[] counts = MRequest.getRequestCount(m_AD_Table_ID, m_Record_ID, m_where, null);
+		int[] counts = MRequest.getRequestCount(m_AD_Table_ID, m_Record_ID, m_Record_UU, m_where, null);
 		int activeCount = counts[1];
 		int inactiveCount = counts[0];
 		if (activeCount > 0)
@@ -182,7 +197,7 @@ public class WRequest implements EventListener<Event>
 		if (e.getTarget() == m_new)
 		{
 			GridTab tab = frame.getADWindowContent().getActiveGridTab();
-			MRequest.newRequest(tab, m_AD_Table_ID, m_Record_ID, m_C_BPartner_ID);
+			MRequest.newRequest(tab, m_AD_Table_ID, m_Record_ID, m_Record_UU, m_C_BPartner_ID);
 		}
 	}
 }

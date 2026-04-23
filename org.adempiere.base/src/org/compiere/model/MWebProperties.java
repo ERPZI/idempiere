@@ -26,13 +26,23 @@ package org.compiere.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
-
+@Deprecated
 public class MWebProperties extends X_U_Web_Properties
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4051314529871227830L;
+
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param U_Web_Properties_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MWebProperties(Properties ctx, String U_Web_Properties_UU, String trxName) {
+        super(ctx, U_Web_Properties_UU, trxName);
+    }
 
 	public MWebProperties(Properties ctx, int uWebProperties , String trxName)
     {

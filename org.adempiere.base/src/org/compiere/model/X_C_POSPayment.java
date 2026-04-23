@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for C_POSPayment
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_POSPayment")
-public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent 
+public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_POSPayment (Properties ctx, int C_POSPayment_ID, String trxName)
@@ -67,6 +67,38 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_POSPayment (Properties ctx, String C_POSPayment_UU, String trxName)
+    {
+      super (ctx, C_POSPayment_UU, trxName);
+      /** if (C_POSPayment_UU == null)
+        {
+			setC_Order_ID (0);
+			setC_POSPayment_ID (0);
+			setC_POSTenderType_ID (0);
+			setIsPostDated (false);
+// N
+			setPayAmt (Env.ZERO);
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_POSPayment (Properties ctx, String C_POSPayment_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_POSPayment_UU, trxName, virtualColumns);
+      /** if (C_POSPayment_UU == null)
+        {
+			setC_Order_ID (0);
+			setC_POSPayment_ID (0);
+			setC_POSTenderType_ID (0);
+			setIsPostDated (false);
+// N
+			setPayAmt (Env.ZERO);
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_POSPayment (Properties ctx, ResultSet rs, String trxName)
     {
@@ -74,7 +106,7 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -95,22 +127,6 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
       return sb.toString();
     }
 
-	/** Set Account No.
-		@param AccountNo Account Number
-	*/
-	public void setAccountNo (String AccountNo)
-	{
-		set_Value (COLUMNNAME_AccountNo, AccountNo);
-	}
-
-	/** Get Account No.
-		@return Account Number
-	  */
-	public String getAccountNo()
-	{
-		return (String)get_Value(COLUMNNAME_AccountNo);
-	}
-
 	/** Set Account Name.
 		@param A_Name Name on Credit Card or Account holder
 	*/
@@ -127,48 +143,20 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 		return (String)get_Value(COLUMNNAME_A_Name);
 	}
 
-	/** Set Check No.
-		@param CheckNo Check Number
+	/** Set Account No.
+		@param AccountNo Account Number
 	*/
-	public void setCheckNo (String CheckNo)
+	public void setAccountNo (String AccountNo)
 	{
-		set_Value (COLUMNNAME_CheckNo, CheckNo);
+		set_Value (COLUMNNAME_AccountNo, AccountNo);
 	}
 
-	/** Get Check No.
-		@return Check Number
+	/** Get Account No.
+		@return Account Number
 	  */
-	public String getCheckNo()
+	public String getAccountNo()
 	{
-		return (String)get_Value(COLUMNNAME_CheckNo);
-	}
-
-	/** CheckStatus AD_Reference_ID=200007 */
-	public static final int CHECKSTATUS_AD_Reference_ID=200007;
-	/** Charged = C */
-	public static final String CHECKSTATUS_Charged = "C";
-	/** Delayed = D */
-	public static final String CHECKSTATUS_Delayed = "D";
-	/** Replaced = P */
-	public static final String CHECKSTATUS_Replaced = "P";
-	/** Received = R */
-	public static final String CHECKSTATUS_Received = "R";
-	/** Returned = T */
-	public static final String CHECKSTATUS_Returned = "T";
-	/** Set Check Status.
-		@param CheckStatus Check Status
-	*/
-	public void setCheckStatus (String CheckStatus)
-	{
-
-		set_Value (COLUMNNAME_CheckStatus, CheckStatus);
-	}
-
-	/** Get Check Status.
-		@return Check Status	  */
-	public String getCheckStatus()
-	{
-		return (String)get_Value(COLUMNNAME_CheckStatus);
+		return (String)get_Value(COLUMNNAME_AccountNo);
 	}
 
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
@@ -194,34 +182,6 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 	public int getC_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
-			.getPO(getC_Payment_ID(), get_TrxName());
-	}
-
-	/** Set Payment.
-		@param C_Payment_ID Payment identifier
-	*/
-	public void setC_Payment_ID (int C_Payment_ID)
-	{
-		if (C_Payment_ID < 1)
-			set_Value (COLUMNNAME_C_Payment_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
-	}
-
-	/** Get Payment.
-		@return Payment identifier
-	  */
-	public int getC_Payment_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -288,6 +248,78 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Payment getC_Payment() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Payment)MTable.get(getCtx(), org.compiere.model.I_C_Payment.Table_ID)
+			.getPO(getC_Payment_ID(), get_TrxName());
+	}
+
+	/** Set Payment.
+		@param C_Payment_ID Payment identifier
+	*/
+	public void setC_Payment_ID (int C_Payment_ID)
+	{
+		if (C_Payment_ID < 1)
+			set_Value (COLUMNNAME_C_Payment_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Payment_ID, Integer.valueOf(C_Payment_ID));
+	}
+
+	/** Get Payment.
+		@return Payment identifier
+	  */
+	public int getC_Payment_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Check No.
+		@param CheckNo Check Number
+	*/
+	public void setCheckNo (String CheckNo)
+	{
+		set_Value (COLUMNNAME_CheckNo, CheckNo);
+	}
+
+	/** Get Check No.
+		@return Check Number
+	  */
+	public String getCheckNo()
+	{
+		return (String)get_Value(COLUMNNAME_CheckNo);
+	}
+
+	/** CheckStatus AD_Reference_ID=200007 */
+	public static final int CHECKSTATUS_AD_Reference_ID=200007;
+	/** Charged = C */
+	public static final String CHECKSTATUS_Charged = "C";
+	/** Delayed = D */
+	public static final String CHECKSTATUS_Delayed = "D";
+	/** Replaced = P */
+	public static final String CHECKSTATUS_Replaced = "P";
+	/** Received = R */
+	public static final String CHECKSTATUS_Received = "R";
+	/** Returned = T */
+	public static final String CHECKSTATUS_Returned = "T";
+	/** Set Check Status.
+		@param CheckStatus Check Status
+	*/
+	public void setCheckStatus (String CheckStatus)
+	{
+
+		set_Value (COLUMNNAME_CheckStatus, CheckStatus);
+	}
+
+	/** Get Check Status.
+		@return Check Status	  */
+	public String getCheckStatus()
+	{
+		return (String)get_Value(COLUMNNAME_CheckStatus);
 	}
 
 	/** Set Number.
@@ -415,10 +447,10 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 	public boolean isPostDated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostDated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -473,10 +505,10 @@ public class X_C_POSPayment extends PO implements I_C_POSPayment, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

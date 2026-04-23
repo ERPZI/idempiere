@@ -22,17 +22,26 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 
 /**
- * Model class for Process Parameter Customizations
+ * User, role, organization or tenant overrides of process parameter model
  *
  * @author raphael.gildo (devCoffee, www.devcoffee.com.br)
- *
  */
 public class MUserDefProcParameter extends X_AD_UserDef_Proc_Parameter {
 
 	/**
-	 *
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -203142278687451678L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_UserDef_Proc_Parameter_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MUserDefProcParameter(Properties ctx, String AD_UserDef_Proc_Parameter_UU, String trxName) {
+        super(ctx, AD_UserDef_Proc_Parameter_UU, trxName);
+    }
 
 	/**
 	 * @param ctx
@@ -41,7 +50,6 @@ public class MUserDefProcParameter extends X_AD_UserDef_Proc_Parameter {
 	 */
 	public MUserDefProcParameter(Properties ctx, int AD_UserDef_Proc_Parameter_ID, String trxName) {
 		super(ctx, AD_UserDef_Proc_Parameter_ID, trxName);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -51,10 +59,16 @@ public class MUserDefProcParameter extends X_AD_UserDef_Proc_Parameter {
 	 */
 	public MUserDefProcParameter(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
-		// TODO Auto-generated constructor stub
 	}
 
-	public static MUserDefProcParameter get (Properties ctx, int AD_Field_ID, int AD_Process_ID)
+	/**
+	 * Get best matching MUserDefProcParameter for parameter and process
+	 * @param ctx
+	 * @param AD_Process_Para_ID
+	 * @param AD_Process_ID
+	 * @return MUserDefProcParameter or null
+	 */
+	public static MUserDefProcParameter get (Properties ctx, int AD_Process_Para_ID, int AD_Process_ID)
 	{
 
 		MUserDefProc userdefProc = MUserDefProc.getBestMatch(ctx, AD_Process_ID);
@@ -74,7 +88,7 @@ public class MUserDefProcParameter extends X_AD_UserDef_Proc_Parameter {
 		{
 			//	create statement
 			pstmt = DB.prepareStatement(sql.toString(), null);
-			pstmt.setInt(1, AD_Field_ID);
+			pstmt.setInt(1, AD_Process_Para_ID);
 			pstmt.setInt(2, userdefProc.getAD_UserDef_Proc_ID());
 			// 	get data
 			rs = pstmt.executeQuery();

@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_UserDef_Field
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserDef_Field")
-public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Persistent 
+public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_UserDef_Field (Properties ctx, int AD_UserDef_Field_ID, String trxName)
@@ -65,6 +65,38 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_UserDef_Field (Properties ctx, String AD_UserDef_Field_UU, String trxName)
+    {
+      super (ctx, AD_UserDef_Field_UU, trxName);
+      /** if (AD_UserDef_Field_UU == null)
+        {
+			setAD_Field_ID (0);
+			setAD_UserDef_Field_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setSeqNo (0);
+// 0
+			setSeqNoGrid (0);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_UserDef_Field (Properties ctx, String AD_UserDef_Field_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_UserDef_Field_UU, trxName, virtualColumns);
+      /** if (AD_UserDef_Field_UU == null)
+        {
+			setAD_Field_ID (0);
+			setAD_UserDef_Field_ID (0);
+			setAD_UserDef_Tab_ID (0);
+			setSeqNo (0);
+// 0
+			setSeqNoGrid (0);
+// 0
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_UserDef_Field (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +104,7 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -148,6 +180,34 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_Style getAD_FieldStyle() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Style)MTable.get(getCtx(), org.compiere.model.I_AD_Style.Table_ID)
+			.getPO(getAD_FieldStyle_ID(), get_TrxName());
+	}
+
+	/** Set Field Style.
+		@param AD_FieldStyle_ID Field CSS Style 
+	*/
+	public void setAD_FieldStyle_ID (int AD_FieldStyle_ID)
+	{
+		if (AD_FieldStyle_ID < 1)
+			set_Value (COLUMNNAME_AD_FieldStyle_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_FieldStyle_ID, Integer.valueOf(AD_FieldStyle_ID));
+	}
+
+	/** Get Field Style.
+		@return Field CSS Style 
+	  */
+	public int getAD_FieldStyle_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_FieldStyle_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_AD_Field getAD_Field() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Field)MTable.get(getCtx(), org.compiere.model.I_AD_Field.Table_ID)
@@ -179,38 +239,10 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_Field_ID()));
     }
-
-	public org.compiere.model.I_AD_Style getAD_FieldStyle() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Style)MTable.get(getCtx(), org.compiere.model.I_AD_Style.Table_ID)
-			.getPO(getAD_FieldStyle_ID(), get_TrxName());
-	}
-
-	/** Set Field Style.
-		@param AD_FieldStyle_ID Field CSS Style 
-	*/
-	public void setAD_FieldStyle_ID (int AD_FieldStyle_ID)
-	{
-		if (AD_FieldStyle_ID < 1)
-			set_Value (COLUMNNAME_AD_FieldStyle_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_FieldStyle_ID, Integer.valueOf(AD_FieldStyle_ID));
-	}
-
-	/** Get Field Style.
-		@return Field CSS Style 
-	  */
-	public int getAD_FieldStyle_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_FieldStyle_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_AD_Style getAD_LabelStyle() throws RuntimeException
 	{
@@ -624,6 +656,29 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 		return (String)get_Value(COLUMNNAME_IsDisplayedGrid);
 	}
 
+	/** IsHtml AD_Reference_ID=319 */
+	public static final int ISHTML_AD_Reference_ID=319;
+	/** No = N */
+	public static final String ISHTML_No = "N";
+	/** Yes = Y */
+	public static final String ISHTML_Yes = "Y";
+	/** Set HTML.
+		@param IsHtml Text has HTML tags
+	*/
+	public void setIsHtml (String IsHtml)
+	{
+
+		set_Value (COLUMNNAME_IsHtml, IsHtml);
+	}
+
+	/** Get HTML.
+		@return Text has HTML tags
+	  */
+	public String getIsHtml()
+	{
+		return (String)get_Value(COLUMNNAME_IsHtml);
+	}
+
 	/** IsMandatory AD_Reference_ID=319 */
 	public static final int ISMANDATORY_AD_Reference_ID=319;
 	/** No = N */
@@ -906,7 +961,7 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 	}
 
 	/** Set Value Format.
-		@param VFormat Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;
+		@param VFormat Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;, or ~regex
 	*/
 	public void setVFormat (String VFormat)
 	{
@@ -914,7 +969,7 @@ public class X_AD_UserDef_Field extends PO implements I_AD_UserDef_Field, I_Pers
 	}
 
 	/** Get Value Format.
-		@return Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;
+		@return Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;, or ~regex
 	  */
 	public String getVFormat()
 	{

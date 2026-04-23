@@ -61,7 +61,7 @@ import org.compiere.apps.IProcessParameter;
 import org.compiere.model.GridField;
 import org.compiere.model.GridFieldVO;
 import org.compiere.model.MClient;
-import org.compiere.model.MLookup;
+import org.compiere.model.MColumn;
 import org.compiere.model.MPInstance;
 import org.compiere.model.MPInstancePara;
 import org.compiere.model.MProcess;
@@ -71,6 +71,7 @@ import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -78,6 +79,8 @@ import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
+import org.zkoss.zk.ui.WrongValueException;
+import org.zkoss.zk.ui.WrongValuesException;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -89,9 +92,11 @@ import org.zkoss.zul.Space;
 import org.zkoss.zul.impl.InputElement;
 import org.zkoss.zul.impl.XulElement;
 
+import static org.adempiere.webui.LayoutUtils.isLabelAboveInputForSmallWidth;
+
 /**
- * Process Parameter Panel.
- * Embedded in {@link ProcessDialog} and {@link ProcessModalDialog}.
+ * Process Parameter Panel.<br/>
+ * Embedded in {@link ProcessDialog} and {@link ProcessModalDialog}.<br/>
  * Capture parameters input, validate and save to DB.
  * 
  * @author Low Heng Sin
@@ -102,7 +107,7 @@ public class ProcessParameterPanel extends Panel implements
 	/**
 	 * generated serial id
 	 */
-	private static final long serialVersionUID = -1398301240136128512L;
+	private static final long serialVersionUID = -8476698839617674953L;
 
 	/** Event post from {@link #valueChange(ValueChangeEvent)} **/
 	private static final String ON_POST_EDITOR_VALUE_CHANGE_EVENT = "onPostEditorValueChange";
@@ -138,7 +143,7 @@ public class ProcessParameterPanel extends Panel implements
 	} // ProcessParameterPanel
 	
 	/**
-	 * Layout UI
+	 * Layout panel
 	 */
 	private void initComponent() {
 		centerPanel = GridFactory.newGridLayout();
@@ -148,10 +153,14 @@ public class ProcessParameterPanel extends Panel implements
 		Columns columns = new Columns();
 		centerPanel.appendChild(columns);
 		Column col = new Column();
-		ZKUpdateUtil.setWidth(col, "30%");
-		columns.appendChild(col);
-		col = new Column();
-		ZKUpdateUtil.setWidth(col, "70%");
+		if (!isLabelAboveInputForSmallWidth()) {
+			ZKUpdateUtil.setWidth(col, "30%");
+			columns.appendChild(col);
+			col = new Column();
+			ZKUpdateUtil.setWidth(col, "70%");
+		} else {
+			ZKUpdateUtil.setWidth(col, "100%");
+		}
 		columns.appendChild(col);
 	}
 
@@ -261,7 +270,7 @@ public class ProcessParameterPanel extends Panel implements
 					+ "p.FieldLength, p.IsMandatory, p.IsRange, p.dateRangeOption, p.ColumnName, "
 					+ "p.DefaultValue, p.DefaultValue2, p.VFormat, p.ValueMin, p.ValueMax, "
 					+ "p.SeqNo, p.AD_Reference_Value_ID, vr.Code AS ValidationCode, "
-					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern, p.MandatoryLogic, p.Placeholder, p.Placeholder2, p.isAutoComplete, "
+					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern, p.MandatoryLogic, p.Placeholder, p.Placeholder2, p.isAutoComplete, p.EntityType, "
 					+ "'' AS ValidationCodeLookup, "
 					+ "fg.Name AS FieldGroup, fg.FieldGroupType, fg.IsCollapsedByDefault, p.IsShowNegateButton "
 					+ "FROM AD_Process_Para p"
@@ -275,7 +284,7 @@ public class ProcessParameterPanel extends Panel implements
 					+ "p.FieldLength, p.IsMandatory, p.IsRange, p.dateRangeOption, p.ColumnName, "
 					+ "p.DefaultValue, p.DefaultValue2, p.VFormat, p.ValueMin, p.ValueMax, "
 					+ "p.SeqNo, p.AD_Reference_Value_ID, vr.Code AS ValidationCode, "
-					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern,p.MandatoryLogic, t.Placeholder, t.Placeholder2, p.isAutoComplete, "
+					+ "p.ReadOnlyLogic, p.DisplayLogic, p.IsEncrypted, NULL AS FormatPattern,p.MandatoryLogic, t.Placeholder, t.Placeholder2, p.isAutoComplete, p.EntityType, "
 					+ "'' AS ValidationCodeLookup, "
 					+ "fgt.Name AS FieldGroup, fg.FieldGroupType, fg.IsCollapsedByDefault, p.IsShowNegateButton "
 					+ "FROM AD_Process_Para p"
@@ -401,6 +410,15 @@ public class ProcessParameterPanel extends Panel implements
 		if (hasFields) {
 			centerPanel.appendChild(rows);
 			dynamicDisplay();
+
+			if (m_processInfo.getAD_Process_ID() > 0) {
+				String className = MProcess.get(Env.getCtx(), m_processInfo.getAD_Process_ID()).getClassname();
+
+				List<IProcessParameterListener> listeners = Extensions.getProcessParameterListeners(className, null);
+				for(IProcessParameterListener listener : listeners)
+					listener.onInit(this);
+			}
+
 		} else
 			dispose();
 		return hasFields;
@@ -459,15 +477,18 @@ public class ProcessParameterPanel extends Panel implements
 		m_wEditors.add(editor); // add to Editors
 
     	Div div = new Div();
-        div.setStyle("text-align: right;");
+		if (!isLabelAboveInputForSmallWidth())
+        	div.setStyle("text-align: right;");
         org.adempiere.webui.component.Label label = editor.getLabel();
         div.appendChild(label);
         if (label.getDecorator() != null)
         	div.appendChild(label.getDecorator());
-        row.appendChild(div);
+		if (!isLabelAboveInputForSmallWidth())
+        	row.appendChild(div);
 		//
         Div box = new Div();
-		box.setStyle("display: flex; align-items: center;");
+		if (!isLabelAboveInputForSmallWidth())
+			box.setStyle("display: flex; align-items: center;");
 		ZKUpdateUtil.setWidth(box, "100%");
 		//create to field and editor
 		if (voF.isRange) {
@@ -546,11 +567,20 @@ public class ProcessParameterPanel extends Panel implements
 				editor.getComponent().setAttribute("isNotClause", bNegate);
 			}
 		}
-		row.appendChild(box);
+		if (!isLabelAboveInputForSmallWidth()) {
+			row.appendChild(box);
+		} else {
+			Div container = new Div();
+			container.appendChild(div);
+			container.appendChild(box);
+			row.appendCellChild(container);
+			LayoutUtils.addSclass("form-label-above-input", row.getLastCell());
+			LayoutUtils.addSclass("form-label", div);
+		}
 	} // createField
 
 	/**
-	 * set place holder message
+	 * Set place holder message
 	 * @param editor
 	 * @param msg
 	 */
@@ -578,49 +608,45 @@ public class ProcessParameterPanel extends Panel implements
 		if (log.isLoggable(Level.CONFIG)) log.config("");
 
 		//mandatory fields validation
-		StringBuilder sb = new StringBuilder();
+		Map<Component, String> wrongValidateComponents = new HashMap<>();
 		int size = m_mFields.size();
 		for (int i = 0; i < size; i++) {
 			GridField field = (GridField) m_mFields.get(i);
-			if (field.isMandatory(true)) // check context
-			{				
-				WEditor wEditor = (WEditor) m_wEditors.get(i);
-				Object data = wEditor.getValue();
-				if (data == null || data.toString().length() == 0) {
-					field.setInserting(true); // set editable (i.e. updateable)
-												// otherwise deadlock
-					field.setError(true);
-					if (sb.length() > 0)
-						sb.append(", ");
-					sb.append(field.getHeader());
-					if (m_wEditors2.get(i) != null) // is a range
-						sb.append(" (").append(Msg.getMsg(Env.getCtx(), "ProcessParameterRangeFrom")).append(")");
-				} else
-					field.setError(false);
-				// Check for Range
-				WEditor wEditor2 = (WEditor) m_wEditors2.get(i);
-				if (wEditor2 != null) {
-					Object data2 = wEditor2.getValue();
-					GridField field2 = (GridField) m_mFields2.get(i);
-					if (data2 == null || data2.toString().length() == 0) {
-						field2.setInserting(true); // set editable (i.e.
-													// updateable) otherwise
-													// deadlock
-						field2.setError(true);
-						if (sb.length() > 0)
-							sb.append(", ");
-						sb.append(field2.getHeader());
-						sb.append(" (").append(Msg.getMsg(Env.getCtx(), "ProcessParameterRangeTo")).append(")");
-					} else
-						field2.setError(false);
-				} // range field
-			} // mandatory
+			GridField field2 = (GridField) m_mFields2.get(i);
+			WEditor wEditor = (WEditor) m_wEditors.get(i);
+			if (wEditor.getComponent() instanceof InputElement)
+				((InputElement)wEditor.getComponent()).clearErrorMessage();
+			WEditor wEditor2 = (WEditor) m_wEditors2.get(i);
+			if (wEditor2 != null && wEditor2.getComponent() instanceof InputElement)
+				((InputElement)wEditor2.getComponent()).clearErrorMessage();
+			Object data = wEditor.getValue();
+			String msg = validate(data, field.getValueMin(), field.getValueMax(), field.isMandatory(true), field.getDisplayType());
+			if (msg != null) {
+				field.setInserting(true); // set editable (i.e. updateable) otherwise deadlock
+				field.setError(true);
+				wrongValidateComponents.put(wEditor.getComponent(), msg);
+			}
+			if (m_wEditors2.get(i) != null) { // is a range
+				data = wEditor2.getValue();
+				msg = validate(data, field.getValueMin(), field.getValueMax(), field.isMandatory(true), field.getDisplayType());
+				if (msg != null) {
+					field2.setInserting(true); // set editable (i.e. updateable) otherwise deadlock
+					field2.setError(true);
+					wrongValidateComponents.put(wEditor2.getComponent(), msg);
+				}
+			}
+
 		} // field loop
 
-		if (sb.length() != 0) {
-			Dialog.error(m_WindowNo, "FillMandatory", sb.toString());
-			return false;
-		}
+		List<WrongValueException> wrongValues = new ArrayList<WrongValueException>();
+
+		wrongValidateComponents.forEach((component, msg) -> {
+			WrongValueException wrongValueException = new WrongValueException(component, msg);
+			wrongValues.add(wrongValueException);
+		});
+
+		if (wrongValues.size() > 0)
+			throw new WrongValuesException(wrongValues.toArray(new WrongValueException[0]));
 
 		/** call {@link IProcessParameterListener} validate(ProcessParameterPanel) **/
 		if (m_processInfo.getAD_Process_ID() > 0) {
@@ -638,8 +664,77 @@ public class ProcessParameterPanel extends Panel implements
 		return true;
 	}	//	validateParameters
 	
+	/**
+	 * Validate mandatory and min/max value
+	 * @param value
+	 * @param valueMin
+	 * @param valueMax
+	 * @param isMandatory
+	 * @param fieldType
+	 * @return null if OK, any message if not OK
+	 */
+	public static String validate(Object value, String valueMin, String valueMax, boolean isMandatory, int fieldType) {
+
+		if (isMandatory) {
+			if (value == null || value.toString().length() == 0) {
+				return Msg.getMsg(Env.getCtx(), "FillMandatory");
+			}
+		}
+
+		BigDecimal value_BD = null;
+		BigDecimal valueMin_BD = null;
+		BigDecimal valueMax_BD = null;
+		Timestamp value_TS = null;
+		Timestamp valueMin_TS = null;
+		Timestamp valueMax_TS = null;
+
+		if (fieldType == DisplayType.Date) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat(DisplayType.DEFAULT_DATE_FORMAT);
+			if (value != null) {
+				try { value_TS = new Timestamp(dateFormat.parse(value.toString()).getTime()); } catch (Exception ex){}
+			}
+			if (valueMin != null) {
+				try { valueMin_TS = new Timestamp(dateFormat.parse(valueMin).getTime()); } catch (Exception ex){}
+			}
+			if (valueMax != null) {
+				try { valueMax_TS = new Timestamp(dateFormat.parse(valueMax).getTime()); } catch (Exception ex){}
+			}
+
+			if (value_TS != null && valueMin_TS != null && value_TS.before(valueMin_TS))
+				return Msg.getMsg(Env.getCtx(), "LessThanMinValue", new Object[] {valueMin});
+
+			if (value_TS != null && valueMax_TS != null && value_TS.after(valueMax_TS))
+				return Msg.getMsg(Env.getCtx(), "MoreThanMaxValue", new Object[] {valueMax});
+
+		} else if (DisplayType.isNumeric(fieldType)) {
+			if (value != null) {
+				try { value_BD = new BigDecimal(value.toString()); } catch (Exception ex){}
+			}
+			if (valueMin != null) {
+				try { valueMin_BD = new BigDecimal(valueMin); } catch (Exception ex){}
+			}
+			if (valueMax != null) {
+				try { valueMax_BD = new BigDecimal(valueMax); } catch (Exception ex){}
+			}
+
+			if (value_BD != null && valueMin_BD != null && valueMin_BD.compareTo(value_BD) > 0)
+				return Msg.getMsg(Env.getCtx(), "LessThanMinValue", new Object[] {valueMin});
+
+			if (value_BD != null && valueMax_BD != null && valueMax_BD.compareTo(value_BD) < 0)
+				return Msg.getMsg(Env.getCtx(), "MoreThanMaxValue", new Object[] {valueMax});
+		} else {
+			if (value != null && valueMin != null && valueMin.compareTo(value.toString()) > 0)
+				return Msg.getMsg(Env.getCtx(), "LessThanMinValue", new Object[] {valueMin});
+
+			if (value != null && valueMax != null && valueMax.compareTo(value.toString()) < 0)
+				return Msg.getMsg(Env.getCtx(), "MoreThanMaxValue", new Object[] {valueMax});
+		}
+
+		return null;
+	}
+
 	/** 
-	 * load parameters from saved instance
+	 * Load parameters from saved instance
 	 * @param instance
 	 */
 	public boolean loadParameters(MPInstance instance)
@@ -978,6 +1073,7 @@ public class ProcessParameterPanel extends Panel implements
 	 * 
 	 * @param evt ValueChangeEvent
 	 */
+	@Override
 	public void valueChange(ValueChangeEvent evt) {
 		String propName = evt.getPropertyName();
 		if (evt.getSource() instanceof WEditor) {
@@ -1108,18 +1204,7 @@ public class ProcessParameterPanel extends Panel implements
 	private void verifyChangedField(GridField field, String columnName) {
 		ArrayList<String> list = field.getDependentOn();
 		if (list.contains(columnName)) {
-			if (field.getLookup() instanceof MLookup)
-			{
-				MLookup mLookup = (MLookup)field.getLookup();
-				//  if the lookup is dynamic (i.e. contains this columnName as variable)
-				if (mLookup.getValidation().indexOf("@"+columnName+"@") != -1)
-				{
-					if (log.isLoggable(Level.FINE)) log.fine(columnName + " changed - "
-						+ field.getColumnName() + " set to null");
-					//  invalidate current selection
-					field.setValue(null, true);
-				}
-			}
+			GridField.updateDependentField(field, columnName, -1, null);
 		}
 	}
 	
@@ -1261,7 +1346,15 @@ public class ProcessParameterPanel extends Panel implements
 	}
 	
 	/**
-	 * focus to first visible field editor.
+	 * Get process info 
+	 * @return process info
+	 */
+	public ProcessInfo getProcessInfo() {
+		return m_processInfo;
+	}
+	
+	/**
+	 * Focus to first visible field editor.
 	 * @return true if there is at least one visible field editor.
 	 */
 	public boolean focusToFirstEditor() {
@@ -1320,7 +1413,8 @@ public class ProcessParameterPanel extends Panel implements
 	}
 	
 	/**
-	 * @return true if editor is showing dialog awaiting user action (usually info window).
+	 * Is WSearchEditor showing dialog that is awaiting user action
+	 * @return true if WSearchEditor is showing dialog that is awaiting user action (usually info window).
 	 */
 	public boolean isWaitingForDialog() {
 		for (int i = 0; i < m_mFields.size(); i++) {
@@ -1368,43 +1462,71 @@ public class ProcessParameterPanel extends Panel implements
 
 	@Override
 	public String get_ValueAsString(String variableName) {
-		for(WEditor editor : m_wEditors) {
-			if (editor.getGridField().getColumnName().equals(variableName)) {
-				//base on code in GridField.updateContext() method
-				int displayType = editor.getGridField().getVO().displayType;	
-				if (displayType == DisplayType.Text 
-					|| displayType == DisplayType.Memo
-					|| displayType == DisplayType.TextLong
-					|| displayType == DisplayType.Binary
-					|| displayType == DisplayType.RowID
-					|| editor.getGridField().isEncrypted())
-					return ""; //	ignore
-				
-				Object value = editor.getValue();
-				if (value == null)
-					return "";
-				else if (value instanceof Boolean)
-				{
-					return (((Boolean)value) ? "Y" : "N");
-				}
-				else if (value instanceof Timestamp)
-				{
-					String stringValue = null;
-					if (value != null && !value.toString().equals("")) {
-						Calendar c1 = Calendar.getInstance();
-						c1.setTime((Date) value);
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						stringValue = sdf.format(c1.getTime());
-					}
-					return stringValue;
-				}
-				else
-				{
-					return value.toString();
-				}
-			}
-		}
-		return null;
+		DefaultEvaluatee evaluatee = new DefaultEvaluatee(new FieldEditorDataProvider(), m_WindowNo, m_TabNo);
+		return evaluatee.get_ValueAsString(variableName);				
 	}
 
+	/**
+	 * Data provider implementation backed by parameter field editors
+	 */
+	private class FieldEditorDataProvider implements DefaultEvaluatee.DataProvider {
+
+		@Override
+		public Object getValue(String columnName) {
+			for(WEditor editor : m_wEditors) {
+				if (editor.getGridField().getColumnName().equals(columnName)) {
+					//base on code in GridField.updateContext() method
+					int displayType = editor.getGridField().getVO().displayType;	
+					if (displayType == DisplayType.Text 
+						|| displayType == DisplayType.Memo
+						|| displayType == DisplayType.TextLong
+						|| displayType == DisplayType.JSON
+						|| displayType == DisplayType.Binary
+						|| displayType == DisplayType.RowID
+						|| editor.getGridField().isEncrypted())
+						return ""; //	ignore
+					
+					Object value = editor.getValue();
+					if (value == null)
+						return "";
+					else if (value instanceof Boolean)
+					{
+						return (((Boolean)value) ? "Y" : "N");
+					}
+					else if (value instanceof Timestamp)
+					{
+						String stringValue = null;
+						if (value != null && !value.toString().equals("")) {
+							Calendar c1 = Calendar.getInstance();
+							c1.setTime((Date) value);
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							stringValue = sdf.format(c1.getTime());
+						}
+						return stringValue;
+					}
+					else
+					{
+						return value.toString();
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Object getProperty(String propertyName) {
+			return null;
+		}
+
+		@Override
+		public MColumn getColumn(String columnName) {
+			return null;
+		}
+
+		@Override
+		public String getTrxName() {
+			return null;
+		}
+		
+	}
 } // ProcessParameterPanel

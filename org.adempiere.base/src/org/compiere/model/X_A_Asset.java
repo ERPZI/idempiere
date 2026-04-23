@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for A_Asset
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_Asset")
-public class X_A_Asset extends PO implements I_A_Asset, I_Persistent 
+public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_Asset (Properties ctx, int A_Asset_ID, String trxName)
@@ -89,6 +89,60 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_A_Asset (Properties ctx, String A_Asset_UU, String trxName)
+    {
+      super (ctx, A_Asset_UU, trxName);
+      /** if (A_Asset_UU == null)
+        {
+			setA_Asset_Action (null);
+// 'MD'
+			setA_Asset_Group_ID (0);
+			setA_Asset_ID (0);
+			setA_Asset_Status (null);
+// 'NW'
+			setIsDepreciated (false);
+			setIsDisposed (false);
+			setIsFullyDepreciated (false);
+// N
+			setIsInPosession (false);
+			setIsOwned (false);
+			setM_AttributeSetInstance_ID (0);
+			setM_Product_ID (0);
+			setName (null);
+			setProcessed (false);
+// 'N'
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Asset (Properties ctx, String A_Asset_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_Asset_UU, trxName, virtualColumns);
+      /** if (A_Asset_UU == null)
+        {
+			setA_Asset_Action (null);
+// 'MD'
+			setA_Asset_Group_ID (0);
+			setA_Asset_ID (0);
+			setA_Asset_Status (null);
+// 'NW'
+			setIsDepreciated (false);
+			setIsDisposed (false);
+			setIsFullyDepreciated (false);
+// N
+			setIsInPosession (false);
+			setIsOwned (false);
+			setM_AttributeSetInstance_ID (0);
+			setM_Product_ID (0);
+			setName (null);
+			setProcessed (false);
+// 'N'
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_A_Asset (Properties ctx, ResultSet rs, String trxName)
     {
@@ -96,7 +150,7 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -116,6 +170,49 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getAD_User_ID(), get_TrxName());
+	}
+
+	/** Set User/Contact.
+		@param AD_User_ID User within the system - Internal or Business Partner Contact
+	*/
+	public void setAD_User_ID (int AD_User_ID)
+	{
+		if (AD_User_ID < 1)
+			set_Value (COLUMNNAME_AD_User_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
+	}
+
+	/** Get User/Contact.
+		@return User within the system - Internal or Business Partner Contact
+	  */
+	public int getAD_User_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Asset Type.
+		@param A_AssetType Asset Type
+	*/
+	public void setA_AssetType (String A_AssetType)
+	{
+		set_Value (COLUMNNAME_A_AssetType, A_AssetType);
+	}
+
+	/** Get Asset Type.
+		@return Asset Type	  */
+	public String getA_AssetType()
+	{
+		return (String)get_Value(COLUMNNAME_A_AssetType);
+	}
 
 	/** A_Asset_Action AD_Reference_ID=53360 */
 	public static final int A_ASSET_ACTION_AD_Reference_ID=53360;
@@ -288,21 +385,6 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 		return (String)get_Value(COLUMNNAME_A_Asset_Status);
 	}
 
-	/** Set Asset Type.
-		@param A_AssetType Asset Type
-	*/
-	public void setA_AssetType (String A_AssetType)
-	{
-		set_Value (COLUMNNAME_A_AssetType, A_AssetType);
-	}
-
-	/** Get Asset Type.
-		@return Asset Type	  */
-	public String getA_AssetType()
-	{
-		return (String)get_Value(COLUMNNAME_A_AssetType);
-	}
-
 	public org.compiere.model.I_A_Asset_Type getA_Asset_Type() throws RuntimeException
 	{
 		return (org.compiere.model.I_A_Asset_Type)MTable.get(getCtx(), org.compiere.model.I_A_Asset_Type.Table_ID)
@@ -343,34 +425,6 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public String getA_Asset_UU()
 	{
 		return (String)get_Value(COLUMNNAME_A_Asset_UU);
-	}
-
-	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
-			.getPO(getAD_User_ID(), get_TrxName());
-	}
-
-	/** Set User/Contact.
-		@param AD_User_ID User within the system - Internal or Business Partner Contact
-	*/
-	public void setAD_User_ID (int AD_User_ID)
-	{
-		if (AD_User_ID < 1)
-			set_Value (COLUMNNAME_AD_User_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_User_ID, Integer.valueOf(AD_User_ID));
-	}
-
-	/** Get User/Contact.
-		@return User within the system - Internal or Business Partner Contact
-	  */
-	public int getAD_User_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_User_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	public org.compiere.model.I_A_Asset getA_Parent_Asset() throws RuntimeException
@@ -527,6 +581,34 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_BPartner getC_BPartnerSR() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartnerSR_ID(), get_TrxName());
+	}
+
+	/** Set BPartner (Agent).
+		@param C_BPartnerSR_ID Business Partner (Agent or Sales Rep)
+	*/
+	public void setC_BPartnerSR_ID (int C_BPartnerSR_ID)
+	{
+		if (C_BPartnerSR_ID < 1)
+			set_Value (COLUMNNAME_C_BPartnerSR_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BPartnerSR_ID, Integer.valueOf(C_BPartnerSR_ID));
+	}
+
+	/** Get BPartner (Agent).
+		@return Business Partner (Agent or Sales Rep)
+	  */
+	public int getC_BPartnerSR_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartnerSR_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -578,34 +660,6 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BPartner getC_BPartnerSR() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_BPartnerSR_ID(), get_TrxName());
-	}
-
-	/** Set BPartner (Agent).
-		@param C_BPartnerSR_ID Business Partner (Agent or Sales Rep)
-	*/
-	public void setC_BPartnerSR_ID (int C_BPartnerSR_ID)
-	{
-		if (C_BPartnerSR_ID < 1)
-			set_Value (COLUMNNAME_C_BPartnerSR_ID, null);
-		else
-			set_Value (COLUMNNAME_C_BPartnerSR_ID, Integer.valueOf(C_BPartnerSR_ID));
-	}
-
-	/** Get BPartner (Agent).
-		@return Business Partner (Agent or Sales Rep)
-	  */
-	public int getC_BPartnerSR_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartnerSR_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -744,10 +798,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isDepreciated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDepreciated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -767,10 +821,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isDisposed()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDisposed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -790,10 +844,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isFullyDepreciated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFullyDepreciated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -813,10 +867,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isInPosession()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInPosession);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -836,10 +890,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isOwned()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOwned);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -896,6 +950,22 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Lease Termination.
+		@param LeaseTerminationDate Lease Termination Date
+	*/
+	public void setLeaseTerminationDate (Timestamp LeaseTerminationDate)
+	{
+		set_Value (COLUMNNAME_LeaseTerminationDate, LeaseTerminationDate);
+	}
+
+	/** Get Lease Termination.
+		@return Lease Termination Date
+	  */
+	public Timestamp getLeaseTerminationDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_LeaseTerminationDate);
+	}
+
 	public org.compiere.model.I_C_BPartner getLease_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -922,22 +992,6 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Lease Termination.
-		@param LeaseTerminationDate Lease Termination Date
-	*/
-	public void setLeaseTerminationDate (Timestamp LeaseTerminationDate)
-	{
-		set_Value (COLUMNNAME_LeaseTerminationDate, LeaseTerminationDate);
-	}
-
-	/** Get Lease Termination.
-		@return Lease Termination Date
-	  */
-	public Timestamp getLeaseTerminationDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_LeaseTerminationDate);
 	}
 
 	/** Set Life use.
@@ -989,40 +1043,6 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public String getLot()
 	{
 		return (String)get_Value(COLUMNNAME_Lot);
-	}
-
-	/** Set Manufactured Year.
-		@param ManufacturedYear Manufactured Year
-	*/
-	public void setManufacturedYear (int ManufacturedYear)
-	{
-		set_Value (COLUMNNAME_ManufacturedYear, Integer.valueOf(ManufacturedYear));
-	}
-
-	/** Get Manufactured Year.
-		@return Manufactured Year	  */
-	public int getManufacturedYear()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_ManufacturedYear);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Manufacturer.
-		@param Manufacturer Manufacturer of the Product
-	*/
-	public void setManufacturer (String Manufacturer)
-	{
-		set_Value (COLUMNNAME_Manufacturer, Manufacturer);
-	}
-
-	/** Get Manufacturer.
-		@return Manufacturer of the Product
-	  */
-	public String getManufacturer()
-	{
-		return (String)get_Value(COLUMNNAME_Manufacturer);
 	}
 
 	public I_M_AttributeSetInstance getM_AttributeSetInstance() throws RuntimeException
@@ -1137,6 +1157,40 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Manufactured Year.
+		@param ManufacturedYear Manufactured Year
+	*/
+	public void setManufacturedYear (int ManufacturedYear)
+	{
+		set_Value (COLUMNNAME_ManufacturedYear, Integer.valueOf(ManufacturedYear));
+	}
+
+	/** Get Manufactured Year.
+		@return Manufactured Year	  */
+	public int getManufacturedYear()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ManufacturedYear);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Manufacturer.
+		@param Manufacturer Manufacturer of the Product
+	*/
+	public void setManufacturer (String Manufacturer)
+	{
+		set_Value (COLUMNNAME_Manufacturer, Manufacturer);
+	}
+
+	/** Get Manufacturer.
+		@return Manufacturer of the Product
+	  */
+	public String getManufacturer()
+	{
+		return (String)get_Value(COLUMNNAME_Manufacturer);
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -1170,7 +1224,7 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	}
 
 	/** Set Next Unit.
-		@param NextMaintenenceUnit Next Maintenence Unit
+		@param NextMaintenenceUnit Next Maintenance Unit
 	*/
 	public void setNextMaintenenceUnit (int NextMaintenenceUnit)
 	{
@@ -1178,7 +1232,7 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	}
 
 	/** Get Next Unit.
-		@return Next Maintenence Unit
+		@return Next Maintenance Unit
 	  */
 	public int getNextMaintenenceUnit()
 	{
@@ -1202,10 +1256,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1224,10 +1278,10 @@ public class X_A_Asset extends PO implements I_A_Asset, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

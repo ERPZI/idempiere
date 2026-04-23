@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_WF_Node
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_WF_Node")
-public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent 
+public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_WF_Node (Properties ctx, int AD_WF_Node_ID, String trxName)
@@ -42,10 +42,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
       super (ctx, AD_WF_Node_ID, trxName);
       /** if (AD_WF_Node_ID == 0)
         {
-			setAction (null);
-// Z
 			setAD_WF_Node_ID (0);
 			setAD_Workflow_ID (0);
+			setAction (null);
+// Z
 			setCost (Env.ZERO);
 			setDuration (0);
 			setEntityType (null);
@@ -73,10 +73,72 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
       super (ctx, AD_WF_Node_ID, trxName, virtualColumns);
       /** if (AD_WF_Node_ID == 0)
         {
-			setAction (null);
-// Z
 			setAD_WF_Node_ID (0);
 			setAD_Workflow_ID (0);
+			setAction (null);
+// Z
+			setCost (Env.ZERO);
+			setDuration (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsAttachedDocumentToEmail (true);
+// Y
+			setIsCentrallyMaintained (true);
+// Y
+			setJoinElement (null);
+// X
+			setLimit (0);
+			setName (null);
+			setSplitElement (null);
+// X
+			setValue (null);
+			setWaitingTime (0);
+			setXPosition (0);
+			setYPosition (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_Node (Properties ctx, String AD_WF_Node_UU, String trxName)
+    {
+      super (ctx, AD_WF_Node_UU, trxName);
+      /** if (AD_WF_Node_UU == null)
+        {
+			setAD_WF_Node_ID (0);
+			setAD_Workflow_ID (0);
+			setAction (null);
+// Z
+			setCost (Env.ZERO);
+			setDuration (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsAttachedDocumentToEmail (true);
+// Y
+			setIsCentrallyMaintained (true);
+// Y
+			setJoinElement (null);
+// X
+			setLimit (0);
+			setName (null);
+			setSplitElement (null);
+// X
+			setValue (null);
+			setWaitingTime (0);
+			setXPosition (0);
+			setYPosition (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_Node (Properties ctx, String AD_WF_Node_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_WF_Node_UU, trxName, virtualColumns);
+      /** if (AD_WF_Node_UU == null)
+        {
+			setAD_WF_Node_ID (0);
+			setAD_Workflow_ID (0);
+			setAction (null);
+// Z
 			setCost (Env.ZERO);
 			setDuration (0);
 			setEntityType (null);
@@ -105,7 +167,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -125,51 +187,6 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** Action AD_Reference_ID=302 */
-	public static final int ACTION_AD_Reference_ID=302;
-	/** User Workbench = B */
-	public static final String ACTION_UserWorkbench = "B";
-	/** User Choice = C */
-	public static final String ACTION_UserChoice = "C";
-	/** Document Action = D */
-	public static final String ACTION_DocumentAction = "D";
-	/** Sub Workflow = F */
-	public static final String ACTION_SubWorkflow = "F";
-	/** User Info = I */
-	public static final String ACTION_UserInfo = "I";
-	/** EMail = M */
-	public static final String ACTION_EMail = "M";
-	/** Apps Process = P */
-	public static final String ACTION_AppsProcess = "P";
-	/** Apps Report = R */
-	public static final String ACTION_AppsReport = "R";
-	/** Apps Task = T */
-	public static final String ACTION_AppsTask = "T";
-	/** Set Variable = V */
-	public static final String ACTION_SetVariable = "V";
-	/** User Window = W */
-	public static final String ACTION_UserWindow = "W";
-	/** User Form = X */
-	public static final String ACTION_UserForm = "X";
-	/** Wait (Sleep) = Z */
-	public static final String ACTION_WaitSleep = "Z";
-	/** Set Action.
-		@param Action Indicates the Action to be performed
-	*/
-	public void setAction (String Action)
-	{
-
-		set_Value (COLUMNNAME_Action, Action);
-	}
-
-	/** Get Action.
-		@return Indicates the Action to be performed
-	  */
-	public String getAction()
-	{
-		return (String)get_Value(COLUMNNAME_Action);
-	}
 
 	public org.compiere.model.I_AD_Column getAD_Column() throws RuntimeException
 	{
@@ -515,6 +532,51 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Action AD_Reference_ID=302 */
+	public static final int ACTION_AD_Reference_ID=302;
+	/** User Workbench = B */
+	public static final String ACTION_UserWorkbench = "B";
+	/** User Choice = C */
+	public static final String ACTION_UserChoice = "C";
+	/** Document Action = D */
+	public static final String ACTION_DocumentAction = "D";
+	/** Sub Workflow = F */
+	public static final String ACTION_SubWorkflow = "F";
+	/** User Info = I */
+	public static final String ACTION_UserInfo = "I";
+	/** EMail = M */
+	public static final String ACTION_EMail = "M";
+	/** Apps Process = P */
+	public static final String ACTION_AppsProcess = "P";
+	/** Apps Report = R */
+	public static final String ACTION_AppsReport = "R";
+	/** Apps Task = T */
+	public static final String ACTION_AppsTask = "T";
+	/** Set Variable = V */
+	public static final String ACTION_SetVariable = "V";
+	/** User Window = W */
+	public static final String ACTION_UserWindow = "W";
+	/** User Form = X */
+	public static final String ACTION_UserForm = "X";
+	/** Wait (Sleep) = Z */
+	public static final String ACTION_WaitSleep = "Z";
+	/** Set Action.
+		@param Action Indicates the Action to be performed
+	*/
+	public void setAction (String Action)
+	{
+
+		set_Value (COLUMNNAME_Action, Action);
+	}
+
+	/** Get Action.
+		@return Indicates the Action to be performed
+	  */
+	public String getAction()
+	{
+		return (String)get_Value(COLUMNNAME_Action);
+	}
+
 	/** Set Attribute Name.
 		@param AttributeName Name of the Attribute
 	*/
@@ -833,10 +895,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isAttachedDocumentToEmail()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAttachedDocumentToEmail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -856,10 +918,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isCentrallyMaintained()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCentrallyMaintained);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -878,10 +940,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isMilestone()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMilestone);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -900,10 +962,10 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public boolean isSubcontracting()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSubcontracting);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -988,7 +1050,7 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -1078,6 +1140,34 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException
+	{
+		return (org.compiere.model.I_S_Resource)MTable.get(getCtx(), org.compiere.model.I_S_Resource.Table_ID)
+			.getPO(getS_Resource_ID(), get_TrxName());
+	}
+
+	/** Set Resource.
+		@param S_Resource_ID Resource
+	*/
+	public void setS_Resource_ID (int S_Resource_ID)
+	{
+		if (S_Resource_ID < 1)
+			set_Value (COLUMNNAME_S_Resource_ID, null);
+		else
+			set_Value (COLUMNNAME_S_Resource_ID, Integer.valueOf(S_Resource_ID));
+	}
+
+	/** Get Resource.
+		@return Resource
+	  */
+	public int getS_Resource_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_S_Resource_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Setup Time.
 		@param SetupTime Setup time before starting Production
 	*/
@@ -1118,34 +1208,6 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public String getSplitElement()
 	{
 		return (String)get_Value(COLUMNNAME_SplitElement);
-	}
-
-	public org.compiere.model.I_S_Resource getS_Resource() throws RuntimeException
-	{
-		return (org.compiere.model.I_S_Resource)MTable.get(getCtx(), org.compiere.model.I_S_Resource.Table_ID)
-			.getPO(getS_Resource_ID(), get_TrxName());
-	}
-
-	/** Set Resource.
-		@param S_Resource_ID Resource
-	*/
-	public void setS_Resource_ID (int S_Resource_ID)
-	{
-		if (S_Resource_ID < 1)
-			set_Value (COLUMNNAME_S_Resource_ID, null);
-		else
-			set_Value (COLUMNNAME_S_Resource_ID, Integer.valueOf(S_Resource_ID));
-	}
-
-	/** Get Resource.
-		@return Resource
-	  */
-	public int getS_Resource_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_S_Resource_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** StartMode AD_Reference_ID=303 */
@@ -1261,25 +1323,6 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return (String)get_Value(COLUMNNAME_Value);
 	}
 
-	/** Set Waiting Time.
-		@param WaitingTime Workflow Simulation Waiting time
-	*/
-	public void setWaitingTime (int WaitingTime)
-	{
-		set_Value (COLUMNNAME_WaitingTime, Integer.valueOf(WaitingTime));
-	}
-
-	/** Get Waiting Time.
-		@return Workflow Simulation Waiting time
-	  */
-	public int getWaitingTime()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_WaitingTime);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Wait Time.
 		@param WaitTime Time in minutes to wait (sleep)
 	*/
@@ -1294,6 +1337,25 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public int getWaitTime()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_WaitTime);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Waiting Time.
+		@param WaitingTime Workflow Simulation Waiting time
+	*/
+	public void setWaitingTime (int WaitingTime)
+	{
+		set_Value (COLUMNNAME_WaitingTime, Integer.valueOf(WaitingTime));
+	}
+
+	/** Get Waiting Time.
+		@return Workflow Simulation Waiting time
+	  */
+	public int getWaitingTime()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_WaitingTime);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1365,25 +1427,6 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Yield %.
-		@param Yield The Yield is the percentage of a lot that is expected to be of acceptable wuality may fall below 100 percent
-	*/
-	public void setYield (int Yield)
-	{
-		set_Value (COLUMNNAME_Yield, Integer.valueOf(Yield));
-	}
-
-	/** Get Yield %.
-		@return The Yield is the percentage of a lot that is expected to be of acceptable wuality may fall below 100 percent
-	  */
-	public int getYield()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Yield);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Y Position.
 		@param YPosition Absolute Y (vertical) position in 1/72 of an inch
 	*/
@@ -1398,6 +1441,25 @@ public class X_AD_WF_Node extends PO implements I_AD_WF_Node, I_Persistent
 	public int getYPosition()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_YPosition);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Yield %.
+		@param Yield The Yield is the percentage of a lot that is expected to be of acceptable wuality may fall below 100 percent
+	*/
+	public void setYield (int Yield)
+	{
+		set_Value (COLUMNNAME_Yield, Integer.valueOf(Yield));
+	}
+
+	/** Get Yield %.
+		@return The Yield is the percentage of a lot that is expected to be of acceptable wuality may fall below 100 percent
+	  */
+	public int getYield()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Yield);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

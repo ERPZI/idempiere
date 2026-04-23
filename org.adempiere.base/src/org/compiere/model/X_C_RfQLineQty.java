@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_RfQLineQty
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_RfQLineQty")
-public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent 
+public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_RfQLineQty (Properties ctx, int C_RfQLineQty_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
       /** if (C_RfQLineQty_ID == 0)
         {
 			setBenchmarkPrice (Env.ZERO);
-			setC_RfQLine_ID (0);
 			setC_RfQLineQty_ID (0);
+			setC_RfQLine_ID (0);
 			setC_UOM_ID (0);
 			setIsOfferQty (false);
 			setIsPurchaseQty (false);
@@ -61,8 +61,46 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
       /** if (C_RfQLineQty_ID == 0)
         {
 			setBenchmarkPrice (Env.ZERO);
-			setC_RfQLine_ID (0);
 			setC_RfQLineQty_ID (0);
+			setC_RfQLine_ID (0);
+			setC_UOM_ID (0);
+			setIsOfferQty (false);
+			setIsPurchaseQty (false);
+			setIsRfQQty (true);
+// Y
+			setQty (Env.ZERO);
+// 1
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_RfQLineQty (Properties ctx, String C_RfQLineQty_UU, String trxName)
+    {
+      super (ctx, C_RfQLineQty_UU, trxName);
+      /** if (C_RfQLineQty_UU == null)
+        {
+			setBenchmarkPrice (Env.ZERO);
+			setC_RfQLineQty_ID (0);
+			setC_RfQLine_ID (0);
+			setC_UOM_ID (0);
+			setIsOfferQty (false);
+			setIsPurchaseQty (false);
+			setIsRfQQty (true);
+// Y
+			setQty (Env.ZERO);
+// 1
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_RfQLineQty (Properties ctx, String C_RfQLineQty_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_RfQLineQty_UU, trxName, virtualColumns);
+      /** if (C_RfQLineQty_UU == null)
+        {
+			setBenchmarkPrice (Env.ZERO);
+			setC_RfQLineQty_ID (0);
+			setC_RfQLine_ID (0);
 			setC_UOM_ID (0);
 			setIsOfferQty (false);
 			setIsPurchaseQty (false);
@@ -80,7 +118,7 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -139,34 +177,6 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 		return bd;
 	}
 
-	public org.compiere.model.I_C_RfQLine getC_RfQLine() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_RfQLine)MTable.get(getCtx(), org.compiere.model.I_C_RfQLine.Table_ID)
-			.getPO(getC_RfQLine_ID(), get_TrxName());
-	}
-
-	/** Set RfQ Line.
-		@param C_RfQLine_ID Request for Quotation Line
-	*/
-	public void setC_RfQLine_ID (int C_RfQLine_ID)
-	{
-		if (C_RfQLine_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_RfQLine_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_RfQLine_ID, Integer.valueOf(C_RfQLine_ID));
-	}
-
-	/** Get RfQ Line.
-		@return Request for Quotation Line
-	  */
-	public int getC_RfQLine_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_RfQLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set RfQ Line Quantity.
 		@param C_RfQLineQty_ID Request for Quotation Line Quantity
 	*/
@@ -204,6 +214,34 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 		return (String)get_Value(COLUMNNAME_C_RfQLineQty_UU);
 	}
 
+	public org.compiere.model.I_C_RfQLine getC_RfQLine() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_RfQLine)MTable.get(getCtx(), org.compiere.model.I_C_RfQLine.Table_ID)
+			.getPO(getC_RfQLine_ID(), get_TrxName());
+	}
+
+	/** Set RfQ Line.
+		@param C_RfQLine_ID Request for Quotation Line
+	*/
+	public void setC_RfQLine_ID (int C_RfQLine_ID)
+	{
+		if (C_RfQLine_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_RfQLine_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_RfQLine_ID, Integer.valueOf(C_RfQLine_ID));
+	}
+
+	/** Get RfQ Line.
+		@return Request for Quotation Line
+	  */
+	public int getC_RfQLine_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_RfQLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_ID)
@@ -235,7 +273,7 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getC_UOM_ID()));
     }
@@ -254,10 +292,10 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 	public boolean isOfferQty()
 	{
 		Object oo = get_Value(COLUMNNAME_IsOfferQty);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -277,10 +315,10 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 	public boolean isPurchaseQty()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPurchaseQty);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -300,10 +338,10 @@ public class X_C_RfQLineQty extends PO implements I_C_RfQLineQty, I_Persistent
 	public boolean isRfQQty()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRfQQty);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

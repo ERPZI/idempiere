@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for C_BP_Employee_Acct
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_BP_Employee_Acct")
-public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_Persistent 
+public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_BP_Employee_Acct (Properties ctx, int C_BP_Employee_Acct_ID, String trxName)
@@ -54,6 +54,28 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_BP_Employee_Acct (Properties ctx, String C_BP_Employee_Acct_UU, String trxName)
+    {
+      super (ctx, C_BP_Employee_Acct_UU, trxName);
+      /** if (C_BP_Employee_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_BPartner_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BP_Employee_Acct (Properties ctx, String C_BP_Employee_Acct_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BP_Employee_Acct_UU, trxName, virtualColumns);
+      /** if (C_BP_Employee_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_BPartner_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_BP_Employee_Acct (Properties ctx, ResultSet rs, String trxName)
     {
@@ -61,7 +83,7 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -78,7 +100,7 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_BP_Employee_Acct[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -110,6 +132,21 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
 		return ii.intValue();
 	}
 
+	/** Set C_BP_Employee_Acct_UU.
+		@param C_BP_Employee_Acct_UU C_BP_Employee_Acct_UU
+	*/
+	public void setC_BP_Employee_Acct_UU (String C_BP_Employee_Acct_UU)
+	{
+		set_Value (COLUMNNAME_C_BP_Employee_Acct_UU, C_BP_Employee_Acct_UU);
+	}
+
+	/** Get C_BP_Employee_Acct_UU.
+		@return C_BP_Employee_Acct_UU	  */
+	public String getC_BP_Employee_Acct_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_BP_Employee_Acct_UU);
+	}
+
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -136,20 +173,5 @@ public class X_C_BP_Employee_Acct extends PO implements I_C_BP_Employee_Acct, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set C_BP_Employee_Acct_UU.
-		@param C_BP_Employee_Acct_UU C_BP_Employee_Acct_UU
-	*/
-	public void setC_BP_Employee_Acct_UU (String C_BP_Employee_Acct_UU)
-	{
-		set_Value (COLUMNNAME_C_BP_Employee_Acct_UU, C_BP_Employee_Acct_UU);
-	}
-
-	/** Get C_BP_Employee_Acct_UU.
-		@return C_BP_Employee_Acct_UU	  */
-	public String getC_BP_Employee_Acct_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_BP_Employee_Acct_UU);
 	}
 }

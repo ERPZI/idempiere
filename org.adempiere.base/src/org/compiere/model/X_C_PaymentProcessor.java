@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaymentProcessor
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_PaymentProcessor")
-public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_Persistent 
+public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_PaymentProcessor (Properties ctx, int C_PaymentProcessor_ID, String trxName)
@@ -51,9 +51,9 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 			setAcceptDiscover (false);
 			setAcceptMC (false);
 			setAcceptVisa (false);
+			setC_PaymentProcessor_ID (0);
 			setCommission (Env.ZERO);
 			setCostPerTrx (Env.ZERO);
-			setC_PaymentProcessor_ID (0);
 			setHostAddress (null);
 			setHostPort (0);
 			setName (null);
@@ -77,9 +77,61 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 			setAcceptDiscover (false);
 			setAcceptMC (false);
 			setAcceptVisa (false);
+			setC_PaymentProcessor_ID (0);
 			setCommission (Env.ZERO);
 			setCostPerTrx (Env.ZERO);
+			setHostAddress (null);
+			setHostPort (0);
+			setName (null);
+			setRequireVV (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaymentProcessor (Properties ctx, String C_PaymentProcessor_UU, String trxName)
+    {
+      super (ctx, C_PaymentProcessor_UU, trxName);
+      /** if (C_PaymentProcessor_UU == null)
+        {
+			setAcceptAMEX (false);
+			setAcceptATM (false);
+			setAcceptCheck (false);
+			setAcceptCorporate (false);
+			setAcceptDiners (false);
+			setAcceptDirectDebit (false);
+			setAcceptDirectDeposit (false);
+			setAcceptDiscover (false);
+			setAcceptMC (false);
+			setAcceptVisa (false);
 			setC_PaymentProcessor_ID (0);
+			setCommission (Env.ZERO);
+			setCostPerTrx (Env.ZERO);
+			setHostAddress (null);
+			setHostPort (0);
+			setName (null);
+			setRequireVV (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_PaymentProcessor (Properties ctx, String C_PaymentProcessor_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_PaymentProcessor_UU, trxName, virtualColumns);
+      /** if (C_PaymentProcessor_UU == null)
+        {
+			setAcceptAMEX (false);
+			setAcceptATM (false);
+			setAcceptCheck (false);
+			setAcceptCorporate (false);
+			setAcceptDiners (false);
+			setAcceptDirectDebit (false);
+			setAcceptDirectDeposit (false);
+			setAcceptDiscover (false);
+			setAcceptMC (false);
+			setAcceptVisa (false);
+			setC_PaymentProcessor_ID (0);
+			setCommission (Env.ZERO);
+			setCostPerTrx (Env.ZERO);
 			setHostAddress (null);
 			setHostPort (0);
 			setName (null);
@@ -94,7 +146,7 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -114,236 +166,6 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** Set Accept AMEX.
-		@param AcceptAMEX Accept American Express Card
-	*/
-	public void setAcceptAMEX (boolean AcceptAMEX)
-	{
-		set_Value (COLUMNNAME_AcceptAMEX, Boolean.valueOf(AcceptAMEX));
-	}
-
-	/** Get Accept AMEX.
-		@return Accept American Express Card
-	  */
-	public boolean isAcceptAMEX()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptAMEX);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept ATM.
-		@param AcceptATM Accept Bank ATM Card
-	*/
-	public void setAcceptATM (boolean AcceptATM)
-	{
-		set_Value (COLUMNNAME_AcceptATM, Boolean.valueOf(AcceptATM));
-	}
-
-	/** Get Accept ATM.
-		@return Accept Bank ATM Card
-	  */
-	public boolean isAcceptATM()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptATM);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Electronic Check.
-		@param AcceptCheck Accept ECheck (Electronic Checks)
-	*/
-	public void setAcceptCheck (boolean AcceptCheck)
-	{
-		set_Value (COLUMNNAME_AcceptCheck, Boolean.valueOf(AcceptCheck));
-	}
-
-	/** Get Accept Electronic Check.
-		@return Accept ECheck (Electronic Checks)
-	  */
-	public boolean isAcceptCheck()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptCheck);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Corporate.
-		@param AcceptCorporate Accept Corporate Purchase Cards
-	*/
-	public void setAcceptCorporate (boolean AcceptCorporate)
-	{
-		set_Value (COLUMNNAME_AcceptCorporate, Boolean.valueOf(AcceptCorporate));
-	}
-
-	/** Get Accept Corporate.
-		@return Accept Corporate Purchase Cards
-	  */
-	public boolean isAcceptCorporate()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptCorporate);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Diners.
-		@param AcceptDiners Accept Diner&#039;s Club
-	*/
-	public void setAcceptDiners (boolean AcceptDiners)
-	{
-		set_Value (COLUMNNAME_AcceptDiners, Boolean.valueOf(AcceptDiners));
-	}
-
-	/** Get Accept Diners.
-		@return Accept Diner&#039;s Club
-	  */
-	public boolean isAcceptDiners()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptDiners);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Direct Debit.
-		@param AcceptDirectDebit Accept Direct Debits (vendor initiated)
-	*/
-	public void setAcceptDirectDebit (boolean AcceptDirectDebit)
-	{
-		set_Value (COLUMNNAME_AcceptDirectDebit, Boolean.valueOf(AcceptDirectDebit));
-	}
-
-	/** Get Accept Direct Debit.
-		@return Accept Direct Debits (vendor initiated)
-	  */
-	public boolean isAcceptDirectDebit()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptDirectDebit);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Direct Deposit.
-		@param AcceptDirectDeposit Accept Direct Deposit (payee initiated)
-	*/
-	public void setAcceptDirectDeposit (boolean AcceptDirectDeposit)
-	{
-		set_Value (COLUMNNAME_AcceptDirectDeposit, Boolean.valueOf(AcceptDirectDeposit));
-	}
-
-	/** Get Accept Direct Deposit.
-		@return Accept Direct Deposit (payee initiated)
-	  */
-	public boolean isAcceptDirectDeposit()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptDirectDeposit);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Discover.
-		@param AcceptDiscover Accept Discover Card
-	*/
-	public void setAcceptDiscover (boolean AcceptDiscover)
-	{
-		set_Value (COLUMNNAME_AcceptDiscover, Boolean.valueOf(AcceptDiscover));
-	}
-
-	/** Get Accept Discover.
-		@return Accept Discover Card
-	  */
-	public boolean isAcceptDiscover()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptDiscover);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept MasterCard.
-		@param AcceptMC Accept Master Card
-	*/
-	public void setAcceptMC (boolean AcceptMC)
-	{
-		set_Value (COLUMNNAME_AcceptMC, Boolean.valueOf(AcceptMC));
-	}
-
-	/** Get Accept MasterCard.
-		@return Accept Master Card
-	  */
-	public boolean isAcceptMC()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptMC);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Accept Visa.
-		@param AcceptVisa Accept Visa Cards
-	*/
-	public void setAcceptVisa (boolean AcceptVisa)
-	{
-		set_Value (COLUMNNAME_AcceptVisa, Boolean.valueOf(AcceptVisa));
-	}
-
-	/** Get Accept Visa.
-		@return Accept Visa Cards
-	  */
-	public boolean isAcceptVisa()
-	{
-		Object oo = get_Value(COLUMNNAME_AcceptVisa);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
 
 	public org.compiere.model.I_AD_Sequence getAD_Sequence() throws RuntimeException
 	{
@@ -371,6 +193,236 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Accept AMEX.
+		@param AcceptAMEX Accept American Express Card
+	*/
+	public void setAcceptAMEX (boolean AcceptAMEX)
+	{
+		set_Value (COLUMNNAME_AcceptAMEX, Boolean.valueOf(AcceptAMEX));
+	}
+
+	/** Get Accept AMEX.
+		@return Accept American Express Card
+	  */
+	public boolean isAcceptAMEX()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptAMEX);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept ATM.
+		@param AcceptATM Accept Bank ATM Card
+	*/
+	public void setAcceptATM (boolean AcceptATM)
+	{
+		set_Value (COLUMNNAME_AcceptATM, Boolean.valueOf(AcceptATM));
+	}
+
+	/** Get Accept ATM.
+		@return Accept Bank ATM Card
+	  */
+	public boolean isAcceptATM()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptATM);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Electronic Check.
+		@param AcceptCheck Accept ECheck (Electronic Checks)
+	*/
+	public void setAcceptCheck (boolean AcceptCheck)
+	{
+		set_Value (COLUMNNAME_AcceptCheck, Boolean.valueOf(AcceptCheck));
+	}
+
+	/** Get Accept Electronic Check.
+		@return Accept ECheck (Electronic Checks)
+	  */
+	public boolean isAcceptCheck()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptCheck);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Corporate.
+		@param AcceptCorporate Accept Corporate Purchase Cards
+	*/
+	public void setAcceptCorporate (boolean AcceptCorporate)
+	{
+		set_Value (COLUMNNAME_AcceptCorporate, Boolean.valueOf(AcceptCorporate));
+	}
+
+	/** Get Accept Corporate.
+		@return Accept Corporate Purchase Cards
+	  */
+	public boolean isAcceptCorporate()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptCorporate);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Diners.
+		@param AcceptDiners Accept Diner&#039;s Club
+	*/
+	public void setAcceptDiners (boolean AcceptDiners)
+	{
+		set_Value (COLUMNNAME_AcceptDiners, Boolean.valueOf(AcceptDiners));
+	}
+
+	/** Get Accept Diners.
+		@return Accept Diner&#039;s Club
+	  */
+	public boolean isAcceptDiners()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptDiners);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Direct Debit.
+		@param AcceptDirectDebit Accept Direct Debits (vendor initiated)
+	*/
+	public void setAcceptDirectDebit (boolean AcceptDirectDebit)
+	{
+		set_Value (COLUMNNAME_AcceptDirectDebit, Boolean.valueOf(AcceptDirectDebit));
+	}
+
+	/** Get Accept Direct Debit.
+		@return Accept Direct Debits (vendor initiated)
+	  */
+	public boolean isAcceptDirectDebit()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptDirectDebit);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Direct Deposit.
+		@param AcceptDirectDeposit Accept Direct Deposit (payee initiated)
+	*/
+	public void setAcceptDirectDeposit (boolean AcceptDirectDeposit)
+	{
+		set_Value (COLUMNNAME_AcceptDirectDeposit, Boolean.valueOf(AcceptDirectDeposit));
+	}
+
+	/** Get Accept Direct Deposit.
+		@return Accept Direct Deposit (payee initiated)
+	  */
+	public boolean isAcceptDirectDeposit()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptDirectDeposit);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Discover.
+		@param AcceptDiscover Accept Discover Card
+	*/
+	public void setAcceptDiscover (boolean AcceptDiscover)
+	{
+		set_Value (COLUMNNAME_AcceptDiscover, Boolean.valueOf(AcceptDiscover));
+	}
+
+	/** Get Accept Discover.
+		@return Accept Discover Card
+	  */
+	public boolean isAcceptDiscover()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptDiscover);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept MasterCard.
+		@param AcceptMC Accept Master Card
+	*/
+	public void setAcceptMC (boolean AcceptMC)
+	{
+		set_Value (COLUMNNAME_AcceptMC, Boolean.valueOf(AcceptMC));
+	}
+
+	/** Get Accept MasterCard.
+		@return Accept Master Card
+	  */
+	public boolean isAcceptMC()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptMC);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Accept Visa.
+		@param AcceptVisa Accept Visa Cards
+	*/
+	public void setAcceptVisa (boolean AcceptVisa)
+	{
+		set_Value (COLUMNNAME_AcceptVisa, Boolean.valueOf(AcceptVisa));
+	}
+
+	/** Get Accept Visa.
+		@return Accept Visa Cards
+	  */
+	public boolean isAcceptVisa()
+	{
+		Object oo = get_Value(COLUMNNAME_AcceptVisa);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	public org.compiere.model.I_C_BankAccount getC_BankAccount() throws RuntimeException
@@ -429,6 +481,43 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 		return ii.intValue();
 	}
 
+	/** Set Payment Processor.
+		@param C_PaymentProcessor_ID Payment processor for electronic payments
+	*/
+	public void setC_PaymentProcessor_ID (int C_PaymentProcessor_ID)
+	{
+		if (C_PaymentProcessor_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_PaymentProcessor_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_PaymentProcessor_ID, Integer.valueOf(C_PaymentProcessor_ID));
+	}
+
+	/** Get Payment Processor.
+		@return Payment processor for electronic payments
+	  */
+	public int getC_PaymentProcessor_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaymentProcessor_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set C_PaymentProcessor_UU.
+		@param C_PaymentProcessor_UU C_PaymentProcessor_UU
+	*/
+	public void setC_PaymentProcessor_UU (String C_PaymentProcessor_UU)
+	{
+		set_Value (COLUMNNAME_C_PaymentProcessor_UU, C_PaymentProcessor_UU);
+	}
+
+	/** Get C_PaymentProcessor_UU.
+		@return C_PaymentProcessor_UU	  */
+	public String getC_PaymentProcessor_UU()
+	{
+		return (String)get_Value(COLUMNNAME_C_PaymentProcessor_UU);
+	}
+
 	/** Set Commission %.
 		@param Commission Commission stated as a percentage
 	*/
@@ -465,43 +554,6 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
-	}
-
-	/** Set Payment Processor.
-		@param C_PaymentProcessor_ID Payment processor for electronic payments
-	*/
-	public void setC_PaymentProcessor_ID (int C_PaymentProcessor_ID)
-	{
-		if (C_PaymentProcessor_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_PaymentProcessor_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_PaymentProcessor_ID, Integer.valueOf(C_PaymentProcessor_ID));
-	}
-
-	/** Get Payment Processor.
-		@return Payment processor for electronic payments
-	  */
-	public int getC_PaymentProcessor_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_PaymentProcessor_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set C_PaymentProcessor_UU.
-		@param C_PaymentProcessor_UU C_PaymentProcessor_UU
-	*/
-	public void setC_PaymentProcessor_UU (String C_PaymentProcessor_UU)
-	{
-		set_Value (COLUMNNAME_C_PaymentProcessor_UU, C_PaymentProcessor_UU);
-	}
-
-	/** Get C_PaymentProcessor_UU.
-		@return C_PaymentProcessor_UU	  */
-	public String getC_PaymentProcessor_UU()
-	{
-		return (String)get_Value(COLUMNNAME_C_PaymentProcessor_UU);
 	}
 
 	/** Set Description.
@@ -593,7 +645,7 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -695,10 +747,10 @@ public class X_C_PaymentProcessor extends PO implements I_C_PaymentProcessor, I_
 	public boolean isRequireVV()
 	{
 		Object oo = get_Value(COLUMNNAME_RequireVV);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

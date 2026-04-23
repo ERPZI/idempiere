@@ -16,18 +16,19 @@
  *****************************************************************************/
 package org.compiere.model;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.Adempiere;
 import org.compiere.util.CLogger;
-import org.compiere.util.DB;
+import org.compiere.util.CacheMgt;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
 
 /**
- *	Role Org Access Model
+ *	Role Organization Access Model
  *	
  *  @author Jorg Janke
  *  @version $Id: MRoleOrgAccess.java,v 1.3 2006/07/30 00:58:38 jjanke Exp $
@@ -37,80 +38,62 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4664267788838719168L;
-
+	private static final long serialVersionUID = -3476937107774004286L;
 
 	/**
 	 * 	Get Organizational Access of Role
 	 *	@param ctx context
 	 *	@param AD_Role_ID role
-	 *	@return array of Role Org Access
+	 *	@return array of Role Organization Access
 	 */
 	public static MRoleOrgAccess[] getOfRole (Properties ctx, int AD_Role_ID)
 	{
-		return get (ctx, "SELECT * FROM AD_Role_OrgAccess WHERE AD_Role_ID=?", AD_Role_ID);	
+		return get (ctx, "AD_Role_ID=?", AD_Role_ID);
 	}	//	getOfRole
 
 	/**
 	 * 	Get Organizational Access of Client
 	 *	@param ctx context
 	 *	@param AD_Client_ID client
-	 *	@return array of Role Org Access
+	 *	@return array of Role Organization Access
 	 */
 	public static MRoleOrgAccess[] getOfClient (Properties ctx, int AD_Client_ID)
 	{
-		return get (ctx, "SELECT * FROM AD_Role_OrgAccess WHERE AD_Client_ID=?", AD_Client_ID);	
+		return get (ctx, "AD_Client_ID=?", AD_Client_ID);
 	}	//	getOfClient
 
 	/**
-	 * 	Get Organizational Access of Org
+	 * 	Get Organizational Access of Organization
 	 *	@param ctx context
-	 *	@param AD_Org_ID role
-	 *	@return array of Role Org Access
+	 *	@param AD_Org_ID organization
+	 *	@return array of Role Organization Access
 	 */
 	public static MRoleOrgAccess[] getOfOrg (Properties ctx, int AD_Org_ID)
 	{
-		return get (ctx, "SELECT * FROM AD_Role_OrgAccess WHERE AD_Org_ID=?", AD_Org_ID);	
+		return get (ctx, "AD_Org_ID=?", AD_Org_ID);
 	}	//	getOfOrg
-	
+
 	/**
-	 * 	Get Organizational Info
+	 * 	Get Organizational Access for Role
 	 *	@param ctx context
-	 *	@param sql sql command
-	 *	@param id id
-	 *	@return array of Role Org Access
+	 *	@param where SQL where clause
+	 *	@param id id parameter for SQL clause
+	 *	@return array of Role Organization Access
 	 */
-	private static MRoleOrgAccess[] get (Properties ctx, String sql, int id)
+	private static MRoleOrgAccess[] get (Properties ctx, String where, int id)
 	{
-		ArrayList<MRoleOrgAccess> list = new ArrayList<MRoleOrgAccess>();
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, id);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-				list.add (new MRoleOrgAccess(ctx, rs, null));
-		}
-		catch (Exception e)
-		{
-			s_log.log(Level.SEVERE, "get", e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
+		List<MRoleOrgAccess> list = new Query(ctx, Table_Name, where, null)
+				.setParameters(id)
+				.setOnlyActiveRecords(true)
+				.list();
 		MRoleOrgAccess[] retValue = new MRoleOrgAccess[list.size ()];
 		list.toArray (retValue);
 		return retValue;
 	}	//	get
-	
+
 	/**
-	 * 	Create Organizational Access for all Automatic Roles
-	 *	@param org org
+	 * 	Create Organizational Access for all Automatic Roles (IsManual=N)
+	 *	@param org organization
 	 *	@return true if created
 	 */
 	public static boolean createForOrg (MOrg org)
@@ -132,9 +115,8 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 	
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MRoleOrgAccess.class);
-
 	
-	/**************************************************************************
+	/**
 	 * 	Load Constructor
 	 *	@param ctx context
 	 *	@param rs result set
@@ -145,8 +127,19 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 		super(ctx, rs, trxName);
 	}	//	MRoleOrgAccess
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Role_OrgAccess_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MRoleOrgAccess(Properties ctx, String AD_Role_OrgAccess_UU, String trxName) {
+        super(ctx, AD_Role_OrgAccess_UU, trxName);
+		if (Util.isEmpty(AD_Role_OrgAccess_UU))
+			setInitialDefaults();
+    }
+
 	/**
-	 * 	Persistency Constructor
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -156,12 +149,19 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 		super(ctx, 0, trxName);
 		if (ignored != 0)
 			throw new IllegalArgumentException("Multi-Key");
-		setIsReadOnly(false);
+		setInitialDefaults();
 	}	//	MRoleOrgAccess
 	
 	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setIsReadOnly(false);
+	}
+
+	/**
 	 * 	Organization Constructor
-	 *	@param org org
+	 *	@param org organization
 	 *	@param AD_Role_ID role
 	 */
 	public MRoleOrgAccess (MOrg org, int AD_Role_ID)
@@ -174,7 +174,7 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 	/**
 	 * 	Role Constructor
 	 *	@param role role
-	 *	@param AD_Org_ID org
+	 *	@param AD_Org_ID organization
 	 */
 	public MRoleOrgAccess (MRole role, int AD_Org_ID)
 	{
@@ -187,6 +187,7 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("MRoleOrgAccess[");
@@ -197,9 +198,8 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 		sb.append("]");
 		return sb.toString();
 	}	//	toString
-
 	
-	/**************************************************************************
+	/**
 	 * 	Extended String Representation
 	 * 	@param ctx context
 	 *	@return extended info
@@ -217,45 +217,23 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 	
 	/**
 	 * 	Get Client Name
-	 *	@return name
+	 *	@return client name
 	 */
 	public String getClientName()
 	{
 		if (m_clientName == null)
 		{
-			String sql = "SELECT c.Name, o.Name "
-				+ "FROM AD_Client c INNER JOIN AD_Org o ON (c.AD_Client_ID=o.AD_Client_ID) "
-				+ "WHERE o.AD_Org_ID=?";
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try
-			{
-				pstmt = DB.prepareStatement(sql, null);
-				pstmt.setInt(1, getAD_Org_ID());
-				rs = pstmt.executeQuery();
-				if (rs.next())
-				{
-					m_clientName = rs.getString(1);
-					m_orgName = rs.getString(2);
-				}
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, "getClientName", e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-				rs = null;
-				pstmt = null;
-			}
+			MOrg org = MOrg.get(getAD_Org_ID());
+			MClient client = MClient.get(org.getAD_Client_ID());
+			m_clientName = client.getName();
+			m_orgName = org.getName();
 		}
 		return m_clientName;
 	}	//	getClientName
 	
 	/**
-	 * 	Get Client Name
-	 *	@return name
+	 * 	Get organization Name
+	 *	@return organization name
 	 */
 	public String getOrgName()
 	{
@@ -263,5 +241,21 @@ public class MRoleOrgAccess extends X_AD_Role_OrgAccess
 			getClientName();
 		return m_orgName;
 	}	//	getOrgName
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) {
+		// Reset role cache
+		if (success)
+			Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().reset(MRole.Table_Name, getAD_Role_ID()));
+		return success;
+	}	//	afterSave
+
+	@Override
+	protected boolean afterDelete(boolean success) {
+		// Reset role cache
+		if (success)
+			Adempiere.getThreadPoolExecutor().submit(() -> CacheMgt.get().reset(MRole.Table_Name, getAD_Role_ID()));
+		return success;
+	}
 
 }	//	MRoleOrgAccess

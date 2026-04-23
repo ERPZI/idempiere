@@ -22,7 +22,6 @@ import java.util.Properties;
 import org.compiere.util.DB;
 import org.compiere.util.Msg;
 
-
 /**
  *	Attribute Use Model
  *	
@@ -32,12 +31,21 @@ import org.compiere.util.Msg;
 public class MAttributeUse extends X_M_AttributeUse
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = -9159120094145438975L;
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_AttributeUse_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAttributeUse(Properties ctx, String M_AttributeUse_UU, String trxName) {
+        super(ctx, M_AttributeUse_UU, trxName);
+    }
+
 	/**
-	 * 	Persistency Constructor
 	 *	@param ctx context
 	 *	@param ignored ignored
 	 *	@param trxName transaction
@@ -50,7 +58,7 @@ public class MAttributeUse extends X_M_AttributeUse
 	}	//	MAttributeUse
 
 	/**
-	 * 	Load Cosntructor
+	 * 	Load Constructor
 	 *	@param ctx context
 	 *	@param rs result set
 	 *	@param trxName transaction
@@ -60,16 +68,11 @@ public class MAttributeUse extends X_M_AttributeUse
 		super(ctx, rs, trxName);
 	}	//	MAttributeUse
 
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true if can be saved
-	 */
 	@Override
 	protected boolean beforeSave(boolean newRecord) {
+		// Not advanced roles cannot assign for use a reference attribute
 		if ((newRecord || is_ValueChanged(COLUMNNAME_M_Attribute_ID))
-				&& ! MRole.getDefault().isAccessAdvanced()) {
-			// not advanced roles cannot assign for use a reference attribute
+				&& ! MRole.getDefault().isAccessAdvanced()) {			
 			MAttribute att = MAttribute.get(getCtx(), getM_Attribute_ID());
 			if (MAttribute.ATTRIBUTEVALUETYPE_Reference.equals(att.getAttributeValueType())) {
 				log.saveError("Error", Msg.getMsg(getCtx(), "ActionNotAllowedHere"));
@@ -77,7 +80,7 @@ public class MAttributeUse extends X_M_AttributeUse
 			}
 		}
 		
-		// Get Sequence No
+		// Set Sequence No
 		if (getSeqNo() == 0) {
 			String sql = "SELECT COALESCE(MAX(SeqNo),0)+10 FROM M_AttributeUse WHERE M_AttributeSet_ID=?";
 			int seqNo = DB.getSQLValue (get_TrxName(), sql, getM_AttributeSet_ID());
@@ -87,17 +90,12 @@ public class MAttributeUse extends X_M_AttributeUse
 		return true;
 	}
 
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
-		//	also used for afterDelete
+		// Update M_AttributeSet IsInstanceAttribute to Y if conditions are met 
 		StringBuilder sql = new StringBuilder("UPDATE M_AttributeSet mas")
 			.append(" SET IsInstanceAttribute='Y' ")
 			.append("WHERE M_AttributeSet_ID=").append(getM_AttributeSet_ID())
@@ -112,7 +110,7 @@ public class MAttributeUse extends X_M_AttributeUse
 		int no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
 			log.fine("afterSave - Set Instance Attribute");
-		//
+		// Update M_AttributeSet IsInstanceAttribute to N if conditions are met
 		sql = new StringBuilder("UPDATE M_AttributeSet mas")
 			.append(" SET IsInstanceAttribute='N' ")
 			.append("WHERE M_AttributeSet_ID=").append(getM_AttributeSet_ID())
@@ -129,13 +127,8 @@ public class MAttributeUse extends X_M_AttributeUse
 		
 		return success;
 	}	//	afterSave
-	
-	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
+		
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		afterSave(false, success);

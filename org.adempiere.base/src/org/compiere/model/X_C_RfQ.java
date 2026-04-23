@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_RfQ
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_RfQ")
-public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent 
+public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_RfQ (Properties ctx, int C_RfQ_ID, String trxName)
@@ -90,6 +90,60 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_RfQ (Properties ctx, String C_RfQ_UU, String trxName)
+    {
+      super (ctx, C_RfQ_UU, trxName);
+      /** if (C_RfQ_UU == null)
+        {
+			setC_Currency_ID (0);
+// @$C_Currency_ID @
+			setC_RfQ_ID (0);
+			setC_RfQ_Topic_ID (0);
+			setDateResponse (new Timestamp( System.currentTimeMillis() ));
+			setDocumentNo (null);
+			setIsInvitedVendorsOnly (false);
+			setIsQuoteAllQty (false);
+			setIsQuoteTotalAmt (false);
+			setIsRfQResponseAccepted (true);
+// Y
+			setIsSelfService (true);
+// Y
+			setName (null);
+			setProcessed (false);
+			setQuoteType (null);
+// S
+			setSalesRep_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_RfQ (Properties ctx, String C_RfQ_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_RfQ_UU, trxName, virtualColumns);
+      /** if (C_RfQ_UU == null)
+        {
+			setC_Currency_ID (0);
+// @$C_Currency_ID @
+			setC_RfQ_ID (0);
+			setC_RfQ_Topic_ID (0);
+			setDateResponse (new Timestamp( System.currentTimeMillis() ));
+			setDocumentNo (null);
+			setIsInvitedVendorsOnly (false);
+			setIsQuoteAllQty (false);
+			setIsQuoteTotalAmt (false);
+			setIsRfQResponseAccepted (true);
+// Y
+			setIsSelfService (true);
+// Y
+			setName (null);
+			setProcessed (false);
+			setQuoteType (null);
+// S
+			setSalesRep_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_RfQ (Properties ctx, ResultSet rs, String trxName)
     {
@@ -97,7 +151,7 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -230,21 +284,6 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Copy Lines.
-		@param CopyLines Copy Lines
-	*/
-	public void setCopyLines (String CopyLines)
-	{
-		set_Value (COLUMNNAME_CopyLines, CopyLines);
-	}
-
-	/** Get Copy Lines.
-		@return Copy Lines	  */
-	public String getCopyLines()
-	{
-		return (String)get_Value(COLUMNNAME_CopyLines);
-	}
-
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
@@ -271,37 +310,6 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Create PO.
-		@param CreatePO Create Purchase Order
-	*/
-	public void setCreatePO (String CreatePO)
-	{
-		set_Value (COLUMNNAME_CreatePO, CreatePO);
-	}
-
-	/** Get Create PO.
-		@return Create Purchase Order
-	  */
-	public String getCreatePO()
-	{
-		return (String)get_Value(COLUMNNAME_CreatePO);
-	}
-
-	/** Set Create SO.
-		@param CreateSO Create SO
-	*/
-	public void setCreateSO (String CreateSO)
-	{
-		set_Value (COLUMNNAME_CreateSO, CreateSO);
-	}
-
-	/** Get Create SO.
-		@return Create SO	  */
-	public String getCreateSO()
-	{
-		return (String)get_Value(COLUMNNAME_CreateSO);
 	}
 
 	/** Set RfQ.
@@ -367,6 +375,52 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public String getC_RfQ_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_RfQ_UU);
+	}
+
+	/** Set Copy Lines.
+		@param CopyLines Copy Lines
+	*/
+	public void setCopyLines (String CopyLines)
+	{
+		set_Value (COLUMNNAME_CopyLines, CopyLines);
+	}
+
+	/** Get Copy Lines.
+		@return Copy Lines	  */
+	public String getCopyLines()
+	{
+		return (String)get_Value(COLUMNNAME_CopyLines);
+	}
+
+	/** Set Create PO.
+		@param CreatePO Create Purchase Order
+	*/
+	public void setCreatePO (String CreatePO)
+	{
+		set_Value (COLUMNNAME_CreatePO, CreatePO);
+	}
+
+	/** Get Create PO.
+		@return Create Purchase Order
+	  */
+	public String getCreatePO()
+	{
+		return (String)get_Value(COLUMNNAME_CreatePO);
+	}
+
+	/** Set Create SO.
+		@param CreateSO Create SO
+	*/
+	public void setCreateSO (String CreateSO)
+	{
+		set_Value (COLUMNNAME_CreateSO, CreateSO);
+	}
+
+	/** Get Create SO.
+		@return Create SO	  */
+	public String getCreateSO()
+	{
+		return (String)get_Value(COLUMNNAME_CreateSO);
 	}
 
 	/** Set Response Date.
@@ -471,7 +525,7 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -506,10 +560,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isInvitedVendorsOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInvitedVendorsOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -529,10 +583,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isQuoteAllQty()
 	{
 		Object oo = get_Value(COLUMNNAME_IsQuoteAllQty);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -552,10 +606,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isQuoteTotalAmt()
 	{
 		Object oo = get_Value(COLUMNNAME_IsQuoteTotalAmt);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -575,10 +629,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isRfQResponseAccepted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRfQResponseAccepted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -598,10 +652,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isSelfService()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSelfService);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -656,10 +710,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -678,10 +732,10 @@ public class X_C_RfQ extends PO implements I_C_RfQ, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

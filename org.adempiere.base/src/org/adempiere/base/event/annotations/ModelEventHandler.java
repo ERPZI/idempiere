@@ -26,28 +26,32 @@ package org.adempiere.base.event.annotations;
 
 import java.lang.reflect.Field;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 
 import org.adempiere.base.Model;
 import org.adempiere.base.event.EventHelper;
 import org.adempiere.base.event.EventManager;
 import org.compiere.model.PO;
+import org.compiere.util.CLogger;
 import org.osgi.service.event.Event;
 
 /**
- * 
- * Event handler for PO related events (po_before_change, doc_before_complete, etc).
- * Delegate to {@link ModelEventDelegate} instance created for each event call
+ * Event handler for PO related events. <br/>
+ * Developers usually don't have to use this class directly; instead, the recommended approach is 
+ * to subclass {@link ModelEventDelegate} and use model event topic annotations.
  * @author hengsin
- * 
  */
 public final class ModelEventHandler<T extends PO> extends BaseEventHandler {
 
 	private Class<T> modelClassType;
 	private String tableName;
 	private BiFunction<T, Event, ? extends ModelEventDelegate<T>> supplier;
+	private static CLogger log = CLogger.getCLogger(ModelEventHandler.class);
 	
 	/**
 	 * @param modelClassType
+	 * @param delegateClass
+	 * @param supplier
 	 */
 	public ModelEventHandler(Class<T> modelClassType, Class<? extends ModelEventDelegate<T>> delegateClass, 
 			BiFunction<T, Event, ? extends ModelEventDelegate<T>> supplier) {
@@ -57,6 +61,9 @@ public final class ModelEventHandler<T extends PO> extends BaseEventHandler {
 		findTableName();
 	}
 
+	/**
+	 * Find table name property from annotation or static field (Table_Name).
+	 */
 	private void findTableName() {
 		try {
 			Model model = modelClassType.getSuperclass().getAnnotation(Model.class);
@@ -81,9 +88,14 @@ public final class ModelEventHandler<T extends PO> extends BaseEventHandler {
 		if (po == null || modelClassType == null)
 			return;
 		
-		if (!modelClassType.isAssignableFrom(po.getClass()))
-			return;
+		if (!modelClassType.isAssignableFrom(po.getClass())) {
+			if (log.isLoggable(Level.INFO))
+		        log.info(String.format("ModelEventHandler %s was skipped: the po class %s is not assignable to the expected type %s",
+		            delegateClass.getName(), po.getClass().getName(), modelClassType.getName()));
+		    return;
+		}
 		
+			
 		super.handleEvent(event);
 	}
 

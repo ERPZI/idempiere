@@ -16,18 +16,16 @@
  *****************************************************************************/
 package org.compiere.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.CLogger;
 import org.compiere.util.MimeType;
-
 
 /**
  *	Individual Attachment Entry of MAttachment
@@ -37,7 +35,9 @@ import org.compiere.util.MimeType;
  */
 public class MAttachmentEntry
 {
-	/**
+    private File m_file;
+
+    /**
 	 * 	Attachment Entry
 	 * 	@param name name
 	 * 	@param data binary data
@@ -49,7 +49,7 @@ public class MAttachmentEntry
 		setName (name);
 		setData (data);
 		setIndex(index);
-	}	//	MAttachmentItem
+	}	//	MAttachmentEntry
 	
 	/**
 	 * 	Attachment Entry
@@ -59,10 +59,20 @@ public class MAttachmentEntry
 	public MAttachmentEntry (String name, byte[] data)
 	{
 		this (name, data, 0);
-	}	//	MAttachmentItem
-	
+	}	//	MAttachmentEntry
+
+    public MAttachmentEntry(String name, File file) {
+        this(name, file, 0);
+    }
+
+    public MAttachmentEntry(String name, File file, int index) {
+        setName(name);
+        setIndex(index);
+        setFile(file);
+    }
+
 	/**
-	 * Constructor for delayed load
+	 * Constructor for delayed loading of content
 	 * @param name
 	 * @param index
 	 * @param ds lazy data source
@@ -85,6 +95,7 @@ public class MAttachmentEntry
 		this.m_data = copy.m_data != null ? Arrays.copyOf(copy.m_data, copy.m_data.length) : null;
 		this.m_index = copy.m_index;
 		this.m_name = copy.m_name;
+        this.m_file = copy.m_file;
 	}
 	
 	/**	The Name				*/
@@ -111,26 +122,65 @@ public class MAttachmentEntry
 	/** True if the entry has been updated (sets by MAttachment.updateEntry(int, byte[]) */
 	private boolean m_isUpdated = false;
 
-	/**
-	 * @return Returns the data.
+
+    /**
+	 * @return byte[] content
 	 */
 	public byte[] getData ()
 	{
-		if (! m_isDataSet && m_ds != null) {
-			setData(m_ds.getData());
-		}
+		if (! m_isDataSet) {
+            if (m_ds != null)
+			    setData(m_ds.getData());
+		} else {
+            if (m_data == null && m_file != null) {
+                try {
+                    m_data = Files.readAllBytes(m_file.toPath());
+                } catch (IOException e) {
+                    log.log(Level.WARNING, e.getMessage(), e);
+                }
+            }
+        }
 		return m_data;
 	}
+	
 	/**
 	 * @param data The data to set.
 	 */
 	public void setData (byte[] data)
 	{
 		m_data = data;
+        m_file = null;
 		m_isDataSet = true;
 	}
+
+    /**
+     * Set the file content
+     * @param file
+     */
+    public void setFile(File file) {
+        m_file = file;
+        m_data = null;
+        m_isDataSet = true;
+    }
+
+    /**
+     * Get size of data content in bytes
+     * @return size
+     */
+    public long getSize()
+    {
+        if (m_ds != null)
+            return m_ds.getSize();
+        else if (m_file != null)
+            return m_file.length();
+        else if (m_data != null && m_data.length > 0)
+            return m_data.length;
+        else
+            return 0;
+    }
+
 	/**
-	 * @return Returns the name.
+	 * @return name of entry
 	 */
 	public String getName ()
 	{
@@ -149,8 +199,8 @@ public class MAttachmentEntry
 	}	//	setName
 	
 	/**
-	 * 	Get Attachment Index
-	 *	@return int index
+	 * 	Get entry Index
+	 *	@return entry index
 	 */
 	public int getIndex()
 	{
@@ -161,6 +211,7 @@ public class MAttachmentEntry
 	 * 	To String
 	 *	@return name
 	 */
+	@Override
 	public String toString ()
 	{
 		return m_name;
@@ -197,10 +248,9 @@ public class MAttachmentEntry
 		sb.append(" - ").append(getContentType());
 		return sb.toString();
 	}	//	toStringX
-
 	
 	/**
-	 * 	Dump Data
+	 * 	Dump Data to standard out
 	 */
 	public void dump ()
 	{
@@ -246,7 +296,10 @@ public class MAttachmentEntry
 	 */
 	public File getFile ()
 	{
-		return getFile (getName());
+        if (m_file != null)
+            return m_file;
+		m_file = getFile (getName());
+        return m_file;
 	}	//	getFile
 
 	/**
@@ -258,8 +311,20 @@ public class MAttachmentEntry
 	{
 		if (fileName == null || fileName.length() == 0)
 			fileName = getName();
-		return getFile (new File(System.getProperty("java.io.tmpdir") + File.separator + fileName));
-	}	//	getFile
+
+        //return file from lazy data source (if name match)
+        if (m_ds != null) {
+            File file = m_ds.getFile();
+            if (file != null && file.exists() && file.getName().equals(fileName))
+                return file;
+        }
+
+        try {
+            return getFile (new File(Files.createTempDirectory("attachment_").toFile() , fileName));
+        } catch (IOException e) {
+            throw new AdempiereException(e);
+        }
+    }	//	getFile
 
 	/**
 	 * 	Get File
@@ -268,19 +333,25 @@ public class MAttachmentEntry
 	 */
 	public File getFile (File file)
 	{
-		if (getData() == null || getData().length == 0)
+		InputStream inputStream = getInputStream();
+        if (inputStream == null)
 			return null;
 		try
 		{
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(getData());
-			fos.close();
+            Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException ioe)
 		{
 			log.log(Level.SEVERE, "getFile", ioe);
-			throw new RuntimeException(ioe);
+			throw new AdempiereException(ioe);
 		}
+        finally
+        {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+            }
+        }
 		return file;
 	}	//	getFile
 
@@ -294,8 +365,8 @@ public class MAttachmentEntry
 	}	//	isPDF
 	
 	/**
-	 * 	Is attachment entry a Graphic
-	 *	@return true if *.gif, *.jpg, *.png
+	 * 	Is attachment entry an image
+	 *	@return true if *.gif, *.jpg or *.png
 	 */
 	public boolean isGraphic()
 	{
@@ -319,23 +390,38 @@ public class MAttachmentEntry
 	 */
 	public InputStream getInputStream()
 	{
-		if (getData() == null)
-			return null;
-		return new ByteArrayInputStream(getData());
+        if (m_ds != null)
+            return m_ds.getInputStream();
+        else if (m_file != null) {
+            try {
+                return new FileInputStream(m_file);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else if (m_data != null && m_data.length > 0)
+            return new ByteArrayInputStream(m_data);
+        else
+            return null;
 	}	//	getInputStream
 
+	/**
+	 * Set entry index
+	 * @param index
+	 */
 	public void setIndex(int index) {
 		if (index > 0)
 			m_index = index;
 		else
 		{
 			long now = System.currentTimeMillis();
+			synchronized(this) {
 			if (s_seed+3600000l < now)	//	older then 1 hour
 			{
 				s_seed = now;
 				s_random = new Random(s_seed);
 			}
-			m_index = s_random.nextInt();
+			m_index = s_random.nextInt();}
 		}
 	}
 
@@ -355,18 +441,30 @@ public class MAttachmentEntry
 		return m_ds;
 	}
 
-	/** Set the updated property 
+	/** 
+	 * Set the updated property 
 	 * @param updated
 	 */
 	public void setUpdated(boolean updated) {
 		m_isUpdated = updated;
 	}
 
-	/** Get the updated property 
-	 * @return updated
+	/** 
+	 * Get the updated property 
+	 * @return true if updated
 	 */
 	public boolean isUpdated() {
 		return m_isUpdated;
 	}
 
+    /**
+     * Clean up resources held. Should stop using the instance after calling this method.
+     */
+    public void cleanUp() {
+        if (m_data != null)
+            m_data = null;
+        if (m_ds != null) {
+            m_ds.cleanUp();
+        }
+    }
 }	//	MAttachmentItem

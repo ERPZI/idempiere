@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  * 	Material Transaction Model
@@ -32,10 +33,21 @@ import org.compiere.util.Env;
 public class MTransaction extends X_M_Transaction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3411351000865493212L;
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_Transaction_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MTransaction(Properties ctx, String M_Transaction_UU, String trxName) {
+        super(ctx, M_Transaction_UU, trxName);
+		if (Util.isEmpty(M_Transaction_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -48,13 +60,24 @@ public class MTransaction extends X_M_Transaction
 		this (ctx, M_Transaction_ID, trxName, (String[]) null);
 	}	//	MTransaction
 
+	/**
+	 * @param ctx
+	 * @param M_Transaction_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MTransaction(Properties ctx, int M_Transaction_ID, String trxName, String... virtualColumns) {
 		super(ctx, M_Transaction_ID, trxName, virtualColumns);
 		if (M_Transaction_ID == 0)
-		{
-			setMovementDate (new Timestamp(System.currentTimeMillis()));
-			setMovementQty (Env.ZERO);
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setMovementDate (new Timestamp(System.currentTimeMillis()));
+		setMovementQty (Env.ZERO);
 	}
 
 	/**
@@ -103,12 +126,12 @@ public class MTransaction extends X_M_Transaction
 		else
 			setMovementDate(MovementDate);
 	}	//	MTransaction
-
 	
 	/**
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MTransaction[");

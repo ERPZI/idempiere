@@ -26,18 +26,22 @@ import java.util.logging.Level;
 
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.ConfirmPanel;
+import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.editor.WEditorPopupMenu;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
 import org.compiere.model.MChangeLog;
 import org.compiere.model.MColumn;
+import org.compiere.model.MEntityType;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MTable;
 import org.compiere.model.MUser;
 import org.compiere.util.CLogger;
@@ -46,6 +50,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.NamePair;
+import org.compiere.util.Util;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -54,27 +59,37 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Listhead;
 import org.zkoss.zul.Listheader;
 import org.zkoss.zul.Menuitem;
+import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
 /**
- * Change History for field
+ * Dialog to view field change log history
  * @author Low Heng Sin
  */
 public class WFieldRecordInfo extends Window implements EventListener<Event>
 {
- 	private static final long serialVersionUID = 3859352394520596098L;
+	/**
+	 * generated serial id
+	 */
+	private static final long serialVersionUID = 8544547290283904702L;
+
 	private int AD_Table_ID;
 	private int AD_Column_ID;
 	private int Record_ID;
-
+	private String Record_UU;
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
+	private Object value;
+	
 	/**
-	 *	Record Info
+	 *	Field Info
 	 *	@param title title
 	 *	@param AD_Table_ID
 	 *  @param AD_Column_ID
 	 *  @param Record_ID
+	 *  @param Record_UU
 	 */
-	public WFieldRecordInfo (String title, int AD_Table_ID, int AD_Column_ID, int Record_ID)
+	public WFieldRecordInfo (String title, int AD_Table_ID, int AD_Column_ID, int Record_ID, String Record_UU, Object value)
 	{
 		super ();
 		this.setTitle(title);
@@ -99,7 +114,9 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		this.AD_Table_ID = AD_Table_ID;
 		this.AD_Column_ID = AD_Column_ID;
 		this.Record_ID = Record_ID;
-		
+		this.Record_UU = Record_UU;
+		this.value = value;
+
 		try
 		{
 			init ( dynInit(title) );
@@ -111,13 +128,13 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		AEnv.showCenterScreen(this);
 	}	//	WFieldRecordInfo
 
-
+	/** table for change log history */
 	private Listbox table = new Listbox();
 	private ConfirmPanel confirmPanel = new ConfirmPanel (false);
 
 	/**	Logger			*/
 	private static final CLogger	log = CLogger.getCLogger(WFieldRecordInfo.class);
-	/** The Data		*/
+	/** Data for {@link #table}		*/
 	private Vector<Vector<String>>	m_data = new Vector<Vector<String>>();
 
 	/** Date Time Format		*/
@@ -137,17 +154,35 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		(DisplayType.Integer, Env.getLanguage(Env.getCtx()));
 
 	/**
-	 * 	Static Layout
+	 * 	Layout dialog
 	 *	@throws Exception
 	 */
 	private void init (boolean showTable) throws Exception
 	{
-
 		Borderlayout layout = new Borderlayout();
 		layout.setParent(this);
 		ZKUpdateUtil.setWidth(layout, "100%");
 		ZKUpdateUtil.setHeight(layout, "100%");
 		
+		North north = new North();
+		MColumn column = MColumn.get (Env.getCtx(), AD_Column_ID);
+
+		north.setParent(layout);
+
+		StringBuffer label = new StringBuffer();
+		label.append(column.getAD_Table().getTableName()).append(".").append(column.getColumnName()).append("='").append(value).append("'");
+
+		if (Env.IsShowTechnicalInfOnHelp(Env.getCtx()))
+		{
+			label.append("\n");
+			MEntityType entityType = MEntityType.get(Env.getCtx(), column.getEntityType());
+			label.append(entityType.getName()).append(" [ ").append(entityType.getEntityType()).append(" ]");
+		}
+
+		Label l = new Label(label.toString());
+		l.setMultiline(true);
+		north.appendChild(l);
+
 		Center center = new Center();
 		center.setParent(layout);
 		if (showTable)
@@ -166,12 +201,11 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		addEventListener(Events.ON_CANCEL, e -> onCancel());
 		setSclass("field-record-info-dialog");
 	}	//	init
-	
-	
+		
 	/**
-	 * 	Dynamic Init
+	 * 	Init components and variables
 	 *	@param title title
-	 *	@return true if table initialized
+	 *	@return true if initialized ok
 	 */
 	private boolean dynInit(String title)
 	{
@@ -186,13 +220,13 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 		if (!MRole.PREFERENCETYPE_Client.equals(MRole.getDefault().getPreferenceType()))
 			return false;
 		
-		if (Record_ID == 0)
+		if (Record_ID == 0 && Util.isEmpty(Record_UU))
 			return false;
 		
 		//	Data
 		String sql = "SELECT AD_Column_ID, Updated, UpdatedBy, OldValue, NewValue "
 			+ "FROM AD_ChangeLog "
-			+ "WHERE AD_Table_ID=? AND Record_ID=? AND AD_Column_ID=? "
+			+ "WHERE AD_Table_ID=? AND (Record_ID=? OR Record_UU=?) AND AD_Column_ID=? "
 			+ "ORDER BY Updated DESC";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -201,7 +235,8 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 			pstmt = DB.prepareStatement (sql, null);
 			pstmt.setInt (1, AD_Table_ID);
 			pstmt.setInt (2, Record_ID);
-			pstmt.setInt (3, AD_Column_ID);
+			pstmt.setString (3, Record_UU);
+			pstmt.setInt (4, AD_Column_ID);
 			rs = pstmt.executeQuery ();
 			while (rs.next ())
 			{
@@ -243,7 +278,7 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 	}	//	dynInit
 	
 	/**
-	 * 	Add Line
+	 * 	Add new line to {@link #m_data}
 	 *	@param AD_Column_ID column
 	 *	@param Updated updated
 	 *	@param UpdatedBy user
@@ -362,15 +397,21 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 	/**
 	 * @param event
 	 */
+	@Override
 	public void onEvent(Event event) throws Exception {
 		onCancel();
 	}
 
-
+	/**
+	 * Handle onCancel event
+	 */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		this.detach();
 	}
-
 
 	/**
 	 * Open field record info dialog
@@ -379,7 +420,8 @@ public class WFieldRecordInfo extends Window implements EventListener<Event>
 	public static void start(GridField gridField) {
 		new WFieldRecordInfo(gridField.getColumnName(), 
 				gridField.getGridTab().getAD_Table_ID(), gridField.getAD_Column_ID(), 
-				gridField.getGridTab().getRecord_ID());
+				gridField.getGridTab().getRecord_ID(),
+				gridField.getGridTab().getRecord_UU(), gridField.getValue());
 	}
 
 	/**

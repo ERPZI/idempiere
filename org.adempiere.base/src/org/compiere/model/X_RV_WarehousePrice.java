@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for RV_WarehousePrice
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="RV_WarehousePrice")
-public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Persistent 
+public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_RV_WarehousePrice (Properties ctx, int RV_WarehousePrice_ID, String trxName)
@@ -66,6 +66,38 @@ public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Pe
         } */
     }
 
+    /** Standard Constructor */
+    public X_RV_WarehousePrice (Properties ctx, String RV_WarehousePrice_UU, String trxName)
+    {
+      super (ctx, RV_WarehousePrice_UU, trxName);
+      /** if (RV_WarehousePrice_UU == null)
+        {
+			setC_UOM_ID (0);
+			setM_PriceList_Version_ID (0);
+			setM_Product_ID (0);
+			setM_Warehouse_ID (0);
+			setName (null);
+			setValue (null);
+			setWarehouseName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_RV_WarehousePrice (Properties ctx, String RV_WarehousePrice_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, RV_WarehousePrice_UU, trxName, virtualColumns);
+      /** if (RV_WarehousePrice_UU == null)
+        {
+			setC_UOM_ID (0);
+			setM_PriceList_Version_ID (0);
+			setM_Product_ID (0);
+			setM_Warehouse_ID (0);
+			setName (null);
+			setValue (null);
+			setWarehouseName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_RV_WarehousePrice (Properties ctx, ResultSet rs, String trxName)
     {
@@ -73,7 +105,7 @@ public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Pe
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -90,7 +122,7 @@ public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Pe
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_RV_WarehousePrice[")
-        .append(get_ID()).append(",Name=").append(getName()).append("]");
+        .append(get_UUID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -136,32 +168,13 @@ public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Pe
 	public boolean isInstanceAttribute()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInstanceAttribute);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Margin %.
-		@param Margin Margin for a product as a percentage
-	*/
-	public void setMargin (BigDecimal Margin)
-	{
-		set_ValueNoCheck (COLUMNNAME_Margin, Margin);
-	}
-
-	/** Get Margin %.
-		@return Margin for a product as a percentage
-	  */
-	public BigDecimal getMargin()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Margin);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
 	}
 
 	public org.compiere.model.I_M_PriceList_Version getM_PriceList_Version() throws RuntimeException
@@ -246,6 +259,25 @@ public class X_RV_WarehousePrice extends PO implements I_RV_WarehousePrice, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Margin %.
+		@param Margin Margin for a product as a percentage
+	*/
+	public void setMargin (BigDecimal Margin)
+	{
+		set_ValueNoCheck (COLUMNNAME_Margin, Margin);
+	}
+
+	/** Get Margin %.
+		@return Margin for a product as a percentage
+	  */
+	public BigDecimal getMargin()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_Margin);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Name.

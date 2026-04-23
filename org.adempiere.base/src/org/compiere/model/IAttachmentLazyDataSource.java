@@ -27,8 +27,11 @@
 
 package org.compiere.model;
 
+import java.io.File;
+import java.io.InputStream;
+
 /**
- *	IDEMPIERE-4889
+ *	IDEMPIERE-4889 interface for lazy loading of attachment content
  * 	@author Carlos Ruiz - globalqss
  */
 public interface IAttachmentLazyDataSource {
@@ -36,8 +39,30 @@ public interface IAttachmentLazyDataSource {
 	/**
 	 * Return a byte array containing the data from the Attachment Entry
 	 * Usually the implementing class must have a constructor with the variable(s) required for loading later the data
-	 * @return
+	 * @return byte[] attachment content
 	 */
 	public byte[] getData();
 
+    /**
+     * Get input stream for attachment entry
+     * @return input stream
+     */
+    InputStream getInputStream();
+
+    /**
+     * Get size of attachment entry
+     * @return size
+     */
+    long getSize();
+
+    /**
+     * Get file attachment
+     * @return file attachment or null
+     */
+    File getFile();
+
+    /**
+     * Clean up resources held
+     */
+    default void cleanUp() {}
 }

@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_PriceList_Version
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_PriceList_Version")
-public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, I_Persistent 
+public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_PriceList_Version (Properties ctx, int M_PriceList_Version_ID, String trxName)
@@ -66,6 +66,38 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_PriceList_Version (Properties ctx, String M_PriceList_Version_UU, String trxName)
+    {
+      super (ctx, M_PriceList_Version_UU, trxName);
+      /** if (M_PriceList_Version_UU == null)
+        {
+			setM_DiscountSchema_ID (0);
+			setM_PriceList_ID (0);
+			setM_PriceList_Version_ID (0);
+			setName (null);
+// @#Date@
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_PriceList_Version (Properties ctx, String M_PriceList_Version_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_PriceList_Version_UU, trxName, virtualColumns);
+      /** if (M_PriceList_Version_UU == null)
+        {
+			setM_DiscountSchema_ID (0);
+			setM_PriceList_ID (0);
+			setM_PriceList_Version_ID (0);
+			setName (null);
+// @#Date@
+			setValidFrom (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+        } */
+    }
+
     /** Load Constructor */
     public X_M_PriceList_Version (Properties ctx, ResultSet rs, String trxName)
     {
@@ -73,7 +105,7 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -166,34 +198,6 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_PriceList_Version getM_Pricelist_Version_Base() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_PriceList_Version)MTable.get(getCtx(), org.compiere.model.I_M_PriceList_Version.Table_ID)
-			.getPO(getM_Pricelist_Version_Base_ID(), get_TrxName());
-	}
-
-	/** Set Base Price List.
-		@param M_Pricelist_Version_Base_ID Source for Price list calculations
-	*/
-	public void setM_Pricelist_Version_Base_ID (int M_Pricelist_Version_Base_ID)
-	{
-		if (M_Pricelist_Version_Base_ID < 1)
-			set_Value (COLUMNNAME_M_Pricelist_Version_Base_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Pricelist_Version_Base_ID, Integer.valueOf(M_Pricelist_Version_Base_ID));
-	}
-
-	/** Get Base Price List.
-		@return Source for Price list calculations
-	  */
-	public int getM_Pricelist_Version_Base_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Pricelist_Version_Base_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Price List Version.
 		@param M_PriceList_Version_ID Identifies a unique instance of a Price List
 	*/
@@ -231,6 +235,34 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
 		return (String)get_Value(COLUMNNAME_M_PriceList_Version_UU);
 	}
 
+	public org.compiere.model.I_M_PriceList_Version getM_Pricelist_Version_Base() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_PriceList_Version)MTable.get(getCtx(), org.compiere.model.I_M_PriceList_Version.Table_ID)
+			.getPO(getM_Pricelist_Version_Base_ID(), get_TrxName());
+	}
+
+	/** Set Base Price List.
+		@param M_Pricelist_Version_Base_ID Source for Price list calculations
+	*/
+	public void setM_Pricelist_Version_Base_ID (int M_Pricelist_Version_Base_ID)
+	{
+		if (M_Pricelist_Version_Base_ID < 1)
+			set_Value (COLUMNNAME_M_Pricelist_Version_Base_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Pricelist_Version_Base_ID, Integer.valueOf(M_Pricelist_Version_Base_ID));
+	}
+
+	/** Get Base Price List.
+		@return Source for Price list calculations
+	  */
+	public int getM_Pricelist_Version_Base_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Pricelist_Version_Base_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -250,7 +282,7 @@ public class X_M_PriceList_Version extends PO implements I_M_PriceList_Version, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

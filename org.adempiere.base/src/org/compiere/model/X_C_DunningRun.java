@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_DunningRun
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_DunningRun")
-public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent 
+public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_DunningRun (Properties ctx, int C_DunningRun_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
       super (ctx, C_DunningRun_ID, trxName);
       /** if (C_DunningRun_ID == 0)
         {
-			setC_Dunning_ID (0);
 			setC_DunningRun_ID (0);
+			setC_Dunning_ID (0);
 			setDunningDate (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setProcessed (false);
@@ -54,8 +54,36 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
       super (ctx, C_DunningRun_ID, trxName, virtualColumns);
       /** if (C_DunningRun_ID == 0)
         {
-			setC_Dunning_ID (0);
 			setC_DunningRun_ID (0);
+			setC_Dunning_ID (0);
+			setDunningDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_DunningRun (Properties ctx, String C_DunningRun_UU, String trxName)
+    {
+      super (ctx, C_DunningRun_UU, trxName);
+      /** if (C_DunningRun_UU == null)
+        {
+			setC_DunningRun_ID (0);
+			setC_Dunning_ID (0);
+			setDunningDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_DunningRun (Properties ctx, String C_DunningRun_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_DunningRun_UU, trxName, virtualColumns);
+      /** if (C_DunningRun_UU == null)
+        {
+			setC_DunningRun_ID (0);
+			setC_Dunning_ID (0);
 			setDunningDate (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setProcessed (false);
@@ -69,7 +97,7 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -89,34 +117,6 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_C_Dunning getC_Dunning() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Dunning)MTable.get(getCtx(), org.compiere.model.I_C_Dunning.Table_ID)
-			.getPO(getC_Dunning_ID(), get_TrxName());
-	}
-
-	/** Set Dunning.
-		@param C_Dunning_ID Dunning Rules for overdue invoices
-	*/
-	public void setC_Dunning_ID (int C_Dunning_ID)
-	{
-		if (C_Dunning_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, Integer.valueOf(C_Dunning_ID));
-	}
-
-	/** Get Dunning.
-		@return Dunning Rules for overdue invoices
-	  */
-	public int getC_Dunning_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Dunning_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_C_DunningLevel getC_DunningLevel() throws RuntimeException
 	{
@@ -182,6 +182,34 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
 		return (String)get_Value(COLUMNNAME_C_DunningRun_UU);
 	}
 
+	public org.compiere.model.I_C_Dunning getC_Dunning() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Dunning)MTable.get(getCtx(), org.compiere.model.I_C_Dunning.Table_ID)
+			.getPO(getC_Dunning_ID(), get_TrxName());
+	}
+
+	/** Set Dunning.
+		@param C_Dunning_ID Dunning Rules for overdue invoices
+	*/
+	public void setC_Dunning_ID (int C_Dunning_ID)
+	{
+		if (C_Dunning_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Dunning_ID, Integer.valueOf(C_Dunning_ID));
+	}
+
+	/** Get Dunning.
+		@return Dunning Rules for overdue invoices
+	  */
+	public int getC_Dunning_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Dunning_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -217,7 +245,7 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getDunningDate()));
     }
@@ -236,10 +264,10 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -258,10 +286,10 @@ public class X_C_DunningRun extends PO implements I_C_DunningRun, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

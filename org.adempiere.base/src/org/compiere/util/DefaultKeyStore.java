@@ -29,13 +29,13 @@ import javax.crypto.SecretKey;
 import org.adempiere.base.IKeyStore;
 
 /**
+ * Default {@link IKeyStore} implementation
  * @author deepak
  * @author hengsin
- *
  */
 public class DefaultKeyStore implements IKeyStore {
 	
-	private static final String LEGACY_ALGORITHM = "DES";
+	public static final String LEGACY_ALGORITHM = "DES";
 
 	private static final String IDEMPIERE_KEYSTORE_PROPERTIES = "idempiere-ks.properties";
 
@@ -53,6 +53,9 @@ public class DefaultKeyStore implements IKeyStore {
 
 	private String algorithm;
 
+	/**
+	 * Load or create key store
+	 */
 	public DefaultKeyStore(){
 		File file = new File(Ini.getAdempiereHome(), IDEMPIERE_KEYSTORE_PROPERTIES);
 		if (file.exists()) {
@@ -66,14 +69,33 @@ public class DefaultKeyStore implements IKeyStore {
 				if (!Util.isEmpty(s) && !Util.isEmpty(a)) {
 					password = s.toCharArray();
 					algorithm = a;
-					keyStore = KeyStore.getInstance("JCEKS");
+					// BKS for Bouncy Castle, BCFKS for Bouncy Castle FIPS, JCEKS for JDK default provider
+					String keyStoreType = p.getProperty("type");
+					if (Util.isEmpty(keyStoreType, true))
+						keyStoreType = "JCEKS";
+					// BC for Bouncy Castle, BCFIPS for Bouncy Castle FIPS
+					String provider = p.getProperty("provider");
+					// org.bouncycastle.jce.provider.BouncyCastleProvider for Bouncy Castle
+					// org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider for Bouncy Castle FIPS
+					String providerClass = p.getProperty("providerClass");
+					if (!Util.isEmpty(providerClass, true) && !Util.isEmpty(provider, true)) {
+						if (java.security.Security.getProvider(provider) == null) {
+							// load and register the provider class dynamically
+							Class<?> clazz = Class.forName(providerClass);
+							Object providerInstance = clazz.getDeclaredConstructor().newInstance();
+							if (providerInstance != null && providerInstance instanceof java.security.Provider securityProvider) {
+								java.security.Security.addProvider(securityProvider);
+							}
+						}
+					}
+					keyStore = Util.isEmpty(provider, true) ? KeyStore.getInstance(keyStoreType) : KeyStore.getInstance(keyStoreType, provider);
 					file = new File(Ini.getAdempiereHome(), IDEMPIERE_KEYSTORE);
 					if (file.exists()) {
 						FileInputStream stream = new FileInputStream(file);
 						keyStore.load(stream, password );
 					} else {
 						keyStore.load(null, password );
-					}				
+					}	
 				} else {
 					createLegacyKey();
 				}
@@ -92,6 +114,9 @@ public class DefaultKeyStore implements IKeyStore {
 		}
 	}
 
+	/**
+	 * Create key using legacy algorithm (DES)
+	 */
 	private void createLegacyKey() {
 		m_key = new javax.crypto.spec.SecretKeySpec
 				(new byte[] {122,125,125,104,122,125,125,104}, LEGACY_ALGORITHM);

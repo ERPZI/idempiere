@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InOutLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_InOutLine")
-public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent 
+public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_InOutLine (Properties ctx, int M_InOutLine_ID, String trxName)
@@ -49,8 +49,8 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_InOutLine WHERE M_InOut_ID=@M_InOut_ID@
 			setM_AttributeSetInstance_ID (0);
-			setM_InOut_ID (0);
 			setM_InOutLine_ID (0);
+			setM_InOut_ID (0);
 			setMovementQty (Env.ZERO);
 // 1
 			setProcessed (false);
@@ -73,8 +73,56 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 			setLine (0);
 // @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_InOutLine WHERE M_InOut_ID=@M_InOut_ID@
 			setM_AttributeSetInstance_ID (0);
-			setM_InOut_ID (0);
 			setM_InOutLine_ID (0);
+			setM_InOut_ID (0);
+			setMovementQty (Env.ZERO);
+// 1
+			setProcessed (false);
+			setQtyEntered (Env.ZERO);
+// 1
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InOutLine (Properties ctx, String M_InOutLine_UU, String trxName)
+    {
+      super (ctx, M_InOutLine_UU, trxName);
+      /** if (M_InOutLine_UU == null)
+        {
+			setC_UOM_ID (0);
+// @#C_UOM_ID@
+			setIsDescription (false);
+// N
+			setIsInvoiced (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_InOutLine WHERE M_InOut_ID=@M_InOut_ID@
+			setM_AttributeSetInstance_ID (0);
+			setM_InOutLine_ID (0);
+			setM_InOut_ID (0);
+			setMovementQty (Env.ZERO);
+// 1
+			setProcessed (false);
+			setQtyEntered (Env.ZERO);
+// 1
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InOutLine (Properties ctx, String M_InOutLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_InOutLine_UU, trxName, virtualColumns);
+      /** if (M_InOutLine_UU == null)
+        {
+			setC_UOM_ID (0);
+// @#C_UOM_ID@
+			setIsDescription (false);
+// N
+			setIsInvoiced (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM M_InOutLine WHERE M_InOut_ID=@M_InOut_ID@
+			setM_AttributeSetInstance_ID (0);
+			setM_InOutLine_ID (0);
+			setM_InOut_ID (0);
 			setMovementQty (Env.ZERO);
 // 1
 			setProcessed (false);
@@ -90,7 +138,7 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -217,25 +265,6 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Confirmed Quantity.
-		@param ConfirmedQty Confirmation of a received quantity
-	*/
-	public void setConfirmedQty (BigDecimal ConfirmedQty)
-	{
-		set_Value (COLUMNNAME_ConfirmedQty, ConfirmedQty);
-	}
-
-	/** Get Confirmed Quantity.
-		@return Confirmation of a received quantity
-	  */
-	public BigDecimal getConfirmedQty()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConfirmedQty);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
@@ -259,34 +288,6 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public int getC_OrderLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_OrderLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
-			.getPO(getC_Project_ID(), get_TrxName());
-	}
-
-	/** Set Project.
-		@param C_Project_ID Financial Project
-	*/
-	public void setC_Project_ID (int C_Project_ID)
-	{
-		if (C_Project_ID < 1)
-			set_Value (COLUMNNAME_C_Project_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
-	}
-
-	/** Get Project.
-		@return Financial Project
-	  */
-	public int getC_Project_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -348,6 +349,34 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_UOM)MTable.get(getCtx(), org.compiere.model.I_C_UOM.Table_ID)
@@ -374,6 +403,25 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Confirmed Quantity.
+		@param ConfirmedQty Confirmation of a received quantity
+	*/
+	public void setConfirmedQty (BigDecimal ConfirmedQty)
+	{
+		set_Value (COLUMNNAME_ConfirmedQty, ConfirmedQty);
+	}
+
+	/** Get Confirmed Quantity.
+		@return Confirmation of a received quantity
+	  */
+	public BigDecimal getConfirmedQty()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConfirmedQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Description.
@@ -406,10 +454,10 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public boolean isAutoProduce()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAutoProduce);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -429,10 +477,10 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public boolean isDescription()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDescription);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -452,10 +500,10 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public boolean isInvoiced()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInvoiced);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -483,7 +531,7 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
@@ -511,34 +559,6 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_ID)
-			.getPO(getM_InOut_ID(), get_TrxName());
-	}
-
-	/** Set Shipment/Receipt.
-		@param M_InOut_ID Material Shipment Document
-	*/
-	public void setM_InOut_ID (int M_InOut_ID)
-	{
-		if (M_InOut_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
-	}
-
-	/** Get Shipment/Receipt.
-		@return Material Shipment Document
-	  */
-	public int getM_InOut_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -581,6 +601,34 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		return (String)get_Value(COLUMNNAME_M_InOutLine_UU);
 	}
 
+	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_ID)
+			.getPO(getM_InOut_ID(), get_TrxName());
+	}
+
+	/** Set Shipment/Receipt.
+		@param M_InOut_ID Material Shipment Document
+	*/
+	public void setM_InOut_ID (int M_InOut_ID)
+	{
+		if (M_InOut_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
+	}
+
+	/** Get Shipment/Receipt.
+		@return Material Shipment Document
+	  */
+	public int getM_InOut_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_M_Locator getM_Locator() throws RuntimeException
 	{
 		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
@@ -607,25 +655,6 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Movement Quantity.
-		@param MovementQty Quantity of a product moved.
-	*/
-	public void setMovementQty (BigDecimal MovementQty)
-	{
-		set_Value (COLUMNNAME_MovementQty, MovementQty);
-	}
-
-	/** Get Movement Quantity.
-		@return Quantity of a product moved.
-	  */
-	public BigDecimal getMovementQty()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
@@ -684,6 +713,25 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Movement Quantity.
+		@param MovementQty Quantity of a product moved.
+	*/
+	public void setMovementQty (BigDecimal MovementQty)
+	{
+		set_Value (COLUMNNAME_MovementQty, MovementQty);
+	}
+
+	/** Get Movement Quantity.
+		@return Quantity of a product moved.
+	  */
+	public BigDecimal getMovementQty()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Picked Quantity.
 		@param PickedQty Picked Quantity
 	*/
@@ -716,10 +764,10 @@ public class X_M_InOutLine extends PO implements I_M_InOutLine, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

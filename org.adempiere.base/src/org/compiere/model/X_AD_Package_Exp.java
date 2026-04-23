@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Package_Exp
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Package_Exp")
-public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persistent 
+public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Package_Exp (Properties ctx, int AD_Package_Exp_ID, String trxName)
@@ -64,6 +64,36 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Package_Exp (Properties ctx, String AD_Package_Exp_UU, String trxName)
+    {
+      super (ctx, AD_Package_Exp_UU, trxName);
+      /** if (AD_Package_Exp_UU == null)
+        {
+			setAD_Package_Exp_ID (0);
+			setIsExportDictionaryEntity (false);
+// N
+			setName (null);
+			setPK_Version (null);
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Package_Exp (Properties ctx, String AD_Package_Exp_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Package_Exp_UU, trxName, virtualColumns);
+      /** if (AD_Package_Exp_UU == null)
+        {
+			setAD_Package_Exp_ID (0);
+			setIsExportDictionaryEntity (false);
+// N
+			setName (null);
+			setPK_Version (null);
+			setProcessing (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Package_Exp (Properties ctx, ResultSet rs, String trxName)
     {
@@ -71,7 +101,7 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -243,10 +273,10 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	public boolean isExportDictionaryEntity()
 	{
 		Object oo = get_Value(COLUMNNAME_IsExportDictionaryEntity);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -271,7 +301,7 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -305,10 +335,10 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -327,10 +357,10 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -338,8 +368,6 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 
 	/** ReleaseNo AD_Reference_ID=50002 */
 	public static final int RELEASENO_AD_Reference_ID=50002;
-	/** No specific release = all */
-	public static final String RELEASENO_NoSpecificRelease = "all";
 	/** Release 2.5.2a = Release 2.5.2a */
 	public static final String RELEASENO_Release252a = "Release 2.5.2a";
 	/** Release 2.5.2b = Release 2.5.2b */
@@ -360,6 +388,8 @@ public class X_AD_Package_Exp extends PO implements I_AD_Package_Exp, I_Persiste
 	public static final String RELEASENO_Release320 = "Release 3.2.0";
 	/** Release 3.3.0 = Release 3.3.0 */
 	public static final String RELEASENO_Release330 = "Release 3.3.0";
+	/** No specific release = all */
+	public static final String RELEASENO_NoSpecificRelease = "all";
 	/** Set Release No.
 		@param ReleaseNo Internal Release Number
 	*/

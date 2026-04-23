@@ -17,11 +17,12 @@
 
 package org.adempiere.webui.event;
 
+import org.adempiere.webui.adwindow.ADWindowToolbar;
+
 /**
- *
+ * Listener interface for {@link ADWindowToolbar}.
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  */
 public interface ToolbarListener
 {
@@ -175,6 +176,9 @@ public interface ToolbarListener
      */
     public void onCustomize();
 
+    /**
+     * Process (gear icon) button
+     */
     public void onProcess();
     
     /**

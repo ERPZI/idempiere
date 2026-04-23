@@ -22,16 +22,16 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 /** Generated Model for U_POSTerminal
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="U_POSTerminal")
-public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent 
+public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_U_POSTerminal (Properties ctx, int U_POSTerminal_ID, String trxName)
@@ -41,9 +41,9 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
         {
 			setAutoLock (false);
 // N
-			setCashBookTransferType (null);
-			setC_CashBook_ID (0);
 			setC_CashBPartner_ID (0);
+			setC_CashBook_ID (0);
+			setCashBookTransferType (null);
 			setU_POSTerminal_ID (0);
         } */
     }
@@ -56,9 +56,39 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
         {
 			setAutoLock (false);
 // N
-			setCashBookTransferType (null);
-			setC_CashBook_ID (0);
 			setC_CashBPartner_ID (0);
+			setC_CashBook_ID (0);
+			setCashBookTransferType (null);
+			setU_POSTerminal_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_U_POSTerminal (Properties ctx, String U_POSTerminal_UU, String trxName)
+    {
+      super (ctx, U_POSTerminal_UU, trxName);
+      /** if (U_POSTerminal_UU == null)
+        {
+			setAutoLock (false);
+// N
+			setC_CashBPartner_ID (0);
+			setC_CashBook_ID (0);
+			setCashBookTransferType (null);
+			setU_POSTerminal_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_U_POSTerminal (Properties ctx, String U_POSTerminal_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, U_POSTerminal_UU, trxName, virtualColumns);
+      /** if (U_POSTerminal_UU == null)
+        {
+			setAutoLock (false);
+// N
+			setC_CashBPartner_ID (0);
+			setC_CashBook_ID (0);
+			setCashBookTransferType (null);
 			setU_POSTerminal_ID (0);
         } */
     }
@@ -70,7 +100,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -105,38 +135,94 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	public boolean isAutoLock()
 	{
 		Object oo = get_Value(COLUMNNAME_AutoLock);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
 
-	public org.compiere.model.I_C_BankAccount getCard_BankAccount() throws RuntimeException
+	public org.compiere.model.I_C_BPartner getC_CashBPartner() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
-			.getPO(getCard_BankAccount_ID(), get_TrxName());
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_CashBPartner_ID(), get_TrxName());
 	}
 
-	/** Set Card Bank Account.
-		@param Card_BankAccount_ID Bank Account on which card transactions will be processed
+	/** Set Cash BPartner.
+		@param C_CashBPartner_ID BPartner to be used for Cash transactions
 	*/
-	public void setCard_BankAccount_ID (int Card_BankAccount_ID)
+	public void setC_CashBPartner_ID (int C_CashBPartner_ID)
 	{
-		if (Card_BankAccount_ID < 1)
-			set_Value (COLUMNNAME_Card_BankAccount_ID, null);
+		if (C_CashBPartner_ID < 1)
+			set_Value (COLUMNNAME_C_CashBPartner_ID, null);
 		else
-			set_Value (COLUMNNAME_Card_BankAccount_ID, Integer.valueOf(Card_BankAccount_ID));
+			set_Value (COLUMNNAME_C_CashBPartner_ID, Integer.valueOf(C_CashBPartner_ID));
 	}
 
-	/** Get Card Bank Account.
-		@return Bank Account on which card transactions will be processed
+	/** Get Cash BPartner.
+		@return BPartner to be used for Cash transactions
 	  */
-	public int getCard_BankAccount_ID()
+	public int getC_CashBPartner_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Card_BankAccount_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_CashBPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_CashBook getC_CashBook() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_CashBook)MTable.get(getCtx(), org.compiere.model.I_C_CashBook.Table_ID)
+			.getPO(getC_CashBook_ID(), get_TrxName());
+	}
+
+	/** Set Cash Book.
+		@param C_CashBook_ID Cash Book for recording petty cash transactions
+	*/
+	public void setC_CashBook_ID (int C_CashBook_ID)
+	{
+		if (C_CashBook_ID < 1)
+			set_Value (COLUMNNAME_C_CashBook_ID, null);
+		else
+			set_Value (COLUMNNAME_C_CashBook_ID, Integer.valueOf(C_CashBook_ID));
+	}
+
+	/** Get Cash Book.
+		@return Cash Book for recording petty cash transactions
+	  */
+	public int getC_CashBook_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_CashBook_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_BPartner getC_TemplateBPartner() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_TemplateBPartner_ID(), get_TrxName());
+	}
+
+	/** Set Template BPartner.
+		@param C_TemplateBPartner_ID BPartner that is to be used as template when new customers are created
+	*/
+	public void setC_TemplateBPartner_ID (int C_TemplateBPartner_ID)
+	{
+		if (C_TemplateBPartner_ID < 1)
+			set_Value (COLUMNNAME_C_TemplateBPartner_ID, null);
+		else
+			set_Value (COLUMNNAME_C_TemplateBPartner_ID, Integer.valueOf(C_TemplateBPartner_ID));
+	}
+
+	/** Get Template BPartner.
+		@return BPartner that is to be used as template when new customers are created
+	  */
+	public int getC_TemplateBPartner_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_TemplateBPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -220,6 +306,34 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return (String)get_Value(COLUMNNAME_CardTransferType);
 	}
 
+	public org.compiere.model.I_C_BankAccount getCard_BankAccount() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
+			.getPO(getCard_BankAccount_ID(), get_TrxName());
+	}
+
+	/** Set Card Bank Account.
+		@param Card_BankAccount_ID Bank Account on which card transactions will be processed
+	*/
+	public void setCard_BankAccount_ID (int Card_BankAccount_ID)
+	{
+		if (Card_BankAccount_ID < 1)
+			set_Value (COLUMNNAME_Card_BankAccount_ID, null);
+		else
+			set_Value (COLUMNNAME_Card_BankAccount_ID, Integer.valueOf(Card_BankAccount_ID));
+	}
+
+	/** Get Card Bank Account.
+		@return Bank Account on which card transactions will be processed
+	  */
+	public int getCard_BankAccount_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Card_BankAccount_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** CashBookTransferType AD_Reference_ID=52002 */
 	public static final int CASHBOOKTRANSFERTYPE_AD_Reference_ID=52002;
 	/** Bank Account = B */
@@ -227,7 +341,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	/** CashBook = C */
 	public static final String CASHBOOKTRANSFERTYPE_CashBook = "C";
 	/** Set Cash Book Transfer Type.
-		@param CashBookTransferType Where the money in the cash book should be transfered to. Either a Bank Account or another Cash Book
+		@param CashBookTransferType Where the money in the cash book should be transferred to. Either a Bank Account or another Cash Book
 	*/
 	public void setCashBookTransferType (String CashBookTransferType)
 	{
@@ -236,7 +350,7 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	}
 
 	/** Get Cash Book Transfer Type.
-		@return Where the money in the cash book should be transfered to. Either a Bank Account or another Cash Book
+		@return Where the money in the cash book should be transferred to. Either a Bank Account or another Cash Book
 	  */
 	public String getCashBookTransferType()
 	{
@@ -294,90 +408,6 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	public int getCashTransferCashBook_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_CashTransferCashBook_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_CashBook getC_CashBook() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_CashBook)MTable.get(getCtx(), org.compiere.model.I_C_CashBook.Table_ID)
-			.getPO(getC_CashBook_ID(), get_TrxName());
-	}
-
-	/** Set Cash Book.
-		@param C_CashBook_ID Cash Book for recording petty cash transactions
-	*/
-	public void setC_CashBook_ID (int C_CashBook_ID)
-	{
-		if (C_CashBook_ID < 1)
-			set_Value (COLUMNNAME_C_CashBook_ID, null);
-		else
-			set_Value (COLUMNNAME_C_CashBook_ID, Integer.valueOf(C_CashBook_ID));
-	}
-
-	/** Get Cash Book.
-		@return Cash Book for recording petty cash transactions
-	  */
-	public int getC_CashBook_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_CashBook_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BPartner getC_CashBPartner() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_CashBPartner_ID(), get_TrxName());
-	}
-
-	/** Set Cash BPartner.
-		@param C_CashBPartner_ID BPartner to be used for Cash transactions
-	*/
-	public void setC_CashBPartner_ID (int C_CashBPartner_ID)
-	{
-		if (C_CashBPartner_ID < 1)
-			set_Value (COLUMNNAME_C_CashBPartner_ID, null);
-		else
-			set_Value (COLUMNNAME_C_CashBPartner_ID, Integer.valueOf(C_CashBPartner_ID));
-	}
-
-	/** Get Cash BPartner.
-		@return BPartner to be used for Cash transactions
-	  */
-	public int getC_CashBPartner_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_CashBPartner_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BankAccount getCheck_BankAccount() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
-			.getPO(getCheck_BankAccount_ID(), get_TrxName());
-	}
-
-	/** Set Check Bank Account.
-		@param Check_BankAccount_ID Bank Account to be used for processing Check transactions
-	*/
-	public void setCheck_BankAccount_ID (int Check_BankAccount_ID)
-	{
-		if (Check_BankAccount_ID < 1)
-			set_Value (COLUMNNAME_Check_BankAccount_ID, null);
-		else
-			set_Value (COLUMNNAME_Check_BankAccount_ID, Integer.valueOf(Check_BankAccount_ID));
-	}
-
-	/** Get Check Bank Account.
-		@return Bank Account to be used for processing Check transactions
-	  */
-	public int getCheck_BankAccount_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Check_BankAccount_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -461,29 +491,29 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return (String)get_Value(COLUMNNAME_CheckTransferType);
 	}
 
-	public org.compiere.model.I_C_BPartner getC_TemplateBPartner() throws RuntimeException
+	public org.compiere.model.I_C_BankAccount getCheck_BankAccount() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_TemplateBPartner_ID(), get_TrxName());
+		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
+			.getPO(getCheck_BankAccount_ID(), get_TrxName());
 	}
 
-	/** Set Template BPartner.
-		@param C_TemplateBPartner_ID BPartner that is to be used as template when new customers are created
+	/** Set Check Bank Account.
+		@param Check_BankAccount_ID Bank Account to be used for processing Check transactions
 	*/
-	public void setC_TemplateBPartner_ID (int C_TemplateBPartner_ID)
+	public void setCheck_BankAccount_ID (int Check_BankAccount_ID)
 	{
-		if (C_TemplateBPartner_ID < 1)
-			set_Value (COLUMNNAME_C_TemplateBPartner_ID, null);
+		if (Check_BankAccount_ID < 1)
+			set_Value (COLUMNNAME_Check_BankAccount_ID, null);
 		else
-			set_Value (COLUMNNAME_C_TemplateBPartner_ID, Integer.valueOf(C_TemplateBPartner_ID));
+			set_Value (COLUMNNAME_Check_BankAccount_ID, Integer.valueOf(Check_BankAccount_ID));
 	}
 
-	/** Get Template BPartner.
-		@return BPartner that is to be used as template when new customers are created
+	/** Get Check Bank Account.
+		@return Bank Account to be used for processing Check transactions
 	  */
-	public int getC_TemplateBPartner_ID()
+	public int getCheck_BankAccount_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_TemplateBPartner_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_Check_BankAccount_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -537,29 +567,6 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_LastLockTime);
 	}
 
-	/** Set Locked.
-		@param Locked Whether the terminal is locked
-	*/
-	public void setLocked (boolean Locked)
-	{
-		set_Value (COLUMNNAME_Locked, Boolean.valueOf(Locked));
-	}
-
-	/** Get Locked.
-		@return Whether the terminal is locked
-	  */
-	public boolean isLocked()
-	{
-		Object oo = get_Value(COLUMNNAME_Locked);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
 	/** Set Lock Time.
 		@param LockTime Time in minutes the terminal should be kept in a locked state.
 	*/
@@ -577,6 +584,29 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Locked.
+		@param Locked Whether the terminal is locked
+	*/
+	public void setLocked (boolean Locked)
+	{
+		set_Value (COLUMNNAME_Locked, Boolean.valueOf(Locked));
+	}
+
+	/** Get Locked.
+		@return Whether the terminal is locked
+	  */
+	public boolean isLocked()
+	{
+		Object oo = get_Value(COLUMNNAME_Locked);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
@@ -667,34 +697,6 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return (String)get_Value(COLUMNNAME_PrinterName);
 	}
 
-	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
-			.getPO(getSalesRep_ID(), get_TrxName());
-	}
-
-	/** Set Sales Representative.
-		@param SalesRep_ID Sales Representative or Company Agent
-	*/
-	public void setSalesRep_ID (int SalesRep_ID)
-	{
-		if (SalesRep_ID < 1)
-			set_Value (COLUMNNAME_SalesRep_ID, null);
-		else
-			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
-	}
-
-	/** Get Sales Representative.
-		@return Sales Representative or Company Agent
-	  */
-	public int getSalesRep_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_M_PriceList getSO_PriceList() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_PriceList)MTable.get(getCtx(), org.compiere.model.I_M_PriceList.Table_ID)
@@ -722,20 +724,32 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Unlocking Time.
-		@param UnlockingTime Time at which the terminal should be unlocked
-	*/
-	public void setUnlockingTime (Timestamp UnlockingTime)
+	public org.compiere.model.I_AD_User getSalesRep() throws RuntimeException
 	{
-		set_Value (COLUMNNAME_UnlockingTime, UnlockingTime);
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getSalesRep_ID(), get_TrxName());
 	}
 
-	/** Get Unlocking Time.
-		@return Time at which the terminal should be unlocked
-	  */
-	public Timestamp getUnlockingTime()
+	/** Set Sales Representative.
+		@param SalesRep_ID Sales Representative or Company Agent
+	*/
+	public void setSalesRep_ID (int SalesRep_ID)
 	{
-		return (Timestamp)get_Value(COLUMNNAME_UnlockingTime);
+		if (SalesRep_ID < 1)
+			set_Value (COLUMNNAME_SalesRep_ID, null);
+		else
+			set_Value (COLUMNNAME_SalesRep_ID, Integer.valueOf(SalesRep_ID));
+	}
+
+	/** Get Sales Representative.
+		@return Sales Representative or Company Agent
+	  */
+	public int getSalesRep_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_SalesRep_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set POS Terminal.
@@ -772,6 +786,22 @@ public class X_U_POSTerminal extends PO implements I_U_POSTerminal, I_Persistent
 	public String getU_POSTerminal_UU()
 	{
 		return (String)get_Value(COLUMNNAME_U_POSTerminal_UU);
+	}
+
+	/** Set Unlocking Time.
+		@param UnlockingTime Time at which the terminal should be unlocked
+	*/
+	public void setUnlockingTime (Timestamp UnlockingTime)
+	{
+		set_Value (COLUMNNAME_UnlockingTime, UnlockingTime);
+	}
+
+	/** Get Unlocking Time.
+		@return Time at which the terminal should be unlocked
+	  */
+	public Timestamp getUnlockingTime()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_UnlockingTime);
 	}
 
 	/** Set Search Key.

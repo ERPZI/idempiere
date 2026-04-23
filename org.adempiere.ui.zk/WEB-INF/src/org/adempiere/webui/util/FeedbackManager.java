@@ -25,15 +25,15 @@ import org.compiere.util.CLogErrorBuffer;
 import org.compiere.util.Env;
 
 /**
+ * Static methods for user feedback service
  * @author hengsin
- *
  */
 public class FeedbackManager {
 
 	/**
 	 * 
 	 * @param errorOnly
-	 * @return attachment datasource
+	 * @return attachment DataSource
 	 */
 	public static DataSource getLogAttachment(boolean errorOnly)
 	{
@@ -49,7 +49,8 @@ public class FeedbackManager {
 	}
 	
 	/**
-	 * 	EMail Support
+	 * EMail Support
+	 * @param errorOnly
 	 */
 	public static void emailSupport(boolean errorOnly)
 	{

@@ -42,6 +42,7 @@ import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
@@ -53,11 +54,11 @@ import org.compiere.util.Util;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
-import org.zkoss.zul.North;
-import org.zkoss.zul.South;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
+import org.zkoss.zul.North;
 import org.zkoss.zul.Separator;
+import org.zkoss.zul.South;
 import org.zkoss.zul.Vbox;
 
 /**
@@ -176,20 +177,20 @@ public class InfoInvoicePanel extends InfoPanel implements ValueChangeListener
         txtDocumentNo = new Textbox();
         txtDescription = new Textbox();
         
-        txtDocumentNo.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentNo");
-        txtDescription.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "description");
+        txtDocumentNo.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentNo");
+        txtDescription.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "description");
 
         dateFrom = new Datebox();
         dateTo= new Datebox();
         
-        dateFrom.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateFrom");
-        dateTo.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateTo");
+        dateFrom.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateFrom");
+        dateTo.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateTo");
 
         amountFrom = new NumberBox(false);
         amountTo = new NumberBox(false);
         
-        amountFrom.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "amountFrom");
-        amountTo.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "amountTo");
+        amountFrom.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "amountFrom");
+        amountTo.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "amountTo");
 
         isPaid = new Checkbox();
         isPaid.setLabel(Msg.translate(Env.getCtx(), "IsPaid"));
@@ -203,7 +204,7 @@ public class InfoInvoicePanel extends InfoPanel implements ValueChangeListener
                 Env.getCtx(), "C_BPartner_ID"), "", false, false, true);
         editorBPartner.addValueChangeListener(this);
         ZKUpdateUtil.setHflex(editorBPartner.getComponent(), "1");
-        editorBPartner.getComponent().setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "bpartnerLookup");
+        editorBPartner.getComponent().setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "bpartnerLookup");
 
         MLookup lookupOrder = MLookupFactory.get(Env.getCtx(), p_WindowNo,
                 0, 4247, DisplayType.Search);
@@ -211,7 +212,7 @@ public class InfoInvoicePanel extends InfoPanel implements ValueChangeListener
                 Env.getCtx(), "C_Order_ID"), "", false, false, true);
         editorOrder.addValueChangeListener(this);
         ZKUpdateUtil.setHflex(editorOrder.getComponent(), "1");
-        editorOrder.getComponent().setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "orderLookup");
+        editorOrder.getComponent().setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "orderLookup");
     }
 
     private void init()
@@ -544,7 +545,7 @@ public class InfoInvoicePanel extends InfoPanel implements ValueChangeListener
 	public void zoom()
 	{
 		log.info( "InfoInvoice.zoom");
-		Integer C_Invoice_ID = getSelectedRowKey();
+		Integer C_Invoice_ID = getIntSelectedRowKey(MInvoice.Table_ID);
 		if (C_Invoice_ID == null)
 			return;
 		MQuery query = new MQuery("C_Invoice");
@@ -584,7 +585,7 @@ public class InfoInvoicePanel extends InfoPanel implements ValueChangeListener
 	protected void saveSelectionDetail()
 	{
 		//  publish for Callout to read
-		Integer ID = getSelectedRowKey();
+		Integer ID = getIntSelectedRowKey(MInvoice.Table_ID);
 		Env.setContext(Env.getCtx(), p_WindowNo, Env.TAB_INFO, "C_Invoice_ID", ID == null ? "0" : ID.toString());
 		//
 		int C_InvoicePaySchedule_ID = 0;

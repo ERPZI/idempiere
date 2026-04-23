@@ -17,24 +17,27 @@
 package org.compiere.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.compiere.report.MReportTree;
 import org.compiere.util.CCache;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
- *  Accounting Schema Model (base)
+ *  Accounting Schema Model
  *
  *  @author 	Jorg Janke
  *  @author     victor.perez@e-evolution.com, www.e-evolution.com
@@ -44,10 +47,9 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
-	private static final long serialVersionUID = 405097978362430053L;
-
+	private static final long serialVersionUID = 2740537819749888011L;
 
 	/**
 	 *  Get AccountSchema
@@ -184,12 +186,23 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}   //  getClientAcctSchema
 
 	/** Cache of Client AcctSchema Arrays		**/
-	private static CCache<Integer,MAcctSchema[]> s_schema = new CCache<Integer,MAcctSchema[]>(I_AD_ClientInfo.Table_Name, I_AD_ClientInfo.Table_Name+"|MAcctSchema[]", 3, 120, false);	//  3 clients
+	private static CCache<Integer,MAcctSchema[]> s_schema = new CCache<Integer,MAcctSchema[]>(I_AD_ClientInfo.Table_Name, I_AD_ClientInfo.Table_Name+"|MAcctSchema[]", 3, 0, false, 0);	//  3 clients
 	/**	Cache of AcctSchemas 					**/
-	private static ImmutableIntPOCache<Integer,MAcctSchema> s_cache = new ImmutableIntPOCache<Integer,MAcctSchema>(Table_Name, 3, 120);	//  3 accounting schemas
-	
-	
-	/**************************************************************************
+	private static ImmutableIntPOCache<Integer,MAcctSchema> s_cache = new ImmutableIntPOCache<Integer,MAcctSchema>(Table_Name, 3, 0, false, 0);	//  3 accounting schemas
+		
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_AcctSchema_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAcctSchema(Properties ctx, String C_AcctSchema_UU, String trxName) {
+        super(ctx, C_AcctSchema_UU, trxName);
+		if (Util.isEmpty(C_AcctSchema_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param C_AcctSchema_ID id
@@ -199,27 +212,32 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	{
 		super (ctx, C_AcctSchema_ID, trxName);
 		if (C_AcctSchema_ID == 0)
-		{
-			setAutoPeriodControl (true);
-			setPeriod_OpenFuture(2);
-			setPeriod_OpenHistory(2);
-			setCostingMethod (COSTINGMETHOD_StandardCosting);
-			setCostingLevel(COSTINGLEVEL_Client);
-			setIsAdjustCOGS(false);
-			setGAAP (GAAP_InternationalGAAP);
-			setHasAlias (true);
-			setHasCombination (false);
-			setIsAccrual (true);	// Y
-			setCommitmentType(COMMITMENTTYPE_None);
-			setIsDiscountCorrectsTax (false);
-			setTaxCorrectionType(TAXCORRECTIONTYPE_None);
-			setIsTradeDiscountPosted (false);
-			setIsPostServices(false);
-			setIsExplicitCostAdjustment(false);
-			setSeparator ("-");	// -
-		}
+			setInitialDefaults();
 	}	//	MAcctSchema
-	
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setAutoPeriodControl (true);
+		setPeriod_OpenFuture(2);
+		setPeriod_OpenHistory(2);
+		setCostingMethod (COSTINGMETHOD_StandardCosting);
+		setCostingLevel(COSTINGLEVEL_Client);
+		setIsAdjustCOGS(false);
+		setGAAP (GAAP_InternationalGAAP);
+		setHasAlias (true);
+		setHasCombination (false);
+		setIsAccrual (true);	// Y
+		setCommitmentType(COMMITMENTTYPE_None);
+		setIsDiscountCorrectsTax (false);
+		setTaxCorrectionType(TAXCORRECTIONTYPE_None);
+		setIsTradeDiscountPosted (false);
+		setIsPostServices(false);
+		setIsExplicitCostAdjustment(false);
+		setSeparator ("-");	// -
+	}
+
 	/**
 	 * 	Load Constructor
 	 *	@param ctx context
@@ -246,7 +264,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	MAcctSchema
 
 	/**
-	 * 
+	 * Copy constructor 
 	 * @param copy
 	 */
 	public MAcctSchema(MAcctSchema copy)
@@ -255,7 +273,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -265,7 +283,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}
 	
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -305,9 +323,9 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	/** Only Post Org Childs			*/
 	private Integer[] 				m_onlyOrgs = null; 
 
-	/**************************************************************************
+	/**
 	 *  AcctSchema Elements
-	 *  @return ArrayList of AcctSchemaElement
+	 *  @return Array of AcctSchemaElement
 	 */
 	public MAcctSchemaElement[] getAcctSchemaElements()
 	{
@@ -315,7 +333,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}   //  getAcctSchemaElements
 
 	/**
-	 *  Get AcctSchema Element
+	 *  Get AcctSchema Element via element type
 	 *  @param elementType segment type - AcctSchemaElement.ELEMENTTYPE_
 	 *  @return AcctSchemaElement
 	 */
@@ -330,7 +348,6 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}   //  getAcctSchemaElement
 
 	/**
-	 *  Has AcctSchema Element
 	 *  @param segmentType segment type - AcctSchemaElement.SEGMENT_
 	 *  @return true if schema has segment type
 	 */
@@ -375,7 +392,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 
 	/**
 	 *	String representation
-	 *  @return String rep
+	 *  @return String representation
 	 */
 	public String toString()
 	{
@@ -387,7 +404,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 
 	/**
 	 * 	Is Suspense Balancing active
-	 *	@return suspense balancing
+	 *	@return true if schema is using suspense balancing account
 	 */
 	public boolean isSuspenseBalancing()
 	{
@@ -397,8 +414,8 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isSuspenseBalancing
 
 	/**
-	 *	Get Suspense Error Account
-	 *  @return suspense error account
+	 *	Get Suspense Balancing Account
+	 *  @return suspense balancing account
 	 */
 	public MAccount getSuspenseBalancing_Acct()
 	{
@@ -413,7 +430,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 
 	/**
 	 * 	Is Currency Balancing active
-	 *	@return suspense balancing
+	 *	@return true if schema is using currency balancing account
 	 */
 	public boolean isCurrencyBalancing()
 	{
@@ -476,9 +493,9 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	 * @deprecated only orgs are now fetched automatically
 	 * @throws IllegalStateException every time when you call it 
 	 */
+	@Deprecated
 	public void setOnlyOrgs (Integer[] orgs)
 	{
-//		m_onlyOrgs = orgs;
 		throw new IllegalStateException("The OnlyOrgs are now fetched automatically");
 	}	//	setOnlyOrgs
 	
@@ -499,7 +516,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	/**
 	 * 	Skip creating postings for this Org.
 	 *	@param AD_Org_ID
-	 *	@return true if to skip
+	 *	@return true if to skip posting
 	 */
 	public synchronized boolean isSkipOrg (int AD_Org_ID)
 	{
@@ -584,7 +601,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	
 	/**
 	 * 	Is Client Costing Level (default)
-	 *	@return true if Client
+	 *	@return true if schema costing is at client level
 	 */
 	public boolean isCostingLevelClient()
 	{
@@ -596,7 +613,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	
 	/**
 	 * 	Is Org Costing Level
-	 *	@return true if Org
+	 *	@return true if schema costing is at organization level
 	 */
 	public boolean isCostingLevelOrg()
 	{
@@ -605,7 +622,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	
 	/**
 	 * 	Is Batch Costing Level
-	 *	@return true if Batch
+	 *	@return true if schema costing is at lot/batch level
 	 */
 	public boolean isCostingLevelBatch()
 	{
@@ -613,8 +630,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isCostingLevelBatch
 
 	/**
-	 * 	Create PO Commitment Accounting
-	 *	@return true if creaet commitments
+	 *	@return true if using commitments accounting for PO
 	 */
 	public boolean isCreatePOCommitment()
 	{
@@ -628,8 +644,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isCreateCommitment
 
 	/**
-	 * 	Create SO Commitment Accounting
-	 *	@return true if creaet commitments
+	 *	@return true if using commitments accounting for SO
 	 */
 	public boolean isCreateSOCommitment()
 	{
@@ -642,8 +657,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isCreateCommitment
 
 	/**
-	 * 	Create Commitment/Reservation Accounting
-	 *	@return true if create reservations
+	 *	@return true if create reservations for PO
 	 */
 	public boolean isCreateReservation()
 	{
@@ -656,7 +670,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 
 	/**
 	 * 	Get Tax Correction Type
-	 *	@return tax correction type
+	 *	@return tax correction type (discount, write off or none)
 	 */
 	public String getTaxCorrectionType()
 	{
@@ -668,7 +682,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	
 	/**
 	 * 	Tax Correction
-	 *	@return true if not none
+	 *	@return true if tax correction type is not none
 	 */
 	public boolean isTaxCorrection()
 	{
@@ -676,8 +690,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isTaxCorrection
 	
 	/**
-	 * 	Tax Correction for Discount
-	 *	@return true if tax is corrected for Discount 
+	 *	@return true if tax correction type is discount or write off+discount 
 	 */
 	public boolean isTaxCorrectionDiscount()
 	{
@@ -686,8 +699,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	}	//	isTaxCorrectionDiscount
 
 	/**
-	 * 	Tax Correction for WriteOff
-	 *	@return true if tax is corrected for WriteOff 
+	 *	@return true if tax correction type is write off or write off+discount 
 	 */
 	public boolean isTaxCorrectionWriteOff()
 	{
@@ -695,11 +707,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 			|| getTaxCorrectionType().equals(TAXCORRECTIONTYPE_Write_OffAndDiscount);
 	}	//	isTaxCorrectionWriteOff
 
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getAD_Org_ID() != 0)
@@ -708,13 +716,14 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 			setTaxCorrectionType(isDiscountCorrectsTax() 
 				? TAXCORRECTIONTYPE_Write_OffAndDiscount : TAXCORRECTIONTYPE_None);
 		checkCosting();
-		//	Check Primary
+		// AD_OrgOnly_ID must be 0 if this is primary accounting schema of tenant
 		if (getAD_OrgOnly_ID() != 0)
 		{
 			MClientInfo info = MClientInfo.get(getCtx(), getAD_Client_ID());
 			if (info.getC_AcctSchema1_ID() == getC_AcctSchema_ID())
 				setAD_OrgOnly_ID(0);
 		}
+		// Disallow costing level change if there are existing costing detail records
 		if (!newRecord && is_ValueChanged(COLUMNNAME_CostingLevel)) 
 		{
 			String products = getProductsWithCost();
@@ -726,12 +735,16 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 		return true;
 	}	//	beforeSave
 	
+	/**
+	 * Get products that has costing detail records. 
+	 * @return comma separated product values
+	 */
 	private String getProductsWithCost() {
 		StringBuilder products = new StringBuilder();
 		StringBuilder sql = new StringBuilder("SELECT DISTINCT p.Value FROM M_Product p JOIN M_CostDetail d ON p.M_Product_ID=d.M_Product_ID");
 		sql.append(" JOIN M_Product_Category_Acct pc ON p.M_Product_Category_ID=pc.M_Product_Category_ID AND d.C_AcctSchema_ID=pc.C_AcctSchema_ID");
 		sql.append(" WHERE p.IsActive='Y' AND pc.IsActive='Y' AND pc.CostingLevel IS NULL AND d.C_AcctSchema_ID=?");
-		String query = DB.getDatabase().addPagingSQL(sql.toString(), 0, 50);
+		String query = DB.getDatabase().addPagingSQL(sql.toString(), 1, 50);
 		List<List<Object>> list = DB.getSQLArrayObjectsEx(get_TrxName(), query, getC_AcctSchema_ID());
 		if (list != null) {
 			for(List<Object> entry : list) {
@@ -757,5 +770,73 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 			m_default.markImmutable();
 		return this;
 	}
+	
+	/**
+	 * Convenient method for testing if a back-date transaction is allowed in primary accounting schema
+	 * @param ctx
+	 * @param dateAcct
+	 * @param trxName
+	 * @throws BackDateTrxNotAllowedException
+	 */
+	public static void testBackDateTrxAllowed(Properties ctx, Timestamp dateAcct, String trxName)
+	throws BackDateTrxNotAllowedException
+	{
+		if (!MAcctSchema.isBackDateTrxAllowed(ctx, dateAcct, trxName)) {
+			throw new BackDateTrxNotAllowedException(dateAcct);
+		}
+	}
+	
+	/**
+	 * Is Back-Date transaction allowed in primary accounting schema?
+	 * @param ctx context
+	 * @param tableID
+	 * @param recordID
+	 * @param trxName 
+	 * @return true if back-date transaction is allowed
+	 */
+	public static boolean isBackDateTrxAllowed(Properties ctx, int tableID, int recordID, String trxName)
+	{
+		Timestamp dateAcct = MCostDetail.getDateAcct(tableID, recordID, trxName);;
+		if (dateAcct == null)
+			return true;
+		return isBackDateTrxAllowed(ctx, dateAcct, trxName);
+	}
+	
+	/**
+	 * Is Back-Date transaction allowed in primary accounting schema?
+	 * @param ctx context
+	 * @param dateAcct account date
+	 * @param trxName
+	 * @return true if back-date transaction is allowed
+	 */
+	public static boolean isBackDateTrxAllowed(Properties ctx, Timestamp dateAcct, String trxName)
+	{
+		if (dateAcct == null)
+			return true;
+		MClientInfo info = MClientInfo.get(ctx, Env.getAD_Client_ID(ctx), trxName); 
+		MAcctSchema as = info.getMAcctSchema1();
+		return as.isBackDateTrxAllowed(dateAcct);
+	}
 
+	/**
+	 * Is Back-Date transaction allowed?
+	 * @param dateAcct account date
+	 * @return true if back-date transaction is allowed
+	 */
+	public boolean isBackDateTrxAllowed(Timestamp dateAcct)
+	{
+		if (dateAcct == null)
+			return true;
+		if (getBackDateDay() != 0)
+		{
+			Timestamp today = TimeUtil.trunc(new Timestamp (System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+			Timestamp allowedBackDate = TimeUtil.addDays(today, - getBackDateDay());
+			if (dateAcct.before(allowedBackDate))
+			{
+				log.warning("Back-Date Days Control" + dateAcct + " before allowed back-date - " + allowedBackDate);
+				return false;
+			}
+		}
+		return true;
+	}
 }	//	MAcctSchema

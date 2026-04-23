@@ -41,6 +41,7 @@ import org.adempiere.webui.event.WTableModelEvent;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.MInOut;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MQuery;
 import org.compiere.util.DisplayType;
@@ -52,11 +53,11 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
-import org.zkoss.zul.North;
-import org.zkoss.zul.South;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
+import org.zkoss.zul.North;
 import org.zkoss.zul.Separator;
+import org.zkoss.zul.South;
 import org.zkoss.zul.Vbox;
 
 /**
@@ -179,11 +180,11 @@ public class InfoInOutPanel extends InfoPanel implements ValueChangeListener, Ev
 		fDescription.addEventListener(Events.ON_CHANGE, this);
 		fPOReference.addEventListener(Events.ON_CHANGE, this);
 		
-		fDocumentNo.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentNo");
-		fDescription.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "description");
-		fPOReference.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "poreference");
-		fDateFrom.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateFrom");
-		fDateTo.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateTo");
+		fDocumentNo.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "documentNo");
+		fDescription.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "description");
+		fPOReference.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "poreference");
+		fDateFrom.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateFrom");
+		fDateTo.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "dateTo");
 
 		fIsSOTrx.setLabel(Msg.translate(Env.getCtx(), "IsSOTrx"));
 		fIsSOTrx.setChecked(!"N".equals(Env.getContext(Env.getCtx(), p_WindowNo, "IsSOTrx")));
@@ -414,7 +415,7 @@ public class InfoInOutPanel extends InfoPanel implements ValueChangeListener, Ev
 	public void zoom()
 	{
 		log.info( "InfoInOut.zoom");
-		Integer M_InOut_ID = getSelectedRowKey();
+		Integer M_InOut_ID = getIntSelectedRowKey(MInOut.Table_ID);
 		if (M_InOut_ID == null)
 			return;
 		MQuery query = new MQuery("M_InOut");

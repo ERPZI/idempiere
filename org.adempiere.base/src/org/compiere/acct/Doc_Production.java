@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MProduct;
+import org.compiere.model.MProduction;
 import org.compiere.model.MProductionLineMA;
 import org.compiere.model.ProductCost;
 import org.compiere.model.X_M_Production;
@@ -36,7 +37,7 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
- *  Post Invoice Documents.
+ *  Post {@link MProduction} Documents.
  *  <pre>
  *  Table:              M_Production (325)
  *  Document Types:     MMP
@@ -61,6 +62,7 @@ public class Doc_Production extends Doc
 	 *  Load Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails()
 	{
 		setC_Currency_ID (NO_CURRENCY);
@@ -81,7 +83,7 @@ public class Doc_Production extends Doc
 	 * @param line
 	 * @param isUsePlan
 	 * @param addMoreQty when you want get value, just pass null
-	 * @return
+	 * @return qty produce for line (include addMoreQty if addMoreQty is not null)
 	 */
 	private BigDecimal manipulateQtyProduced (Map<Integer, BigDecimal> mQtyProduced, X_M_ProductionLine line, Boolean isUsePlan, BigDecimal addMoreQty){
 		BigDecimal qtyProduced = null;
@@ -102,7 +104,7 @@ public class Doc_Production extends Doc
 		return qtyProduced;
 	}
 	/**
-	 *	Load Invoice Line
+	 *	Load production lines
 	 *	@param prod production
 	 *  @return DoaLine Array
 	 */
@@ -112,7 +114,7 @@ public class Doc_Production extends Doc
 		mQtyProduced = new HashMap<>(); 
 		String sqlPL = null;
 		if (prod.isUseProductionPlan()){
-//			Production
+			//	Production Plan
 			//	-- ProductionLine	- the real level
 			sqlPL = "SELECT * FROM "
 							+ " M_ProductionLine pro_line INNER JOIN M_ProductionPlan plan ON pro_line.M_ProductionPlan_id = plan.M_ProductionPlan_id "
@@ -120,7 +122,7 @@ public class Doc_Production extends Doc
 							+ " WHERE pro.M_Production_ID=? "
 							+ " ORDER BY plan.M_ProductionPlan_id, pro_line.Line";
 		}else{
-//			Production
+			//	Production
 			//	-- ProductionLine	- the real level
 			sqlPL = "SELECT * FROM M_ProductionLine pl "
 					+ "WHERE pl.M_Production_ID=? "
@@ -178,6 +180,7 @@ public class Doc_Production extends Doc
 	 *  Get Balance
 	 *  @return Zero (always balanced)
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -194,6 +197,7 @@ public class Doc_Production extends Doc
 	 *  @param as account schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -224,8 +228,8 @@ public class Doc_Production extends Doc
 					for (int j = 0; j < mas.length; j++)
 					{
 						MProductionLineMA ma = mas[j];													
-						MCostDetail cd = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-								line.get_ID(), ma.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());	
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+								line.get_ID(), getTrxName());	
 						if (cd != null)
 							costs = costs.add(cd.getAmt());	
 						else 
@@ -240,8 +244,8 @@ public class Doc_Production extends Doc
 				} 
 				else
 				{
-					MCostDetail cd = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-							line.get_ID(), line.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
+					MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), getTrxName());
 					if (cd != null) 
 					{
 						costs = cd.getAmt();
@@ -259,8 +263,8 @@ public class Doc_Production extends Doc
 			
 				// MZ Goodwill
 				// if Production CostDetail exist then get Cost from Cost Detail
-				MCostDetail cd = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-						line.get_ID(), line.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
+				MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), getTrxName());
 				if (cd != null) 
 				{
 					costs = cd.getAmt();
@@ -307,8 +311,8 @@ public class Doc_Production extends Doc
 										BigDecimal maCost = BigDecimal.ZERO ;
 										MProductionLineMA ma = bomLineMA[j];								
 										// get cost of children
-										MCostDetail cd0 = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",									
-												line0.get_ID(), ma.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
+										MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+												line0.get_ID(), getTrxName());
 										if (cd0 != null) 
 											maCost = cd0.getAmt();
 										else 
@@ -330,8 +334,8 @@ public class Doc_Production extends Doc
 							else
 							{
 								// get cost of children  for batch costing level 
-								MCostDetail cd0 = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-										line0.get_ID(), line0.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
+								MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), line0.getM_AttributeSetInstance_ID(),
+										line0.get_ID(), getTrxName());
 								BigDecimal costs0;
 								if (cd0 != null) 
 								{
@@ -349,8 +353,8 @@ public class Doc_Production extends Doc
 						else
 						{
 						// get cost of children
-							MCostDetail cd0 = MCostDetail.get (as.getCtx(), "M_ProductionLine_ID=?",
-									line0.get_ID(), line0.getM_AttributeSetInstance_ID(), as.getC_AcctSchema_ID(), getTrxName());
+							MCostDetail cd0 = MCostDetail.getProduction(as, line0.getM_Product_ID(), line0.getM_AttributeSetInstance_ID(),
+									line0.get_ID(), getTrxName());
 							BigDecimal costs0;
 							if (cd0 != null) 
 							{
@@ -437,11 +441,19 @@ public class Doc_Production extends Doc
 			{
 				if (line.isProductionBOM())
 				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
 					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,
 							bomCost.negate(), qtyProduced,
-							description, getTrxName()))
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 					 {
 						 p_Error = "Failed to create cost detail record";
 						 return null;
@@ -453,11 +465,19 @@ public class Doc_Production extends Doc
 					 {
 						MProductionLineMA ma = mas[j];
 						BigDecimal maCost = costMap.get(line.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID());		
+						int Ref_CostDetail_ID = 0;
+						if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+						{
+							MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
+									line.getReversalLine_ID(), 0, getTrxName());
+							if (cd != null)
+								Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+						}
 						if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 								line.getM_Product_ID(), ma.getM_AttributeSetInstance_ID(),
 								line.get_ID(), 0,
 								maCost, ma.getMovementQty(),
-								description, getTrxName()))
+								description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 						{
 							p_Error = "Failed to create cost detail record";
 							return null;
@@ -466,12 +486,19 @@ public class Doc_Production extends Doc
 				 } 
 				 else
 				 {
-					 
+					 int Ref_CostDetail_ID = 0;
+					 if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					 {
+						 MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								 line.getReversalLine_ID(), 0, getTrxName());
+						 if (cd != null)
+							 Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					 }
 					 if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,
 							costs, line.getQty(),
-							description, getTrxName()))
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 					 {
 						 p_Error = "Failed to create cost detail record";
 						 return null;
@@ -482,11 +509,19 @@ public class Doc_Production extends Doc
 			{		
 				if (line.isProductionBOM() && !(MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod)))
 				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
 					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 							line.get_ID(), 0,
 							bomCost.negate(), line.getQty(),
-							description, getTrxName()))
+							description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 						{
 							p_Error = "Failed to create cost detail record";
 							return null;
@@ -494,11 +529,19 @@ public class Doc_Production extends Doc
 				}
 				else
 				{
+					int Ref_CostDetail_ID = 0;
+					if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+					{
+						MCostDetail cd = MCostDetail.getProduction(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+								line.getReversalLine_ID(), 0, getTrxName());
+						if (cd != null)
+							Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+					}
 					if (!MCostDetail.createProduction(as, line.getAD_Org_ID(),
 						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 						line.get_ID(), 0,
 						costs, line.getQty(),
-						description, getTrxName()))
+						description, line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 					{
 						p_Error = "Failed to create cost detail record";
 						return null;

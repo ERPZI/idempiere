@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_DemandLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_DemandLine")
-public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent 
+public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_DemandLine (Properties ctx, int M_DemandLine_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
       /** if (M_DemandLine_ID == 0)
         {
 			setC_Period_ID (0);
-			setM_Demand_ID (0);
 			setM_DemandLine_ID (0);
+			setM_Demand_ID (0);
 			setM_Product_ID (0);
 			setQty (Env.ZERO);
 			setQtyCalculated (Env.ZERO);
@@ -57,8 +57,38 @@ public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
       /** if (M_DemandLine_ID == 0)
         {
 			setC_Period_ID (0);
-			setM_Demand_ID (0);
 			setM_DemandLine_ID (0);
+			setM_Demand_ID (0);
+			setM_Product_ID (0);
+			setQty (Env.ZERO);
+			setQtyCalculated (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DemandLine (Properties ctx, String M_DemandLine_UU, String trxName)
+    {
+      super (ctx, M_DemandLine_UU, trxName);
+      /** if (M_DemandLine_UU == null)
+        {
+			setC_Period_ID (0);
+			setM_DemandLine_ID (0);
+			setM_Demand_ID (0);
+			setM_Product_ID (0);
+			setQty (Env.ZERO);
+			setQtyCalculated (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_DemandLine (Properties ctx, String M_DemandLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_DemandLine_UU, trxName, virtualColumns);
+      /** if (M_DemandLine_UU == null)
+        {
+			setC_Period_ID (0);
+			setM_DemandLine_ID (0);
+			setM_Demand_ID (0);
 			setM_Product_ID (0);
 			setQty (Env.ZERO);
 			setQtyCalculated (Env.ZERO);
@@ -72,7 +102,7 @@ public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -124,38 +154,10 @@ public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getC_Period_ID()));
     }
-
-	public org.compiere.model.I_M_Demand getM_Demand() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Demand)MTable.get(getCtx(), org.compiere.model.I_M_Demand.Table_ID)
-			.getPO(getM_Demand_ID(), get_TrxName());
-	}
-
-	/** Set Demand.
-		@param M_Demand_ID Material Demand
-	*/
-	public void setM_Demand_ID (int M_Demand_ID)
-	{
-		if (M_Demand_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_Demand_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_Demand_ID, Integer.valueOf(M_Demand_ID));
-	}
-
-	/** Get Demand.
-		@return Material Demand
-	  */
-	public int getM_Demand_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Demand_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Demand Line.
 		@param M_DemandLine_ID Material Demand Line
@@ -192,6 +194,34 @@ public class X_M_DemandLine extends PO implements I_M_DemandLine, I_Persistent
 	public String getM_DemandLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_DemandLine_UU);
+	}
+
+	public org.compiere.model.I_M_Demand getM_Demand() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Demand)MTable.get(getCtx(), org.compiere.model.I_M_Demand.Table_ID)
+			.getPO(getM_Demand_ID(), get_TrxName());
+	}
+
+	/** Set Demand.
+		@param M_Demand_ID Material Demand
+	*/
+	public void setM_Demand_ID (int M_Demand_ID)
+	{
+		if (M_Demand_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Demand_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Demand_ID, Integer.valueOf(M_Demand_ID));
+	}
+
+	/** Get Demand.
+		@return Material Demand
+	  */
+	public int getM_Demand_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Demand_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException

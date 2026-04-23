@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for S_TimeExpenseLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="S_TimeExpenseLine")
-public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Persistent 
+public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240411L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_S_TimeExpenseLine (Properties ctx, int S_TimeExpenseLine_ID, String trxName)
@@ -54,10 +54,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			setM_Product_ID (0);
 // @SQL=SELECT M_Product_ID AS DefaultValue FROM ZI_ExpenseCategory WHERE ZI_ExpenseCategory_ID = @ZI_ExpenseCategory_ID@
 			setProcessed (false);
-			setS_TimeExpense_ID (0);
 			setS_TimeExpenseLine_ID (0);
 			setUser1_ID (0);
 // @0|User1_ID@
+			setS_TimeExpense_ID (0);
         } */
     }
 
@@ -79,10 +79,46 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			setM_Product_ID (0);
 // @SQL=SELECT M_Product_ID AS DefaultValue FROM ZI_ExpenseCategory WHERE ZI_ExpenseCategory_ID = @ZI_ExpenseCategory_ID@
 			setProcessed (false);
-			setS_TimeExpense_ID (0);
 			setS_TimeExpenseLine_ID (0);
 			setUser1_ID (0);
 // @0|User1_ID@
+			setS_TimeExpense_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_S_TimeExpenseLine (Properties ctx, String S_TimeExpenseLine_UU, String trxName)
+    {
+      super (ctx, S_TimeExpenseLine_UU, trxName);
+      /** if (S_TimeExpenseLine_UU == null)
+        {
+			setDateExpense (new Timestamp( System.currentTimeMillis() ));
+// @DateExpense@;@DateReport@
+			setIsInvoiced (false);
+			setIsTimeReport (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM S_TimeExpenseLine WHERE S_TimeExpense_ID=@S_TimeExpense_ID@
+			setProcessed (false);
+			setS_TimeExpenseLine_ID (0);
+			setS_TimeExpense_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_S_TimeExpenseLine (Properties ctx, String S_TimeExpenseLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, S_TimeExpenseLine_UU, trxName, virtualColumns);
+      /** if (S_TimeExpenseLine_UU == null)
+        {
+			setDateExpense (new Timestamp( System.currentTimeMillis() ));
+// @DateExpense@;@DateReport@
+			setIsInvoiced (false);
+			setIsTimeReport (false);
+			setLine (0);
+// @SQL=SELECT NVL(MAX(Line),0)+10 AS DefaultValue FROM S_TimeExpenseLine WHERE S_TimeExpense_ID=@S_TimeExpense_ID@
+			setProcessed (false);
+			setS_TimeExpenseLine_ID (0);
+			setS_TimeExpense_ID (0);
         } */
     }
 
@@ -93,7 +129,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -120,7 +156,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			.getPO(getC_Activity_ID(), get_TrxName());
 	}
 
-	/** Set Functional Area.
+	/** Set Activity.
 		@param C_Activity_ID Business Activity
 	*/
 	public void setC_Activity_ID (int C_Activity_ID)
@@ -131,7 +167,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Functional Area.
+	/** Get Activity.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID()
@@ -254,25 +290,6 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return ii.intValue();
 	}
 
-	/** Set Converted Amount.
-		@param ConvertedAmt Converted Amount
-	*/
-	public void setConvertedAmt (BigDecimal ConvertedAmt)
-	{
-		set_Value (COLUMNNAME_ConvertedAmt, ConvertedAmt);
-	}
-
-	/** Get Converted Amount.
-		@return Converted Amount
-	  */
-	public BigDecimal getConvertedAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConvertedAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
@@ -296,34 +313,6 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public int getC_OrderLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_OrderLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
-			.getPO(getC_Project_ID(), get_TrxName());
-	}
-
-	/** Set Project.
-		@param C_Project_ID Financial Project
-	*/
-	public void setC_Project_ID (int C_Project_ID)
-	{
-		if (C_Project_ID < 1)
-			set_Value (COLUMNNAME_C_Project_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
-	}
-
-	/** Get Project.
-		@return Financial Project
-	  */
-	public int getC_Project_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -412,6 +401,34 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 			 return 0;
 		return ii.intValue();
 	}
+	
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_C_UOM getC_UOM() throws RuntimeException
 	{
@@ -439,6 +456,25 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Converted Amount.
+		@param ConvertedAmt Converted Amount
+	*/
+	public void setConvertedAmt (BigDecimal ConvertedAmt)
+	{
+		set_Value (COLUMNNAME_ConvertedAmt, ConvertedAmt);
+	}
+
+	/** Get Converted Amount.
+		@return Converted Amount
+	  */
+	public BigDecimal getConvertedAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConvertedAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Expense Date.
@@ -525,10 +561,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isInvoiced()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInvoiced);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -548,10 +584,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isTimeReport()
 	{
 		Object oo = get_Value(COLUMNNAME_IsTimeReport);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -579,7 +615,7 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
@@ -589,7 +625,8 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	*/
 	public void setLineNetAmt (BigDecimal LineNetAmt)
 	{
-		throw new IllegalArgumentException ("LineNetAmt is virtual column");	}
+		set_Value (COLUMNNAME_LineNetAmt, LineNetAmt);
+	}
 
 	/** Get Line Amount.
 		@return Line Extended Amount (Quantity * Actual Price) without Freight and Charges
@@ -646,25 +683,6 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return (String)get_Value(COLUMNNAME_Note);
 	}
 
-	/** Set Price.
-		@param PriceEntered Price Entered - the price based on the selected/base UoM
-	*/
-	public void setPriceEntered (BigDecimal PriceEntered)
-	{
-		set_Value (COLUMNNAME_PriceEntered, PriceEntered);
-	}
-
-	/** Get Price.
-		@return Price Entered - the price based on the selected/base UoM
-	  */
-	public BigDecimal getPriceEntered()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceEntered);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	/** Set Price Invoiced.
 		@param PriceInvoiced The priced invoiced to the customer (in the currency of the customer&#039;s AR price list) - 0 for default price
 	*/
@@ -717,10 +735,10 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -805,34 +823,6 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_S_TimeExpense getS_TimeExpense() throws RuntimeException
-	{
-		return (org.compiere.model.I_S_TimeExpense)MTable.get(getCtx(), org.compiere.model.I_S_TimeExpense.Table_ID)
-			.getPO(getS_TimeExpense_ID(), get_TrxName());
-	}
-
-	/** Set Expense Report.
-		@param S_TimeExpense_ID Time and Expense Report
-	*/
-	public void setS_TimeExpense_ID (int S_TimeExpense_ID)
-	{
-		if (S_TimeExpense_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_S_TimeExpense_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_S_TimeExpense_ID, Integer.valueOf(S_TimeExpense_ID));
-	}
-
-	/** Get Expense Report.
-		@return Time and Expense Report
-	  */
-	public int getS_TimeExpense_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_S_TimeExpense_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Expense Line.
 		@param S_TimeExpenseLine_ID Time and Expense Report Line
 	*/
@@ -868,6 +858,34 @@ public class X_S_TimeExpenseLine extends PO implements I_S_TimeExpenseLine, I_Pe
 	public String getS_TimeExpenseLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_S_TimeExpenseLine_UU);
+	}
+
+	public org.compiere.model.I_S_TimeExpense getS_TimeExpense() throws RuntimeException
+	{
+		return (org.compiere.model.I_S_TimeExpense)MTable.get(getCtx(), org.compiere.model.I_S_TimeExpense.Table_ID)
+			.getPO(getS_TimeExpense_ID(), get_TrxName());
+	}
+
+	/** Set Expense Report.
+		@param S_TimeExpense_ID Time and Expense Report
+	*/
+	public void setS_TimeExpense_ID (int S_TimeExpense_ID)
+	{
+		if (S_TimeExpense_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_S_TimeExpense_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_S_TimeExpense_ID, Integer.valueOf(S_TimeExpense_ID));
+	}
+
+	/** Get Expense Report.
+		@return Time and Expense Report
+	  */
+	public int getS_TimeExpense_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_S_TimeExpense_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_S_TimeType getS_TimeType() throws RuntimeException

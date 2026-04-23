@@ -27,6 +27,9 @@ package org.adempiere.webui.adwindow;
 import java.util.List;
 
 import org.adempiere.util.Callback;
+import org.adempiere.webui.adwindow.validator.WindowValidatorEvent;
+import org.adempiere.webui.adwindow.validator.WindowValidatorEventType;
+import org.adempiere.webui.adwindow.validator.WindowValidatorManager;
 import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.editor.IProcessButton;
 import org.adempiere.webui.editor.WButtonEditor;
@@ -45,6 +48,7 @@ import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menuseparator;
 
 /**
+ * Popup menu for process buttons and document actions
  * @author hengsin
  */
 public class ProcessButtonPopup extends Menupopup implements EventListener<Event> {
@@ -64,7 +68,7 @@ public class ProcessButtonPopup extends Menupopup implements EventListener<Event
 	private static final long serialVersionUID = 304878472233552113L;
 
 	/**
-	 * Render buttons as menu items.
+	 * Render buttons as menu items.<br/>
 	 * Special treatment for DocAction - render each available document action as a sub menu item.
 	 * @param buttons
 	 */
@@ -107,6 +111,8 @@ public class ProcessButtonPopup extends Menupopup implements EventListener<Event
 				if (this.getChildren().size() > 0)
 					appendChild(new Menuseparator());
 				Menu menu = new Menu(Msg.getElement(Env.getCtx(), "DocAction"));
+				if (docActionBtn.isDisabled())
+					menu.setDisabled(true);
 				appendChild(menu);
 				Menupopup popup = new Menupopup();
 				popup.setAttribute(BUTTON_ATTRIBUTE, docActionBtn);
@@ -140,7 +146,27 @@ public class ProcessButtonPopup extends Menupopup implements EventListener<Event
 						GridTab gridTab = pb.getADTabpanel().getGridTab();
 						ADWindow adwindow = ADWindow.get(gridTab.getWindowNo());
 						ADWindowContent windowContent = adwindow.getADWindowContent();
-						windowContent.executeButtonProcess(pb, true, gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), true);
+						
+						final Callback<Boolean> postCallback = new Callback<Boolean>() {
+							@Override
+							public void onCallback(Boolean result) {
+								if (result) {
+									WindowValidatorEvent event = new WindowValidatorEvent(adwindow, WindowValidatorEventType.AFTER_DOC_ACTION.getName());
+							    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(event, null);
+								}
+							}
+						};
+				    	Callback<Boolean> preCallback = new Callback<Boolean>() {
+							@Override
+							public void onCallback(Boolean result) {
+								if (result) {
+									windowContent.executeButtonProcess(pb, true, gridTab.getAD_Table_ID(), gridTab.getRecord_ID(), true, postCallback);
+								}
+							}
+						};
+						
+						WindowValidatorEvent validatorEvent = new WindowValidatorEvent(adwindow, WindowValidatorEventType.BEFORE_DOC_ACTION.getName(), pb);
+				    	WindowValidatorManager.getInstance().fireWindowValidatorEvent(validatorEvent, preCallback);				    							
 					}
 				}
 			});

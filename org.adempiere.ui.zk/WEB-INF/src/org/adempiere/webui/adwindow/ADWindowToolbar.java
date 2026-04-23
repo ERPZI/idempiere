@@ -35,6 +35,7 @@ import org.adempiere.webui.component.Combobox;
 import org.adempiere.webui.component.Tabpanel;
 import org.adempiere.webui.component.ToolBar;
 import org.adempiere.webui.component.ToolBarButton;
+import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.event.ToolbarListener;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
@@ -80,7 +81,6 @@ import org.zkoss.zul.impl.LabelImageElement;
  * Toolbar of AD_Window
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Feb 25, 2007
- * @version $Revision: 0.10 $
  *
  * @author Cristina Ghita, www.arhipac.ro
  * 				<li>FR [ 2076330 ] Add new methods in CWindowToolbar class
@@ -90,7 +90,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	/**
 	 * generated serial id
 	 */
-	private static final long serialVersionUID = -5151981978053022864L;
+	private static final long serialVersionUID = -2174135931334134570L;
 
 	/**
 	 * Attribute for {@link #overflowPopup} to store the last close timestamp in ms.
@@ -171,23 +171,15 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     /** List of toolbar button with IsAdvanced=Y **/
     private List<String> advancedList;
 
-	// Elaine 2008/12/04
 	/** Show Personal Lock								*/
 	public boolean isPersonalLock = MRole.getDefault().isPersonalLock();
 	private boolean isAllowProductInfo = MRole.getDefault().canAccess_Info_Product();
 
 	private int windowNo = 0;
-	/** previous key event time in ms **/
-	private long prevKeyEventTime = 0;
-	/** 
-	 * Previous key event.
-	 * Use together with prevKeyEventTime to detect double fire of key event from browser
-	 */
-	private KeyEvent prevKeyEvent;
 	
 	/**
 	 * Maintain hierarchical Quick form by its parent-child tab while open leaf
-	 * tab once & dispose and doing same action
+	 * tab once and dispose and doing same action
 	 */
 	private int	quickFormTabHrchyLevel		= 0;
 	/** show more button for mobile client **/
@@ -203,6 +195,10 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	private int prevWidth;
 	/** AD Window content part that own this toolbar **/
 	private AbstractADWindowContent windowContent;
+	/**
+	 * SysConfig USE_ESC_FOR_TAB_CLOSING
+	 */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	/**
 	 * default constructor
@@ -272,10 +268,10 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
         if (MRole.getDefault().isCanReport()) {
             btnReport = createButton("Report", "Report", "Report");
             btnReport.setTooltiptext(btnReport.getTooltiptext()+ "    Alt+R");
+            btnArchive = createButton("Archive", "Archive", "Archive");
+            btnPrint = createButton("Print", "Print", "Print");
+            btnPrint.setTooltiptext(btnPrint.getTooltiptext()+ "    Alt+P");
         }
-        btnArchive = createButton("Archive", "Archive", "Archive");
-        btnPrint = createButton("Print", "Print", "Print");
-        btnPrint.setTooltiptext(btnPrint.getTooltiptext()+ "    Alt+P");
         if (isPersonalLock) {
             btnLock = createButton("Lock", "Lock", "Lock"); // Elaine 2008/12/04
             btnLock.setDisabled(!isPersonalLock); // Elaine 2008/12/04
@@ -307,7 +303,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
         btnActiveWorkflows.setDisabled(false); // Elaine 2008/07/17
         btnRequests.setDisabled(false); // Elaine 2008/07/22
-        btnArchive.setDisabled(false); // Elaine 2008/07/28
+		if (btnArchive != null)
+			btnArchive.setDisabled(false); // Elaine 2008/07/28
 
         if (MRole.getDefault().isCanExport())
         {
@@ -506,6 +503,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
      */
     private void configureKeyMap()
     {
+    	//Alt + Key
 		altKeyMap.put(VK_H, btnHelp);
 		altKeyMap.put(VK_N, btnNew);
 		altKeyMap.put(VK_D, btnDelete);
@@ -520,7 +518,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		altKeyMap.put(VK_Z, btnIgnore);
 		if (btnReport != null)
 			altKeyMap.put(VK_R, btnReport);		
-		altKeyMap.put(VK_P, btnPrint);
+		if (btnPrint != null)
+			altKeyMap.put(VK_P, btnPrint);
 		altKeyMap.put(VK_O, btnProcess);
 		altKeyMap.put(VK_L, btnCustomize);
 	}
@@ -578,22 +577,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 			if (!(keyEvent.getKeyCode() == KeyEvent.F2) && windowContent != null && windowContent.getOpenQuickFormTabs().size() > 0)
 				return;
 
-        	if (LayoutUtils.isReallyVisible(this)) {
-	        	//filter same key event that is too close
-	        	//firefox fire key event twice when grid is visible
-	        	long time = System.currentTimeMillis();
-	        	if (prevKeyEvent != null && prevKeyEventTime > 0 &&
-	        			prevKeyEvent.getKeyCode() == keyEvent.getKeyCode() &&
-	    				prevKeyEvent.getTarget() == keyEvent.getTarget() &&
-	    				prevKeyEvent.isAltKey() == keyEvent.isAltKey() &&
-	    				prevKeyEvent.isCtrlKey() == keyEvent.isCtrlKey() &&
-	    				prevKeyEvent.isShiftKey() == keyEvent.isShiftKey()) {
-	        		if ((time - prevKeyEventTime) <= 300) {
-	        			return;
-	        		}
-	        	}
-	        	this.onCtrlKeyEvent(keyEvent);
-        	}
+		if (LayoutUtils.isReallyVisible(this))
+			this.onCtrlKeyEvent(keyEvent);
         } else if (Events.ON_SELECT.equals(eventName)) 
         {
         	int index = fQueryName.getSelectedIndex();
@@ -609,10 +594,17 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
         	doOnClick(event);
         }
+        else if(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT.equals(eventName)) {
+        	IDesktop desktop = SessionManager.getAppDesktop();
+        	if (windowNo > 0 && desktop.isCloseTabWithShortcut())
+        		desktop.closeWindow(windowNo);
+        	else
+        		desktop.setCloseTabWithShortcut(true);
+        }
     }
 
     /**
-     * Handle ON_Click event for button.
+     * Handle ON_Click event for button.<br/>
      * Call register {@link ToolbarListener}.
      * @param event
      */
@@ -699,6 +691,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     }
 
     /**
+     * Is save button enable
      * @return true if Save button is enable
      */
     public boolean isSaveEnable() {
@@ -715,6 +708,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     }
     
     /**
+     * Is delete button enable
      * @return true if Delete button is enable
      */
     public boolean isDeleteEnable()
@@ -723,6 +717,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     }
     
     /**
+     * Is create new record button enable
      * @return true if New button is enable
      */
 	public boolean isNewEnabled() {
@@ -781,7 +776,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
      */
     public void enablePrint(boolean enabled)
     {
-    	this.btnPrint.setDisabled(!enabled);
+		if (btnPrint != null)
+			this.btnPrint.setDisabled(!enabled);
     }
 
     /**
@@ -827,7 +823,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
      */
     public void enableArchive(boolean enabled)
     {
-    	btnArchive.setDisabled(!enabled);
+		if (btnArchive != null)
+			btnArchive.setDisabled(!enabled);
     }
     
     /**
@@ -868,7 +865,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
 	/**
      * Turn on/off Lock button (Pressed=On, Not Pressed=Off)
-     * @param enabled
+     * @param locked
      */
     public void lock(boolean locked)
     {
@@ -913,6 +910,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     }
 
     /**
+     * Get source event
      * @return ON_Click event that's being handle
      */
     public Event getEvent()
@@ -931,20 +929,17 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		ToolBarButton btn = null;
 		if (keyEvent.isAltKey() && !keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
 		{
-			if (keyEvent.getKeyCode() == VK_X)
+			if ((keyEvent.getKeyCode() == VK_X))
 			{
-				if (windowNo > 0)
-				{
-					prevKeyEventTime = System.currentTimeMillis();
-		        	prevKeyEvent = keyEvent;
-					keyEvent.stopPropagation();
-					SessionManager.getAppDesktop().closeWindow(windowNo);
-				}
+				onCloseWithShortcut(keyEvent);
 			}
 			else
 			{
 				btn = altKeyMap.get(keyEvent.getKeyCode());
 			}
+		}
+		else if (keyEvent.getKeyCode() == 0x1B && isUseEscForTabClosing) {	// ESC
+			onCloseWithShortcut(keyEvent);
 		}
 		else if (!keyEvent.isAltKey() && keyEvent.isCtrlKey() && !keyEvent.isShiftKey())
 		{
@@ -981,6 +976,15 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
+	 * Close Window
+	 * @param keyEvent
+	 */
+	private void onCloseWithShortcut(KeyEvent keyEvent) {
+		keyEvent.stopPropagation();
+		Events.echoEvent(new Event(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this));
+	}
+	
+	/**
 	 * Fire ON_Click event for button, trigger by shortcut key event.
 	 * @param keyEvent source shortcut key event
 	 * @param btn
@@ -988,8 +992,6 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	private void fireButtonClickEvent(KeyEvent keyEvent, ToolBarButton btn)
 	{
 		if (btn != null) {
-			prevKeyEventTime = System.currentTimeMillis();
-        	prevKeyEvent = keyEvent;
 			keyEvent.stopPropagation();
 			if (!btn.isDisabled() && btn.isVisible()) {
 				Events.sendEvent(btn, new Event(Events.ON_CLICK, btn));
@@ -1059,6 +1061,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	private boolean ToolBarMenuRestictionLoaded = false;
 	
 	/**
+	 * Is current login user has access to buttonName
 	 * @param buttonName
 	 * @return true if current login user has access to buttonName
 	 */
@@ -1114,8 +1117,8 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 
 	/**
      * Enable/disable Process button
-     * @param enabled
-     */
+	 * @param b boolean
+	 */
 	public void enableProcessButton(boolean b) {
 		if (btnProcess != null) {
 			btnProcess.setDisabled(!b);
@@ -1123,14 +1126,13 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
-	 * Dynamic update of each toolbar button state (Check restrictions).
+	 * Dynamic update of each toolbar button state (Check restrictions).<br/>
 	 * For custom button, call {@link ToolbarCustomButton#dynamicDisplay()}, process pressedLogic and readOnlyLogic.
 	 */
 	public void dynamicDisplay() {
 		List<Toolbarbutton> customButtons = new ArrayList<Toolbarbutton>();
 		for(ToolbarCustomButton toolbarCustomBtn : toolbarCustomButtons) {
-			if (overflows != null)
-				toolbarCustomBtn.dynamicDisplay(overflows.contains(toolbarCustomBtn.getToolbarbutton()));
+			toolbarCustomBtn.dynamicDisplay(overflows == null || overflows.contains(toolbarCustomBtn.getToolbarbutton()));
 			customButtons.add(toolbarCustomBtn.getToolbarbutton());
 		}
 		
@@ -1214,6 +1216,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		super.onPageDetached(page);
 		try {
 			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, this);
+			removeEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this);
 		} catch (Exception e) {}
 	}
 
@@ -1222,6 +1225,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 		super.onPageAttached(newpage, oldpage);
 		if (newpage != null) {
 			SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
+			addEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this);
 		}
 	}
 	
@@ -1331,7 +1335,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
-	 * Populate overflow popup.
+	 * Populate overflow popup.<br/>
 	 * Use for both desktop and mobile client.
 	 */
 	private void populateOverflowPopup() {
@@ -1381,7 +1385,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
-	 * Enable show more feature for desktop client.
+	 * Enable show more feature for desktop client.<br/>
 	 * Overflow for mobile client is initialise differently in {@link #mobileInit()}.
 	 */
 	private void enableShowMore() {
@@ -1394,7 +1398,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
-	 * Show overflow popup after {@link #btnShowMore}.
+	 * Show overflow popup after {@link #btnShowMore}.<br/>
 	 * For desktop client only.
 	 */
 	private void onShowMore() {
@@ -1430,7 +1434,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
-	 * Create overflow popup. 
+	 * Create overflow popup. <br/>
 	 * For both desktop and mobile client.
 	 */
 	private void newOverflowPopup() {
@@ -1449,7 +1453,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 	
 	/**
-	 * Post after size event handler for mobile client.
+	 * Post after size event handler for mobile client.<br/>
 	 * Calculate which toolbar buttons should overflow to show more popup.
 	 */
 	public void onPostAfterSize() {
@@ -1471,6 +1475,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
     }
 
 	/**
+	 * Get parent tab level for quick form
 	 * @return parent tab level for quick form
 	 */
 	public int getQuickFormTabHrchyLevel()
@@ -1479,6 +1484,7 @@ public class ADWindowToolbar extends ToolBar implements EventListener<Event>
 	}
 
 	/**
+	 * Set parent tab level for quick form
 	 * @param quickFormHrchyTabLevel
 	 */
 	public void setQuickFormTabHrchyLevel(int quickFormHrchyTabLevel)

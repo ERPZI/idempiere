@@ -31,14 +31,15 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
 import org.compiere.util.CLogger;
+import org.compiere.util.DisplayType;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
 
 /**
- *
+ * Default editor for {@link DisplayType#Date}.<br/>
+ * Implemented with {@link Datebox} component.
  * @author <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date Mar 12, 2007
- * @version $Revision: 0.10 $
  */
 public class WDateEditor extends WEditor implements ContextMenuListener
 {
@@ -74,16 +75,15 @@ public class WDateEditor extends WEditor implements ContextMenuListener
         init();
     }
 
-
 	/**
 	 * Constructor for use if a grid field is unavailable
 	 *
 	 * @param label
-	 *            column name (not displayed)
+	 *            field label
 	 * @param description
-	 *            description of component
+	 *            field description
 	 * @param mandatory
-	 *            whether a selection must be made
+	 *            whether field is mandatory
 	 * @param readonly
 	 *            whether or not the editor is read only
 	 * @param updateable
@@ -96,6 +96,9 @@ public class WDateEditor extends WEditor implements ContextMenuListener
 		init();
 	}
 
+	/**
+	 * Default constructor
+	 */
 	public WDateEditor()
 	{
 		this("Date", "Date", false, false, true);
@@ -115,6 +118,9 @@ public class WDateEditor extends WEditor implements ContextMenuListener
 		super(new Datebox(), columnName, title, null, mandatory, readonly, updateable);
 	}
 
+	/**
+	 * Init component and context menu
+	 */
 	private void init()
 	{
 		popupMenu = new WEditorPopupMenu(false, false, isShowPreference());
@@ -124,7 +130,7 @@ public class WDateEditor extends WEditor implements ContextMenuListener
 			getComponent().setPlaceholder(gridField.getPlaceholder());
 	}
 
-	
+	@Override
 	public void onEvent(Event event)
     {
 		if (Events.ON_CHANGE.equalsIgnoreCase(event.getName()) || Events.ON_OK.equalsIgnoreCase(event.getName()))
@@ -151,18 +157,14 @@ public class WDateEditor extends WEditor implements ContextMenuListener
     @Override
     public String getDisplay()
     {
-    	// Elaine 2008/07/29
     	return getComponent().getText();
-    	//
     }
 
     @Override
     public Timestamp getValue()
     {
-    	// Elaine 2008/07/25
     	if(getComponent().getValue() == null) return null;
     	return Timestamp.valueOf(getComponent().getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-    	//
     }
 
     @Override
@@ -173,7 +175,7 @@ public class WDateEditor extends WEditor implements ContextMenuListener
     		Timestamp currentValue = oldValue;
     		oldValue = null;
     		getComponent().setValue(null);
-    		if (currentValue != null)
+    		if (currentValue != null && !readOnly)
     		{
     			ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), currentValue, null);
     			super.fireValueChange(changeEvent);
@@ -185,7 +187,7 @@ public class WDateEditor extends WEditor implements ContextMenuListener
     		LocalDateTime localDateTime = ((Timestamp)value).toLocalDateTime();
             getComponent().setValueInLocalDateTime(localDateTime);            
             oldValue = Timestamp.valueOf(localDateTime);
-            if (!Objects.equals(currentValue, oldValue)) 
+			if (!Objects.equals(currentValue, oldValue) && !readOnly) 
             {
             	ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), currentValue, oldValue);
             	super.fireValueChange(changeEvent);
@@ -201,7 +203,7 @@ public class WDateEditor extends WEditor implements ContextMenuListener
         			oldValue = Timestamp.valueOf(getComponent().getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
         		else
         			oldValue = null;
-    			if (!Objects.equals(currentValue, oldValue))
+    			if (!Objects.equals(currentValue, oldValue) && !readOnly)
     			{
 	    			ValueChangeEvent changeEvent = new ValueChangeEvent(this, this.getColumnName(), currentValue, oldValue);
 	                super.fireValueChange(changeEvent);
@@ -226,11 +228,11 @@ public class WDateEditor extends WEditor implements ContextMenuListener
 		getComponent().setEnabled(readWrite);
 	}
 
+	@Override
 	public String[] getEvents()
     {
         return LISTENER_EVENTS;
     }
-
 
 	@Override
 	public void onMenu(ContextMenuEvent evt) {

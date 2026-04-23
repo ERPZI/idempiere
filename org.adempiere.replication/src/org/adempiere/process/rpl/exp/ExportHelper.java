@@ -254,7 +254,7 @@ public class ExportHelper {
 				// process single XML Attribute
 				// Create new element
 				Element newElement = outDocument.createElement(formatLine.getValue());
-				if (log.isLoggable(Level.INFO)) log.info("Format Line Seach key: "+ formatLine.getValue());
+				if (log.isLoggable(Level.INFO)) log.info("Format Line Search key: "+ formatLine.getValue());
 				if (formatLine.getAD_Column_ID() == 0) {
 					throw new Exception(Msg.getMsg (masterPO.getCtx(), "EXPColumnMandatory"));
 				}
@@ -383,7 +383,7 @@ public class ExportHelper {
 
 				final StringBuilder whereClause = new StringBuilder(masterPO.get_KeyColumns()[0] +"=?");
 
-				if (embeddedFormat.getWhereClause() != null & !"".equals(embeddedFormat.getWhereClause()))
+				if (embeddedFormat.getWhereClause() != null && !"".equals(embeddedFormat.getWhereClause()))
 				{
 				    whereClause.append(" AND ").append(embeddedFormat.getWhereClause());
 				}
@@ -418,7 +418,7 @@ public class ExportHelper {
 				if (log.isLoggable(Level.INFO)) log.info("Table Embedded = " + tableEmbedded);
 
 				final StringBuilder whereClause = new StringBuilder(tableEmbedded.getTableName() + "_ID =?");
-				if (embeddedFormat.getWhereClause() != null & !"".equals(embeddedFormat.getWhereClause()))
+				if (embeddedFormat.getWhereClause() != null && !"".equals(embeddedFormat.getWhereClause()))
 				{
 				    whereClause.append(" AND ").append(embeddedFormat.getWhereClause());
 				}

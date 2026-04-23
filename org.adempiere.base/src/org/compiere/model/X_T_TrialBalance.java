@@ -24,22 +24,22 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for T_TrialBalance
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="T_TrialBalance")
-public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persistent 
+public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
-    public X_T_TrialBalance (Properties ctx, int T_TrialBalance_ID, String trxName)
+    public X_T_TrialBalance (Properties ctx, String T_TrialBalance_UU, String trxName)
     {
-      super (ctx, T_TrialBalance_ID, trxName);
-      /** if (T_TrialBalance_ID == 0)
+      super (ctx, T_TrialBalance_UU, trxName);
+      /** if (T_TrialBalance_UU == null)
         {
 			setAD_PInstance_ID (0);
 			setAmtAcctBalance (Env.ZERO);
@@ -53,10 +53,10 @@ public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persiste
     }
 
     /** Standard Constructor */
-    public X_T_TrialBalance (Properties ctx, int T_TrialBalance_ID, String trxName, String ... virtualColumns)
+    public X_T_TrialBalance (Properties ctx, String T_TrialBalance_UU, String trxName, String ... virtualColumns)
     {
-      super (ctx, T_TrialBalance_ID, trxName, virtualColumns);
-      /** if (T_TrialBalance_ID == 0)
+      super (ctx, T_TrialBalance_UU, trxName, virtualColumns);
+      /** if (T_TrialBalance_UU == null)
         {
 			setAD_PInstance_ID (0);
 			setAmtAcctBalance (Env.ZERO);
@@ -76,7 +76,7 @@ public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -93,81 +93,9 @@ public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persiste
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_T_TrialBalance[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_A_Asset getA_Asset() throws RuntimeException
-	{
-		return (org.compiere.model.I_A_Asset)MTable.get(getCtx(), org.compiere.model.I_A_Asset.Table_ID)
-			.getPO(getA_Asset_ID(), get_TrxName());
-	}
-
-	/** Set Asset.
-		@param A_Asset_ID Asset used internally or by customers
-	*/
-	public void setA_Asset_ID (int A_Asset_ID)
-	{
-		if (A_Asset_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_A_Asset_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
-	}
-
-	/** Get Asset.
-		@return Asset used internally or by customers
-	  */
-	public int getA_Asset_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
-			.getPO(getAccount_ID(), get_TrxName());
-	}
-
-	/** Set Account.
-		@param Account_ID Account used
-	*/
-	public void setAccount_ID (int Account_ID)
-	{
-		if (Account_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_Account_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_Account_ID, Integer.valueOf(Account_ID));
-	}
-
-	/** Get Account.
-		@return Account used
-	  */
-	public int getAccount_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Account Key.
-		@param AccountValue Key of Account Element
-	*/
-	public void setAccountValue (String AccountValue)
-	{
-		set_ValueNoCheck (COLUMNNAME_AccountValue, AccountValue);
-	}
-
-	/** Get Account Key.
-		@return Key of Account Element
-	  */
-	public String getAccountValue()
-	{
-		return (String)get_Value(COLUMNNAME_AccountValue);
-	}
 
 	/** Set Trx Organization.
 		@param AD_OrgTrx_ID Performing or initiating organization
@@ -242,6 +170,78 @@ public class X_T_TrialBalance extends PO implements I_T_TrialBalance, I_Persiste
 	public int getAD_Table_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_A_Asset getA_Asset() throws RuntimeException
+	{
+		return (org.compiere.model.I_A_Asset)MTable.get(getCtx(), org.compiere.model.I_A_Asset.Table_ID)
+			.getPO(getA_Asset_ID(), get_TrxName());
+	}
+
+	/** Set Asset.
+		@param A_Asset_ID Asset used internally or by customers
+	*/
+	public void setA_Asset_ID (int A_Asset_ID)
+	{
+		if (A_Asset_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_A_Asset_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
+	}
+
+	/** Get Asset.
+		@return Asset used internally or by customers
+	  */
+	public int getA_Asset_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Account Key.
+		@param AccountValue Key of Account Element
+	*/
+	public void setAccountValue (String AccountValue)
+	{
+		set_ValueNoCheck (COLUMNNAME_AccountValue, AccountValue);
+	}
+
+	/** Get Account Key.
+		@return Key of Account Element
+	  */
+	public String getAccountValue()
+	{
+		return (String)get_Value(COLUMNNAME_AccountValue);
+	}
+
+	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getAccount_ID(), get_TrxName());
+	}
+
+	/** Set Account.
+		@param Account_ID Account used
+	*/
+	public void setAccount_ID (int Account_ID)
+	{
+		if (Account_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_Account_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_Account_ID, Integer.valueOf(Account_ID));
+	}
+
+	/** Get Account.
+		@return Account used
+	  */
+	public int getAccount_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

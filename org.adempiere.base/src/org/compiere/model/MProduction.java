@@ -1,3 +1,24 @@
+/***********************************************************************
+ * This file is part of iDempiere ERP Open Source                      *
+ * http://www.idempiere.org                                            *
+ *                                                                     *
+ * Copyright (C) Contributors                                          *
+ *                                                                     *
+ * This program is free software; you can redistribute it and/or       *
+ * modify it under the terms of the GNU General Public License         *
+ * as published by the Free Software Foundation; either version 2      *
+ * of the License, or (at your option) any later version.              *
+ *                                                                     *
+ * This program is distributed in the hope that it will be useful,     *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the        *
+ * GNU General Public License for more details.                        *
+ *                                                                     *
+ * You should have received a copy of the GNU General Public License   *
+ * along with this program; if not, write to the Free Software         *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,          *
+ * MA 02110-1301, USA.                                                 *
+ **********************************************************************/
 package org.compiere.model;
 
 import java.io.File;
@@ -12,6 +33,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.adempiere.exceptions.PeriodClosedException;
 import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
@@ -24,7 +46,7 @@ import org.compiere.util.Util;
 
 public class MProduction extends X_M_Production implements DocAction {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -1185737281702437745L;
 
@@ -33,22 +55,60 @@ public class MProduction extends X_M_Production implements DocAction {
 	protected int lineno;
 	protected int count;
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_Production_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MProduction(Properties ctx, String M_Production_UU, String trxName) {
+        super(ctx, M_Production_UU, trxName);
+		if (Util.isEmpty(M_Production_UU))
+			setInitialDefaults();
+    }
+
+    /**
+     * @param ctx
+     * @param M_Production_ID
+     * @param trxName
+     */
 	public MProduction(Properties ctx, int M_Production_ID, String trxName) {
 		this (ctx, M_Production_ID, trxName, (String[]) null);
 	}
 
+	/**
+	 * @param ctx
+	 * @param M_Production_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MProduction(Properties ctx, int M_Production_ID, String trxName, String... virtualColumns) {
 		super(ctx, M_Production_ID, trxName, virtualColumns);
-		if (M_Production_ID == 0) {
-			setDocStatus(DOCSTATUS_Drafted);
-			setDocAction (DOCACTION_Prepare);
-		}
+		if (M_Production_ID == 0)
+			setInitialDefaults();
 	}
 
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocStatus(DOCSTATUS_Drafted);
+		setDocAction (DOCACTION_Prepare);
+	}
+
+	/**
+	 * @param ctx
+	 * @param rs
+	 * @param trxName
+	 */
 	public MProduction(Properties ctx, ResultSet rs, String trxName) {
 		super(ctx, rs, trxName);
 	}
 	
+	/**
+	 * Create new production with client, organization and date promised (as movement date) from order line.
+	 * @param line order line
+	 */
 	public MProduction( MOrderLine line ) {
 		super( line.getCtx(), 0, line.get_TrxName());
 		setAD_Client_ID(line.getAD_Client_ID());
@@ -56,6 +116,10 @@ public class MProduction extends X_M_Production implements DocAction {
 		setMovementDate( line.getDatePromised() );
 	}
 
+	/**
+	 * Create new production for project line
+	 * @param line project line
+	 */
 	public MProduction( MProjectLine line ) {
 		super( line.getCtx(), 0, line.get_TrxName());
 		MProject project = new MProject(line.getCtx(), line.getC_Project_ID(), line.get_TrxName());
@@ -167,6 +231,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			if (this.getProcessedOn().signum() == 0) {
 				setMovementDate(TimeUtil.getDay(0));
 				MPeriod.testPeriodOpen(getCtx(), getMovementDate(), getC_DocType_ID(), getAD_Org_ID());
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
 			}
 		}
 		if (dt.isOverwriteSeqOnComplete()) {
@@ -178,6 +243,10 @@ public class MProduction extends X_M_Production implements DocAction {
 		}
 	}
 
+	/**
+	 * @param lines
+	 * @return true if one of the production is an end product line (IsEndProduct=Y).
+	 */
 	private boolean isHaveEndProduct(MProductionLine[] lines) {
 		
 		for(MProductionLine line : lines) {
@@ -187,6 +256,11 @@ public class MProduction extends X_M_Production implements DocAction {
 		return false;
 	}
 
+	/**
+	 * Process production lines - create material transaction
+	 * @param lines
+	 * @return error message or empty string
+	 */
 	protected Object processLines(MProductionLine[] lines) {
 		StringBuilder errors = new StringBuilder();
 		for ( int i = 0; i<lines.length; i++) {
@@ -202,7 +276,10 @@ public class MProduction extends X_M_Production implements DocAction {
 		return errors.toString();
 	}
 	
-
+	/**
+	 * Get production lines
+	 * @return array of MProductionLine
+	 */
 	public MProductionLine[] getLines() {
 		ArrayList<MProductionLine> list = new ArrayList<MProductionLine>();
 		
@@ -237,6 +314,10 @@ public class MProduction extends X_M_Production implements DocAction {
 		return retValue;
 	}
 	
+	/**
+	 * Delete all production lines
+	 * @param trxName
+	 */
 	public void deleteLines(String trxName) {
 
 		for (MProductionLine line : getLines())
@@ -246,10 +327,21 @@ public class MProduction extends X_M_Production implements DocAction {
 
 	}// deleteLines
 
+	/**
+	 * Create production lines
+	 * @param mustBeStocked true to verify BOM component has sufficient on hand
+	 * @return number of line created
+	 */
 	public int createLines(boolean mustBeStocked) {
 		return createLines(mustBeStocked, 0);
 	}
 	
+	/**
+	 * Create production line
+	 * @param mustBeStocked true to verify BOM component has sufficient on hand
+	 * @param PP_Product_BOM_ID optional BOM ID. 0 to use default product BOM
+	 * @return number of line created
+	 */
 	public int createLines(boolean mustBeStocked, int PP_Product_BOM_ID) {
 		
 		lineno = 100;
@@ -259,7 +351,6 @@ public class MProduction extends X_M_Production implements DocAction {
 		// product to be produced
 		MProduct finishedProduct = new MProduct(getCtx(), getM_Product_ID(), get_TrxName());
 		
-
 		MProductionLine line = new MProductionLine( this );
 		line.setLine( lineno );
 		line.setM_Product_ID( finishedProduct.get_ID() );
@@ -279,6 +370,14 @@ public class MProduction extends X_M_Production implements DocAction {
 		return count;
 	}
 
+	/**
+	 * Create production line
+	 * @param mustBeStocked true to verify BOM component has sufficient on hand
+	 * @param finishedProduct end product
+	 * @param requiredQty
+	 * @param PP_Product_BOM_ID optional BOM ID. 0 to use default product BOM
+	 * @return number of line created
+	 */
 	protected int createLines(boolean mustBeStocked, MProduct finishedProduct, BigDecimal requiredQty, int PP_Product_BOM_ID) {
 		
 		int defaultLocator = 0;
@@ -501,6 +600,7 @@ public class MProduction extends X_M_Production implements DocAction {
 
 		//	Std Period open?
 		MPeriod.testPeriodOpen(getCtx(), getMovementDate(), getC_DocType_ID(), getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
 
 		if ( getIsCreated().equals("N") )
 		{
@@ -535,9 +635,8 @@ public class MProduction extends X_M_Production implements DocAction {
 	}
 
 	/**
-	 * 
 	 * @param M_Product_ID
-	 * @return error message (if any)
+	 * @return error message (if any) or null
 	 */
 	public String validateEndProduct(int M_Product_ID) {
 		String msg = isBom(M_Product_ID);
@@ -556,6 +655,11 @@ public class MProduction extends X_M_Production implements DocAction {
 		return null;
 	}
 
+	/**
+	 * Validate product has valid BOM
+	 * @param M_Product_ID
+	 * @return error message or null
+	 */
 	protected String isBom(int M_Product_ID)
 	{
 		String bom = DB.getSQLValueString(get_TrxName(), "SELECT isbom FROM M_Product WHERE M_Product_ID = ?", M_Product_ID);
@@ -572,6 +676,14 @@ public class MProduction extends X_M_Production implements DocAction {
 		return null;
 	}
 
+	/**
+	 * Cost validation for BOM product using standard costing method.<br/>
+	 * - has cost<br/>
+	 * - difference between current product cost and sum of component cost is less than 0.005.
+	 * @param M_Product_ID
+	 * @return true if cost is ok 
+	 * @throws AdempiereUserError
+	 */
 	protected boolean costsOK(int M_Product_ID) throws AdempiereUserError {
 		MProduct product = MProduct.get(getCtx(), M_Product_ID, get_TrxName());
 		String costingMethod=product.getCostingMethod(MClient.get(getCtx()).getAcctSchema());
@@ -672,6 +784,15 @@ public class MProduction extends X_M_Production implements DocAction {
 			{
 				accrual = true;
 			}
+			
+			try
+			{
+				MAcctSchema.testBackDateTrxAllowed(getCtx(), getMovementDate(), get_TrxName());
+			}
+			catch (BackDateTrxNotAllowedException e)
+			{
+				accrual = true;
+			}
 
 			if (accrual)
 				return reverseAccrualIt();
@@ -733,6 +854,11 @@ public class MProduction extends X_M_Production implements DocAction {
 		return true;
 	}
 
+	/**
+	 * Reverse this production document
+	 * @param accrual true to use current date, false to use this production's movement date
+	 * @return reversal production record
+	 */
 	protected MProduction reverse(boolean accrual) {
 		Timestamp reversalDate = accrual ? Env.getContextAsDate(getCtx(), Env.DATE) : getMovementDate();
 		if (reversalDate == null) {
@@ -743,6 +869,7 @@ public class MProduction extends X_M_Production implements DocAction {
 			setC_OrderLine_ID(0);
 
 		MPeriod.testPeriodOpen(getCtx(), reversalDate, getC_DocType_ID(), getAD_Org_ID());
+		MAcctSchema.testBackDateTrxAllowed(getCtx(), reversalDate, get_TrxName());
 		MProduction reversal = null;
 		reversal = copyFrom (reversalDate);
 
@@ -793,6 +920,11 @@ public class MProduction extends X_M_Production implements DocAction {
 		return reversal;
 	}
 
+	/**
+	 * Create new production from this production (including lines)
+	 * @param reversalDate movement date
+	 * @return new production record
+	 */
 	protected MProduction copyFrom(Timestamp reversalDate) {
 		MProduction to = new MProduction(getCtx(), 0, get_TrxName());
 		PO.copyValues (this, to, getAD_Client_ID(), getAD_Org_ID());
@@ -940,6 +1072,7 @@ public class MProduction extends X_M_Production implements DocAction {
 		if (getC_DocType_ID() <= 0) {
 			setC_DocType_ID(MDocType.getDocType(MDocType.DOCBASETYPE_MaterialProduction));
 		}
+		// Set IsUseProductionPlan flag
 		if (getM_Product_ID() > 0) {
 			if (isUseProductionPlan()) {
 				setIsUseProductionPlan(false);
@@ -953,7 +1086,7 @@ public class MProduction extends X_M_Production implements DocAction {
 	}
 
 	/**
-	 * 	Document Status is Complete or Closed
+	 * 	Document Status is Complete, Closed or Reversed
 	 *	@return true if CO, CL or RE
 	 */
 	public boolean isStatusComplete()

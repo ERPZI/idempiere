@@ -1,3 +1,24 @@
+/***********************************************************************
+ * This file is part of iDempiere ERP Open Source                      *
+ * http://www.idempiere.org                                            *
+ *                                                                     *
+ * Copyright (C) Contributors                                          *
+ *                                                                     *
+ * This program is free software; you can redistribute it and/or       *
+ * modify it under the terms of the GNU General Public License         *
+ * as published by the Free Software Foundation; either version 2      *
+ * of the License, or (at your option) any later version.              *
+ *                                                                     *
+ * This program is distributed in the hope that it will be useful,     *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the        *
+ * GNU General Public License for more details.                        *
+ *                                                                     *
+ * You should have received a copy of the GNU General Public License   *
+ * along with this program; if not, write to the Free Software         *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,          *
+ * MA 02110-1301, USA.                                                 *
+ **********************************************************************/
 package org.zkforge.keylistener;
 
 import java.io.IOException;
@@ -24,21 +45,21 @@ public class Keylistener extends HtmlBasedComponent {
 	private boolean _autoBlur = true;
 
 	/**
-	 * Auto generated serial UID
+	 * generated serial UID
 	 */
 	private static final long serialVersionUID = 4611014738053691844L;
 
 	/**
 	 * Is auto blur active
 	 *
-	 * @return the autoBlur
+	 * @return true if autoBlur is enable, false otherwise
 	 */
 	public boolean isAutoBlur() {
 		return _autoBlur;
 	}
 
 	/**
-	 * Set auto blur. If auto blur is set focus will be moved to keylistener
+	 * Set auto blur. If auto blur is set, focus will be moved to keylistener
 	 * component before onCtrlKey event is triggered. This is used to force any
 	 * pending onChange events to be triggered first.
 	 *

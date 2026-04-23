@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_CommissionRun
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_CommissionRun")
-public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persistent 
+public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_CommissionRun (Properties ctx, int C_CommissionRun_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
       super (ctx, C_CommissionRun_ID, trxName);
       /** if (C_CommissionRun_ID == 0)
         {
-			setC_Commission_ID (0);
 			setC_CommissionRun_ID (0);
+			setC_Commission_ID (0);
 			setDocumentNo (null);
 			setGrandTotal (Env.ZERO);
 			setProcessed (false);
@@ -57,8 +57,38 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
       super (ctx, C_CommissionRun_ID, trxName, virtualColumns);
       /** if (C_CommissionRun_ID == 0)
         {
-			setC_Commission_ID (0);
 			setC_CommissionRun_ID (0);
+			setC_Commission_ID (0);
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setProcessed (false);
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CommissionRun (Properties ctx, String C_CommissionRun_UU, String trxName)
+    {
+      super (ctx, C_CommissionRun_UU, trxName);
+      /** if (C_CommissionRun_UU == null)
+        {
+			setC_CommissionRun_ID (0);
+			setC_Commission_ID (0);
+			setDocumentNo (null);
+			setGrandTotal (Env.ZERO);
+			setProcessed (false);
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CommissionRun (Properties ctx, String C_CommissionRun_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_CommissionRun_UU, trxName, virtualColumns);
+      /** if (C_CommissionRun_UU == null)
+        {
+			setC_CommissionRun_ID (0);
+			setC_Commission_ID (0);
 			setDocumentNo (null);
 			setGrandTotal (Env.ZERO);
 			setProcessed (false);
@@ -73,7 +103,7 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -93,34 +123,6 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	public org.compiere.model.I_C_Commission getC_Commission() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Commission)MTable.get(getCtx(), org.compiere.model.I_C_Commission.Table_ID)
-			.getPO(getC_Commission_ID(), get_TrxName());
-	}
-
-	/** Set Commission.
-		@param C_Commission_ID Commission
-	*/
-	public void setC_Commission_ID (int C_Commission_ID)
-	{
-		if (C_Commission_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Commission_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Commission_ID, Integer.valueOf(C_Commission_ID));
-	}
-
-	/** Get Commission.
-		@return Commission
-	  */
-	public int getC_Commission_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Commission_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Commission Run.
 		@param C_CommissionRun_ID Commission Run or Process
@@ -157,6 +159,34 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 	public String getC_CommissionRun_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_CommissionRun_UU);
+	}
+
+	public org.compiere.model.I_C_Commission getC_Commission() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Commission)MTable.get(getCtx(), org.compiere.model.I_C_Commission.Table_ID)
+			.getPO(getC_Commission_ID(), get_TrxName());
+	}
+
+	/** Set Commission.
+		@param C_Commission_ID Commission
+	*/
+	public void setC_Commission_ID (int C_Commission_ID)
+	{
+		if (C_Commission_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Commission_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Commission_ID, Integer.valueOf(C_Commission_ID));
+	}
+
+	/** Get Commission.
+		@return Commission
+	  */
+	public int getC_Commission_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Commission_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
@@ -222,7 +252,7 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -260,10 +290,10 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -282,10 +312,10 @@ public class X_C_CommissionRun extends PO implements I_C_CommissionRun, I_Persis
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

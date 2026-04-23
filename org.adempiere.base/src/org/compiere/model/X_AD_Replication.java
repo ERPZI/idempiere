@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Replication
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Replication")
-public class X_AD_Replication extends PO implements I_AD_Replication, I_Persistent 
+public class X_AD_Replication extends PO implements I_AD_Replication, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Replication (Properties ctx, int AD_Replication_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
       super (ctx, AD_Replication_ID, trxName);
       /** if (AD_Replication_ID == 0)
         {
-			setAD_Replication_ID (0);
 			setAD_ReplicationStrategy_ID (0);
+			setAD_Replication_ID (0);
 			setHostAddress (null);
 			setHostPort (0);
 // 80
@@ -61,8 +61,46 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
       super (ctx, AD_Replication_ID, trxName, virtualColumns);
       /** if (AD_Replication_ID == 0)
         {
-			setAD_Replication_ID (0);
 			setAD_ReplicationStrategy_ID (0);
+			setAD_Replication_ID (0);
+			setHostAddress (null);
+			setHostPort (0);
+// 80
+			setIsRMIoverHTTP (true);
+// Y
+			setName (null);
+			setRemote_Client_ID (0);
+			setRemote_Org_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Replication (Properties ctx, String AD_Replication_UU, String trxName)
+    {
+      super (ctx, AD_Replication_UU, trxName);
+      /** if (AD_Replication_UU == null)
+        {
+			setAD_ReplicationStrategy_ID (0);
+			setAD_Replication_ID (0);
+			setHostAddress (null);
+			setHostPort (0);
+// 80
+			setIsRMIoverHTTP (true);
+// Y
+			setName (null);
+			setRemote_Client_ID (0);
+			setRemote_Org_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Replication (Properties ctx, String AD_Replication_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Replication_UU, trxName, virtualColumns);
+      /** if (AD_Replication_UU == null)
+        {
+			setAD_ReplicationStrategy_ID (0);
+			setAD_Replication_ID (0);
 			setHostAddress (null);
 			setHostPort (0);
 // 80
@@ -81,7 +119,7 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -101,28 +139,6 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** Set Replication.
-		@param AD_Replication_ID Data Replication Target
-	*/
-	public void setAD_Replication_ID (int AD_Replication_ID)
-	{
-		if (AD_Replication_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_Replication_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_Replication_ID, Integer.valueOf(AD_Replication_ID));
-	}
-
-	/** Get Replication.
-		@return Data Replication Target
-	  */
-	public int getAD_Replication_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Replication_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public org.compiere.model.I_AD_ReplicationStrategy getAD_ReplicationStrategy() throws RuntimeException
 	{
@@ -147,6 +163,28 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
 	public int getAD_ReplicationStrategy_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_ReplicationStrategy_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Replication.
+		@param AD_Replication_ID Data Replication Target
+	*/
+	public void setAD_Replication_ID (int AD_Replication_ID)
+	{
+		if (AD_Replication_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_Replication_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_Replication_ID, Integer.valueOf(AD_Replication_ID));
+	}
+
+	/** Get Replication.
+		@return Data Replication Target
+	  */
+	public int getAD_Replication_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Replication_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -302,10 +340,10 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
 	public boolean isRMIoverHTTP()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRMIoverHTTP);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -330,7 +368,7 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -364,10 +402,10 @@ public class X_AD_Replication extends PO implements I_AD_Replication, I_Persiste
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

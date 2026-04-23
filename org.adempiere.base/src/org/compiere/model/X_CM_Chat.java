@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for CM_Chat
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="CM_Chat")
-public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent 
+public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_CM_Chat (Properties ctx, int CM_Chat_ID, String trxName)
@@ -43,7 +43,6 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 			setCM_Chat_ID (0);
 			setConfidentialType (null);
 			setDescription (null);
-			setRecord_ID (0);
         } */
     }
 
@@ -57,7 +56,32 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 			setCM_Chat_ID (0);
 			setConfidentialType (null);
 			setDescription (null);
-			setRecord_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_CM_Chat (Properties ctx, String CM_Chat_UU, String trxName)
+    {
+      super (ctx, CM_Chat_UU, trxName);
+      /** if (CM_Chat_UU == null)
+        {
+			setAD_Table_ID (0);
+			setCM_Chat_ID (0);
+			setConfidentialType (null);
+			setDescription (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_CM_Chat (Properties ctx, String CM_Chat_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, CM_Chat_UU, trxName, virtualColumns);
+      /** if (CM_Chat_UU == null)
+        {
+			setAD_Table_ID (0);
+			setCM_Chat_ID (0);
+			setConfidentialType (null);
+			setDescription (null);
         } */
     }
 
@@ -68,7 +92,7 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -117,28 +141,6 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Chat.
-		@param CM_Chat_ID Chat or discussion thread
-	*/
-	public void setCM_Chat_ID (int CM_Chat_ID)
-	{
-		if (CM_Chat_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_CM_Chat_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_CM_Chat_ID, Integer.valueOf(CM_Chat_ID));
-	}
-
-	/** Get Chat.
-		@return Chat or discussion thread
-	  */
-	public int getCM_Chat_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_CM_Chat_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_CM_ChatType getCM_ChatType() throws RuntimeException
 	{
 		return (org.compiere.model.I_CM_ChatType)MTable.get(getCtx(), org.compiere.model.I_CM_ChatType.Table_ID)
@@ -162,6 +164,28 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 	public int getCM_ChatType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_CM_ChatType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Chat.
+		@param CM_Chat_ID Chat or discussion thread
+	*/
+	public void setCM_Chat_ID (int CM_Chat_ID)
+	{
+		if (CM_Chat_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_CM_Chat_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_CM_Chat_ID, Integer.valueOf(CM_Chat_ID));
+	}
+
+	/** Get Chat.
+		@return Chat or discussion thread
+	  */
+	public int getCM_Chat_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_CM_Chat_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -228,7 +252,7 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDescription());
     }
@@ -278,5 +302,20 @@ public class X_CM_Chat extends PO implements I_CM_Chat, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Record UUID.
+		@param Record_UU Record UUID
+	*/
+	public void setRecord_UU (String Record_UU)
+	{
+		set_ValueNoCheck (COLUMNNAME_Record_UU, Record_UU);
+	}
+
+	/** Get Record UUID.
+		@return Record UUID	  */
+	public String getRecord_UU()
+	{
+		return (String)get_Value(COLUMNNAME_Record_UU);
 	}
 }

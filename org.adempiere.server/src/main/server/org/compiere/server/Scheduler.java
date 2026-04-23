@@ -39,6 +39,7 @@ import org.adempiere.base.upload.UploadResponse;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MAuthorizationAccount;
 import org.compiere.model.MClient;
+import org.compiere.model.MColumn;
 import org.compiere.model.MMailText;
 import org.compiere.model.MNote;
 import org.compiere.model.MOrgInfo;
@@ -63,6 +64,8 @@ import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.EMail;
 import org.compiere.util.Env;
+import org.compiere.util.KeyNamePair;
+import org.compiere.util.Login;
 import org.compiere.util.Msg;
 import org.compiere.util.TimeUtil;
 import org.compiere.util.Trx;
@@ -133,37 +136,44 @@ public class Scheduler extends AdempiereServer
 		SimpleDateFormat dateFormat4Timestamp = new SimpleDateFormat("yyyy-MM-dd"); 
 		Env.setContext(getCtx(), Env.DATE, dateFormat4Timestamp.format(ts)+" 00:00:00" );    //  JDBC format
 
-		//Create new Session and set #AD_Session_ID to context
-		MSession session = MSession.get(Env.getCtx());
-		if(session == null) {
-			session = MSession.create(Env.getCtx());
+		// validate login to check if session is valid
+		String errorMessage = new Login(Env.getCtx()).validateLogin(new KeyNamePair(scheduler.getAD_Org_ID(), ""));
+		if (Util.isEmpty(errorMessage)) {
+			//Create new Session and set #AD_Session_ID to context
+			MSession session = MSession.get(Env.getCtx());
+			if(session == null) {
+				session = MSession.create(Env.getCtx());
+			} else {
+				session = new MSession(Env.getCtx(), session.getAD_Session_ID(), null);
+			}
+			MProcess process = new MProcess(getCtx(), scheduler.getAD_Process_ID(), null);
+			try
+			{
+				m_trx = Trx.get(Trx.createTrxName("Scheduler"), true);
+				m_trx.setDisplayName(getClass().getName()+"_"+getModel().getName()+"_doWork");
+				m_summary.append(runProcess(process));
+				m_trx.commit(true);
+			}
+			catch (Throwable e)
+			{
+				if (m_trx != null)
+					m_trx.rollback();
+				log.log(Level.WARNING, process.toString(), e);
+				m_summary.append(e.toString());
+			}
+			finally
+			{
+				if (m_trx != null)
+					m_trx.close();
+				m_trx = null;
+				session.logout();
+				getCtx().remove(Env.AD_SESSION_ID);
+			}
 		} else {
-			session = new MSession(Env.getCtx(), session.getAD_Session_ID(), null);
+			log.log(Level.WARNING, errorMessage);
+			m_summary.append(errorMessage);
 		}
-		MProcess process = new MProcess(getCtx(), scheduler.getAD_Process_ID(), null);
-		try
-		{
-			m_trx = Trx.get(Trx.createTrxName("Scheduler"), true);
-			m_trx.setDisplayName(getClass().getName()+"_"+getModel().getName()+"_doWork");
-			m_summary.append(runProcess(process));
-			m_trx.commit(true);
-		}
-		catch (Throwable e)
-		{
-			if (m_trx != null)
-				m_trx.rollback();
-			log.log(Level.WARNING, process.toString(), e);
-			m_summary.append(e.toString());
-		}
-		finally
-		{
-			if (m_trx != null)
-				m_trx.close();
-			m_trx = null;
-			session.logout();
-			getCtx().remove(Env.AD_SESSION_ID);
-		}
-		
+
 		//
 		int no = scheduler.deleteLog();
 		m_summary.append(" Logs deleted=").append(no);
@@ -194,7 +204,7 @@ public class Scheduler extends AdempiereServer
 		int AD_Table_ID = scheduler.getAD_Table_ID();
 		int Record_ID = scheduler.getRecord_ID();
 		//
-		MPInstance pInstance = new MPInstance(getCtx(), process.getAD_Process_ID(), Record_ID);
+		MPInstance pInstance = new MPInstance(getCtx(), process.getAD_Process_ID(), AD_Table_ID, Record_ID, null); // TODO: Support Schedule with Record_UU
 		pInstance.saveEx();
 		fillParameter(pInstance);
 		//
@@ -258,11 +268,12 @@ public class Scheduler extends AdempiereServer
 					note.saveEx();
 					String log = pi.getLogInfo(true);
 					if (log != null &&  log.trim().length() > 0) {
-						MAttachment attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), null);
+						MAttachment attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), note.getAD_Note_UU(), null);
 						attachment.setClientOrg(scheduler.getAD_Client_ID(), scheduler.getAD_Org_ID());
 						attachment.setTextMsg(schedulerName);
 						attachment.addEntry("ProcessLog.html", log.getBytes("UTF-8"));
 						attachment.saveEx();
+						attachment.close();
 					}
 				}
 			}
@@ -307,7 +318,7 @@ public class Scheduler extends AdempiereServer
 						MAttachment attachment = null;
 						if (fileList != null && !fileList.isEmpty()) {
 							//	Attachment
-							attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), null);
+							attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), note.getAD_Note_UU(), null);
 							attachment.setClientOrg(scheduler.getAD_Client_ID(), scheduler.getAD_Org_ID());
 							attachment.setTextMsg(schedulerName);
 							for (File entry : fileList)
@@ -317,7 +328,7 @@ public class Scheduler extends AdempiereServer
 						String log = pi.getLogInfo(true);
 						if (log != null &&  log.trim().length() > 0) {
 							if (attachment == null) {
-								attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), null);
+								attachment = new MAttachment (getCtx(), MNote.Table_ID, note.getAD_Note_ID(), note.getAD_Note_UU(), null);
 								attachment.setClientOrg(scheduler.getAD_Client_ID(), scheduler.getAD_Org_ID());
 								attachment.setTextMsg(schedulerName);
 							}
@@ -683,7 +694,7 @@ public class Scheduler extends AdempiereServer
 		if (variable == null
 			|| (variable != null && variable.length() == 0))
 			value = null;
-		else if (variable.startsWith("@SQL=")) {
+		else if (variable.startsWith(MColumn.VIRTUAL_UI_COLUMN_PREFIX)) {
 			String	defStr = "";
 			String sql = variable.substring(5);	//	w/o tag
 			//sql = Env.parseContext(m_vo.ctx, m_vo.WindowNo, sql, false, true);	//	replace variables

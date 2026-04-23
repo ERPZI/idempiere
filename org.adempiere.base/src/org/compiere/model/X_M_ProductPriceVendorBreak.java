@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for M_ProductPriceVendorBreak
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_ProductPriceVendorBreak")
-public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceVendorBreak, I_Persistent 
+public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceVendorBreak, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_ProductPriceVendorBreak (Properties ctx, int M_ProductPriceVendorBreak_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceV
         {
 			setBreakValue (Env.ZERO);
 			setM_PriceList_Version_ID (0);
-			setM_Product_ID (0);
 			setM_ProductPriceVendorBreak_ID (0);
+			setM_Product_ID (0);
 			setPriceLimit (Env.ZERO);
 			setPriceList (Env.ZERO);
 			setPriceStd (Env.ZERO);
@@ -58,8 +58,40 @@ public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceV
         {
 			setBreakValue (Env.ZERO);
 			setM_PriceList_Version_ID (0);
-			setM_Product_ID (0);
 			setM_ProductPriceVendorBreak_ID (0);
+			setM_Product_ID (0);
+			setPriceLimit (Env.ZERO);
+			setPriceList (Env.ZERO);
+			setPriceStd (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ProductPriceVendorBreak (Properties ctx, String M_ProductPriceVendorBreak_UU, String trxName)
+    {
+      super (ctx, M_ProductPriceVendorBreak_UU, trxName);
+      /** if (M_ProductPriceVendorBreak_UU == null)
+        {
+			setBreakValue (Env.ZERO);
+			setM_PriceList_Version_ID (0);
+			setM_ProductPriceVendorBreak_ID (0);
+			setM_Product_ID (0);
+			setPriceLimit (Env.ZERO);
+			setPriceList (Env.ZERO);
+			setPriceStd (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ProductPriceVendorBreak (Properties ctx, String M_ProductPriceVendorBreak_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_ProductPriceVendorBreak_UU, trxName, virtualColumns);
+      /** if (M_ProductPriceVendorBreak_UU == null)
+        {
+			setBreakValue (Env.ZERO);
+			setM_PriceList_Version_ID (0);
+			setM_ProductPriceVendorBreak_ID (0);
+			setM_Product_ID (0);
 			setPriceLimit (Env.ZERO);
 			setPriceList (Env.ZERO);
 			setPriceStd (Env.ZERO);
@@ -73,7 +105,7 @@ public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceV
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -169,34 +201,6 @@ public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceV
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
-			.getPO(getM_Product_ID(), get_TrxName());
-	}
-
-	/** Set Product.
-		@param M_Product_ID Product, Service, Item
-	*/
-	public void setM_Product_ID (int M_Product_ID)
-	{
-		if (M_Product_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
-	}
-
-	/** Get Product.
-		@return Product, Service, Item
-	  */
-	public int getM_Product_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Product Price Break.
 		@param M_ProductPriceVendorBreak_ID Product Price Break
 	*/
@@ -231,6 +235,34 @@ public class X_M_ProductPriceVendorBreak extends PO implements I_M_ProductPriceV
 	public String getM_ProductPriceVendorBreak_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_ProductPriceVendorBreak_UU);
+	}
+
+	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
+			.getPO(getM_Product_ID(), get_TrxName());
+	}
+
+	/** Set Product.
+		@param M_Product_ID Product, Service, Item
+	*/
+	public void setM_Product_ID (int M_Product_ID)
+	{
+		if (M_Product_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Product_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
+	}
+
+	/** Get Product.
+		@return Product, Service, Item
+	  */
+	public int getM_Product_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Limit Price.

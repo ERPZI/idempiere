@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_WF_NextCondition
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_WF_NextCondition")
-public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, I_Persistent 
+public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_WF_NextCondition (Properties ctx, int AD_WF_NextCondition_ID, String trxName)
@@ -73,6 +73,46 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_WF_NextCondition (Properties ctx, String AD_WF_NextCondition_UU, String trxName)
+    {
+      super (ctx, AD_WF_NextCondition_UU, trxName);
+      /** if (AD_WF_NextCondition_UU == null)
+        {
+			setAD_WF_NextCondition_ID (0);
+			setAD_WF_NodeNext_ID (0);
+// @4|AD_WF_NodeNext_ID@
+			setAndOr (null);
+// O
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setOperation (null);
+			setSeqNo (0);
+// @SQL=SELECT COALESCE(MAX(SeqNo),0)+10 AS DefaultValue FROM AD_WF_NextCondition WHERE AD_WF_NodeNext_ID=@AD_WF_NodeNext_ID@
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_WF_NextCondition (Properties ctx, String AD_WF_NextCondition_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_WF_NextCondition_UU, trxName, virtualColumns);
+      /** if (AD_WF_NextCondition_UU == null)
+        {
+			setAD_WF_NextCondition_ID (0);
+			setAD_WF_NodeNext_ID (0);
+// @4|AD_WF_NodeNext_ID@
+			setAndOr (null);
+// O
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setOperation (null);
+			setSeqNo (0);
+// @SQL=SELECT COALESCE(MAX(SeqNo),0)+10 AS DefaultValue FROM AD_WF_NextCondition WHERE AD_WF_NodeNext_ID=@AD_WF_NodeNext_ID@
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_WF_NextCondition (Properties ctx, ResultSet rs, String trxName)
     {
@@ -80,7 +120,7 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -250,12 +290,12 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
 	public static final String OPERATION_GtEq = ">=";
 	/** &gt; = &gt;&gt; */
 	public static final String OPERATION_Gt = ">>";
-	/**  ~ = ~~ */
-	public static final String OPERATION_Like = "~~";
 	/** |&lt;x&gt;| = AB */
 	public static final String OPERATION_X = "AB";
 	/** sql = SQ */
 	public static final String OPERATION_Sql = "SQ";
+	/**  ~ = ~~ */
+	public static final String OPERATION_Like = "~~";
 	/** Set Operation.
 		@param Operation Compare Operation
 	*/
@@ -271,6 +311,21 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
 	public String getOperation()
 	{
 		return (String)get_Value(COLUMNNAME_Operation);
+	}
+
+	/** Set SQL Expression/Statement.
+		@param SQLStatement SQL Expression/Statement
+	*/
+	public void setSQLStatement (String SQLStatement)
+	{
+		set_Value (COLUMNNAME_SQLStatement, SQLStatement);
+	}
+
+	/** Get SQL Expression/Statement.
+		@return SQL Expression/Statement	  */
+	public String getSQLStatement()
+	{
+		return (String)get_Value(COLUMNNAME_SQLStatement);
 	}
 
 	/** Set Sequence.
@@ -292,21 +347,6 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
 		return ii.intValue();
 	}
 
-	/** Set SQL Expression/Statement.
-		@param SQLStatement SQL Expression/Statement
-	*/
-	public void setSQLStatement (String SQLStatement)
-	{
-		set_Value (COLUMNNAME_SQLStatement, SQLStatement);
-	}
-
-	/** Get SQL Expression/Statement.
-		@return SQL Expression/Statement	  */
-	public String getSQLStatement()
-	{
-		return (String)get_Value(COLUMNNAME_SQLStatement);
-	}
-
 	/** Set Search Key.
 		@param Value Search key for the record in the format required - must be unique
 	*/
@@ -326,7 +366,7 @@ public class X_AD_WF_NextCondition extends PO implements I_AD_WF_NextCondition, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getValue());
     }

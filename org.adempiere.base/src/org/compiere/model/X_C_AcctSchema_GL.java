@@ -19,19 +19,19 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for C_AcctSchema_GL
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_AcctSchema_GL")
-public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persistent 
+public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_AcctSchema_GL (Properties ctx, int C_AcctSchema_GL_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
       /** if (C_AcctSchema_GL_ID == 0)
         {
 			setC_AcctSchema_ID (0);
-			setCommitmentOffset_Acct (0);
 			setCommitmentOffsetSales_Acct (0);
+			setCommitmentOffset_Acct (0);
 			setIntercompanyDueFrom_Acct (0);
 			setIntercompanyDueTo_Acct (0);
 			setPPVOffset_Acct (0);
@@ -58,8 +58,44 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
       /** if (C_AcctSchema_GL_ID == 0)
         {
 			setC_AcctSchema_ID (0);
-			setCommitmentOffset_Acct (0);
 			setCommitmentOffsetSales_Acct (0);
+			setCommitmentOffset_Acct (0);
+			setIntercompanyDueFrom_Acct (0);
+			setIntercompanyDueTo_Acct (0);
+			setPPVOffset_Acct (0);
+			setUseCurrencyBalancing (false);
+			setUseSuspenseBalancing (false);
+			setUseSuspenseError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_AcctSchema_GL (Properties ctx, String C_AcctSchema_GL_UU, String trxName)
+    {
+      super (ctx, C_AcctSchema_GL_UU, trxName);
+      /** if (C_AcctSchema_GL_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setCommitmentOffsetSales_Acct (0);
+			setCommitmentOffset_Acct (0);
+			setIntercompanyDueFrom_Acct (0);
+			setIntercompanyDueTo_Acct (0);
+			setPPVOffset_Acct (0);
+			setUseCurrencyBalancing (false);
+			setUseSuspenseBalancing (false);
+			setUseSuspenseError (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_AcctSchema_GL (Properties ctx, String C_AcctSchema_GL_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_AcctSchema_GL_UU, trxName, virtualColumns);
+      /** if (C_AcctSchema_GL_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setCommitmentOffsetSales_Acct (0);
+			setCommitmentOffset_Acct (0);
 			setIntercompanyDueFrom_Acct (0);
 			setIntercompanyDueTo_Acct (0);
 			setPPVOffset_Acct (0);
@@ -76,7 +112,7 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -93,7 +129,7 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_AcctSchema_GL[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -140,38 +176,13 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getC_AcctSchema_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getC_AcctSchema_ID()));
     }
-
-	public I_C_ValidCombination getCommitmentOffset_A() throws RuntimeException
-	{
-		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
-			.getPO(getCommitmentOffset_Acct(), get_TrxName());
-	}
-
-	/** Set Commitment Offset.
-		@param CommitmentOffset_Acct Budgetary Commitment Offset Account
-	*/
-	public void setCommitmentOffset_Acct (int CommitmentOffset_Acct)
-	{
-		set_Value (COLUMNNAME_CommitmentOffset_Acct, Integer.valueOf(CommitmentOffset_Acct));
-	}
-
-	/** Get Commitment Offset.
-		@return Budgetary Commitment Offset Account
-	  */
-	public int getCommitmentOffset_Acct()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_CommitmentOffset_Acct);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	public I_C_ValidCombination getCommitmentOffsetSales_A() throws RuntimeException
 	{
@@ -193,6 +204,31 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
 	public int getCommitmentOffsetSales_Acct()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_CommitmentOffsetSales_Acct);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_ValidCombination getCommitmentOffset_A() throws RuntimeException
+	{
+		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
+			.getPO(getCommitmentOffset_Acct(), get_TrxName());
+	}
+
+	/** Set Commitment Offset.
+		@param CommitmentOffset_Acct Budgetary Commitment Offset Account
+	*/
+	public void setCommitmentOffset_Acct (int CommitmentOffset_Acct)
+	{
+		set_Value (COLUMNNAME_CommitmentOffset_Acct, Integer.valueOf(CommitmentOffset_Acct));
+	}
+
+	/** Get Commitment Offset.
+		@return Budgetary Commitment Offset Account
+	  */
+	public int getCommitmentOffset_Acct()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_CommitmentOffset_Acct);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -335,10 +371,10 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
 	public boolean isUseCurrencyBalancing()
 	{
 		Object oo = get_Value(COLUMNNAME_UseCurrencyBalancing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -357,10 +393,10 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
 	public boolean isUseSuspenseBalancing()
 	{
 		Object oo = get_Value(COLUMNNAME_UseSuspenseBalancing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -379,10 +415,10 @@ public class X_C_AcctSchema_GL extends PO implements I_C_AcctSchema_GL, I_Persis
 	public boolean isUseSuspenseError()
 	{
 		Object oo = get_Value(COLUMNNAME_UseSuspenseError);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for M_Product_Category_Acct
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_Product_Category_Acct")
-public class X_M_Product_Category_Acct extends PO implements I_M_Product_Category_Acct, I_Persistent 
+public class X_M_Product_Category_Acct extends PO implements I_M_Product_Category_Acct, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_Product_Category_Acct (Properties ctx, int M_Product_Category_Acct_ID, String trxName)
@@ -76,6 +76,50 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Product_Category_Acct (Properties ctx, String M_Product_Category_Acct_UU, String trxName)
+    {
+      super (ctx, M_Product_Category_Acct_UU, trxName);
+      /** if (M_Product_Category_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setM_Product_Category_ID (0);
+			setP_Asset_Acct (0);
+			setP_COGS_Acct (0);
+			setP_CostAdjustment_Acct (0);
+			setP_Expense_Acct (0);
+			setP_InventoryClearing_Acct (0);
+			setP_InvoicePriceVariance_Acct (0);
+			setP_PurchasePriceVariance_Acct (0);
+			setP_RateVariance_Acct (0);
+			setP_Revenue_Acct (0);
+			setP_TradeDiscountGrant_Acct (0);
+			setP_TradeDiscountRec_Acct (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Product_Category_Acct (Properties ctx, String M_Product_Category_Acct_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Product_Category_Acct_UU, trxName, virtualColumns);
+      /** if (M_Product_Category_Acct_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setM_Product_Category_ID (0);
+			setP_Asset_Acct (0);
+			setP_COGS_Acct (0);
+			setP_CostAdjustment_Acct (0);
+			setP_Expense_Acct (0);
+			setP_InventoryClearing_Acct (0);
+			setP_InvoicePriceVariance_Acct (0);
+			setP_PurchasePriceVariance_Acct (0);
+			setP_RateVariance_Acct (0);
+			setP_Revenue_Acct (0);
+			setP_TradeDiscountGrant_Acct (0);
+			setP_TradeDiscountRec_Acct (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Product_Category_Acct (Properties ctx, ResultSet rs, String trxName)
     {
@@ -83,7 +127,7 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -100,7 +144,7 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_M_Product_Category_Acct[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -163,18 +207,18 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
 	public static final String COSTINGMETHOD_AveragePO = "A";
 	/** Fifo = F */
 	public static final String COSTINGMETHOD_Fifo = "F";
-	/** Last Invoice = i */
-	public static final String COSTINGMETHOD_LastInvoice = "i";
 	/** Average Invoice = I */
 	public static final String COSTINGMETHOD_AverageInvoice = "I";
 	/** Lifo = L */
 	public static final String COSTINGMETHOD_Lifo = "L";
-	/** Last PO Price = p */
-	public static final String COSTINGMETHOD_LastPOPrice = "p";
 	/** Standard Costing = S */
 	public static final String COSTINGMETHOD_StandardCosting = "S";
 	/** User Defined = U */
 	public static final String COSTINGMETHOD_UserDefined = "U";
+	/** Last Invoice = i */
+	public static final String COSTINGMETHOD_LastInvoice = "i";
+	/** Last PO Price = p */
+	public static final String COSTINGMETHOD_LastPOPrice = "p";
 	/** _ = x */
 	public static final String COSTINGMETHOD__ = "x";
 	/** Set Costing Method.
@@ -512,28 +556,6 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
 		return ii.intValue();
 	}
 
-	/** Set Process Now.
-		@param Processing Process Now
-	*/
-	public void setProcessing (boolean Processing)
-	{
-		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
-	}
-
-	/** Get Process Now.
-		@return Process Now	  */
-	public boolean isProcessing()
-	{
-		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
 	public I_C_ValidCombination getP_TradeDiscountGrant_A() throws RuntimeException
 	{
 		return (I_C_ValidCombination)MTable.get(getCtx(), I_C_ValidCombination.Table_ID)
@@ -582,5 +604,27 @@ public class X_M_Product_Category_Acct extends PO implements I_M_Product_Categor
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Process Now.
+		@param Processing Process Now
+	*/
+	public void setProcessing (boolean Processing)
+	{
+		set_Value (COLUMNNAME_Processing, Boolean.valueOf(Processing));
+	}
+
+	/** Get Process Now.
+		@return Process Now	  */
+	public boolean isProcessing()
+	{
+		Object oo = get_Value(COLUMNNAME_Processing);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 }

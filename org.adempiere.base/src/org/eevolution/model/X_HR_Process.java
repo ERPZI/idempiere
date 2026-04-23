@@ -26,16 +26,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for HR_Process
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="HR_Process")
-public class X_HR_Process extends PO implements I_HR_Process, I_Persistent 
+public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_HR_Process (Properties ctx, int HR_Process_ID, String trxName)
@@ -77,6 +77,46 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_HR_Process (Properties ctx, String HR_Process_UU, String trxName)
+    {
+      super (ctx, HR_Process_UU, trxName);
+      /** if (HR_Process_UU == null)
+        {
+			setC_DocTypeTarget_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setHR_Payroll_ID (0);
+			setName (null);
+			setPosted (false);
+// N
+			setProcessed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_HR_Process (Properties ctx, String HR_Process_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, HR_Process_UU, trxName, virtualColumns);
+      /** if (HR_Process_UU == null)
+        {
+			setC_DocTypeTarget_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setHR_Payroll_ID (0);
+			setName (null);
+			setPosted (false);
+// N
+			setProcessed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_HR_Process (Properties ctx, ResultSet rs, String trxName)
     {
@@ -84,7 +124,7 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -217,34 +257,6 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
-			.getPO(getC_DocType_ID(), get_TrxName());
-	}
-
-	/** Set Document Type.
-		@param C_DocType_ID Document type or rules
-	*/
-	public void setC_DocType_ID (int C_DocType_ID)
-	{
-		if (C_DocType_ID < 0)
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
-	}
-
-	/** Get Document Type.
-		@return Document type or rules
-	  */
-	public int getC_DocType_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_DocType getC_DocTypeTarget() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
@@ -273,20 +285,32 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Column SQL.
-		@param ColumnSQL Virtual Column (r/o)
-	*/
-	public void setColumnSQL (String ColumnSQL)
+	public org.compiere.model.I_C_DocType getC_DocType() throws RuntimeException
 	{
-		set_Value (COLUMNNAME_ColumnSQL, ColumnSQL);
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getC_DocType_ID(), get_TrxName());
 	}
 
-	/** Get Column SQL.
-		@return Virtual Column (r/o)
-	  */
-	public String getColumnSQL()
+	/** Set Document Type.
+		@param C_DocType_ID Document type or rules
+	*/
+	public void setC_DocType_ID (int C_DocType_ID)
 	{
-		return (String)get_Value(COLUMNNAME_ColumnSQL);
+		if (C_DocType_ID < 0)
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+	}
+
+	/** Get Document Type.
+		@return Document type or rules
+	  */
+	public int getC_DocType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException
@@ -315,6 +339,22 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Column SQL.
+		@param ColumnSQL Virtual Column (r/o)
+	*/
+	public void setColumnSQL (String ColumnSQL)
+	{
+		set_Value (COLUMNNAME_ColumnSQL, ColumnSQL);
+	}
+
+	/** Get Column SQL.
+		@return Virtual Column (r/o)
+	  */
+	public String getColumnSQL()
+	{
+		return (String)get_Value(COLUMNNAME_ColumnSQL);
 	}
 
 	/** Set Account Date.
@@ -629,7 +669,7 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -648,10 +688,10 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -671,10 +711,10 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -712,10 +752,10 @@ public class X_HR_Process extends PO implements I_HR_Process, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_RMA
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_RMA")
-public class X_M_RMA extends PO implements I_M_RMA, I_Persistent 
+public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_RMA (Properties ctx, int M_RMA_ID, String trxName)
@@ -51,9 +51,8 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 			setIsApproved (false);
 			setIsSOTrx (false);
 // @IsSOTrx@
-			setM_RMA_ID (0);
 			setM_RMAType_ID (0);
-			setM_Warehouse_ID (0);
+			setM_RMA_ID (0);
 			setName (null);
 			setProcessed (false);
 			setSalesRep_ID (0);
@@ -77,8 +76,56 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 			setIsApproved (false);
 			setIsSOTrx (false);
 // @IsSOTrx@
-			setM_RMA_ID (0);
 			setM_RMAType_ID (0);
+			setM_RMA_ID (0);
+			setName (null);
+			setProcessed (false);
+			setSalesRep_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_RMA (Properties ctx, String M_RMA_UU, String trxName)
+    {
+      super (ctx, M_RMA_UU, trxName);
+      /** if (M_RMA_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setInOut_ID (0);
+			setIsApproved (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_RMAType_ID (0);
+			setM_RMA_ID (0);
+			setName (null);
+			setProcessed (false);
+			setSalesRep_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_RMA (Properties ctx, String M_RMA_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_RMA_UU, trxName, virtualColumns);
+      /** if (M_RMA_UU == null)
+        {
+			setC_DocType_ID (0);
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setInOut_ID (0);
+			setIsApproved (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_RMAType_ID (0);
+			setM_RMA_ID (0);
 			setName (null);
 			setProcessed (false);
 			setSalesRep_ID (0);
@@ -92,7 +139,7 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -401,7 +448,7 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -480,10 +527,10 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -503,35 +550,13 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set RMA.
-		@param M_RMA_ID Return Material Authorization
-	*/
-	public void setM_RMA_ID (int M_RMA_ID)
-	{
-		if (M_RMA_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_RMA_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_RMA_ID, Integer.valueOf(M_RMA_ID));
-	}
-
-	/** Get RMA.
-		@return Return Material Authorization
-	  */
-	public int getM_RMA_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_RMA_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_RMAType getM_RMAType() throws RuntimeException
@@ -557,6 +582,28 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public int getM_RMAType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_RMAType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set RMA.
+		@param M_RMA_ID Return Material Authorization
+	*/
+	public void setM_RMA_ID (int M_RMA_ID)
+	{
+		if (M_RMA_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_RMA_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_RMA_ID, Integer.valueOf(M_RMA_ID));
+	}
+
+	/** Get RMA.
+		@return Return Material Authorization
+	  */
+	public int getM_RMA_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_RMA_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -635,10 +682,10 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -657,10 +704,10 @@ public class X_M_RMA extends PO implements I_M_RMA, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -14,7 +14,7 @@
 package org.adempiere.webui.part;
 
 /**
- * 
+ * Interface to handle onSelect event for tab
  * @author hengsin
  *
  */
@@ -23,7 +23,7 @@ public interface ITabOnSelectHandler {
 	public final static String ATTRIBUTE_KEY = "TabOnSelectHandler";
 
 	/**
-	 * handle tab on_select event
+	 * Handle tab on_select event
 	 */
 	public void onSelect();
 

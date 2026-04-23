@@ -42,7 +42,11 @@ import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.SimplePDFViewer;
+import org.compiere.model.MInOut;
+import org.compiere.model.MInvoice;
 import org.compiere.model.MProcess;
+import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.print.ReportEngine;
 import org.compiere.process.ProcessInfo;
@@ -81,17 +85,21 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfWriter;
 
 /**
- *	Embedded Dialog to Start process or report.
- *	Displays information about the process
- *		and lets the user decide to start it
- *  	and displays results (optionally print them).
+ *  Embedded window to start process or report.<br/>
+ *  <pre>
+ *  Displays information about the process
+ *     and lets the user decide to start it
+ *     and displays results (optionally print them)  
  *  Calls ProcessCtl to execute.
+ *  </pre>
  *  @author 	Low Heng Sin
  *  @author     arboleda - globalqss
  *  - Implement ShowHelp option on processes and reports
  */
 public class ProcessDialog extends AbstractProcessDialog implements EventListener<Event>, IHelpContext, ITabOnCloseHandler
 {
+	public static final String SAVED_PREDEFINED_CONTEXT_VARIABLES = "__PredefinedContextVariables__";
+
 	/**
 	 * generated serial id
 	 */
@@ -122,14 +130,10 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	/** process log content of {@link #resultPanelLayout}, host {@link #logMessageTable} **/
 	private HtmlBasedComponent infoResultContent;
 
-	/** Window No					*/
-	private int m_WindowNo = -1;
-	/** timestamp of previous key event **/
-	private long prevKeyEventTime = 0;
 	/**
-	 * Previous key event. use together with {@link #prevKeyEventTime} to detect double firing of key event from browser.
+	 * SysConfig USE_ESC_FOR_TAB_CLOSING
 	 */
-	private KeyEvent prevKeyEvent;
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	/**
 	 * Dialog to start a process/report
@@ -153,6 +157,11 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
 		this.setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, m_WindowNo);
 		Env.setContext(Env.getCtx(), m_WindowNo, "IsSOTrx", isSOTrx ? "Y" : "N");
+		//save for rerun of report
+		if (predefinedContextVariables != null && MProcess.get(AD_Process_ID).isReport())
+		{
+			Env.setContext(Env.getCtx(), m_WindowNo, SAVED_PREDEFINED_CONTEXT_VARIABLES, predefinedContextVariables);
+		}
 		Env.setPredefinedVariables(Env.getCtx(), m_WindowNo, predefinedContextVariables);
 		try
 		{
@@ -173,6 +182,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		super.onPageAttached(newpage, oldpage);
 		try {
 			SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, this);
+			addEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this);
 			
 			Component parentTab = this.getParent();
 			if (parentTab != null && parentTab instanceof Tabpanel) {
@@ -186,23 +196,18 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		super.onPageDetached(page);
 		try {
 			SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, this);
+			removeEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this);
 			SessionManager.getAppDesktop().unregisterWindow(m_WindowNo);
 		} catch (Exception e) {}
 	}
 
-	/**
-	 * 	Set Visible 
-	 * 	(set focus to OK if visible)
-	 * 	@param visible true if visible
-	 */
+	@Override
 	public boolean setVisible (boolean visible)
 	{
 		return super.setVisible(visible);
 	}	//	setVisible
 
-	/**
-	 *	Dispose
-	 */
+	@Override
 	public void dispose()
 	{
 		super.dispose();
@@ -236,23 +241,17 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 			}
         } else if (event.getName().equals(Events.ON_CTRL_KEY)) {
         	KeyEvent keyEvent = (KeyEvent) event;
-        	if (LayoutUtils.isReallyVisible(this)) {
-	        	//filter same key event that is too close
-	        	//firefox fire key event twice when grid is visible
-	        	long time = System.currentTimeMillis();
-	        	if (prevKeyEvent != null && prevKeyEventTime > 0 &&
-	        			prevKeyEvent.getKeyCode() == keyEvent.getKeyCode() &&
-	    				prevKeyEvent.getTarget() == keyEvent.getTarget() &&
-	    				prevKeyEvent.isAltKey() == keyEvent.isAltKey() &&
-	    				prevKeyEvent.isCtrlKey() == keyEvent.isCtrlKey() &&
-	    				prevKeyEvent.isShiftKey() == keyEvent.isShiftKey()) {
-	        		if ((time - prevKeyEventTime) <= 300) {
-	        			return;
-	        		}
-	        	}
+        	if (LayoutUtils.isReallyVisible(this))
 	        	this.onCtrlKeyEvent(keyEvent);
-        	}
-		} else {
+		} 
+        else if(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT.equals(event.getName())) {
+        	IDesktop desktop = SessionManager.getAppDesktop();
+        	if (m_WindowNo > 0 && desktop.isCloseTabWithShortcut())
+        		desktop.closeWindow(m_WindowNo);
+        	else
+        		desktop.setCloseTabWithShortcut(true);
+        }
+        else {
 			super.onEvent(event);
 		}
 	}
@@ -279,13 +278,10 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	 * @param keyEvent
 	 */
 	private void onCtrlKeyEvent(KeyEvent keyEvent) {
-		if (keyEvent.isAltKey() && keyEvent.getKeyCode() == 0x58) { // Alt-X
-			if (m_WindowNo > 0) {
-				prevKeyEventTime = System.currentTimeMillis();
-				prevKeyEvent = keyEvent;
-				keyEvent.stopPropagation();
-				SessionManager.getAppDesktop().closeWindow(m_WindowNo);
-			}
+		if ((keyEvent.isAltKey() && keyEvent.getKeyCode() == 0x58)	// Alt-X
+				|| (keyEvent.getKeyCode() == 0x1B && isUseEscForTabClosing)) {	// ESC
+			keyEvent.stopPropagation();
+			Events.echoEvent(new Event(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this));
 		}
 	}
 
@@ -318,6 +314,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}
 
 	/**
+	 * Get in progress mask
 	 * @return in progress mask
 	 */
 	private Div getMask() {
@@ -328,7 +325,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}
 	
 	/**
-	 * show in progress mask
+	 * Show in progress mask
 	 * @param window
 	 */
 	private void showBusyMask(Window window) {
@@ -348,7 +345,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}
 		
 	/**
-	 * close in progress mask
+	 * Close in progress mask
 	 */
 	private void hideBusyMask() 
 	{
@@ -421,7 +418,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}
 	
 	/**
-	 * layout process execution result panel
+	 * Layout process execution result panel
 	 * @param topParameterLayout
 	 */
 	private void layoutResultPanel (HtmlBasedComponent topParameterLayout){
@@ -438,7 +435,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}
 	
 	/**
-	 * replace oldComponent with newComponent
+	 * Replace oldComponent with newComponent
 	 * @param newComponent
 	 * @param oldComponent
 	 */
@@ -448,7 +445,7 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 	}	
 	
 	/**
-	 * append m_logs content to {@link #logMessageTable}
+	 * Append m_logs content to {@link #logMessageTable}
 	 * @param m_logs
 	 * @param infoResultContent
 	 */
@@ -584,12 +581,12 @@ public class ProcessDialog extends AbstractProcessDialog implements EventListene
 		{
 			if (log.isLoggable(Level.CONFIG)) log.config("");
 			//	Print invoices
-			if (getAD_Process_ID() == PROCESS_C_INVOICE_GENERATE)
+			if (getAD_Process_ID() == PROCESS_C_INVOICE_GENERATE && MRole.getDefault().isCanReport(MInvoice.Table_ID))
 			{
 				printInvoices();
 				return true;
 			}
-			else if (getAD_Process_ID() == PROCESS_M_INOUT_GENERATE)
+			else if (getAD_Process_ID() == PROCESS_M_INOUT_GENERATE && MRole.getDefault().isCanReport(MInOut.Table_ID))
 			{
 				printShipments();
 				return true;

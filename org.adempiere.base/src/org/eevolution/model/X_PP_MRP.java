@@ -26,16 +26,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PP_MRP
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PP_MRP")
-public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent 
+public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PP_MRP (Properties ctx, int PP_MRP_ID, String trxName)
@@ -65,6 +65,34 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_PP_MRP (Properties ctx, String PP_MRP_UU, String trxName)
+    {
+      super (ctx, PP_MRP_UU, trxName);
+      /** if (PP_MRP_UU == null)
+        {
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+			setM_Warehouse_ID (0);
+			setPP_MRP_ID (0);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_MRP (Properties ctx, String PP_MRP_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_MRP_UU, trxName, virtualColumns);
+      /** if (PP_MRP_UU == null)
+        {
+			setDateOrdered (new Timestamp( System.currentTimeMillis() ));
+			setDatePromised (new Timestamp( System.currentTimeMillis() ));
+			setM_Warehouse_ID (0);
+			setPP_MRP_ID (0);
+			setValue (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_PP_MRP (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +100,7 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -121,6 +149,34 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
+			.getPO(getC_OrderLine_ID(), get_TrxName());
+	}
+
+	/** Set Sales Order Line.
+		@param C_OrderLine_ID Sales Order Line
+	*/
+	public void setC_OrderLine_ID (int C_OrderLine_ID)
+	{
+		if (C_OrderLine_ID < 1)
+			set_Value (COLUMNNAME_C_OrderLine_ID, null);
+		else
+			set_Value (COLUMNNAME_C_OrderLine_ID, Integer.valueOf(C_OrderLine_ID));
+	}
+
+	/** Get Sales Order Line.
+		@return Sales Order Line
+	  */
+	public int getC_OrderLine_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_OrderLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
@@ -149,29 +205,55 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException
+	public org.eevolution.model.I_DD_OrderLine getDD_OrderLine() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
-			.getPO(getC_OrderLine_ID(), get_TrxName());
+		return (org.eevolution.model.I_DD_OrderLine)MTable.get(getCtx(), org.eevolution.model.I_DD_OrderLine.Table_ID)
+			.getPO(getDD_OrderLine_ID(), get_TrxName());
 	}
 
-	/** Set Sales Order Line.
-		@param C_OrderLine_ID Sales Order Line
+	/** Set Distribution Order Line.
+		@param DD_OrderLine_ID Distribution Order Line
 	*/
-	public void setC_OrderLine_ID (int C_OrderLine_ID)
+	public void setDD_OrderLine_ID (int DD_OrderLine_ID)
 	{
-		if (C_OrderLine_ID < 1)
-			set_Value (COLUMNNAME_C_OrderLine_ID, null);
+		if (DD_OrderLine_ID < 1)
+			set_Value (COLUMNNAME_DD_OrderLine_ID, null);
 		else
-			set_Value (COLUMNNAME_C_OrderLine_ID, Integer.valueOf(C_OrderLine_ID));
+			set_Value (COLUMNNAME_DD_OrderLine_ID, Integer.valueOf(DD_OrderLine_ID));
 	}
 
-	/** Get Sales Order Line.
-		@return Sales Order Line
-	  */
-	public int getC_OrderLine_ID()
+	/** Get Distribution Order Line.
+		@return Distribution Order Line	  */
+	public int getDD_OrderLine_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_OrderLine_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_DD_OrderLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.eevolution.model.I_DD_Order getDD_Order() throws RuntimeException
+	{
+		return (org.eevolution.model.I_DD_Order)MTable.get(getCtx(), org.eevolution.model.I_DD_Order.Table_ID)
+			.getPO(getDD_Order_ID(), get_TrxName());
+	}
+
+	/** Set Distribution Order.
+		@param DD_Order_ID Distribution Order
+	*/
+	public void setDD_Order_ID (int DD_Order_ID)
+	{
+		if (DD_Order_ID < 1)
+			set_Value (COLUMNNAME_DD_Order_ID, null);
+		else
+			set_Value (COLUMNNAME_DD_Order_ID, Integer.valueOf(DD_Order_ID));
+	}
+
+	/** Get Distribution Order.
+		@return Distribution Order	  */
+	public int getDD_Order_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DD_Order_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -289,60 +371,6 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 		return (Timestamp)get_Value(COLUMNNAME_DateStartSchedule);
 	}
 
-	public org.eevolution.model.I_DD_Order getDD_Order() throws RuntimeException
-	{
-		return (org.eevolution.model.I_DD_Order)MTable.get(getCtx(), org.eevolution.model.I_DD_Order.Table_ID)
-			.getPO(getDD_Order_ID(), get_TrxName());
-	}
-
-	/** Set Distribution Order.
-		@param DD_Order_ID Distribution Order
-	*/
-	public void setDD_Order_ID (int DD_Order_ID)
-	{
-		if (DD_Order_ID < 1)
-			set_Value (COLUMNNAME_DD_Order_ID, null);
-		else
-			set_Value (COLUMNNAME_DD_Order_ID, Integer.valueOf(DD_Order_ID));
-	}
-
-	/** Get Distribution Order.
-		@return Distribution Order	  */
-	public int getDD_Order_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_DD_Order_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.eevolution.model.I_DD_OrderLine getDD_OrderLine() throws RuntimeException
-	{
-		return (org.eevolution.model.I_DD_OrderLine)MTable.get(getCtx(), org.eevolution.model.I_DD_OrderLine.Table_ID)
-			.getPO(getDD_OrderLine_ID(), get_TrxName());
-	}
-
-	/** Set Distribution Order Line.
-		@param DD_OrderLine_ID Distribution Order Line
-	*/
-	public void setDD_OrderLine_ID (int DD_OrderLine_ID)
-	{
-		if (DD_OrderLine_ID < 1)
-			set_Value (COLUMNNAME_DD_OrderLine_ID, null);
-		else
-			set_Value (COLUMNNAME_DD_OrderLine_ID, Integer.valueOf(DD_OrderLine_ID));
-	}
-
-	/** Get Distribution Order Line.
-		@return Distribution Order Line	  */
-	public int getDD_OrderLine_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_DD_OrderLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -416,41 +444,13 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 	public boolean isAvailable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAvailable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	public org.compiere.model.I_M_Forecast getM_Forecast() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Forecast)MTable.get(getCtx(), org.compiere.model.I_M_Forecast.Table_ID)
-			.getPO(getM_Forecast_ID(), get_TrxName());
-	}
-
-	/** Set Forecast.
-		@param M_Forecast_ID Material Forecast
-	*/
-	public void setM_Forecast_ID (int M_Forecast_ID)
-	{
-		if (M_Forecast_ID < 1)
-			set_Value (COLUMNNAME_M_Forecast_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Forecast_ID, Integer.valueOf(M_Forecast_ID));
-	}
-
-	/** Get Forecast.
-		@return Material Forecast
-	  */
-	public int getM_Forecast_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Forecast_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_ForecastLine getM_ForecastLine() throws RuntimeException
@@ -476,6 +476,34 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 	public int getM_ForecastLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_ForecastLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Forecast getM_Forecast() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Forecast)MTable.get(getCtx(), org.compiere.model.I_M_Forecast.Table_ID)
+			.getPO(getM_Forecast_ID(), get_TrxName());
+	}
+
+	/** Set Forecast.
+		@param M_Forecast_ID Material Forecast
+	*/
+	public void setM_Forecast_ID (int M_Forecast_ID)
+	{
+		if (M_Forecast_ID < 1)
+			set_Value (COLUMNNAME_M_Forecast_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Forecast_ID, Integer.valueOf(M_Forecast_ID));
+	}
+
+	/** Get Forecast.
+		@return Material Forecast
+	  */
+	public int getM_Forecast_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Forecast_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -509,34 +537,6 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Requisition)MTable.get(getCtx(), org.compiere.model.I_M_Requisition.Table_ID)
-			.getPO(getM_Requisition_ID(), get_TrxName());
-	}
-
-	/** Set Requisition.
-		@param M_Requisition_ID Material Requisition
-	*/
-	public void setM_Requisition_ID (int M_Requisition_ID)
-	{
-		if (M_Requisition_ID < 1)
-			set_Value (COLUMNNAME_M_Requisition_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Requisition_ID, Integer.valueOf(M_Requisition_ID));
-	}
-
-	/** Get Requisition.
-		@return Material Requisition
-	  */
-	public int getM_Requisition_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Requisition_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_M_RequisitionLine getM_RequisitionLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_RequisitionLine)MTable.get(getCtx(), org.compiere.model.I_M_RequisitionLine.Table_ID)
@@ -560,6 +560,34 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 	public int getM_RequisitionLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_RequisitionLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Requisition getM_Requisition() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Requisition)MTable.get(getCtx(), org.compiere.model.I_M_Requisition.Table_ID)
+			.getPO(getM_Requisition_ID(), get_TrxName());
+	}
+
+	/** Set Requisition.
+		@param M_Requisition_ID Material Requisition
+	*/
+	public void setM_Requisition_ID (int M_Requisition_ID)
+	{
+		if (M_Requisition_ID < 1)
+			set_Value (COLUMNNAME_M_Requisition_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Requisition_ID, Integer.valueOf(M_Requisition_ID));
+	}
+
+	/** Get Requisition.
+		@return Material Requisition
+	  */
+	public int getM_Requisition_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Requisition_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -612,7 +640,7 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -648,33 +676,6 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 	public String getOrderType()
 	{
 		return (String)get_Value(COLUMNNAME_OrderType);
-	}
-
-	public org.compiere.model.I_AD_User getPlanner() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
-			.getPO(getPlanner_ID(), get_TrxName());
-	}
-
-	/** Set Planner.
-		@param Planner_ID Planner
-	*/
-	public void setPlanner_ID (int Planner_ID)
-	{
-		if (Planner_ID < 1)
-			set_Value (COLUMNNAME_Planner_ID, null);
-		else
-			set_Value (COLUMNNAME_Planner_ID, Integer.valueOf(Planner_ID));
-	}
-
-	/** Get Planner.
-		@return Planner	  */
-	public int getPlanner_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Planner_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
 	}
 
 	/** Set Material Requirement Planning.
@@ -764,6 +765,33 @@ public class X_PP_MRP extends PO implements I_PP_MRP, I_Persistent
 	public int getPP_Order_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Order_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_AD_User getPlanner() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)
+			.getPO(getPlanner_ID(), get_TrxName());
+	}
+
+	/** Set Planner.
+		@param Planner_ID Planner
+	*/
+	public void setPlanner_ID (int Planner_ID)
+	{
+		if (Planner_ID < 1)
+			set_Value (COLUMNNAME_Planner_ID, null);
+		else
+			set_Value (COLUMNNAME_Planner_ID, Integer.valueOf(Planner_ID));
+	}
+
+	/** Get Planner.
+		@return Planner	  */
+	public int getPlanner_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Planner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

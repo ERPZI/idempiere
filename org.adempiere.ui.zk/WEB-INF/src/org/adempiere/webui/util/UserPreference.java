@@ -19,7 +19,6 @@ import java.util.Properties;
 import org.compiere.model.I_AD_Preference;
 import org.compiere.model.MPreference;
 import org.compiere.model.MUser;
-import org.compiere.model.PO;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -27,7 +26,7 @@ import org.compiere.util.Language;
 import org.compiere.util.Util;
 
 /**
- *
+ * Controller for user preference (AD_Preference)
  * @author hengsin
  * @author Teo Sarca, www.arhipac.ro
  *			<li>FR [ 2694043 ] Query. first/firstOnly usage best practice
@@ -36,7 +35,7 @@ import org.compiere.util.Util;
  */
 public final class UserPreference implements Serializable {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -5225476997340598606L;
 
@@ -71,6 +70,10 @@ public final class UserPreference implements Serializable {
 	/** Header Collapsed **/
 	public static final String P_HEADER_COLLAPSED = "HeaderCollapsed";
 	public static final String DEFAULT_HEADER_COLLAPSED = "N";
+	
+	/** Header Collapsed **/
+	public static final String P_RECORD_INFO_DEFAULT_TAB = "RecordInfoDefaultTab";
+	public static final String DEFAULT_RECORD_INFO_DEFAULT_TAB = "C";
 
 	/** Ini Properties */
 	private static final String[] PROPERTIES = new String[] {
@@ -81,7 +84,8 @@ public final class UserPreference implements Serializable {
 		P_WAREHOUSE,
 		P_MENU_COLLAPSED,
 		P_HELP_COLLAPSED,
-		P_HEADER_COLLAPSED};
+		P_HEADER_COLLAPSED,
+		P_RECORD_INFO_DEFAULT_TAB};
 	/** Ini Property Values */
 	private static final String[] VALUES = new String[] {
 		DEFAULT_LANGUAGE,
@@ -91,7 +95,8 @@ public final class UserPreference implements Serializable {
 		DEFAULT_WAREHOUSE,
 		DEFAULT_MENU_COLLAPSED,
 		DEFAULT_HELP_COLLAPSED,
-		DEFAULT_HEADER_COLLAPSED};
+		DEFAULT_HEADER_COLLAPSED,
+		DEFAULT_RECORD_INFO_DEFAULT_TAB};
 
 	/** Container for Properties */
 	private Properties props = new Properties();
@@ -126,13 +131,8 @@ public final class UserPreference implements Serializable {
 					}
 					String oldValue = preference.getValue();
 					if (! value.equals(oldValue)) {
-						try {
-							PO.setCrossTenantSafe();
-							preference.setValue(value);
-							preference.saveEx();
-						} finally {
-							PO.clearCrossTenantSafe();
-						}
+						preference.setValue(value);
+						preference.saveCrossTenantSafeEx();
 					}
 				}
 			}
@@ -182,8 +182,8 @@ public final class UserPreference implements Serializable {
 		}
 	}
 
-	/***************************************************************************
-	 * Set Property
+	/**
+	 * Set value for user preference property
 	 *
 	 * @param key
 	 *            Key
@@ -200,7 +200,7 @@ public final class UserPreference implements Serializable {
 	} // setProperty
 
 	/**
-	 * Set Property
+	 * Set value for user preference property
 	 *
 	 * @param key
 	 *            Key
@@ -212,7 +212,7 @@ public final class UserPreference implements Serializable {
 	} // setProperty
 
 	/**
-	 * Set Property
+	 * Set value for user preference property
 	 *
 	 * @param key
 	 *            Key
@@ -224,7 +224,7 @@ public final class UserPreference implements Serializable {
 	} // setProperty
 
 	/**
-	 * Get Propery
+	 * Get user preference property value
 	 *
 	 * @param key
 	 *            Key
@@ -241,7 +241,7 @@ public final class UserPreference implements Serializable {
 	} // getProperty
 
 	/**
-	 * Get Propery as Boolean
+	 * Get Property as Boolean (Y/N)
 	 *
 	 * @param key
 	 *            Key

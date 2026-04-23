@@ -19,7 +19,7 @@ package org.compiere.dbPort;
 import org.compiere.util.Util;
 
 /**
- *  Join Clause.
+ *  Model for Join Clause.
  *  <pre>
  *  f.AD_Column_ID = c.AD_Column_ID(+)
  *  </pre>
@@ -48,9 +48,11 @@ public class Join
 	private String  m_condition;
 
 	/**
-	 *  Evaluate the clause.
+	 *  Parse join clause.
+	 *  <pre>
 	 *  e.g.    tb.AD_User_ID(+)=?
 	 *          f.AD_Column_ID = c.AD_Column_ID(+)
+	 *  </pre>
 	 *  @param joinClause
 	 */
 	private void evaluate (String joinClause)
@@ -81,7 +83,7 @@ public class Join
 	}   //  evaluate
 
 	/**
-	 *  Get origial Join Clause.
+	 *  Get original Join Clause.<br/>
 	 *  e.g. f.AD_Column_ID = c.AD_Column_ID(+)
 	 *  @return Join cluase
 	 */
@@ -109,7 +111,7 @@ public class Join
 	}   //  getJoinAlias
 
 	/**
-	 *  Is Left Aouter Join
+	 *  Is Left Outer Join
 	 *  @return true if left outer join
 	 */
 	public boolean isLeft()
@@ -118,7 +120,7 @@ public class Join
 	}   //  isLeft
 
 	/**
-	 *  Get Join condition.
+	 *  Get Join condition.<br/>
 	 *  e.g. f.AD_Column_ID = c.AD_Column_ID
 	 *  @return join condition
 	 */
@@ -127,11 +129,9 @@ public class Join
 		return m_condition;
 	}   //  getCondition
 
-	/*************************************************************************/
-
 	/**
 	 *  Set Main Table Name.
-	 *  If table name equals alias, the alias is set to ""
+	 *  If table name equals alias, the alias is set to "".
 	 *  @param mainTable
 	 */
 	public void setMainTable(String mainTable)
@@ -153,8 +153,8 @@ public class Join
 	}   //  getMainTable
 
 	/**
-	 *  Set Main Table Name.
-	 *  If table name equals alias, the alias is set to ""
+	 *  Set Join Table Name.<br/>
+	 *  If join table name equals join alias, the join alias is set to ""
 	 *  @param joinTable
 	 */
 	public void setJoinTable(String joinTable)
@@ -175,10 +175,8 @@ public class Join
 		return m_joinTable;
 	}   //  getJoinTable
 
-	/*************************************************************************/
-
 	/**
-	 *  This Join is a condition of the first Join.
+	 *  This Join is a condition of the first Join. <br/>
 	 *  e.g. tb.AD_User_ID(+)=?  or tb.AD_User_ID(+)='123'
 	 *  @param first
 	 *  @return true if condition

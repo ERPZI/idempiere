@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Window
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Window")
-public class X_AD_Window extends PO implements I_AD_Window, I_Persistent 
+public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Window (Properties ctx, int AD_Window_ID, String trxName)
@@ -71,6 +71,44 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Window (Properties ctx, String AD_Window_UU, String trxName)
+    {
+      super (ctx, AD_Window_UU, trxName);
+      /** if (AD_Window_UU == null)
+        {
+			setAD_Window_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsBetaFunctionality (false);
+			setIsDefault (false);
+			setIsSOTrx (true);
+// Y
+			setName (null);
+			setWindowType (null);
+// M
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Window (Properties ctx, String AD_Window_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Window_UU, trxName, virtualColumns);
+      /** if (AD_Window_UU == null)
+        {
+			setAD_Window_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsBetaFunctionality (false);
+			setIsDefault (false);
+			setIsSOTrx (true);
+// Y
+			setName (null);
+			setWindowType (null);
+// M
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Window (Properties ctx, ResultSet rs, String trxName)
     {
@@ -78,7 +116,7 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -257,10 +295,10 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 	public boolean isBetaFunctionality()
 	{
 		Object oo = get_Value(COLUMNNAME_IsBetaFunctionality);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -280,10 +318,10 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -303,10 +341,10 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -331,7 +369,7 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -365,10 +403,10 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -388,33 +426,6 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 	public String getTitleLogic()
 	{
 		return (String)get_Value(COLUMNNAME_TitleLogic);
-	}
-
-	/** WindowType AD_Reference_ID=108 */
-	public static final int WINDOWTYPE_AD_Reference_ID=108;
-	/** Maintain = M */
-	public static final String WINDOWTYPE_Maintain = "M";
-	/** Query Only = Q */
-	public static final String WINDOWTYPE_QueryOnly = "Q";
-	/** Single Record = S */
-	public static final String WINDOWTYPE_SingleRecord = "S";
-	/** Transaction = T */
-	public static final String WINDOWTYPE_Transaction = "T";
-	/** Set Window Type.
-		@param WindowType Type or classification of a Window
-	*/
-	public void setWindowType (String WindowType)
-	{
-
-		set_Value (COLUMNNAME_WindowType, WindowType);
-	}
-
-	/** Get Window Type.
-		@return Type or classification of a Window
-	  */
-	public String getWindowType()
-	{
-		return (String)get_Value(COLUMNNAME_WindowType);
 	}
 
 	/** Set Window Height.
@@ -451,5 +462,32 @@ public class X_AD_Window extends PO implements I_AD_Window, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** WindowType AD_Reference_ID=108 */
+	public static final int WINDOWTYPE_AD_Reference_ID=108;
+	/** Maintain = M */
+	public static final String WINDOWTYPE_Maintain = "M";
+	/** Query Only = Q */
+	public static final String WINDOWTYPE_QueryOnly = "Q";
+	/** Single Record = S */
+	public static final String WINDOWTYPE_SingleRecord = "S";
+	/** Transaction = T */
+	public static final String WINDOWTYPE_Transaction = "T";
+	/** Set Window Type.
+		@param WindowType Type or classification of a Window
+	*/
+	public void setWindowType (String WindowType)
+	{
+
+		set_Value (COLUMNNAME_WindowType, WindowType);
+	}
+
+	/** Get Window Type.
+		@return Type or classification of a Window
+	  */
+	public String getWindowType()
+	{
+		return (String)get_Value(COLUMNNAME_WindowType);
 	}
 }

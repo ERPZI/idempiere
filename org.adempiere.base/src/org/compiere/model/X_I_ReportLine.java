@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for I_ReportLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="I_ReportLine")
-public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent 
+public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_I_ReportLine (Properties ctx, int I_ReportLine_ID, String trxName)
@@ -55,6 +55,28 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_I_ReportLine (Properties ctx, String I_ReportLine_UU, String trxName)
+    {
+      super (ctx, I_ReportLine_UU, trxName);
+      /** if (I_ReportLine_UU == null)
+        {
+			setI_IsImported (false);
+			setI_ReportLine_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_ReportLine (Properties ctx, String I_ReportLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_ReportLine_UU, trxName, virtualColumns);
+      /** if (I_ReportLine_UU == null)
+        {
+			setI_IsImported (false);
+			setI_ReportLine_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_I_ReportLine (Properties ctx, ResultSet rs, String trxName)
     {
@@ -62,7 +84,7 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -82,32 +104,6 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** CalculationType AD_Reference_ID=236 */
-	public static final int CALCULATIONTYPE_AD_Reference_ID=236;
-	/** Add (Op1+Op2) = A */
-	public static final String CALCULATIONTYPE_AddOp1PlusOp2 = "A";
-	/** Percentage (Op1 of Op2) = P */
-	public static final String CALCULATIONTYPE_PercentageOp1OfOp2 = "P";
-	/** Add Range (Op1 to Op2) = R */
-	public static final String CALCULATIONTYPE_AddRangeOp1ToOp2 = "R";
-	/** Subtract (Op1-Op2) = S */
-	public static final String CALCULATIONTYPE_SubtractOp1_Op2 = "S";
-	/** Set Calculation.
-		@param CalculationType Calculation
-	*/
-	public void setCalculationType (String CalculationType)
-	{
-
-		set_Value (COLUMNNAME_CalculationType, CalculationType);
-	}
-
-	/** Get Calculation.
-		@return Calculation	  */
-	public String getCalculationType()
-	{
-		return (String)get_Value(COLUMNNAME_CalculationType);
-	}
 
 	public org.compiere.model.I_C_ElementValue getC_ElementValue() throws RuntimeException
 	{
@@ -135,6 +131,32 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** CalculationType AD_Reference_ID=236 */
+	public static final int CALCULATIONTYPE_AD_Reference_ID=236;
+	/** Add (Op1+Op2) = A */
+	public static final String CALCULATIONTYPE_AddOp1PlusOp2 = "A";
+	/** Percentage (Op1 of Op2) = P */
+	public static final String CALCULATIONTYPE_PercentageOp1OfOp2 = "P";
+	/** Add Range (Op1 to Op2) = R */
+	public static final String CALCULATIONTYPE_AddRangeOp1ToOp2 = "R";
+	/** Subtract (Op1-Op2) = S */
+	public static final String CALCULATIONTYPE_SubtractOp1_Op2 = "S";
+	/** Set Calculation.
+		@param CalculationType Calculation
+	*/
+	public void setCalculationType (String CalculationType)
+	{
+
+		set_Value (COLUMNNAME_CalculationType, CalculationType);
+	}
+
+	/** Get Calculation.
+		@return Calculation	  */
+	public String getCalculationType()
+	{
+		return (String)get_Value(COLUMNNAME_CalculationType);
 	}
 
 	/** Set Description.
@@ -199,10 +221,10 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -259,10 +281,10 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -282,10 +304,10 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public boolean isSummary()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSummary);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -334,7 +356,7 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -397,33 +419,6 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 		return (String)get_Value(COLUMNNAME_PAPeriodType);
 	}
 
-	public org.compiere.model.I_PA_ReportLine getPA_ReportLine() throws RuntimeException
-	{
-		return (org.compiere.model.I_PA_ReportLine)MTable.get(getCtx(), org.compiere.model.I_PA_ReportLine.Table_ID)
-			.getPO(getPA_ReportLine_ID(), get_TrxName());
-	}
-
-	/** Set Report Line.
-		@param PA_ReportLine_ID Report Line
-	*/
-	public void setPA_ReportLine_ID (int PA_ReportLine_ID)
-	{
-		if (PA_ReportLine_ID < 1)
-			set_Value (COLUMNNAME_PA_ReportLine_ID, null);
-		else
-			set_Value (COLUMNNAME_PA_ReportLine_ID, Integer.valueOf(PA_ReportLine_ID));
-	}
-
-	/** Get Report Line.
-		@return Report Line	  */
-	public int getPA_ReportLine_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLine_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_PA_ReportLineSet getPA_ReportLineSet() throws RuntimeException
 	{
 		return (org.compiere.model.I_PA_ReportLineSet)MTable.get(getCtx(), org.compiere.model.I_PA_ReportLineSet.Table_ID)
@@ -446,6 +441,33 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public int getPA_ReportLineSet_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLineSet_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_PA_ReportLine getPA_ReportLine() throws RuntimeException
+	{
+		return (org.compiere.model.I_PA_ReportLine)MTable.get(getCtx(), org.compiere.model.I_PA_ReportLine.Table_ID)
+			.getPO(getPA_ReportLine_ID(), get_TrxName());
+	}
+
+	/** Set Report Line.
+		@param PA_ReportLine_ID Report Line
+	*/
+	public void setPA_ReportLine_ID (int PA_ReportLine_ID)
+	{
+		if (PA_ReportLine_ID < 1)
+			set_Value (COLUMNNAME_PA_ReportLine_ID, null);
+		else
+			set_Value (COLUMNNAME_PA_ReportLine_ID, Integer.valueOf(PA_ReportLine_ID));
+	}
+
+	/** Get Report Line.
+		@return Report Line	  */
+	public int getPA_ReportLine_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLine_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -522,10 +544,10 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -544,10 +566,10 @@ public class X_I_ReportLine extends PO implements I_I_ReportLine, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

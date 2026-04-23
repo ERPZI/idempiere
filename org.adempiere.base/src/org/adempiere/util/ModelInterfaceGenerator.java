@@ -55,10 +55,10 @@ import org.compiere.util.Env;
 import org.compiere.util.Util;
 
 /**
+ *  Generate interface class for model 
  *	@author Trifon Trifonov
- *	@version $Id$
  *
- * @author Teo Sarca, SC ARHIPAC SERVICE SRL
+ *  @author Teo Sarca, SC ARHIPAC SERVICE SRL
  * 				<li>BF [ 1781629 ] Don't use Env.NL in model class/interface generators
  * 				<li>FR [ 1781630 ] Generated class/interfaces have a lot of unused imports
  * 				<li>BF [ 1781632 ] Generated class/interfaces should be UTF-8
@@ -72,15 +72,14 @@ import org.compiere.util.Util;
  * 				<li>--
  * 				<li>FR [ 2848449 ] ModelClassGenerator: Implement model getters
  *					https://sourceforge.net/p/adempiere/feature-requests/812/
- * @author Teo Sarca, teo.sarca@gmail.com
+ *  @author Teo Sarca, teo.sarca@gmail.com
  * 				<li>FR [ 3020635 ] Model Generator should use FQ class names
  * 					https://sourceforge.net/p/adempiere/feature-requests/987/
- * @author Victor Perez, e-Evolution
+ *  @author Victor Perez, e-Evolution
  * 				<li>FR [ 1785001 ] Using ModelPackage of EntityType to Generate Model Class
  */
 public class ModelInterfaceGenerator
 {
-
 	private String packageName = "";
 
 	public static final String NL = "\n";
@@ -107,8 +106,10 @@ public class ModelInterfaceGenerator
 	/** Logger */
 	private static final CLogger log = CLogger.getCLogger(ModelInterfaceGenerator.class);
 
+	public final static String GEN_SOURCE_INTERFACE = "I";
+	public final static String GEN_SOURCE_CLASS = "C";
+	
 	/**
-	 * 
 	 * @param AD_Table_ID
 	 * @param directory
 	 * @param packageName
@@ -251,6 +252,10 @@ public class ModelInterfaceGenerator
 				+ " AND c.IsActive='Y' AND (c.ColumnSQL IS NULL OR c.ColumnSQL NOT LIKE '@SQL%') "
 				+ (!Util.isEmpty(entityTypeFilter) ? " AND c." + entityTypeFilter : "")
 				+ " ORDER BY c.ColumnName";
+		if (DB.isOracle())
+			sql += " COLLATE \"BINARY\"";
+		else if (DB.isPostgreSQL())
+			sql += " COLLATE \"C\"";
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
@@ -377,7 +382,13 @@ public class ModelInterfaceGenerator
 		return sb.toString();
 	}
 
-	// ****** Set/Get Comment ******
+	/**
+	 * Generate javadoc comment for methods.
+	 * @param startOfComment
+	 * @param propertyName
+	 * @param description
+	 * @param result
+	 */
 	public void generateJavaComment(String startOfComment, String propertyName,	String description, StringBuilder result) {
 		result.append("\n")
 			  .append("\t/** ").append(startOfComment).append(" ")
@@ -389,7 +400,7 @@ public class ModelInterfaceGenerator
 		result.append("\t  */\n");
 	}
 
-	/*
+	/**
 	 * Write to file
 	 *
 	 * @param sb string buffer
@@ -431,6 +442,7 @@ public class ModelInterfaceGenerator
 
 	/** Import classes */
 	private Collection<String> s_importClasses = new TreeSet<String>();
+	
 	/**
 	 * Add class name to class import list
 	 * @param className
@@ -450,6 +462,7 @@ public class ModelInterfaceGenerator
 		}
 		s_importClasses.add(className);
 	}
+	
 	/**
 	 * Add class to class import list
 	 * @param cl
@@ -462,6 +475,7 @@ public class ModelInterfaceGenerator
 			return;
 		addImportClass(cl.getCanonicalName());
 	}
+	
 	/**
 	 * Generate java imports
 	 * @param sb
@@ -473,7 +487,6 @@ public class ModelInterfaceGenerator
 		sb.append(NL);
 	}
 
-
 	/**
 	 * Get class for given display type and reference
 	 * @param displayType
@@ -483,7 +496,6 @@ public class ModelInterfaceGenerator
 	public static Class<?> getClass(String columnName, int displayType, int AD_Reference_ID)
 	{
 		// Handle Posted
-		// TODO: hardcoded
 		if (columnName.equalsIgnoreCase("Posted")
 				|| columnName.equalsIgnoreCase("Processed")
 				|| columnName.equalsIgnoreCase("Processing"))
@@ -491,7 +503,6 @@ public class ModelInterfaceGenerator
 			return Boolean.class;
 		}
 		// Record_ID
-		// TODO: hardcoded
 		else if (columnName.equalsIgnoreCase("Record_ID"))
 		{
 			return Integer.class;
@@ -543,6 +554,11 @@ public class ModelInterfaceGenerator
 		}
 	}
 
+	/**
+	 * @param cl
+	 * @param displayType
+	 * @return Java data type name (without the package part)
+	 */
 	public static String getDataTypeName(Class<?> cl, int displayType)
 	{
 		String dataType = cl.getName();
@@ -587,7 +603,6 @@ public class ModelInterfaceGenerator
 	}
 
 	/**
-	 *
 	 * @param AD_Table_ID
 	 * @param toEntityType
 	 * @return true if a model getter method (method that is returning referenced PO) should be generated
@@ -611,7 +626,7 @@ public class ModelInterfaceGenerator
 	 * Get EntityType Model Package.
 	 * author Victor Perez - [ 1785001 ] Using ModelPackage of EntityType to Generate Model Class
 	 * @param entityType
-	 * @return
+	 * @return Java package name or null 
 	 */
 	public static String getModelPackage(String entityType)
 	{
@@ -624,6 +639,10 @@ public class ModelInterfaceGenerator
 		return null;
 	}
 
+	/**
+	 * @param columnName
+	 * @return Java field name
+	 */
 	public static String getFieldName(String columnName)
 	{
 		String fieldName;
@@ -634,6 +653,13 @@ public class ModelInterfaceGenerator
 		return fieldName;
 	}
 
+	/**
+	 * @param AD_Table_ID
+	 * @param columnName
+	 * @param displayType
+	 * @param AD_Reference_ID
+	 * @return Java class name or null
+	 */
 	public static String getReferenceClassName(int AD_Table_ID, String columnName, int displayType, int AD_Reference_ID)
 	{
 		String referenceClassName = null;
@@ -666,10 +692,10 @@ public class ModelInterfaceGenerator
 		else if (displayType == DisplayType.Table
 				|| (displayType == DisplayType.Search && AD_Reference_ID > 0))
 		{
-			// TODO: HARDCODED: do not generate model getter for Fact_Acct.Account_ID
+			// do not generate model getter for Fact_Acct.Account_ID
 			if (AD_Table_ID == 270 && columnName.equals("Account_ID"))
 				return null;
-			// TODO: HARDCODED: do not generate model getter for GL_DistributionLine.Account_ID
+			// do not generate model getter for GL_DistributionLine.Account_ID
 			if (AD_Table_ID == 707 && columnName.equals("Account_ID"))
 				return null;
 			//
@@ -760,6 +786,18 @@ public class ModelInterfaceGenerator
 	 */
 	public static void generateSource(String sourceFolder, String packageName, String entityType, String tableName, String columnEntityType)
 	{
+		generateSource(GEN_SOURCE_INTERFACE, sourceFolder, packageName, entityType, tableName, columnEntityType);
+	}
+
+	/**
+	 * @param sourceFolder
+	 * @param packageName
+	 * @param entityType
+	 * @param tableName table Like
+	 * @param columnEntityType
+	 */
+	public static void generateSource(String type, String sourceFolder, String packageName, String entityType, String tableName, String columnEntityType)
+	{
 		if (sourceFolder == null || sourceFolder.trim().length() == 0)
 			throw new IllegalArgumentException("Must specify source folder");
 
@@ -773,9 +811,7 @@ public class ModelInterfaceGenerator
 		if (tableName == null || tableName.trim().length() == 0)
 			throw new IllegalArgumentException("Must specify table name");
 
-		StringBuilder tableLike = new StringBuilder().append(tableName.trim());
-		if (!tableLike.toString().startsWith("'") || !tableLike.toString().endsWith("'"))
-			tableLike = new StringBuilder("'").append(tableLike).append("'");
+		StringBuilder tableLike = new StringBuilder().append(tableName.trim().toUpperCase().replace("'", ""));
 
 		StringBuilder entityTypeFilter = new StringBuilder();
 		if (entityType != null && entityType.trim().length() > 0)
@@ -784,7 +820,7 @@ public class ModelInterfaceGenerator
 			StringTokenizer tokenizer = new StringTokenizer(entityType, ",");
 			int i = 0;
 			while(tokenizer.hasMoreTokens()) {
-				StringBuilder token = new StringBuilder(tokenizer.nextToken().trim());
+				StringBuilder token = new StringBuilder().append(tokenizer.nextToken().trim());
 				if (!token.toString().startsWith("'") || !token.toString().endsWith("'"))
 					token = new StringBuilder("'").append(token).append("'");
 				if (i > 0)
@@ -809,7 +845,7 @@ public class ModelInterfaceGenerator
 			directory = new StringBuilder(directory.toString().replaceAll("[\\\\]", File.separator));
 		else
 			directory = new StringBuilder(directory.toString().replaceAll("[/]", File.separator));
-		directory = new StringBuilder(directory).append(packagePath);
+		directory.append(packagePath);
 		file = new File(directory.toString());
 		if (!file.exists())
 			file.mkdirs();
@@ -828,9 +864,19 @@ public class ModelInterfaceGenerator
 			.append("WHERE IsActive = 'Y' AND TableName NOT LIKE '%_Trl' ");
 		// Autodetect if we need to use IN or LIKE clause - teo_sarca [ 3020640 ]
 		if (tableLike.indexOf(",") == -1)
-			sql.append(" AND TableName LIKE ").append(tableLike);
-		else
-			sql.append(" AND TableName IN (").append(tableLike).append(")"); // only specific tables
+			sql.append(" AND UPPER(TableName) LIKE ").append(DB.TO_STRING(tableLike.toString()));
+		else { // only specific tables
+			StringBuilder finalTableLike = new StringBuilder("");
+			for (String table : tableLike.toString().split(",")) {
+				if (finalTableLike.length() > 0)
+					finalTableLike.append(", ");
+
+				finalTableLike.append(DB.TO_STRING(table.replace("'", "").trim()));
+			}
+
+			sql.append(" AND UPPER(TableName) IN (").append(finalTableLike).append(")");
+		}
+
 		sql.append(" AND ").append(entityTypeFilter.toString());
 		if (filterViews != null) {
 			sql.append(filterViews);
@@ -863,10 +909,19 @@ public class ModelInterfaceGenerator
 		{
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			rs = pstmt.executeQuery();
+
+			boolean isEmpty = true;
 			while (rs.next())
 			{
-				new ModelInterfaceGenerator(rs.getInt(1), directory.toString(), packageName, columnFilter);
+				isEmpty = false;
+				if (type.equals(GEN_SOURCE_INTERFACE))
+					new ModelInterfaceGenerator(rs.getInt(1), directory.toString(), packageName, columnFilter);
+				else if (type.equals(GEN_SOURCE_CLASS))
+					new ModelClassGenerator(rs.getInt(1), directory.toString(), packageName, columnFilter);
 			}
+			
+			if (isEmpty)
+				System.out.println("No data found for the table with name " + tableName);
 		}
 		catch (SQLException e)
 		{
@@ -877,5 +932,4 @@ public class ModelInterfaceGenerator
 			DB.close(rs, pstmt);
 			rs = null; pstmt = null;
 		}
-	}
-}
+	}}

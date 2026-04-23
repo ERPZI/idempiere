@@ -31,7 +31,7 @@ import org.compiere.model.ProductCost;
 import org.compiere.util.Env;
 
 /**
- *  Post Invoice Documents.
+ *  Post {@link MMovement} Documents. DOCTYPE_MatMovement.
  *  <pre>
  *  Table:              M_Movement (323)
  *  Document Types:     MMM
@@ -62,6 +62,7 @@ public class Doc_Movement extends Doc
 	 *  Load Document Details
 	 *  @return error message or null
 	 */
+	@Override
 	protected String loadDocumentDetails()
 	{
 		setC_Currency_ID(NO_CURRENCY);
@@ -77,7 +78,7 @@ public class Doc_Movement extends Doc
 	}   //  loadDocumentDetails
 
 	/**
-	 *	Load Invoice Line
+	 *	Load inventory movement lines
 	 *	@param move move
 	 *  @return document lines (DocLine_Material)
 	 */
@@ -105,6 +106,7 @@ public class Doc_Movement extends Doc
 	 *  Get Balance
 	 *  @return balance (ZERO) - always balanced
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		BigDecimal retValue = Env.ZERO;
@@ -121,7 +123,8 @@ public class Doc_Movement extends Doc
 	 *  </pre>
 	 *  @param as account schema
 	 *  @return Fact
-	 */
+	 */	
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		//  create Fact Header
@@ -232,22 +235,40 @@ public class Doc_Movement extends Doc
 				String description = line.getDescription();
 				if (description == null)
 					description = "";
+				
 				//	Cost Detail From
+				int Ref_CostDetail_ID = 0;
+				if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+				{
+					MCostDetail cd = MCostDetail.getMovement(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.getReversalLine_ID(), 0, true, getTrxName());
+					if (cd != null)
+						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+				}
 				if (!MCostDetail.createMovement(as, dr.getAD_Org_ID(), 	//	locator org
 					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 					line.get_ID(), 0,
 					costs.negate(), line.getQty().negate(), true,
-					description + "(|->)", getTrxName()))
+					description + "(|->)", line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 				{
 					p_Error = "Failed to create cost detail record";
 					return null;
 				}
+				
 				//	Cost Detail To
+				Ref_CostDetail_ID = 0;
+				if (line.getReversalLine_ID() > 0 && line.get_ID() > line.getReversalLine_ID())
+				{
+					MCostDetail cd = MCostDetail.getMovement(as, line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.getReversalLine_ID(), 0, false, getTrxName());
+					if (cd != null)
+						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+				}
 				if (!MCostDetail.createMovement(as, cr.getAD_Org_ID(),	//	locator org
 					line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
 					line.get_ID(), 0,
 					costs, line.getQty(), false,
-					description + "(|<-)", getTrxName()))
+					description + "(|<-)", line.getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 				{
 					p_Error = "Failed to create cost detail record";
 					return null;
@@ -260,7 +281,11 @@ public class Doc_Movement extends Doc
 		facts.add(fact);
 		return facts;
 	}   //  createFact
-
+	
+	/**
+	 * @param line
+	 * @return true if line is for reversal
+	 */
 	private boolean isReversal(DocLine line) {
 		return m_Reversal_ID !=0 && line.getReversalLine_ID() != 0;
 	}

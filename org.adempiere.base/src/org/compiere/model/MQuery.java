@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.DefaultEvaluatee;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -41,28 +42,28 @@ import org.compiere.util.ValueNamePair;
 
 /**
  *	Query Descriptor.
- * 	Maintains restrictions (WHERE clause)
+ * 	Maintains restrictions (WHERE clause).
  *
  * 	@author 	Jorg Janke
  * 	@version 	$Id: MQuery.java,v 1.4 2006/07/30 00:58:04 jjanke Exp $
  * 
- * @author Teo Sarca
+ *  @author Teo Sarca
  * 		<li>BF [ 2860022 ] MQuery.get() is generating restrictions for non-existent column
  * 			https://sourceforge.net/p/adempiere/bugs/2099/
  */
 public class MQuery implements Serializable, Cloneable
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -8671209250739719461L;
 
 	/**
-	 *	Get Query from Parameter
-	 *	@param ctx context (to determine language)
-	 *  @param AD_PInstance_ID instance
+	 *	Create new Query for report
+	 *	@param ctx context
+	 *  @param AD_PInstance_ID process instance for report
 	 *  @param TableName table name
-	 *  @return where clause
+	 *  @return MQuery
 	 */
 	static public MQuery get (Properties ctx, int AD_PInstance_ID, String TableName)
 	{
@@ -176,6 +177,12 @@ public class MQuery implements Serializable, Cloneable
 				if (!Util.isEmpty(P_Query) || (table != null && table.getColumn(ParameterName) == null))
 				{
 					query = reportQuery.getReportProcessQuery();
+				}
+
+				if (table != null && table.getColumn(ParameterName) != null) {
+					MColumn column = table.getColumn(ParameterName);
+					if (column != null && !Util.isEmpty(column.getColumnSQL()))
+						ParameterName = column.getColumnSQL();
 				}
 
 				//-------------------------------------------------------------
@@ -312,6 +319,13 @@ public class MQuery implements Serializable, Cloneable
 		return reportQuery;
 	}	//	get
 	
+	/**
+	 * Parse expression with variable
+	 * @param evaluatee Resolver for variables in expression
+	 * @param expression expression to parse
+	 * @param ignoreUnparseable if true and there are variables that can't be resolved, return empty string  
+	 * @return parsed expression
+	 */
 	private static String parseVariable(Evaluatee evaluatee, String expression, boolean ignoreUnparseable) {
 		if (expression == null || expression.length() == 0)
 			return "";
@@ -364,10 +378,10 @@ public class MQuery implements Serializable, Cloneable
 	}
 	
 	/**
-	 * 	Get Zoom Column Name.
-	 * 	Converts Synonyms like SalesRep_ID to AD_User_ID
+	 * 	Get Zoom Column Name.<br/>
+	 * 	Convert well known synonyms like SalesRep_ID to AD_User_ID.
 	 *	@param columnName column name
-	 *	@return column name
+	 *	@return zoom column name
 	 */
 	public static String getZoomColumnName (String columnName)
 	{
@@ -398,8 +412,7 @@ public class MQuery implements Serializable, Cloneable
 	}	//	getZoomColumnName
 	
 	/**
-	 * 	Derive Zoom Table Name from column name.
-	 * 	(e.g. drop _ID)
+	 * 	Derive Zoom Table Name from column name (drop _ID or _UU).
 	 *	@param columnName  column name
 	 *	@return table name
 	 */
@@ -409,16 +422,18 @@ public class MQuery implements Serializable, Cloneable
 		int index = tableName.lastIndexOf("_ID");
 		if (index != -1)
 			return tableName.substring(0, index);
+		index = tableName.lastIndexOf("_UU");
+		if (index != -1)
+			return tableName.substring(0, index);
 		return tableName;
 	}	//	getZoomTableName
-
 	
-	/*************************************************************************
-	 * 	Create simple Equal Query.
-	 *  Creates columnName=value or columnName='value'
+	/**
+	 * 	Create simple Equal Query.<br/>
+	 *  Create restriction of columnName=value or columnName='value'
 	 * 	@param columnName columnName
 	 * 	@param value value
-	 * 	@return quary
+	 * 	@return query
 	 */
 	public static MQuery getEqualQuery (String columnName, Object value)
 	{
@@ -430,7 +445,7 @@ public class MQuery implements Serializable, Cloneable
 
 	/**
 	 * 	Create simple Equal Query.
-	 *  Creates columnName=value
+	 *  Create restriction of columnName=value.
 	 * 	@param columnName columnName
 	 * 	@param value value
 	 * 	@return query
@@ -448,7 +463,7 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Create No Record query.
 	 * 	@param tableName table name
-	 * 	@param newRecord new Record Indicator (2=3) 
+	 * 	@param newRecord new Record Indicator. if true, add restriction of "2=3", otherwise add restriction of "1-2" 
 	 * 	@return query
 	 */
 	public static MQuery getNoRecordQuery (String tableName, boolean newRecord)
@@ -464,9 +479,8 @@ public class MQuery implements Serializable, Cloneable
 	
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MQuery.class);
-	
-	
-	/**************************************************************************
+		
+	/**
 	 *	Constructor w/o table name
 	 */
 	public MQuery ()
@@ -483,8 +497,8 @@ public class MQuery implements Serializable, Cloneable
 	}	//	MQuery
 
 	/**
-	 * 	Constructor get TableNAme from Table
-	 * 	@param AD_Table_ID Table_ID
+	 * 	Constructor get TableName from table id
+	 * 	@param AD_Table_ID
 	 */
 	public MQuery (int AD_Table_ID)
 	{	//	Use Client Context as r/o
@@ -514,16 +528,19 @@ public class MQuery implements Serializable, Cloneable
 
 	private MQuery m_reportProcessQuery;
 
-
+	/**
+	 * @return zoom AD_Window_ID
+	 */
 	public int getZoomWindowID() {
 		return m_zoomWindow_ID;
 	}
 
-
+	/**
+	 * @param m_zoomWindow_ID AD_Window_ID for zoom
+	 */
 	public void setZoomWindowID(int m_zoomWindow_ID) {
 		this.m_zoomWindow_ID = m_zoomWindow_ID;
 	}
-
 
 	/**
 	 * 	Get Record Count
@@ -542,8 +559,7 @@ public class MQuery implements Serializable, Cloneable
 	{
 		m_recordCount = count;
 	}	//	setRecordCount
-	
-	
+		
 	/** Equal 			*/
 	public static final String	EQUAL = "=";
 	public static final String	MSG_EQUAL = "OPERATOR_EQUAL";
@@ -584,7 +600,7 @@ public class MQuery implements Serializable, Cloneable
 	public static final String 	NULL = " IS NULL ";
 	public static final String 	MSG_NULL = "OPERATOR_NULL";
 
-	/* NOTE: Value is the SQL operator, and Name is the message that appears in Find window and reports */
+	/** NOTE: Value is the SQL operator, and Name is the message that appears in find window and reports */
 	/**	All the Operators			*/
 	public static final ValueNamePair[]	OPERATORS = new ValueNamePair[] {
 		new ValueNamePair (EQUAL,			MSG_EQUAL),		//	0 - EQUAL_INDEX
@@ -652,15 +668,15 @@ public class MQuery implements Serializable, Cloneable
 		new ValueNamePair (NOT_NULL,		MSG_NOT_NULL)
 	};
 
-	/*************************************************************************
+	/**
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0, All%
+	 * 	@param Code query value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
 	 *  @param andCondition true=and, false=or
-	 *  @param depth ( = no open brackets )
+	 *  @param depth number of parenthesis
 	 */
 	public void addRestriction (String ColumnName, String Operator,
 		Object Code, String InfoName, String InfoDisplay, boolean andCondition, int depth)
@@ -670,16 +686,16 @@ public class MQuery implements Serializable, Cloneable
 		m_list.add(r);
 	}	//	addRestriction
 	
-	/*************************************************************************
+	/**
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0, All%
+	 * 	@param Code query value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
 	 *  @param andCondition true=and, false=or
-	 *  @param notCondition true=not, false=empty
-	 *  @param depth ( = no open brackets )
+	 *  @param notCondition true=not
+	 *  @param depth number of parenthesis
 	 */
 	public void addRestriction (String ColumnName, String Operator,
 		Object Code, String InfoName, String InfoDisplay, boolean andCondition, boolean notCondition, int depth)
@@ -692,14 +708,14 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Range Restriction (BETWEEN)
 	 * 	@param ColumnName ColumnName
-	 * 	@param Code Code, e.g 0, All%
-	 * 	@param Code_to Code, e.g 0, All%
+	 * 	@param Code from value, e.g 0, All%
+	 * 	@param Code_to to value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
-	 * 	@param InfoDisplay_to Display of Code (Lookup)
+	 * 	@param InfoDisplay_to Display of Code_to (Lookup)
 	 *  @param andCondition true=and, false=or
-	 *  @param notCondition true=not, false=empty
-	 *  @param depth ( = no open brackets )
+	 *  @param notCondition true=not
+	 *  @param depth number of parenthesis
 	 */
 	public void addRangeRestriction (String ColumnName,
 		Object Code, Object Code_to,
@@ -710,15 +726,15 @@ public class MQuery implements Serializable, Cloneable
 		m_list.add(r);
 	}
 	
-	/*************************************************************************
+	/**
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0, All%
+	 * 	@param Code query value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
 	 * 	@param andOrCondition AND/OR/AND NOT/OR NOT - concatenation of parenthesis
-	 *  @param depth ( = no open brackets )
+	 *  @param depth number of parenthesis
 	 */
 	public void addRestriction (String ColumnName, String Operator,
 		Object Code, String InfoName, String InfoDisplay, String andOrCondition, int depth)
@@ -728,11 +744,11 @@ public class MQuery implements Serializable, Cloneable
 		m_list.add(r);
 	}	//	addRestriction
 	
-	/*************************************************************************
+	/**
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0, All%
+	 * 	@param Code query value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
 	 */
@@ -748,7 +764,7 @@ public class MQuery implements Serializable, Cloneable
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0, All%
+	 * 	@param Code query value, e.g 0, All%
 	 */
 	public void addRestriction (String ColumnName, String Operator,
 		Object Code)
@@ -762,7 +778,7 @@ public class MQuery implements Serializable, Cloneable
 	 * 	Add Restriction
 	 * 	@param ColumnName ColumnName
 	 * 	@param Operator Operator, e.g. = != ..
-	 * 	@param Code Code, e.g 0
+	 * 	@param Code query value, e.g 0
 	 */
 	public void addRestriction (String ColumnName, String Operator,
 		int Code)
@@ -775,13 +791,13 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Range Restriction (BETWEEN)
 	 * 	@param ColumnName ColumnName
-	 * 	@param Code Code, e.g 0, All%
-	 * 	@param Code_to Code, e.g 0, All%
+	 * 	@param Code from value, e.g 0, All%
+	 * 	@param Code_to to value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
-	 * 	@param InfoDisplay_to Display of Code (Lookup)
+	 * 	@param InfoDisplay_to Display of Code_to (Lookup)
 	 *  @param andCondition true=and, false=or
-	 *  @param depth ( = no open brackets )
+	 *  @param depth number of parenthesis
 	 */
 	public void addRangeRestriction (String ColumnName,
 		Object Code, Object Code_to,
@@ -795,13 +811,13 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Range Restriction (BETWEEN)
 	 * 	@param ColumnName ColumnName
-	 * 	@param Code Code, e.g 0, All%
-	 * 	@param Code_to Code, e.g 0, All%
+	 * 	@param Code from value, e.g 0, All%
+	 * 	@param Code_to to value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
-	 * 	@param InfoDisplay_to Display of Code (Lookup)
+	 * 	@param InfoDisplay_to Display of Code_to (Lookup)
 	 * 	@param andOrCondition AND/OR/AND NOT/OR NOT - concatenation of parenthesis
-	 *  @param depth ( = no open brackets )
+	 *  @param depth number of parenthesis
 	 */
 	public void addRangeRestriction (String ColumnName,
 		Object Code, Object Code_to,
@@ -815,11 +831,11 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Range Restriction (BETWEEN)
 	 * 	@param ColumnName ColumnName
-	 * 	@param Code Code, e.g 0, All%
-	 * 	@param Code_to Code, e.g 0, All%
+	 * 	@param Code from value, e.g 0, All%
+	 * 	@param Code_to to value, e.g 0, All%
 	 *  @param InfoName Display Name
 	 * 	@param InfoDisplay Display of Code (Lookup)
-	 * 	@param InfoDisplay_to Display of Code (Lookup)
+	 * 	@param InfoDisplay_to Display of Code_to (Lookup)
 	 */
 	public void addRangeRestriction (String ColumnName,
 		Object Code, Object Code_to,
@@ -833,8 +849,8 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Range Restriction (BETWEEN)
 	 * 	@param ColumnName ColumnName
-	 * 	@param Code Code, e.g 0, All%
-	 * 	@param Code_to Code, e.g 0, All%
+	 * 	@param Code from value, e.g 0, All%
+	 * 	@param Code_to to value, e.g 0, All%
 	 */
 	public void addRangeRestriction (String ColumnName,
 		Object Code, Object Code_to)
@@ -856,8 +872,8 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Restriction
 	 * 	@param whereClause SQL WHERE clause
-	 *  @param andCondition
-	 *  @param joinDepth
+	 *  @param andCondition true=and, false=or
+	 *  @param joinDepth number of parenthesis
 	 */
 	public void addRestriction (String whereClause, boolean andCondition, int joinDepth)
 	{
@@ -871,6 +887,9 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Restriction
 	 * 	@param whereClause SQL WHERE clause
+	 *  @param andCondition true=and, false=or
+	 *  @param notCondition true=not
+	 *  @param joinDepth number of parenthesis
 	 */
 	public void addRestriction (String whereClause, boolean andCondition, boolean notCondition, int joinDepth)
 	{
@@ -884,6 +903,10 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Restriction
 	 * 	@param whereClause SQL WHERE clause
+	 *  @param andCondition true=and, false=or
+	 *  @param notCondition true=not
+	 *  @param existsCondition true=exists
+	 *  @param joinDepth number of parenthesis
 	 */
 	public void addRestriction (String whereClause, boolean andCondition, boolean notCondition, boolean existsCondition, int joinDepth)
 	{
@@ -897,7 +920,7 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Add Restriction
 	 * 	@param whereClause SQL WHERE clause
-	 *  @param joinDepth
+	 *  @param joinDepth number of parenthesis
 	 *  @param andOrCondition
 	 */
 	public void addRestriction (String whereClause, int joinDepth, String andOrCondition)
@@ -922,6 +945,13 @@ public class MQuery implements Serializable, Cloneable
 		m_newRecord = whereClause.equals(NEWRECORD);
 	}	//	addRestriction
 
+	/**
+	 * Add restriction 
+	 * @param whereClause
+	 * @param Operator
+	 * @param InfoName
+	 * @param InfoDisplay
+	 */
 	public void addRestriction (String whereClause, String Operator, String InfoName, String InfoDisplay)
 	{
 		if (whereClause == null || whereClause.trim().length() == 0)
@@ -945,7 +975,7 @@ public class MQuery implements Serializable, Cloneable
 		return m_newRecord;
 	}	//	isNewRecord
 	
-	/*************************************************************************
+	/**
 	 * 	Create the resulting Query WHERE Clause
 	 * 	@return Where Clause
 	 */
@@ -1051,7 +1081,7 @@ public class MQuery implements Serializable, Cloneable
 	
 	/**
 	 * 	Create Query WHERE Clause.
-	 *  Not fully qualified
+	 *  Not fully qualified.
 	 * 	@param index restriction index
 	 * 	@return Where Clause or "" if not valid
 	 */
@@ -1101,12 +1131,11 @@ public class MQuery implements Serializable, Cloneable
 	{
 		m_TableName = TableName;
 	}	//	setTableName
-
 	
-	/*************************************************************************
+	/**
 	 * 	Get ColumnName of index
 	 * 	@param index index
-	 * 	@return ColumnName
+	 * 	@return ColumnName or null
 	 */
 	public String getColumnName (int index)
 	{
@@ -1132,7 +1161,7 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Get Operator of index
 	 * 	@param index index
-	 * 	@return Operator
+	 * 	@return Operator or null
 	 */
 	public String getOperator (int index)
 	{
@@ -1145,7 +1174,7 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Get Operator of index
 	 * 	@param index index
-	 * 	@return Operator
+	 * 	@return Operator or null
 	 */
 	public Object getCode (int index)
 	{
@@ -1158,7 +1187,7 @@ public class MQuery implements Serializable, Cloneable
 	/**
 	 * 	Get Operator of index
 	 * 	@param index index
-	 * 	@return Operator
+	 * 	@return Operator or null
 	 */
 	public Object getCode_to (int index)
 	{
@@ -1169,9 +1198,9 @@ public class MQuery implements Serializable, Cloneable
 	}	//	getCode
 	
 	/**
-	 * 	Get Restriction Display of index
+	 * 	Get display text of index
 	 * 	@param index index
-	 * 	@return Restriction Display
+	 * 	@return Display Text
 	 */
 	public String getInfoDisplay (int index)
 	{
@@ -1182,9 +1211,9 @@ public class MQuery implements Serializable, Cloneable
 	}	//	getOperator
 
 	/**
-	 * 	Get TO Restriction Display of index
-	 * 	@param index index
-	 * 	@return Restriction Display
+	 * 	Get display text of to restriction
+	 * 	@param index index of restriction
+	 * 	@return Display Text
 	 */
 	public String getInfoDisplay_to (int index)
 	{
@@ -1237,6 +1266,7 @@ public class MQuery implements Serializable, Cloneable
 	 * 	String representation
 	 * 	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		if (isActive())
@@ -1282,7 +1312,6 @@ public class MQuery implements Serializable, Cloneable
 	}
 
 	/**
-	 * 
 	 * @param tableName
 	 */
 	public void setZoomTableName(String tableName) {
@@ -1290,7 +1319,6 @@ public class MQuery implements Serializable, Cloneable
 	}
 	
 	/**
-	 * 
 	 * @return zoom table name
 	 */
 	public String getZoomTableName() {
@@ -1298,7 +1326,6 @@ public class MQuery implements Serializable, Cloneable
 	}
 
 	/**
-	 * 
 	 * @param column
 	 */
 	public void setZoomColumnName(String column) {
@@ -1306,7 +1333,6 @@ public class MQuery implements Serializable, Cloneable
 	}
 	
 	/**
-	 * 
 	 * @return zoom column name
 	 */
 	public String getZoomColumnName() {
@@ -1314,7 +1340,6 @@ public class MQuery implements Serializable, Cloneable
 	}
 
 	/**
-	 * 
 	 * @param value
 	 */
 	public void setZoomValue(Object value) {
@@ -1322,31 +1347,35 @@ public class MQuery implements Serializable, Cloneable
 	}
 	
 	/**
-	 * 
 	 * @return zoom value, usually an integer
 	 */
 	public Object getZoomValue() {
 		return m_zoomValue;
 	}
 	
+	/**
+	 * @param query
+	 */
 	public void setReportProcessQuery(MQuery query) {
 		m_reportProcessQuery = query;
 	}
 	
+	/**
+	 * @return query
+	 */
 	public MQuery getReportProcessQuery() {
 		return m_reportProcessQuery;
 	}
 	
 	/**
-	 * 
 	 * @param ColumnName
 	 * @param Operator
-	 * @param Code
+	 * @param Code query value
 	 * @param InfoName
-	 * @param InfoDisplay
-	 * @param andCondition
-	 * @param depth
-	 * @return
+	 * @param InfoDisplay display text of code
+	 * @param andCondition true=and, false=or
+	 * @param depth number of parenthesis
+	 * @return SQL
 	 */
 	public String getRestrictionSQL (String ColumnName, String Operator,
 			Object Code, String InfoName, String InfoDisplay, boolean andCondition, int depth)
@@ -1358,14 +1387,14 @@ public class MQuery implements Serializable, Cloneable
 
 	/**
 	 * @param ColumnName
-	 * @param Code
-	 * @param Code_To
+	 * @param Code from value
+	 * @param Code_To to value
 	 * @param InfoName
-	 * @param InfoDisplay
-	 * @param InfoDisplay_To
-	 * @param andCondition
-	 * @param depth
-	 * @return
+	 * @param InfoDisplay display text of from value
+	 * @param InfoDisplay_To display text of to value
+	 * @param andCondition true=and, false=or
+	 * @param depth number of parenthesis
+	 * @return SQL
 	 */
 	public String getRestrictionSQL (String ColumnName, 
 			Object Code, Object Code_To, String InfoName, String InfoDisplay, String InfoDisplay_To, boolean andCondition, int depth)
@@ -1389,13 +1418,13 @@ public class MQuery implements Serializable, Cloneable
 	}
 }	//	MQuery
 
-/*****************************************************************************
+/**
  *	Query Restriction
  */
 class Restriction  implements Serializable
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = -4521978087587321243L;
 
@@ -1403,7 +1432,7 @@ class Restriction  implements Serializable
 	 * 	Restriction
 	 * 	@param columnName ColumnName
 	 * 	@param operator Operator, e.g. = != ..
-	 * 	@param code Code, e.g 0, All%
+	 * 	@param code query value, e.g 0, All%
 	 *  @param infoName Display Name
 	 * 	@param infoDisplay Display of Code (Lookup)
 	 * 	@param andCondition true->AND false->OR
@@ -1421,7 +1450,7 @@ class Restriction  implements Serializable
 	 * 	Restriction
 	 * 	@param columnName ColumnName
 	 * 	@param operator Operator, e.g. = != ..
-	 * 	@param code Code, e.g 0, All%
+	 * 	@param code query value, e.g 0, All%
 	 *  @param infoName Display Name
 	 * 	@param infoDisplay Display of Code (Lookup)
 	 * 	@param andOrCondition AND/OR/AND NOT/OR NOT - concatenation of parenthesis
@@ -1435,7 +1464,6 @@ class Restriction  implements Serializable
 			InfoName = infoName;
 		else
 			InfoName = ColumnName;
-
 		
 		this.andOrCondition = andOrCondition;
 		this.joinDepth = depth < 0 ? 0 : depth;
@@ -1488,11 +1516,11 @@ class Restriction  implements Serializable
 	/**
 	 * 	Range Restriction (BETWEEN)
 	 * 	@param columnName ColumnName
-	 * 	@param code Code, e.g 0, All%
-	 * 	@param code_to Code, e.g 0, All%
+	 * 	@param code from value, e.g 0, All%
+	 * 	@param code_to to value, e.g 0, All%
 	 *  @param infoName Display Name
 	 * 	@param infoDisplay Display of Code (Lookup)
-	 * 	@param infoDisplay_to Display of Code (Lookup)
+	 * 	@param infoDisplay_to Display of Code_To (Lookup)
 	 * 	@param andCondition true->AND false->OR
 	 *  @param depth number of parenthesis
 	 */
@@ -1507,11 +1535,11 @@ class Restriction  implements Serializable
 	/**
 	 * 	Range Restriction (BETWEEN)
 	 * 	@param columnName ColumnName
-	 * 	@param code Code, e.g 0, All%
-	 * 	@param code_to Code, e.g 0, All%
+	 * 	@param code from value, e.g 0, All%
+	 * 	@param code_to to value, e.g 0, All%
 	 *  @param infoName Display Name
 	 * 	@param infoDisplay Display of Code (Lookup)
-	 * 	@param infoDisplay_to Display of Code (Lookup)
+	 * 	@param infoDisplay_to Display of Code_To (Lookup)
 	 * 	@param andOrCondition AND/OR/AND NOT/OR NOT - concatenation of parenthesis
 	 *  @param depth number of parenthesis
 	 */
@@ -1540,11 +1568,11 @@ class Restriction  implements Serializable
 	/**
 	 * 	Range Restriction (BETWEEN)
 	 * 	@param columnName ColumnName
-	 * 	@param code Code, e.g 0, All%
-	 * 	@param code_to Code, e.g 0, All%
+	 * 	@param code from value, e.g 0, All%
+	 * 	@param code_to to value, e.g 0, All%
 	 *  @param infoName Display Name
 	 * 	@param infoDisplay Display of Code (Lookup)
-	 * 	@param infoDisplay_to Display of Code (Lookup)
+	 * 	@param infoDisplay_to Display of Code_To (Lookup)
 	 */
 	Restriction (String columnName,
 		Object code, Object code_to,
@@ -1597,6 +1625,10 @@ class Restriction  implements Serializable
 	/**
 	 * 	Create Restriction with direct WHERE clause
 	 * 	@param whereClause SQL WHERE Clause
+	 *  @param andCondition true=and, false=or
+	 *  @param notCondition true=not
+	 *  @param existsCondition true=exists
+	 *  @param depth number of parenthesis
 	 */
 	Restriction (String whereClause, boolean andCondition, boolean notCondition, boolean existsCondition, int depth)
 	{
@@ -1611,7 +1643,7 @@ class Restriction  implements Serializable
 	 * 
 	 * @param ColumnName
 	 * @param ExistsClause
-	 * @param Code
+	 * @param Code query value
 	 */
 	Restriction (String ExistsClause, Object Code)
 	{
@@ -1647,26 +1679,25 @@ class Restriction  implements Serializable
 	protected boolean	existsCondition = false;
 
 	/**
-	 * 	Return SQL construct for this restriction
+	 * 	Get SQL build from this restriction
 	 *  @param tableName optional table name
-	 * 	@return SQL WHERE construct
+	 * 	@return SQL WHERE clause
 	 */
 	public String getSQL (String tableName)
 	{
 		if (DirectWhereClause != null)
 			return DirectWhereClause;
 		
-
 		if(ExistsClause != null){
 			StringBuilder sb = new StringBuilder();
 			sb.append(ExistsClause);
 
 			if (Code instanceof String)
-				sb = new StringBuilder(sb.toString().replaceAll("\\?", DB.TO_STRING(Code.toString())));
+				sb = new StringBuilder(sb.toString().replace("?", DB.TO_STRING(Code.toString())));
 			else if (Code instanceof Timestamp)
-				sb = new StringBuilder(sb.toString().replaceAll("\\?", DB.TO_DATE((Timestamp)Code, false)));
+				sb = new StringBuilder(sb.toString().replace("?", DB.TO_DATE((Timestamp)Code, false)));
 			else
-				sb = new StringBuilder(sb.toString().replaceAll("\\?", Code.toString()));
+				sb = new StringBuilder(sb.toString().replace("?", Code.toString()));
 
 			return sb.toString();
 		}
@@ -1751,6 +1782,7 @@ class Restriction  implements Serializable
 	 * 	Get String Representation
 	 * 	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		return getSQL(null);
@@ -1797,6 +1829,9 @@ class Restriction  implements Serializable
 class QueryEvaluatee implements Evaluatee {
 	private Map<String, String> parameterMap;
 
+	/**
+	 * @param parameterMap
+	 */
 	public QueryEvaluatee(Map<String, String> parameterMap) {
 		this.parameterMap = parameterMap;
 	}
@@ -1808,53 +1843,35 @@ class QueryEvaluatee implements Evaluatee {
 	 */
 	public String get_ValueAsString (Properties ctx, String variableName)
 	{
-		//ref column
-		String foreignColumn = "";
-		int f = variableName.indexOf('.');
-		if (f > 0) {
-			foreignColumn = variableName.substring(f+1, variableName.length());
-			variableName = variableName.substring(0, f);
-		}
-
-		String value = null;
-		if (variableName.startsWith("#") || variableName.startsWith("$")) {
-			value = Env.getContext(ctx, variableName);
-		} else {
-			value = parameterMap.get(variableName);
-		}
-		if (!Util.isEmpty(value) && !Util.isEmpty(foreignColumn) && variableName.endsWith("_ID")) {
-			String refValue = "";
-			int id = 0;
-			try {
-				id = Integer.parseInt(value);
-			} catch (Exception e){}
-			if (id > 0) {
-				if (variableName.startsWith("#") || variableName.startsWith("$")) {
-					variableName = variableName.substring(1);
-				} else if (variableName.indexOf("|") > 0) {
-					variableName = variableName.substring(variableName.lastIndexOf("|")+1);
-				}
-				String foreignTable = null;
-				if (foreignColumn.indexOf(".") > 0) {
-					foreignTable = foreignColumn.substring(0, foreignColumn.indexOf("."));
-				} else {
-					foreignTable = variableName.substring(0, variableName.length()-3);
-				}
-				MTable t = MTable.get(Env.getCtx(), foreignTable);
-				if (t != null) {
-					refValue = DB.getSQLValueString(null,
-							"SELECT " + foreignColumn + " FROM " + foreignTable + " WHERE "
-							+ foreignTable + "_ID = ?", id);
-				}
-			}
-			return refValue;
-		}
-		return value;
-	}	//	get_ValueAsString
+		DefaultEvaluatee evaluatee = new DefaultEvaluatee(new ParameterDataProvider());
+		return evaluatee.get_ValueAsString(ctx, variableName);
+	}
 
 	@Override
 	public String get_ValueAsString(String variableName) {
 		return get_ValueAsString(Env.getCtx(), variableName);
 	}
 
+	private class ParameterDataProvider implements DefaultEvaluatee.DataProvider {
+
+		@Override
+		public Object getValue(String columnName) {
+			return parameterMap.get(columnName);
+		}
+
+		@Override
+		public Object getProperty(String propertyName) {
+			return null;
+		}
+
+		@Override
+		public MColumn getColumn(String columnName) {
+			return null;
+		}
+
+		@Override
+		public String getTrxName() {
+			return null;
+		}		
+	}
 }

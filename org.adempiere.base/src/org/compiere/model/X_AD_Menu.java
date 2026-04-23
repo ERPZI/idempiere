@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Menu
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Menu")
-public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent 
+public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Menu (Properties ctx, int AD_Menu_ID, String trxName)
@@ -69,6 +69,42 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Menu (Properties ctx, String AD_Menu_UU, String trxName)
+    {
+      super (ctx, AD_Menu_UU, trxName);
+      /** if (AD_Menu_UU == null)
+        {
+			setAD_Menu_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsReadOnly (false);
+// N
+			setIsSOTrx (true);
+// Y
+			setIsSummary (false);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Menu (Properties ctx, String AD_Menu_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Menu_UU, trxName, virtualColumns);
+      /** if (AD_Menu_UU == null)
+        {
+			setAD_Menu_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsReadOnly (false);
+// N
+			setIsSOTrx (true);
+// Y
+			setIsSummary (false);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Menu (Properties ctx, ResultSet rs, String trxName)
     {
@@ -76,7 +112,7 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -96,43 +132,6 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
         .append(get_ID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
-
-	/** Action AD_Reference_ID=104 */
-	public static final int ACTION_AD_Reference_ID=104;
-	/** Workbench = B */
-	public static final String ACTION_Workbench = "B";
-	/** Detail = D */
-	public static final String ACTION_Detail = "D";
-	/** WorkFlow = F */
-	public static final String ACTION_WorkFlow = "F";
-	/** Info = I */
-	public static final String ACTION_Info = "I";
-	/** Process = P */
-	public static final String ACTION_Process = "P";
-	/** Report = R */
-	public static final String ACTION_Report = "R";
-	/** Task = T */
-	public static final String ACTION_Task = "T";
-	/** Window = W */
-	public static final String ACTION_Window = "W";
-	/** Form = X */
-	public static final String ACTION_Form = "X";
-	/** Set Action.
-		@param Action Indicates the Action to be performed
-	*/
-	public void setAction (String Action)
-	{
-
-		set_Value (COLUMNNAME_Action, Action);
-	}
-
-	/** Get Action.
-		@return Indicates the Action to be performed
-	  */
-	public String getAction()
-	{
-		return (String)get_Value(COLUMNNAME_Action);
-	}
 
 	public org.compiere.model.I_AD_Form getAD_Form() throws RuntimeException
 	{
@@ -339,6 +338,43 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Action AD_Reference_ID=104 */
+	public static final int ACTION_AD_Reference_ID=104;
+	/** Workbench = B */
+	public static final String ACTION_Workbench = "B";
+	/** Detail = D */
+	public static final String ACTION_Detail = "D";
+	/** WorkFlow = F */
+	public static final String ACTION_WorkFlow = "F";
+	/** Info = I */
+	public static final String ACTION_Info = "I";
+	/** Process = P */
+	public static final String ACTION_Process = "P";
+	/** Report = R */
+	public static final String ACTION_Report = "R";
+	/** Task = T */
+	public static final String ACTION_Task = "T";
+	/** Window = W */
+	public static final String ACTION_Window = "W";
+	/** Form = X */
+	public static final String ACTION_Form = "X";
+	/** Set Action.
+		@param Action Indicates the Action to be performed
+	*/
+	public void setAction (String Action)
+	{
+
+		set_Value (COLUMNNAME_Action, Action);
+	}
+
+	/** Get Action.
+		@return Indicates the Action to be performed
+	  */
+	public String getAction()
+	{
+		return (String)get_Value(COLUMNNAME_Action);
+	}
+
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -388,10 +424,10 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 	public boolean isCentrallyMaintained()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCentrallyMaintained);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -411,10 +447,10 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 	public boolean isReadOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReadOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -434,10 +470,10 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -457,10 +493,10 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
 	public boolean isSummary()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSummary);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -485,7 +521,7 @@ public class X_AD_Menu extends PO implements I_AD_Menu, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

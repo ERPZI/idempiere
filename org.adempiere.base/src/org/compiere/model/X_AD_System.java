@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_System
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_System")
-public class X_AD_System extends PO implements I_AD_System, I_Persistent 
+public class X_AD_System extends PO implements I_AD_System, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_System (Properties ctx, int AD_System_ID, String trxName)
@@ -90,6 +90,60 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_System (Properties ctx, String AD_System_UU, String trxName)
+    {
+      super (ctx, AD_System_UU, trxName);
+      /** if (AD_System_UU == null)
+        {
+			setAD_System_ID (0);
+// 0
+			setInfo (null);
+			setIsAllowStatistics (false);
+			setIsAutoErrorReport (true);
+// Y
+			setIsFailOnBuildDiffer (false);
+// N
+			setIsFailOnMissingModelValidator (true);
+// Y
+			setName (null);
+			setPassword (null);
+			setReplicationType (null);
+// L
+			setSystemStatus (null);
+// E
+			setUserName (null);
+			setVersion (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_System (Properties ctx, String AD_System_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_System_UU, trxName, virtualColumns);
+      /** if (AD_System_UU == null)
+        {
+			setAD_System_ID (0);
+// 0
+			setInfo (null);
+			setIsAllowStatistics (false);
+			setIsAutoErrorReport (true);
+// Y
+			setIsFailOnBuildDiffer (false);
+// N
+			setIsFailOnMissingModelValidator (true);
+// Y
+			setName (null);
+			setPassword (null);
+			setReplicationType (null);
+// L
+			setSystemStatus (null);
+// E
+			setUserName (null);
+			setVersion (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_System (Properties ctx, ResultSet rs, String trxName)
     {
@@ -97,7 +151,7 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -303,10 +357,10 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isAllowStatistics()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllowStatistics);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -326,10 +380,10 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isAutoErrorReport()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAutoErrorReport);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -348,10 +402,10 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isFailOnBuildDiffer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFailOnBuildDiffer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -370,10 +424,10 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isFailOnMissingModelValidator()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFailOnMissingModelValidator);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -393,44 +447,13 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isJustMigrated()
 	{
 		Object oo = get_Value(COLUMNNAME_IsJustMigrated);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Last Build Info.
-		@param LastBuildInfo Last Build Info
-	*/
-	public void setLastBuildInfo (String LastBuildInfo)
-	{
-		set_Value (COLUMNNAME_LastBuildInfo, LastBuildInfo);
-	}
-
-	/** Get Last Build Info.
-		@return Last Build Info	  */
-	public String getLastBuildInfo()
-	{
-		return (String)get_Value(COLUMNNAME_LastBuildInfo);
-	}
-
-	/** Set Last Migration Script Applied.
-		@param LastMigrationScriptApplied Register of the filename for the last migration script applied on this database
-	*/
-	public void setLastMigrationScriptApplied (String LastMigrationScriptApplied)
-	{
-		set_Value (COLUMNNAME_LastMigrationScriptApplied, LastMigrationScriptApplied);
-	}
-
-	/** Get Last Migration Script Applied.
-		@return Register of the filename for the last migration script applied on this database
-	  */
-	public String getLastMigrationScriptApplied()
-	{
-		return (String)get_Value(COLUMNNAME_LastMigrationScriptApplied);
 	}
 
 	/** Set LDAP Domain.
@@ -465,6 +488,37 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 		return (String)get_Value(COLUMNNAME_LDAPHost);
 	}
 
+	/** Set Last Build Info.
+		@param LastBuildInfo Last Build Info
+	*/
+	public void setLastBuildInfo (String LastBuildInfo)
+	{
+		set_Value (COLUMNNAME_LastBuildInfo, LastBuildInfo);
+	}
+
+	/** Get Last Build Info.
+		@return Last Build Info	  */
+	public String getLastBuildInfo()
+	{
+		return (String)get_Value(COLUMNNAME_LastBuildInfo);
+	}
+
+	/** Set Last Migration Script Applied.
+		@param LastMigrationScriptApplied Register of the filename for the last migration script applied on this database
+	*/
+	public void setLastMigrationScriptApplied (String LastMigrationScriptApplied)
+	{
+		set_Value (COLUMNNAME_LastMigrationScriptApplied, LastMigrationScriptApplied);
+	}
+
+	/** Get Last Migration Script Applied.
+		@return Register of the filename for the last migration script applied on this database
+	  */
+	public String getLastMigrationScriptApplied()
+	{
+		return (String)get_Value(COLUMNNAME_LastMigrationScriptApplied);
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -484,7 +538,7 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -552,10 +606,10 @@ public class X_AD_System extends PO implements I_AD_System, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

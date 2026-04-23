@@ -22,19 +22,19 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.util.Env;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for M_ProductionLineMA
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_ProductionLineMA")
-public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_Persistent 
+public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_ProductionLineMA (Properties ctx, int M_ProductionLineMA_ID, String trxName)
@@ -43,8 +43,8 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
       /** if (M_ProductionLineMA_ID == 0)
         {
 			setM_AttributeSetInstance_ID (0);
-			setMovementQty (Env.ZERO);
 			setM_ProductionLine_ID (0);
+			setMovementQty (Env.ZERO);
         } */
     }
 
@@ -55,8 +55,32 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
       /** if (M_ProductionLineMA_ID == 0)
         {
 			setM_AttributeSetInstance_ID (0);
-			setMovementQty (Env.ZERO);
 			setM_ProductionLine_ID (0);
+			setMovementQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ProductionLineMA (Properties ctx, String M_ProductionLineMA_UU, String trxName)
+    {
+      super (ctx, M_ProductionLineMA_UU, trxName);
+      /** if (M_ProductionLineMA_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setM_ProductionLine_ID (0);
+			setMovementQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_ProductionLineMA (Properties ctx, String M_ProductionLineMA_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_ProductionLineMA_UU, trxName, virtualColumns);
+      /** if (M_ProductionLineMA_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setM_ProductionLine_ID (0);
+			setMovementQty (Env.ZERO);
         } */
     }
 
@@ -67,7 +91,7 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -84,7 +108,7 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_M_ProductionLineMA[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -132,23 +156,19 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
 		return ii.intValue();
 	}
 
-	/** Set Movement Quantity.
-		@param MovementQty Quantity of a product moved.
+	/** Set M_ProductionLineMA_UU.
+		@param M_ProductionLineMA_UU M_ProductionLineMA_UU
 	*/
-	public void setMovementQty (BigDecimal MovementQty)
+	public void setM_ProductionLineMA_UU (String M_ProductionLineMA_UU)
 	{
-		set_Value (COLUMNNAME_MovementQty, MovementQty);
+		set_Value (COLUMNNAME_M_ProductionLineMA_UU, M_ProductionLineMA_UU);
 	}
 
-	/** Get Movement Quantity.
-		@return Quantity of a product moved.
-	  */
-	public BigDecimal getMovementQty()
+	/** Get M_ProductionLineMA_UU.
+		@return M_ProductionLineMA_UU	  */
+	public String getM_ProductionLineMA_UU()
 	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
+		return (String)get_Value(COLUMNNAME_M_ProductionLineMA_UU);
 	}
 
 	public org.compiere.model.I_M_ProductionLine getM_ProductionLine() throws RuntimeException
@@ -179,26 +199,30 @@ public class X_M_ProductionLineMA extends PO implements I_M_ProductionLineMA, I_
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getM_ProductionLine_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getM_ProductionLine_ID()));
     }
 
-	/** Set M_ProductionLineMA_UU.
-		@param M_ProductionLineMA_UU M_ProductionLineMA_UU
+	/** Set Movement Quantity.
+		@param MovementQty Quantity of a product moved.
 	*/
-	public void setM_ProductionLineMA_UU (String M_ProductionLineMA_UU)
+	public void setMovementQty (BigDecimal MovementQty)
 	{
-		set_Value (COLUMNNAME_M_ProductionLineMA_UU, M_ProductionLineMA_UU);
+		set_Value (COLUMNNAME_MovementQty, MovementQty);
 	}
 
-	/** Get M_ProductionLineMA_UU.
-		@return M_ProductionLineMA_UU	  */
-	public String getM_ProductionLineMA_UU()
+	/** Get Movement Quantity.
+		@return Quantity of a product moved.
+	  */
+	public BigDecimal getMovementQty()
 	{
-		return (String)get_Value(COLUMNNAME_M_ProductionLineMA_UU);
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 }

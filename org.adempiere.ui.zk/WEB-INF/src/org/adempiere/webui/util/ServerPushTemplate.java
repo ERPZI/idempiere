@@ -22,8 +22,8 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 
 /**
- * Zk UI update must be done in either UI thread or using server push. This class help to implement
- * that base on spring's jdbctemplate pattern.
+ * Zk UI update must be done in UI (event listener) thread. This class help to implement
+ * that base on spring's jdbc template pattern.
  * @author hengsin
  *
  */
@@ -32,7 +32,6 @@ public class ServerPushTemplate {
 	private Desktop desktop;
 
 	/**
-	 *
 	 * @param desktop
 	 */
 	public ServerPushTemplate(Desktop desktop) {
@@ -40,8 +39,8 @@ public class ServerPushTemplate {
 	}
 
 	/**
-	 * Execute asynchronous task in UI thread. This is implemented
-	 * using Executions.schedule and will return immediately
+	 * Execute asynchronous task in UI (event listener) thread. This is implemented
+	 * using Executions.schedule and will return immediately.
 	 * @param callback
 	 */
 	public void executeAsync(final IServerPushCallback callback) {
@@ -67,10 +66,11 @@ public class ServerPushTemplate {
 	}
 
 	/**
-	 * Execute synchronous task in UI thread. This is implemented
+	 * Execute synchronous task in UI (event listener) thread. This is implemented
 	 * using Executions.activate/deactivate and will only return after the
-	 * invoked task have ended. For better scalability, if possible, you
-	 * should use executeAsync instead. 
+	 * invoked task have ended.
+	 * <p> 
+	 * For better scalability, if possible, you should use {@link #executeAsync(IServerPushCallback)} instead. 
 	 * @param callback
 	 */
 	public void execute(IServerPushCallback callback) {
@@ -99,7 +99,7 @@ public class ServerPushTemplate {
 	}
 	
 	/**
-	 *
+	 * Get desktop
 	 * @return desktop
 	 */
 	public Desktop getDesktop() {

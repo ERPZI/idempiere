@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Package_Imp_Detail
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 12
  */
 public interface I_AD_Package_Imp_Detail 
 {
@@ -40,19 +40,6 @@ public interface I_AD_Package_Imp_Detail
     BigDecimal accessLevel = BigDecimal.valueOf(6);
 
     /** Load Meta Data */
-
-    /** Column name Action */
-    public static final String COLUMNNAME_Action = "Action";
-
-	/** Set Action.
-	  * Indicates the Action to be performed
-	  */
-	public void setAction (String Action);
-
-	/** Get Action.
-	  * Indicates the Action to be performed
-	  */
-	public String getAction();
 
     /** Column name AD_Backup_ID */
     public static final String COLUMNNAME_AD_Backup_ID = "AD_Backup_ID";
@@ -128,6 +115,19 @@ public interface I_AD_Package_Imp_Detail
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
+    /** Column name Action */
+    public static final String COLUMNNAME_Action = "Action";
+
+	/** Set Action.
+	  * Indicates the Action to be performed
+	  */
+	public void setAction (String Action);
+
+	/** Get Action.
+	  * Indicates the Action to be performed
+	  */
+	public String getAction();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -191,6 +191,15 @@ public interface I_AD_Package_Imp_Detail
 	  * Direct internal record ID
 	  */
 	public int getRecord_ID();
+
+    /** Column name Record_UU */
+    public static final String COLUMNNAME_Record_UU = "Record_UU";
+
+	/** Set Record UUID	  */
+	public void setRecord_UU (String Record_UU);
+
+	/** Get Record UUID	  */
+	public String getRecord_UU();
 
     /** Column name Result */
     public static final String COLUMNNAME_Result = "Result";

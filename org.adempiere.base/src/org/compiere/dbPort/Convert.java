@@ -50,7 +50,7 @@ import org.compiere.util.Ini;
 import org.compiere.util.Util;
 
 /**
- *  Convert SQL to Target DB
+ *  Convert SQL from Oracle syntax to Target DB syntax
  *
  *  @author     Jorg Janke, Victor Perez
  *  @version    $Id: Convert.java,v 1.3 2006/07/30 00:55:04 jjanke Exp $
@@ -83,10 +83,12 @@ public abstract class Convert
 	/**	Logger	*/
 	private static final CLogger	log	= CLogger.getCLogger (Convert.class);
 	
+    private static File fileOr = null;
     private static FileOutputStream fosScriptOr = null;
-    private static Writer writerOr;
+    private static Writer writerOr = null;
+    private static File filePg = null;
     private static FileOutputStream fosScriptPg = null;
-    private static Writer writerPg;
+    private static Writer writerPg = null;
 
     /**
 	 *  Set Verbose
@@ -97,10 +99,10 @@ public abstract class Convert
 		m_verbose = verbose;
 	}   //  setVerbose
 
-	/**************************************************************************
-	 *  Execute SQL Statement (stops at first error).
-	 *  If an error occured hadError() returns true.
-	 *  You can get details via getConversionError() or getException()
+	/**
+	 *  Execute SQL Statements (stops at first error). <br/>
+	 *  If an error occur, hadError() returns true. <br/>
+	 *  You can get error details via getConversionError() or getException().
 	 *  @param sqlStatements
 	 *  @param conn connection
 	 *  @return true if success
@@ -194,20 +196,20 @@ public abstract class Convert
 	}   //  getException
 
 	/**
-	 *  Returns true if a conversion or execution error had occured.
-	 *  Get more details via getConversionError() or getException()
-	 *  @return true if error had occured
+	 *  Returns true if a conversion or execution error had occurred.
+	 *  Get more details via getConversionError() or getException().
+	 *  @return true if error had occurred
 	 */
 	public boolean hasError()
 	{
-		return (m_exception != null) | (m_conversionError != null);
+		return (m_exception != null) || (m_conversionError != null);
 	}   //  hasError
 
 	/**
-	 *  Convert SQL Statement (stops at first error).
-	 *  Statements are delimited by /
-	 *  If an error occured hadError() returns true.
-	 *  You can get details via getConversionError()
+	 *  Convert SQL Statements (stops at first error). <br/>
+	 *  Statements are delimited by /. <br/>
+	 *  If an error occurred, hadError() returns true.
+	 *  You can get details via getConversionError().
 	 *  @param sqlStatements
 	 *  @return converted statement as a string
 	 */
@@ -226,9 +228,9 @@ public abstract class Convert
 	}   //  convertAll
 
 	/**
-	 *  Convert SQL Statement (stops at first error).
-	 *  If an error occured hadError() returns true.
-	 *  You can get details via getConversionError()
+	 *  Convert SQL Statements (stops at first error).<br/>
+	 *  If an error occurred, hadError() returns true.
+	 *  You can get details via getConversionError().
 	 *  @param sqlStatements
 	 *  @return Array of converted Statements
 	 */
@@ -247,15 +249,14 @@ public abstract class Convert
 
 	/**
 	 *  Return last conversion error or null.
-	 *  @return lst conversion error
+	 *  @return last conversion error
 	 */
 	public String getConversionError()
 	{
 		return m_conversionError;
 	}   //  getConversionError
-
 	
-	/**************************************************************************
+	/**
 	 *  Conversion routine (stops at first error).
 	 *  <pre>
 	 *  - convertStatement
@@ -278,7 +279,7 @@ public abstract class Convert
 	}   //  convertIt
 
 	/**
-	 * Clean up Statement. Remove trailing spaces, carrige return and tab 
+	 * Clean up Statement. Remove trailing spaces, carriage return and tab 
 	 * 
 	 * @param statement
 	 * @return sql statement
@@ -292,11 +293,10 @@ public abstract class Convert
 
 		clean = clean.trim();
 		return clean;
-	} // removeComments
+	} // cleanUpStatement
 	
 	/**
-	 * Utility method to replace quoted string with a predefined marker
-
+	 * Utility method to replace quoted string with a predefined marker.
 	 * @param inputValue
 	 * @param retVars
 	 * @param nonce
@@ -331,6 +331,7 @@ public abstract class Convert
 	 * Utility method to recover quoted string store in retVars
 	 * @param retValue
 	 * @param retVars
+	 * @param nonce
 	 * @return string
 	 */
 	protected String recoverQuotedStrings(String retValue, Vector<String>retVars, String nonce) {
@@ -354,7 +355,7 @@ public abstract class Convert
 	}
 	
 	/**
-	 * Convert simple SQL Statement. Based on ConvertMap
+	 * Convert simple SQL Statement. Based on ConvertMap.
 	 * 
 	 * @param sqlStatement
 	 * @return converted Statement
@@ -364,7 +365,8 @@ public abstract class Convert
 		if (sqlStatement.toUpperCase().indexOf("EXCEPTION WHEN") != -1) {
 			String error = "Exception clause needs to be converted: "
 					+ sqlStatement;
-			log.info(error);
+			if (log.isLoggable(Level.INFO))
+				log.info(error);
 			m_conversionError = error;
 			return sqlStatement;
 		}
@@ -404,7 +406,7 @@ public abstract class Convert
 	/**
 	 * do convert map base conversion
 	 * @param sqlStatement
-	 * @return string
+	 * @return converted sql statement
 	 */
 	protected String convertWithConvertMap(String sqlStatement) {
 		try 
@@ -471,7 +473,7 @@ public abstract class Convert
 					Files.createDirectories(Paths.get(folderPg));
 				}
 				if (fosScriptOr == null) {
-					File fileOr = new File(folderOr + fileName);
+					fileOr = new File(folderOr + fileName);
 					fosScriptOr = new FileOutputStream(fileOr, true);
 					writerOr = new BufferedWriter(new OutputStreamWriter(fosScriptOr, "UTF8"));
 					writerOr.append("-- ");
@@ -488,7 +490,7 @@ public abstract class Convert
 					pgStatement = r[0];
 				}
 				if (fosScriptPg == null) {
-					File filePg = new File(folderPg + fileName);
+					filePg = new File(folderPg + fileName);
 					fosScriptPg = new FileOutputStream(filePg, true);
 					writerPg = new BufferedWriter(new OutputStreamWriter(fosScriptPg, "UTF8"));
 					writerPg.append("-- ");
@@ -551,6 +553,7 @@ public abstract class Convert
 		return logMigrationScript;
 	}
 
+	/** List of tables to skip log migration script */
 	private static String [] dontLogTables = new String[] {
 			"AD_ACCESSLOG",
 			"AD_ALERTPROCESSORLOG",
@@ -685,6 +688,50 @@ public abstract class Convert
 		w.append("\n;\n\n");
 		// flush stream - teo_sarca BF [ 1894474 ]
 		w.flush();
+	}
+
+	/**
+	 * Close the files for migration scripts, used just on Tests
+	 */
+	public static void closeLogMigrationScript() {
+		try {
+			if (writerOr != null) {
+				writerOr.flush();
+				writerOr.close();
+				writerOr = null;
+			}
+			if (writerPg != null) {
+				writerPg.flush();
+				writerPg.close();
+				writerPg = null;
+			}
+			if (fosScriptOr != null) {
+				fosScriptOr.flush();
+				fosScriptOr.close();
+				fosScriptOr = null;
+			}
+			if (fosScriptPg != null) {
+				fosScriptPg.flush();
+				fosScriptPg.close();
+				fosScriptPg = null;
+			}
+			fileOr = null;
+			filePg = null;
+		} catch (IOException e) {
+			// ignore
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Get the name of the migration script file
+	 * @return
+	 */
+	public static String getGeneratedMigrationScriptFileName() {
+		if (filePg != null) {
+			return filePg.getName();
+		}
+		return null;
 	}
 
 }   //  Convert

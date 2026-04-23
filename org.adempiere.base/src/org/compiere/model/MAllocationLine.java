@@ -26,7 +26,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
-
+import org.compiere.util.Util;
 
 /**
  *	Allocation Line Model
@@ -37,9 +37,21 @@ import org.compiere.util.Msg;
 public class MAllocationLine extends X_C_AllocationLine
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 5532305715886380749L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_AllocationLine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAllocationLine(Properties ctx, String C_AllocationLine_UU, String trxName) {
+        super(ctx, C_AllocationLine_UU, trxName);
+		if (Util.isEmpty(C_AllocationLine_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -51,13 +63,18 @@ public class MAllocationLine extends X_C_AllocationLine
 	{
 		super (ctx, C_AllocationLine_ID, trxName);
 		if (C_AllocationLine_ID == 0)
-		{
-			setAmount (Env.ZERO);
-			setDiscountAmt (Env.ZERO);
-			setWriteOffAmt (Env.ZERO);
-			setOverUnderAmt(Env.ZERO);
-		}	
+			setInitialDefaults();
 	}	//	MAllocationLine
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setAmount (Env.ZERO);
+		setDiscountAmt (Env.ZERO);
+		setWriteOffAmt (Env.ZERO);
+		setOverUnderAmt(Env.ZERO);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -131,7 +148,7 @@ public class MAllocationLine extends X_C_AllocationLine
 	
 	/**
 	 * 	Get Parent Trx Date
-	 *	@return date trx
+	 *	@return parent trx date
 	 */
 	public Timestamp getDateTrx ()
 	{
@@ -187,19 +204,16 @@ public class MAllocationLine extends X_C_AllocationLine
 			m_invoice = new MInvoice (getCtx(), getC_Invoice_ID(), get_TrxName());
 		return m_invoice;
 	}	//	getInvoice
-
 	
-	/**************************************************************************
-	 * 	Before Save
-	 *	@param newRecord
-	 *	@return save
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (newRecord && getParent().isProcessed()) {
 			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_AllocationHdr_ID"));
 			return false;
 		}
+		
+		// Disallow edit of business partner and invoice field
 		if (!newRecord  
 			&& (is_ValueChanged("C_BPartner_ID") || is_ValueChanged("C_Invoice_ID")))
 		{
@@ -207,7 +221,7 @@ public class MAllocationLine extends X_C_AllocationLine
 			return false;
 		}
 		
-		//	Set BPartner/Order from Invoice
+		// Set BPartner/Order from Invoice
 		if (getC_BPartner_ID() == 0 && getInvoice() != null)
 			setC_BPartner_ID(getInvoice().getC_BPartner_ID()); 
 		if (getC_Order_ID() == 0 && getInvoice() != null)
@@ -215,15 +229,12 @@ public class MAllocationLine extends X_C_AllocationLine
 		//
 		return true;
 	}	//	beforeSave
-
 	
-	/**
-	 * 	Before Delete
-	 *	@return true if reversed
-	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
 		setIsActive(false);
+		// Reverse allocation
 		processIt(true);
 		return true;
 	}	//	beforeDelete
@@ -232,6 +243,7 @@ public class MAllocationLine extends X_C_AllocationLine
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MAllocationLine[");
@@ -252,9 +264,9 @@ public class MAllocationLine extends X_C_AllocationLine
 		return sb.toString ();
 	}	//	toString
 	
-	/**************************************************************************
-	 * 	Process Allocation (does not update line).
-	 * 	- Update and Link Invoice/Payment/Cash
+	/**
+	 * 	Process Allocation (does not update line). <br/>
+	 * 	- Update and Link Invoice/Payment/Cash.
 	 * 	@param reverse if true allocation is reversed
 	 *	@return C_BPartner_ID
 	 */

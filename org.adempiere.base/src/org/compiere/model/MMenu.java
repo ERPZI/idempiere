@@ -31,7 +31,7 @@ import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
 /**
- *	Menu Model
+ *	Application Menu Model
  *	
  *  @author Jorg Janke
  *  @author victor.perez@e-evolution.com
@@ -41,16 +41,15 @@ import org.idempiere.cache.ImmutablePOSupport;
  */
 public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 {
-
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 8157805998814206274L;
 	/** Cache */
-	private static ImmutableIntPOCache<Integer, MMenu>	s_cache				= new ImmutableIntPOCache<Integer, MMenu>(Table_Name, 50);
+	private static ImmutableIntPOCache<Integer, MMenu>	s_cache				= new ImmutableIntPOCache<Integer, MMenu>(Table_Name, 50, 0, false, 0);
 
 	/**
-	 * Get Menu method from cache
+	 * Get Menu method from cache (immutable)
 	 * 
 	 * @param AD_Menu_ID menu id
 	 */
@@ -60,7 +59,7 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	}
 
 	/**
-	 * Get Menu method from cache
+	 * Get Menu method from cache (immutable)
 	 * 
 	 * @param ctx
 	 * @param AD_Menu_ID menu id
@@ -100,23 +99,24 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	}
 
 	/**
-	 * Get menues with where clause
+	 * Get menus with where clause
 	 * @param ctx context
 	 * @param whereClause where clause w/o the actual WHERE
-	 * @return MMenu
+	 * @return MMenu[]
 	 * @deprecated
 	 */
+	@Deprecated
 	public static MMenu[] get (Properties ctx, String whereClause)
 	{
 		return get(ctx, whereClause, null);
 	}
 	
 	/**
-	 * Get menues with where clause
+	 * Get menus with where clause
 	 * @param ctx context
 	 * @param whereClause where clause w/o the actual WHERE
 	 * @param trxName transaction
-	 * @return MMenu
+	 * @return array of MMenu
 	 */
 	public static MMenu[] get (Properties ctx, final String whereClause, String trxName)
 	{
@@ -131,7 +131,19 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	/**	Static Logger	*/
 	private static CLogger	s_log	= CLogger.getCLogger (MMenu.class);
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param AD_Menu_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MMenu(Properties ctx, String AD_Menu_UU, String trxName) {
+        super(ctx, AD_Menu_UU, trxName);
+		if (Util.isEmpty(AD_Menu_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param AD_Menu_ID id
@@ -141,13 +153,18 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	{
 		super (ctx, AD_Menu_ID, trxName);
 		if (AD_Menu_ID == 0)
-		{
-			setEntityType (ENTITYTYPE_UserMaintained);	// U
-			setIsReadOnly (false);	// N
-			setIsSOTrx (false);
-			setIsSummary (false);
-		}
+			setInitialDefaults();
 	}	//	MMenu
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setEntityType (ENTITYTYPE_UserMaintained);	// U
+		setIsReadOnly (false);	// N
+		setIsSOTrx (false);
+		setIsSummary (false);
+	}
 
 	/**
 	 * 	Load Contrusctor
@@ -160,14 +177,10 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 		super(ctx, rs, trxName);
 	}	//	MMenu
 
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
-		//	Reset info
+		//	Reset action to null and IsCentrallyMaintained to false if IsSummary=Y
 		if (isSummary() && getAction() != null)
 			setAction(null);
 		if (isSummary() && isCentrallyMaintained())
@@ -175,7 +188,7 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 		String action = getAction();
 		if (action == null)
 			action = "";
-		//	Clean up references
+		// Ensure reference field (AD_Window_ID, AD_Form_ID, etc) is reset to null if it is not for the selected action.
 		if (getAD_Window_ID() != 0 && !action.equals(ACTION_Window))
 			setAD_Window_ID(0);
 		if (getAD_Form_ID() != 0 && !action.equals(ACTION_Form))
@@ -191,30 +204,21 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 			setAD_InfoWindow_ID(0);
 		return true;
 	}	//	beforeSave
-	
-	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+		
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
+		// Create new menu tree record
 		if (newRecord)
 			insert_Tree(MTree_Base.TREETYPE_Menu);
 		return success;
 	}	//	afterSave
 
-	/**
-	 * 	After Delete
-	 *	@param success
-	 *	@return deleted
-	 */
 	protected boolean afterDelete (boolean success)
 	{
+		// Delete tree record
 		if (success)
 			delete_Tree(MTree_Base.TREETYPE_Menu);
 		return success;
@@ -223,8 +227,8 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	/**
 	 *  FR [ 1966326 ]
 	 * 	get Menu ID
-	 *	@param menuName String Menu Name
-	 *	@return int retValue
+	 *	@param menuName Menu Name
+	 *	@return AD_Menu_ID or 0 (not found) or -1 (has error)
 	 */
 	public static int getMenu_ID(String menuName) {
 		int retValue = 0;
@@ -260,7 +264,9 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 		return this;
 	}
 
-	/** Returns the name using UserDef module ; if nothing is defined, fallback to the translated name */
+	/** 
+	 * @return name using UserDef module ; if nothing is defined, fallback to the translated name 
+	 */
 	public String getDisplayedName() {
 
 		if (!Util.isEmpty(getAction())) {

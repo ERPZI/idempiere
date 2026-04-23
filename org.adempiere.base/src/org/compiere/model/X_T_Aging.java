@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for T_Aging
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="T_Aging")
-public class X_T_Aging extends PO implements I_T_Aging, I_Persistent 
+public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_T_Aging (Properties ctx, int T_Aging_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
       /** if (T_Aging_ID == 0)
         {
 			setAD_PInstance_ID (0);
-			setC_BPartner_ID (0);
 			setC_BP_Group_ID (0);
+			setC_BPartner_ID (0);
 			setC_Currency_ID (0);
 			setDue0 (Env.ZERO);
 			setDue0_30 (Env.ZERO);
@@ -89,8 +89,8 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
       /** if (T_Aging_ID == 0)
         {
 			setAD_PInstance_ID (0);
-			setC_BPartner_ID (0);
 			setC_BP_Group_ID (0);
+			setC_BPartner_ID (0);
 			setC_Currency_ID (0);
 			setDue0 (Env.ZERO);
 			setDue0_30 (Env.ZERO);
@@ -129,6 +129,84 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_T_Aging (Properties ctx, String T_Aging_UU, String trxName)
+    {
+      super (ctx, T_Aging_UU, trxName);
+      /** if (T_Aging_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setC_BP_Group_ID (0);
+			setC_BPartner_ID (0);
+			setC_Currency_ID (0);
+			setDue0 (Env.ZERO);
+			setDue0_30 (Env.ZERO);
+			setDue0_7 (Env.ZERO);
+			setDue1_7 (Env.ZERO);
+			setDue31_60 (Env.ZERO);
+			setDue31_Plus (Env.ZERO);
+			setDue61_90 (Env.ZERO);
+			setDue61_Plus (Env.ZERO);
+			setDue8_30 (Env.ZERO);
+			setDue91_Plus (Env.ZERO);
+			setDueAmt (Env.ZERO);
+			setDueDate (new Timestamp( System.currentTimeMillis() ));
+			setInvoicedAmt (Env.ZERO);
+			setIsListInvoices (false);
+			setIsSOTrx (false);
+			setOpenAmt (Env.ZERO);
+			setPastDue1_30 (Env.ZERO);
+			setPastDue1_7 (Env.ZERO);
+			setPastDue31_60 (Env.ZERO);
+			setPastDue31_Plus (Env.ZERO);
+			setPastDue61_90 (Env.ZERO);
+			setPastDue61_Plus (Env.ZERO);
+			setPastDue8_30 (Env.ZERO);
+			setPastDue91_Plus (Env.ZERO);
+			setPastDueAmt (Env.ZERO);
+			setStatementDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_T_Aging (Properties ctx, String T_Aging_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, T_Aging_UU, trxName, virtualColumns);
+      /** if (T_Aging_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setC_BP_Group_ID (0);
+			setC_BPartner_ID (0);
+			setC_Currency_ID (0);
+			setDue0 (Env.ZERO);
+			setDue0_30 (Env.ZERO);
+			setDue0_7 (Env.ZERO);
+			setDue1_7 (Env.ZERO);
+			setDue31_60 (Env.ZERO);
+			setDue31_Plus (Env.ZERO);
+			setDue61_90 (Env.ZERO);
+			setDue61_Plus (Env.ZERO);
+			setDue8_30 (Env.ZERO);
+			setDue91_Plus (Env.ZERO);
+			setDueAmt (Env.ZERO);
+			setDueDate (new Timestamp( System.currentTimeMillis() ));
+			setInvoicedAmt (Env.ZERO);
+			setIsListInvoices (false);
+			setIsSOTrx (false);
+			setOpenAmt (Env.ZERO);
+			setPastDue1_30 (Env.ZERO);
+			setPastDue1_7 (Env.ZERO);
+			setPastDue31_60 (Env.ZERO);
+			setPastDue31_Plus (Env.ZERO);
+			setPastDue61_90 (Env.ZERO);
+			setPastDue61_Plus (Env.ZERO);
+			setPastDue8_30 (Env.ZERO);
+			setPastDue91_Plus (Env.ZERO);
+			setPastDueAmt (Env.ZERO);
+			setStatementDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
     /** Load Constructor */
     public X_T_Aging (Properties ctx, ResultSet rs, String trxName)
     {
@@ -136,7 +214,7 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -153,7 +231,7 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_T_Aging[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -208,34 +286,6 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public int getC_Activity_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Activity_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_BPartner_ID(), get_TrxName());
-	}
-
-	/** Set Business Partner.
-		@param C_BPartner_ID Identifies a Business Partner
-	*/
-	public void setC_BPartner_ID (int C_BPartner_ID)
-	{
-		if (C_BPartner_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
-	}
-
-	/** Get Business Partner.
-		@return Identifies a Business Partner
-	  */
-	public int getC_BPartner_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -297,6 +347,34 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
+	}
+
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
+	*/
+	public void setC_BPartner_ID (int C_BPartner_ID)
+	{
+		if (C_BPartner_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+	}
+
+	/** Get Business Partner.
+		@return Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public org.compiere.model.I_C_Campaign getC_Campaign() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Campaign)MTable.get(getCtx(), org.compiere.model.I_C_Campaign.Table_ID)
@@ -353,34 +431,6 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
-			.getPO(getC_Invoice_ID(), get_TrxName());
-	}
-
-	/** Set Invoice.
-		@param C_Invoice_ID Invoice Identifier
-	*/
-	public void setC_Invoice_ID (int C_Invoice_ID)
-	{
-		if (C_Invoice_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
-	}
-
-	/** Get Invoice.
-		@return Invoice Identifier
-	  */
-	public int getC_Invoice_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_InvoicePaySchedule getC_InvoicePaySchedule() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_InvoicePaySchedule)MTable.get(getCtx(), org.compiere.model.I_C_InvoicePaySchedule.Table_ID)
@@ -409,28 +459,29 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Currency getConvertAmountsInCurrency() throws RuntimeException
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
-			.getPO(getConvertAmountsInCurrency_ID(), get_TrxName());
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
+			.getPO(getC_Invoice_ID(), get_TrxName());
 	}
 
-	/** Set Convert Amounts in Currency.
-		@param ConvertAmountsInCurrency_ID Convert Amounts in Currency
+	/** Set Invoice.
+		@param C_Invoice_ID Invoice Identifier
 	*/
-	public void setConvertAmountsInCurrency_ID (int ConvertAmountsInCurrency_ID)
+	public void setC_Invoice_ID (int C_Invoice_ID)
 	{
-		if (ConvertAmountsInCurrency_ID < 1)
-			set_Value (COLUMNNAME_ConvertAmountsInCurrency_ID, null);
+		if (C_Invoice_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, null);
 		else
-			set_Value (COLUMNNAME_ConvertAmountsInCurrency_ID, Integer.valueOf(ConvertAmountsInCurrency_ID));
+			set_ValueNoCheck (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
 	}
 
-	/** Get Convert Amounts in Currency.
-		@return Convert Amounts in Currency	  */
-	public int getConvertAmountsInCurrency_ID()
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_ConvertAmountsInCurrency_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -464,6 +515,33 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_Currency getConvertAmountsInCurrency() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
+			.getPO(getConvertAmountsInCurrency_ID(), get_TrxName());
+	}
+
+	/** Set Convert Amounts in Currency.
+		@param ConvertAmountsInCurrency_ID Convert Amounts in Currency
+	*/
+	public void setConvertAmountsInCurrency_ID (int ConvertAmountsInCurrency_ID)
+	{
+		if (ConvertAmountsInCurrency_ID < 1)
+			set_Value (COLUMNNAME_ConvertAmountsInCurrency_ID, null);
+		else
+			set_Value (COLUMNNAME_ConvertAmountsInCurrency_ID, Integer.valueOf(ConvertAmountsInCurrency_ID));
+	}
+
+	/** Get Convert Amounts in Currency.
+		@return Convert Amounts in Currency	  */
+	public int getConvertAmountsInCurrency_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ConvertAmountsInCurrency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Account Date.
 		@param DateAcct Accounting Date
 	*/
@@ -478,10 +556,10 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public boolean isDateAcct()
 	{
 		Object oo = get_Value(COLUMNNAME_DateAcct);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -754,10 +832,10 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public boolean isListInvoices()
 	{
 		Object oo = get_Value(COLUMNNAME_IsListInvoices);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -777,10 +855,10 @@ public class X_T_Aging extends PO implements I_T_Aging, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

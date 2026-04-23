@@ -215,10 +215,11 @@ public class Doc_MatchPO extends Doc
 	}   //  loadDocumentDetails
 
 
-	/**************************************************************************
+	/**
 	 *  Get Source Currency Balance - subtracts line and tax amounts from total - no rounding
 	 *  @return Zero - always balanced
 	 */
+	@Override
 	public BigDecimal getBalance()
 	{
 		return Env.ZERO;
@@ -235,6 +236,7 @@ public class Doc_MatchPO extends Doc
 	 *  @param as accounting schema
 	 *  @return Fact
 	 */
+	@Override
 	public ArrayList<Fact> createFacts (MAcctSchema as)
 	{
 		ArrayList<Fact> facts = new ArrayList<Fact>();
@@ -415,7 +417,8 @@ public class Doc_MatchPO extends Doc
 		String costingMethod = product.getCostingMethod(as);
 		//get standard cost and also make sure cost for other costing method is updated
 		BigDecimal costs = m_pc.getProductCosts(as, getAD_Org_ID(),
-			MAcctSchema.COSTINGMETHOD_StandardCosting, m_C_OrderLine_ID, false);	//	non-zero costs
+			MAcctSchema.COSTINGMETHOD_StandardCosting, m_C_OrderLine_ID, false, 
+			getDateAcct(), (MCostDetail) null, isInBackDatePostingProcess());	//	non-zero costs
 
 		if (MAcctSchema.COSTINGMETHOD_StandardCosting.equals(costingMethod))
 		{
@@ -537,8 +540,9 @@ public class Doc_MatchPO extends Doc
 		}
 	}   //  createFact
 
-	/** Verify if the posting involves two or more organizations
-	@return true if there are more than one org involved on the posting
+	/** 
+	 * Verify if the posting involves two or more organizations
+	 * @return true if there are more than one org involved on the posting
 	 */
 	private boolean isInterOrg(MAcctSchema as) {
 		MAcctSchemaElement elementorg = as.getAcctSchemaElement(MAcctSchemaElement.ELEMENTTYPE_Organization);
@@ -556,7 +560,13 @@ public class Doc_MatchPO extends Doc
 		return false;
 	}
 
-	// Elaine 2008/6/20	
+	/**
+	 * Create cost detail for MatchPO 	
+	 * @param as
+	 * @param poCost
+	 * @param landedCostMap
+	 * @return error message or empty string
+	 */
 	private String createMatchPOCostDetail(MAcctSchema as, BigDecimal poCost, Map<Integer, BigDecimal> landedCostMap)
 	{
 		if (m_ioLine != null && m_ioLine.getM_InOutLine_ID() > 0 &&
@@ -575,7 +585,8 @@ public class Doc_MatchPO extends Doc
 			for (int i = 0 ; i < mPO.length ; i++)
 			{
 				if (mPO[i].getM_AttributeSetInstance_ID() == mMatchPO.getM_AttributeSetInstance_ID()
-					&& mPO[i].getM_MatchPO_ID() != mMatchPO.getM_MatchPO_ID())
+					&& mPO[i].getM_MatchPO_ID() != mMatchPO.getM_MatchPO_ID()
+					&& mPO[i].getDateAcct().compareTo(mMatchPO.getDateAcct()) == 0)
 				{
 					BigDecimal qty = (isReturnTrx ? mPO[i].getQty().negate() : mPO[i].getQty());
 					BigDecimal orderCost = BigDecimal.ZERO;
@@ -627,12 +638,20 @@ public class Doc_MatchPO extends Doc
 			
 			if (tAmt.scale() > as.getCostingPrecision())
 				tAmt = tAmt.setScale(as.getCostingPrecision(), RoundingMode.HALF_UP);
-			// Set Total Amount and Total Quantity from Matched PO 
+			int Ref_CostDetail_ID = 0;
+			if (mMatchPO.getReversal_ID() > 0 && mMatchPO.get_ID() > mMatchPO.getReversal_ID())
+			{
+				MCostDetail cd = MCostDetail.getOrder(as, getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
+						mMatchPO.getReversal().getC_OrderLine_ID(), 0, mMatchPO.getReversal().getDateAcct(), getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}
+			// Set Total Amount and Total Quantity from Matched PO
 			if (!MCostDetail.createOrder(as, m_oLine.getAD_Org_ID(), 
 					getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
 					m_oLine.getC_OrderLine_ID(), 0,		//	no cost element
 					tAmt, tQty,			//	Delivered
-					m_oLine.getDescription(), getTrxName()))
+					m_oLine.getDescription(), getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 			{
 				return "SaveError";
 			}
@@ -648,21 +667,38 @@ public class Doc_MatchPO extends Doc
 		return "";
 	}
 
-
+	/**
+	 * Create cost detail for landed cost adjustment
+	 * @param as
+	 * @param landedCostMap
+	 * @param mMatchPO
+	 * @param tQty
+	 * @return error message or empty string
+	 */
 	private String createLandedCostAdjustments(MAcctSchema as,
 			Map<Integer, BigDecimal> landedCostMap, MMatchPO mMatchPO,
 			BigDecimal tQty) {
 		for(Integer elementId : landedCostMap.keySet())
 		{
 			BigDecimal amt = landedCostMap.get(elementId);
+			if (mMatchPO.isReversal())
+				amt = amt.negate();
 			amt = amt.multiply(tQty);
 			if (amt.scale() > as.getCostingPrecision())
 				amt = amt.setScale(as.getCostingPrecision(), RoundingMode.HALF_UP);
+			int Ref_CostDetail_ID = 0;
+			if (mMatchPO.getReversal_ID() > 0 && mMatchPO.get_ID() > mMatchPO.getReversal_ID())
+			{
+				MCostDetail cd = MCostDetail.getOrder(as, getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
+						mMatchPO.getReversal().getC_OrderLine_ID(), 0, mMatchPO.getReversal().getDateAcct(), getTrxName());
+				if (cd != null)
+					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
+			}
 			if (!MCostDetail.createOrder(as, m_oLine.getAD_Org_ID(), 
 					getM_Product_ID(), mMatchPO.getM_AttributeSetInstance_ID(),
 					m_oLine.getC_OrderLine_ID(), elementId,
 					amt, tQty,			//	Delivered
-					m_oLine.getDescription(), getTrxName()))
+					m_oLine.getDescription(), getDateAcct(), Ref_CostDetail_ID, getTrxName()))
 			{
 				return "SaveError";
 			}
@@ -675,6 +711,5 @@ public class Doc_MatchPO extends Doc
 	public boolean isDeferPosting() {
 		return m_deferPosting;
 	}
-
 	
 }   //  Doc_MatchPO

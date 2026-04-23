@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for C_BPartner_Product
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_BPartner_Product")
-public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_Persistent 
+public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_BPartner_Product (Properties ctx, int C_BPartner_Product_ID, String trxName)
@@ -64,6 +64,36 @@ public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_BPartner_Product (Properties ctx, String C_BPartner_Product_UU, String trxName)
+    {
+      super (ctx, C_BPartner_Product_UU, trxName);
+      /** if (C_BPartner_Product_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setIsManufacturer (false);
+// N
+			setM_Product_ID (0);
+			setShelfLifeMinDays (0);
+			setShelfLifeMinPct (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BPartner_Product (Properties ctx, String C_BPartner_Product_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BPartner_Product_UU, trxName, virtualColumns);
+      /** if (C_BPartner_Product_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setIsManufacturer (false);
+// N
+			setM_Product_ID (0);
+			setShelfLifeMinDays (0);
+			setShelfLifeMinPct (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_BPartner_Product (Properties ctx, ResultSet rs, String trxName)
     {
@@ -71,7 +101,7 @@ public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -88,7 +118,7 @@ public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_C_BPartner_Product[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -165,29 +195,13 @@ public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_
 	public boolean isManufacturer()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManufacturer);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Manufacturer.
-		@param Manufacturer Manufacturer of the Product
-	*/
-	public void setManufacturer (String Manufacturer)
-	{
-		set_Value (COLUMNNAME_Manufacturer, Manufacturer);
-	}
-
-	/** Get Manufacturer.
-		@return Manufacturer of the Product
-	  */
-	public String getManufacturer()
-	{
-		return (String)get_Value(COLUMNNAME_Manufacturer);
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
@@ -216,6 +230,22 @@ public class X_C_BPartner_Product extends PO implements I_C_BPartner_Product, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Manufacturer.
+		@param Manufacturer Manufacturer of the Product
+	*/
+	public void setManufacturer (String Manufacturer)
+	{
+		set_Value (COLUMNNAME_Manufacturer, Manufacturer);
+	}
+
+	/** Get Manufacturer.
+		@return Manufacturer of the Product
+	  */
+	public String getManufacturer()
+	{
+		return (String)get_Value(COLUMNNAME_Manufacturer);
 	}
 
 	/** Set Quality Rating.

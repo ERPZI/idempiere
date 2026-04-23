@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for R_IssueKnown
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="R_IssueKnown")
-public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent 
+public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_R_IssueKnown (Properties ctx, int R_IssueKnown_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
       /** if (R_IssueKnown_ID == 0)
         {
 			setIssueSummary (null);
-			setReleaseNo (null);
 			setR_IssueKnown_ID (0);
+			setReleaseNo (null);
         } */
     }
 
@@ -52,8 +52,32 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
       /** if (R_IssueKnown_ID == 0)
         {
 			setIssueSummary (null);
-			setReleaseNo (null);
 			setR_IssueKnown_ID (0);
+			setReleaseNo (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_IssueKnown (Properties ctx, String R_IssueKnown_UU, String trxName)
+    {
+      super (ctx, R_IssueKnown_UU, trxName);
+      /** if (R_IssueKnown_UU == null)
+        {
+			setIssueSummary (null);
+			setR_IssueKnown_ID (0);
+			setReleaseNo (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_IssueKnown (Properties ctx, String R_IssueKnown_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, R_IssueKnown_UU, trxName, virtualColumns);
+      /** if (R_IssueKnown_UU == null)
+        {
+			setIssueSummary (null);
+			setR_IssueKnown_ID (0);
+			setReleaseNo (null);
         } */
     }
 
@@ -64,7 +88,7 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -181,38 +205,14 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
 	}
-
-	/** Set Release No.
-		@param ReleaseNo Internal Release Number
-	*/
-	public void setReleaseNo (String ReleaseNo)
-	{
-		set_Value (COLUMNNAME_ReleaseNo, ReleaseNo);
-	}
-
-	/** Get Release No.
-		@return Internal Release Number
-	  */
-	public String getReleaseNo()
-	{
-		return (String)get_Value(COLUMNNAME_ReleaseNo);
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), getReleaseNo());
-    }
 
 	/** Set Known Issue.
 		@param R_IssueKnown_ID Known Issue
@@ -334,6 +334,30 @@ public class X_R_IssueKnown extends PO implements I_R_IssueKnown, I_Persistent
 			 return 0;
 		return ii.intValue();
 	}
+
+	/** Set Release No.
+		@param ReleaseNo Internal Release Number
+	*/
+	public void setReleaseNo (String ReleaseNo)
+	{
+		set_Value (COLUMNNAME_ReleaseNo, ReleaseNo);
+	}
+
+	/** Get Release No.
+		@return Internal Release Number
+	  */
+	public String getReleaseNo()
+	{
+		return (String)get_Value(COLUMNNAME_ReleaseNo);
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), getReleaseNo());
+    }
 
 	/** Set Source Class.
 		@param SourceClassName Source Class Name

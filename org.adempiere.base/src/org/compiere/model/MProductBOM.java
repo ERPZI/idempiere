@@ -35,6 +35,7 @@ import org.compiere.util.Env;
  *  @author Jorg Janke
  *  @version $Id: MProductBOM.java,v 1.5 2006/07/30 00:51:02 jjanke Exp $
  */
+@Deprecated
 public class MProductBOM extends X_M_Product_BOM
 {
 	/**
@@ -76,9 +77,8 @@ public class MProductBOM extends X_M_Product_BOM
 	/** Static Logger					*/
 	@SuppressWarnings("unused")
 	private static CLogger s_log = CLogger.getCLogger(MProductBOM.class);
-
 	
-	/**************************************************************************
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param M_Product_BOM_ID id
@@ -146,13 +146,7 @@ public class MProductBOM extends X_M_Product_BOM
 		return sb.toString();
 	}	//	toString
 
-	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)

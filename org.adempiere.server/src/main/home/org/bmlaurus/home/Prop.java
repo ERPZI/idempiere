@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.compiere.model.SystemProperties;
 import org.compiere.util.CLogger;
 import org.compiere.util.Ini;
 import org.compiere.util.SecureEngine;
@@ -90,7 +91,7 @@ public final class Prop implements Serializable {
 	public static final String	SOC_7				=	"Social7";
 	
 	/**Defaults*/
-	private static final String CREDITS				=	"Welcome to the iDempiere 10 Peace Page!";
+	private static final String CREDITS				=	"Welcome to the iDempiere 12 Kudos Page!";
 	private static String LOGO_URL 					= 	null;
 	
 	
@@ -114,12 +115,9 @@ public final class Prop implements Serializable {
 	{
 		boolean loadOK = true;
 		s_prop = new Properties();
-		InputStream fis = null;
-		try
+		try (InputStream fis = new FileInputStream(filename))
 		{
-			fis = new FileInputStream(filename);
 			s_prop.load(fis);
-			fis.close();
 		}
 		catch (FileNotFoundException e)
 		{
@@ -128,10 +126,8 @@ public final class Prop implements Serializable {
 				log.info("!!WARNING:Please locate your custom home.properties on IDEMPIERE_HOME.");
 			}
 			loadOK = false;
-			try {
-				fis = Prop.class.getResourceAsStream(HOME_PROPERTY_FILE);
+			try (InputStream fis = Prop.class.getResourceAsStream(HOME_PROPERTY_FILE)){
 				s_prop.load(fis);	
-				fis.close();
 				loadOK = true;
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -245,8 +241,8 @@ public final class Prop implements Serializable {
 	
 	public static String getFileName (boolean tryUserHome)
 	{
-		if (System.getProperty("PropertyHomeFile") != null)
-			return System.getProperty("PropertyHomeFile");
+		if (SystemProperties.getPropertyHomeFile() != null)
+			return SystemProperties.getPropertyHomeFile();
 		String base = null;
 		if (tryUserHome && Ini.isClient())
 			base = System.getProperty("user.home");

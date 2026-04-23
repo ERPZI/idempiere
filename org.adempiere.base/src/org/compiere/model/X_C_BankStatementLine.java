@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_BankStatementLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_BankStatementLine")
-public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, I_Persistent 
+public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_BankStatementLine (Properties ctx, int C_BankStatementLine_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
       super (ctx, C_BankStatementLine_ID, trxName);
       /** if (C_BankStatementLine_ID == 0)
         {
-			setC_BankStatement_ID (0);
 			setC_BankStatementLine_ID (0);
+			setC_BankStatement_ID (0);
 			setC_Currency_ID (0);
 // @SQL=SELECT C_Currency_ID FROM C_BankAccount WHERE C_BankAccount_ID=@C_BankAccount_ID@
 			setChargeAmt (Env.ZERO);
@@ -71,8 +71,66 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
       super (ctx, C_BankStatementLine_ID, trxName, virtualColumns);
       /** if (C_BankStatementLine_ID == 0)
         {
-			setC_BankStatement_ID (0);
 			setC_BankStatementLine_ID (0);
+			setC_BankStatement_ID (0);
+			setC_Currency_ID (0);
+// @SQL=SELECT C_Currency_ID FROM C_BankAccount WHERE C_BankAccount_ID=@C_BankAccount_ID@
+			setChargeAmt (Env.ZERO);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @DateAcct@
+			setInterestAmt (Env.ZERO);
+			setIsManual (true);
+// Y
+			setIsReversal (false);
+			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 FROM C_BankStatementLine WHERE C_BankStatement_ID=@C_BankStatement_ID@
+			setProcessed (false);
+			setStatementLineDate (new Timestamp( System.currentTimeMillis() ));
+// @StatementLineDate@
+			setStmtAmt (Env.ZERO);
+			setTrxAmt (Env.ZERO);
+			setValutaDate (new Timestamp( System.currentTimeMillis() ));
+// @StatementDate@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BankStatementLine (Properties ctx, String C_BankStatementLine_UU, String trxName)
+    {
+      super (ctx, C_BankStatementLine_UU, trxName);
+      /** if (C_BankStatementLine_UU == null)
+        {
+			setC_BankStatementLine_ID (0);
+			setC_BankStatement_ID (0);
+			setC_Currency_ID (0);
+// @SQL=SELECT C_Currency_ID FROM C_BankAccount WHERE C_BankAccount_ID=@C_BankAccount_ID@
+			setChargeAmt (Env.ZERO);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @DateAcct@
+			setInterestAmt (Env.ZERO);
+			setIsManual (true);
+// Y
+			setIsReversal (false);
+			setLine (0);
+// @SQL=SELECT COALESCE(MAX(Line),0)+10 FROM C_BankStatementLine WHERE C_BankStatement_ID=@C_BankStatement_ID@
+			setProcessed (false);
+			setStatementLineDate (new Timestamp( System.currentTimeMillis() ));
+// @StatementLineDate@
+			setStmtAmt (Env.ZERO);
+			setTrxAmt (Env.ZERO);
+			setValutaDate (new Timestamp( System.currentTimeMillis() ));
+// @StatementDate@
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_BankStatementLine (Properties ctx, String C_BankStatementLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_BankStatementLine_UU, trxName, virtualColumns);
+      /** if (C_BankStatementLine_UU == null)
+        {
+			setC_BankStatementLine_ID (0);
+			setC_BankStatement_ID (0);
 			setC_Currency_ID (0);
 // @SQL=SELECT C_Currency_ID FROM C_BankAccount WHERE C_BankAccount_ID=@C_BankAccount_ID@
 			setChargeAmt (Env.ZERO);
@@ -101,7 +159,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -122,29 +180,29 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
       return sb.toString();
     }
 
-	public org.compiere.model.I_C_BankStatement getC_BankStatement() throws RuntimeException
+	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_BankStatement)MTable.get(getCtx(), org.compiere.model.I_C_BankStatement.Table_ID)
-			.getPO(getC_BankStatement_ID(), get_TrxName());
+		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
+			.getPO(getC_BPartner_ID(), get_TrxName());
 	}
 
-	/** Set Bank Statement.
-		@param C_BankStatement_ID Bank Statement of account
+	/** Set Business Partner.
+		@param C_BPartner_ID Identifies a Business Partner
 	*/
-	public void setC_BankStatement_ID (int C_BankStatement_ID)
+	public void setC_BPartner_ID (int C_BPartner_ID)
 	{
-		if (C_BankStatement_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_BankStatement_ID, null);
+		if (C_BPartner_ID < 1)
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
 		else
-			set_ValueNoCheck (COLUMNNAME_C_BankStatement_ID, Integer.valueOf(C_BankStatement_ID));
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
 	}
 
-	/** Get Bank Statement.
-		@return Bank Statement of account
+	/** Get Business Partner.
+		@return Identifies a Business Partner
 	  */
-	public int getC_BankStatement_ID()
+	public int getC_BPartner_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankStatement_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -187,29 +245,29 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 		return (String)get_Value(COLUMNNAME_C_BankStatementLine_UU);
 	}
 
-	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
+	public org.compiere.model.I_C_BankStatement getC_BankStatement() throws RuntimeException
 	{
-		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
-			.getPO(getC_BPartner_ID(), get_TrxName());
+		return (org.compiere.model.I_C_BankStatement)MTable.get(getCtx(), org.compiere.model.I_C_BankStatement.Table_ID)
+			.getPO(getC_BankStatement_ID(), get_TrxName());
 	}
 
-	/** Set Business Partner.
-		@param C_BPartner_ID Identifies a Business Partner
+	/** Set Bank Statement.
+		@param C_BankStatement_ID Bank Statement of account
 	*/
-	public void setC_BPartner_ID (int C_BPartner_ID)
+	public void setC_BankStatement_ID (int C_BankStatement_ID)
 	{
-		if (C_BPartner_ID < 1)
-			set_Value (COLUMNNAME_C_BPartner_ID, null);
+		if (C_BankStatement_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_BankStatement_ID, null);
 		else
-			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+			set_ValueNoCheck (COLUMNNAME_C_BankStatement_ID, Integer.valueOf(C_BankStatement_ID));
 	}
 
-	/** Get Business Partner.
-		@return Identifies a Business Partner
+	/** Get Bank Statement.
+		@return Bank Statement of account
 	  */
-	public int getC_BPartner_ID()
+	public int getC_BankStatement_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BankStatement_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -271,23 +329,31 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 		return ii.intValue();
 	}
 
-	/** Set Charge amount.
-		@param ChargeAmt Charge Amount
-	*/
-	public void setChargeAmt (BigDecimal ChargeAmt)
+	public org.compiere.model.I_C_DepositBatch getC_DepositBatch() throws RuntimeException
 	{
-		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
+		return (org.compiere.model.I_C_DepositBatch)MTable.get(getCtx(), org.compiere.model.I_C_DepositBatch.Table_ID)
+			.getPO(getC_DepositBatch_ID(), get_TrxName());
 	}
 
-	/** Get Charge amount.
-		@return Charge Amount
-	  */
-	public BigDecimal getChargeAmt()
+	/** Set Deposit Batch.
+		@param C_DepositBatch_ID Deposit Batch
+	*/
+	public void setC_DepositBatch_ID (int C_DepositBatch_ID)
 	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
+		if (C_DepositBatch_ID < 1)
+			set_Value (COLUMNNAME_C_DepositBatch_ID, null);
+		else
+			set_Value (COLUMNNAME_C_DepositBatch_ID, Integer.valueOf(C_DepositBatch_ID));
+	}
+
+	/** Get Deposit Batch.
+		@return Deposit Batch	  */
+	public int getC_DepositBatch_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_DepositBatch_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
@@ -344,6 +410,25 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Charge amount.
+		@param ChargeAmt Charge Amount
+	*/
+	public void setChargeAmt (BigDecimal ChargeAmt)
+	{
+		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
+	}
+
+	/** Get Charge amount.
+		@return Charge Amount
+	  */
+	public BigDecimal getChargeAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Create Payment.
@@ -605,10 +690,10 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	public boolean isManual()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManual);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -628,10 +713,10 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	public boolean isReversal()
 	{
 		Object oo = get_Value(COLUMNNAME_IsReversal);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -659,7 +744,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
@@ -709,10 +794,10 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

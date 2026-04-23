@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InOut
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_InOut")
-public class X_M_InOut extends PO implements I_M_InOut, I_Persistent 
+public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_InOut (Properties ctx, int M_InOut_ID, String trxName)
@@ -67,10 +67,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 			setIsSOTrx (false);
 // @IsSOTrx@
 			setM_InOut_ID (0);
+			setM_Warehouse_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setMovementType (null);
-			setM_Warehouse_ID (0);
 			setPosted (false);
 			setPriorityRule (null);
 // 5
@@ -110,10 +110,96 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 			setIsSOTrx (false);
 // @IsSOTrx@
 			setM_InOut_ID (0);
+			setM_Warehouse_ID (0);
 			setMovementDate (new Timestamp( System.currentTimeMillis() ));
 // @#Date@
 			setMovementType (null);
+			setPosted (false);
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSendEMail (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InOut (Properties ctx, String M_InOut_UU, String trxName)
+    {
+      super (ctx, M_InOut_UU, trxName);
+      /** if (M_InOut_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_DocType_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// A
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightCostRule (null);
+// I
+			setIsAlternateReturnAddress (false);
+// N
+			setIsApproved (false);
+			setIsInDispute (false);
+			setIsInTransit (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_InOut_ID (0);
 			setM_Warehouse_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setMovementType (null);
+			setPosted (false);
+			setPriorityRule (null);
+// 5
+			setProcessed (false);
+			setSendEMail (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InOut (Properties ctx, String M_InOut_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_InOut_UU, trxName, virtualColumns);
+      /** if (M_InOut_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_BPartner_Location_ID (0);
+			setC_DocType_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDeliveryRule (null);
+// A
+			setDeliveryViaRule (null);
+// P
+			setDocAction (null);
+// CO
+			setDocStatus (null);
+// DR
+			setDocumentNo (null);
+			setFreightCostRule (null);
+// I
+			setIsAlternateReturnAddress (false);
+// N
+			setIsApproved (false);
+			setIsInDispute (false);
+			setIsInTransit (false);
+			setIsPrinted (false);
+			setIsSOTrx (false);
+// @IsSOTrx@
+			setM_InOut_ID (0);
+			setM_Warehouse_ID (0);
+			setMovementDate (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setMovementType (null);
 			setPosted (false);
 			setPriorityRule (null);
 // 5
@@ -129,7 +215,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -368,25 +454,6 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Charge amount.
-		@param ChargeAmt Charge Amount
-	*/
-	public void setChargeAmt (BigDecimal ChargeAmt)
-	{
-		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
-	}
-
-	/** Get Charge amount.
-		@return Charge Amount
-	  */
-	public BigDecimal getChargeAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
@@ -469,6 +536,25 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Charge amount.
+		@param ChargeAmt Charge Amount
+	*/
+	public void setChargeAmt (BigDecimal ChargeAmt)
+	{
+		set_Value (COLUMNNAME_ChargeAmt, ChargeAmt);
+	}
+
+	/** Get Charge amount.
+		@return Charge Amount
+	  */
+	public BigDecimal getChargeAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ChargeAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Create Confirm.
@@ -778,7 +864,7 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -1044,10 +1130,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isAlternateReturnAddress()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAlternateReturnAddress);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1067,10 +1153,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1090,10 +1176,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isDropShip()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDropShip);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1113,10 +1199,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isInDispute()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInDispute);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1136,10 +1222,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isInTransit()
 	{
 		Object oo = get_Value(COLUMNNAME_IsInTransit);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1159,10 +1245,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isPrinted()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrinted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1182,10 +1268,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1226,65 +1312,6 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public String getM_InOut_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_InOut_UU);
-	}
-
-	/** Set Movement Date.
-		@param MovementDate Date a product was moved in or out of inventory
-	*/
-	public void setMovementDate (Timestamp MovementDate)
-	{
-		set_Value (COLUMNNAME_MovementDate, MovementDate);
-	}
-
-	/** Get Movement Date.
-		@return Date a product was moved in or out of inventory
-	  */
-	public Timestamp getMovementDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
-	}
-
-	/** MovementType AD_Reference_ID=189 */
-	public static final int MOVEMENTTYPE_AD_Reference_ID=189;
-	/** Customer Returns = C+ */
-	public static final String MOVEMENTTYPE_CustomerReturns = "C+";
-	/** Customer Shipment = C- */
-	public static final String MOVEMENTTYPE_CustomerShipment = "C-";
-	/** Inventory In = I+ */
-	public static final String MOVEMENTTYPE_InventoryIn = "I+";
-	/** Inventory Out = I- */
-	public static final String MOVEMENTTYPE_InventoryOut = "I-";
-	/** Movement To = M+ */
-	public static final String MOVEMENTTYPE_MovementTo = "M+";
-	/** Movement From = M- */
-	public static final String MOVEMENTTYPE_MovementFrom = "M-";
-	/** Production + = P+ */
-	public static final String MOVEMENTTYPE_ProductionPlus = "P+";
-	/** Production - = P- */
-	public static final String MOVEMENTTYPE_Production_ = "P-";
-	/** Vendor Receipts = V+ */
-	public static final String MOVEMENTTYPE_VendorReceipts = "V+";
-	/** Vendor Returns = V- */
-	public static final String MOVEMENTTYPE_VendorReturns = "V-";
-	/** Work Order + = W+ */
-	public static final String MOVEMENTTYPE_WorkOrderPlus = "W+";
-	/** Work Order - = W- */
-	public static final String MOVEMENTTYPE_WorkOrder_ = "W-";
-	/** Set Movement Type.
-		@param MovementType Method of moving the inventory
-	*/
-	public void setMovementType (String MovementType)
-	{
-
-		set_ValueNoCheck (COLUMNNAME_MovementType, MovementType);
-	}
-
-	/** Get Movement Type.
-		@return Method of moving the inventory
-	  */
-	public String getMovementType()
-	{
-		return (String)get_Value(COLUMNNAME_MovementType);
 	}
 
 	public org.compiere.model.I_M_RMA getM_RMA() throws RuntimeException
@@ -1371,6 +1398,65 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Movement Date.
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
+	/** MovementType AD_Reference_ID=189 */
+	public static final int MOVEMENTTYPE_AD_Reference_ID=189;
+	/** Customer Returns = C+ */
+	public static final String MOVEMENTTYPE_CustomerReturns = "C+";
+	/** Customer Shipment = C- */
+	public static final String MOVEMENTTYPE_CustomerShipment = "C-";
+	/** Inventory In = I+ */
+	public static final String MOVEMENTTYPE_InventoryIn = "I+";
+	/** Inventory Out = I- */
+	public static final String MOVEMENTTYPE_InventoryOut = "I-";
+	/** Movement To = M+ */
+	public static final String MOVEMENTTYPE_MovementTo = "M+";
+	/** Movement From = M- */
+	public static final String MOVEMENTTYPE_MovementFrom = "M-";
+	/** Production + = P+ */
+	public static final String MOVEMENTTYPE_ProductionPlus = "P+";
+	/** Production - = P- */
+	public static final String MOVEMENTTYPE_Production_ = "P-";
+	/** Vendor Receipts = V+ */
+	public static final String MOVEMENTTYPE_VendorReceipts = "V+";
+	/** Vendor Returns = V- */
+	public static final String MOVEMENTTYPE_VendorReturns = "V-";
+	/** Work Order + = W+ */
+	public static final String MOVEMENTTYPE_WorkOrderPlus = "W+";
+	/** Work Order - = W- */
+	public static final String MOVEMENTTYPE_WorkOrder_ = "W-";
+	/** Set Movement Type.
+		@param MovementType Method of moving the inventory
+	*/
+	public void setMovementType (String MovementType)
+	{
+
+		set_ValueNoCheck (COLUMNNAME_MovementType, MovementType);
+	}
+
+	/** Get Movement Type.
+		@return Method of moving the inventory
+	  */
+	public String getMovementType()
+	{
+		return (String)get_Value(COLUMNNAME_MovementType);
+	}
+
 	/** Set No Packages.
 		@param NoPackages Number of packages shipped
 	*/
@@ -1390,22 +1476,6 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Pick Date.
-		@param PickDate Date/Time when picked for Shipment
-	*/
-	public void setPickDate (Timestamp PickDate)
-	{
-		set_Value (COLUMNNAME_PickDate, PickDate);
-	}
-
-	/** Get Pick Date.
-		@return Date/Time when picked for Shipment
-	  */
-	public Timestamp getPickDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_PickDate);
-	}
-
 	/** Set Order Reference.
 		@param POReference Transaction Reference Number (Sales Order, Purchase Order) of your Business Partner
 	*/
@@ -1422,6 +1492,22 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 		return (String)get_Value(COLUMNNAME_POReference);
 	}
 
+	/** Set Pick Date.
+		@param PickDate Date/Time when picked for Shipment
+	*/
+	public void setPickDate (Timestamp PickDate)
+	{
+		set_Value (COLUMNNAME_PickDate, PickDate);
+	}
+
+	/** Get Pick Date.
+		@return Date/Time when picked for Shipment
+	  */
+	public Timestamp getPickDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_PickDate);
+	}
+
 	/** Set Posted.
 		@param Posted Posting status
 	*/
@@ -1436,10 +1522,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1488,10 +1574,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1529,10 +1615,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1710,10 +1796,10 @@ public class X_M_InOut extends PO implements I_M_InOut, I_Persistent
 	public boolean isSendEMail()
 	{
 		Object oo = get_Value(COLUMNNAME_SendEMail);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

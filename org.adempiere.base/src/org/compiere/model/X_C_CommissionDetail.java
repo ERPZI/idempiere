@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_CommissionDetail
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_CommissionDetail")
-public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_Persistent 
+public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_CommissionDetail (Properties ctx, int C_CommissionDetail_ID, String trxName)
@@ -65,6 +65,36 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_CommissionDetail (Properties ctx, String C_CommissionDetail_UU, String trxName)
+    {
+      super (ctx, C_CommissionDetail_UU, trxName);
+      /** if (C_CommissionDetail_UU == null)
+        {
+			setActualAmt (Env.ZERO);
+			setActualQty (Env.ZERO);
+			setC_CommissionAmt_ID (0);
+			setC_CommissionDetail_ID (0);
+			setC_Currency_ID (0);
+			setConvertedAmt (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_CommissionDetail (Properties ctx, String C_CommissionDetail_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_CommissionDetail_UU, trxName, virtualColumns);
+      /** if (C_CommissionDetail_UU == null)
+        {
+			setActualAmt (Env.ZERO);
+			setActualQty (Env.ZERO);
+			setC_CommissionAmt_ID (0);
+			setC_CommissionDetail_ID (0);
+			setC_Currency_ID (0);
+			setConvertedAmt (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_CommissionDetail (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +102,7 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -252,25 +282,6 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
 		return ii.intValue();
 	}
 
-	/** Set Converted Amount.
-		@param ConvertedAmt Converted Amount
-	*/
-	public void setConvertedAmt (BigDecimal ConvertedAmt)
-	{
-		set_Value (COLUMNNAME_ConvertedAmt, ConvertedAmt);
-	}
-
-	/** Get Converted Amount.
-		@return Converted Amount
-	  */
-	public BigDecimal getConvertedAmt()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConvertedAmt);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
 	public org.compiere.model.I_C_OrderLine getC_OrderLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_OrderLine)MTable.get(getCtx(), org.compiere.model.I_C_OrderLine.Table_ID)
@@ -297,6 +308,25 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Converted Amount.
+		@param ConvertedAmt Converted Amount
+	*/
+	public void setConvertedAmt (BigDecimal ConvertedAmt)
+	{
+		set_Value (COLUMNNAME_ConvertedAmt, ConvertedAmt);
+	}
+
+	/** Get Converted Amount.
+		@return Converted Amount
+	  */
+	public BigDecimal getConvertedAmt()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ConvertedAmt);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Info.
@@ -334,7 +364,7 @@ public class X_C_CommissionDetail extends PO implements I_C_CommissionDetail, I_
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getReference());
     }

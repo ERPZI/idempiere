@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for S_Resource
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="S_Resource")
-public class X_S_Resource extends PO implements I_S_Resource, I_Persistent 
+public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_S_Resource (Properties ctx, int S_Resource_ID, String trxName)
@@ -47,8 +47,8 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 			setName (null);
 			setPercentUtilization (Env.ZERO);
 // 100
-			setS_Resource_ID (0);
 			setS_ResourceType_ID (0);
+			setS_Resource_ID (0);
 			setValue (null);
         } */
     }
@@ -65,8 +65,44 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 			setName (null);
 			setPercentUtilization (Env.ZERO);
 // 100
-			setS_Resource_ID (0);
 			setS_ResourceType_ID (0);
+			setS_Resource_ID (0);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_S_Resource (Properties ctx, String S_Resource_UU, String trxName)
+    {
+      super (ctx, S_Resource_UU, trxName);
+      /** if (S_Resource_UU == null)
+        {
+			setIsAvailable (true);
+// Y
+			setM_Warehouse_ID (0);
+			setName (null);
+			setPercentUtilization (Env.ZERO);
+// 100
+			setS_ResourceType_ID (0);
+			setS_Resource_ID (0);
+			setValue (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_S_Resource (Properties ctx, String S_Resource_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, S_Resource_UU, trxName, virtualColumns);
+      /** if (S_Resource_UU == null)
+        {
+			setIsAvailable (true);
+// Y
+			setM_Warehouse_ID (0);
+			setName (null);
+			setPercentUtilization (Env.ZERO);
+// 100
+			setS_ResourceType_ID (0);
+			setS_Resource_ID (0);
 			setValue (null);
         } */
     }
@@ -78,7 +114,7 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -193,10 +229,10 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 	public boolean isAvailable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAvailable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -215,39 +251,13 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 	public boolean isManufacturingResource()
 	{
 		Object oo = get_Value(COLUMNNAME_IsManufacturingResource);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** ManufacturingResourceType AD_Reference_ID=53223 */
-	public static final int MANUFACTURINGRESOURCETYPE_AD_Reference_ID=53223;
-	/** Production Line = PL */
-	public static final String MANUFACTURINGRESOURCETYPE_ProductionLine = "PL";
-	/** Plant = PT */
-	public static final String MANUFACTURINGRESOURCETYPE_Plant = "PT";
-	/** Work Center = WC */
-	public static final String MANUFACTURINGRESOURCETYPE_WorkCenter = "WC";
-	/** Work Station = WS */
-	public static final String MANUFACTURINGRESOURCETYPE_WorkStation = "WS";
-	/** Set Manufacturing Resource Type.
-		@param ManufacturingResourceType Manufacturing Resource Type
-	*/
-	public void setManufacturingResourceType (String ManufacturingResourceType)
-	{
-
-		set_Value (COLUMNNAME_ManufacturingResourceType, ManufacturingResourceType);
-	}
-
-	/** Get Manufacturing Resource Type.
-		@return Manufacturing Resource Type	  */
-	public String getManufacturingResourceType()
-	{
-		return (String)get_Value(COLUMNNAME_ManufacturingResourceType);
 	}
 
 	public org.compiere.model.I_M_Warehouse getM_Warehouse() throws RuntimeException
@@ -278,6 +288,32 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 		return ii.intValue();
 	}
 
+	/** ManufacturingResourceType AD_Reference_ID=53223 */
+	public static final int MANUFACTURINGRESOURCETYPE_AD_Reference_ID=53223;
+	/** Production Line = PL */
+	public static final String MANUFACTURINGRESOURCETYPE_ProductionLine = "PL";
+	/** Plant = PT */
+	public static final String MANUFACTURINGRESOURCETYPE_Plant = "PT";
+	/** Work Center = WC */
+	public static final String MANUFACTURINGRESOURCETYPE_WorkCenter = "WC";
+	/** Work Station = WS */
+	public static final String MANUFACTURINGRESOURCETYPE_WorkStation = "WS";
+	/** Set Manufacturing Resource Type.
+		@param ManufacturingResourceType Manufacturing Resource Type
+	*/
+	public void setManufacturingResourceType (String ManufacturingResourceType)
+	{
+
+		set_Value (COLUMNNAME_ManufacturingResourceType, ManufacturingResourceType);
+	}
+
+	/** Get Manufacturing Resource Type.
+		@return Manufacturing Resource Type	  */
+	public String getManufacturingResourceType()
+	{
+		return (String)get_Value(COLUMNNAME_ManufacturingResourceType);
+	}
+
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -297,7 +333,7 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -358,28 +394,6 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 		return bd;
 	}
 
-	/** Set Resource.
-		@param S_Resource_ID Resource
-	*/
-	public void setS_Resource_ID (int S_Resource_ID)
-	{
-		if (S_Resource_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_S_Resource_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_S_Resource_ID, Integer.valueOf(S_Resource_ID));
-	}
-
-	/** Get Resource.
-		@return Resource
-	  */
-	public int getS_Resource_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_S_Resource_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_S_ResourceType getS_ResourceType() throws RuntimeException
 	{
 		return (org.compiere.model.I_S_ResourceType)MTable.get(getCtx(), org.compiere.model.I_S_ResourceType.Table_ID)
@@ -402,6 +416,28 @@ public class X_S_Resource extends PO implements I_S_Resource, I_Persistent
 	public int getS_ResourceType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_S_ResourceType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Resource.
+		@param S_Resource_ID Resource
+	*/
+	public void setS_Resource_ID (int S_Resource_ID)
+	{
+		if (S_Resource_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_S_Resource_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_S_Resource_ID, Integer.valueOf(S_Resource_ID));
+	}
+
+	/** Get Resource.
+		@return Resource
+	  */
+	public int getS_Resource_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_S_Resource_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

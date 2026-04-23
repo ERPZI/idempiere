@@ -19,19 +19,19 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for AD_Ref_Table
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_Ref_Table")
-public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent 
+public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_Ref_Table (Properties ctx, int AD_Ref_Table_ID, String trxName)
@@ -65,6 +65,38 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_Ref_Table (Properties ctx, String AD_Ref_Table_UU, String trxName)
+    {
+      super (ctx, AD_Ref_Table_UU, trxName);
+      /** if (AD_Ref_Table_UU == null)
+        {
+			setAD_Display (0);
+			setAD_Key (0);
+			setAD_Reference_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsValueDisplayed (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_Ref_Table (Properties ctx, String AD_Ref_Table_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_Ref_Table_UU, trxName, virtualColumns);
+      /** if (AD_Ref_Table_UU == null)
+        {
+			setAD_Display (0);
+			setAD_Key (0);
+			setAD_Reference_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsValueDisplayed (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_Ref_Table (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +104,7 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -89,7 +121,7 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_AD_Ref_Table[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
 
@@ -171,6 +203,21 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set AD_Ref_Table_UU.
+		@param AD_Ref_Table_UU AD_Ref_Table_UU
+	*/
+	public void setAD_Ref_Table_UU (String AD_Ref_Table_UU)
+	{
+		set_Value (COLUMNNAME_AD_Ref_Table_UU, AD_Ref_Table_UU);
+	}
+
+	/** Get AD_Ref_Table_UU.
+		@return AD_Ref_Table_UU	  */
+	public String getAD_Ref_Table_UU()
+	{
+		return (String)get_Value(COLUMNNAME_AD_Ref_Table_UU);
+	}
+
 	public org.compiere.model.I_AD_Reference getAD_Reference() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Reference)MTable.get(getCtx(), org.compiere.model.I_AD_Reference.Table_ID)
@@ -199,28 +246,13 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getAD_Reference_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getAD_Reference_ID()));
     }
-
-	/** Set AD_Ref_Table_UU.
-		@param AD_Ref_Table_UU AD_Ref_Table_UU
-	*/
-	public void setAD_Ref_Table_UU (String AD_Ref_Table_UU)
-	{
-		set_Value (COLUMNNAME_AD_Ref_Table_UU, AD_Ref_Table_UU);
-	}
-
-	/** Get AD_Ref_Table_UU.
-		@return AD_Ref_Table_UU	  */
-	public String getAD_Ref_Table_UU()
-	{
-		return (String)get_Value(COLUMNNAME_AD_Ref_Table_UU);
-	}
 
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
 	{
@@ -311,10 +343,10 @@ public class X_AD_Ref_Table extends PO implements I_AD_Ref_Table, I_Persistent
 	public boolean isValueDisplayed()
 	{
 		Object oo = get_Value(COLUMNNAME_IsValueDisplayed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -23,7 +23,6 @@ import org.compiere.util.*;
  *	Reset Cache
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: CacheReset.java,v 1.2 2006/07/30 00:51:02 jjanke Exp $
  */
 @org.adempiere.base.annotation.Process
 public class CacheReset extends SvrProcess 
@@ -37,8 +36,8 @@ public class CacheReset extends SvrProcess
 
 
 	/**
-	 *  Perform process.
-	 *  @return Message to be translated
+	 *  Perform cache reset.
+	 *  @return message for number of cache entries evicted
 	 *  @throws Exception
 	 */
 	protected String doIt() throws java.lang.Exception

@@ -19,20 +19,21 @@ package org.compiere.model;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for M_CostDetail
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_CostDetail")
-public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent 
+public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_CostDetail (Properties ctx, int M_CostDetail_ID, String trxName)
@@ -42,6 +43,9 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
         {
 			setAmt (Env.ZERO);
 			setC_AcctSchema_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setIsBackDate (false);
+// N
 			setIsSOTrx (false);
 			setM_AttributeSetInstance_ID (0);
 			setM_CostDetail_ID (0);
@@ -59,6 +63,49 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
         {
 			setAmt (Env.ZERO);
 			setC_AcctSchema_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setIsBackDate (false);
+// N
+			setIsSOTrx (false);
+			setM_AttributeSetInstance_ID (0);
+			setM_CostDetail_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+			setQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_CostDetail (Properties ctx, String M_CostDetail_UU, String trxName)
+    {
+      super (ctx, M_CostDetail_UU, trxName);
+      /** if (M_CostDetail_UU == null)
+        {
+			setAmt (Env.ZERO);
+			setC_AcctSchema_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setIsBackDate (false);
+// N
+			setIsSOTrx (false);
+			setM_AttributeSetInstance_ID (0);
+			setM_CostDetail_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+			setQty (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_CostDetail (Properties ctx, String M_CostDetail_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_CostDetail_UU, trxName, virtualColumns);
+      /** if (M_CostDetail_UU == null)
+        {
+			setAmt (Env.ZERO);
+			setC_AcctSchema_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setIsBackDate (false);
+// N
 			setIsSOTrx (false);
 			setM_AttributeSetInstance_ID (0);
 			setM_CostDetail_ID (0);
@@ -75,7 +122,7 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -113,6 +160,22 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Back-Date Processed On.
+		@param BackDateProcessedOn The date+time (expressed in decimal format) when the document has been processed
+	*/
+	public void setBackDateProcessedOn (Timestamp BackDateProcessedOn)
+	{
+		set_Value (COLUMNNAME_BackDateProcessedOn, BackDateProcessedOn);
+	}
+
+	/** Get Back-Date Processed On.
+		@return The date+time (expressed in decimal format) when the document has been processed
+	  */
+	public Timestamp getBackDateProcessedOn()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_BackDateProcessedOn);
 	}
 
 	public org.compiere.model.I_C_AcctSchema getC_AcctSchema() throws RuntimeException
@@ -303,6 +366,22 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 		return bd;
 	}
 
+	/** Set Account Date.
+		@param DateAcct Accounting Date
+	*/
+	public void setDateAcct (Timestamp DateAcct)
+	{
+		set_Value (COLUMNNAME_DateAcct, DateAcct);
+	}
+
+	/** Get Account Date.
+		@return Accounting Date
+	  */
+	public Timestamp getDateAcct()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateAcct);
+	}
+
 	/** Set Delta Amount.
 		@param DeltaAmt Difference Amount
 	*/
@@ -357,6 +436,28 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set Back-Date.
+		@param IsBackDate Back-Date
+	*/
+	public void setIsBackDate (boolean IsBackDate)
+	{
+		set_Value (COLUMNNAME_IsBackDate, Boolean.valueOf(IsBackDate));
+	}
+
+	/** Get Back-Date.
+		@return Back-Date	  */
+	public boolean isBackDate()
+	{
+		Object oo = get_Value(COLUMNNAME_IsBackDate);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Sales Transaction.
 		@param IsSOTrx This is a Sales Transaction
 	*/
@@ -371,10 +472,10 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -700,10 +801,10 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -726,5 +827,26 @@ public class X_M_CostDetail extends PO implements I_M_CostDetail, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set Referenced Cost Detail.
+		@param Ref_CostDetail_ID Referenced Cost Detail
+	*/
+	public void setRef_CostDetail_ID (int Ref_CostDetail_ID)
+	{
+		if (Ref_CostDetail_ID < 1)
+			set_Value (COLUMNNAME_Ref_CostDetail_ID, null);
+		else
+			set_Value (COLUMNNAME_Ref_CostDetail_ID, Integer.valueOf(Ref_CostDetail_ID));
+	}
+
+	/** Get Referenced Cost Detail.
+		@return Referenced Cost Detail	  */
+	public int getRef_CostDetail_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Ref_CostDetail_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

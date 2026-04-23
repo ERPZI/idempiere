@@ -30,7 +30,6 @@ import org.compiere.util.Trx;
 /**
  * Transfer data from editor to GridTab
  * @author hengsin
- *
  */
 public class GridTabDataBinder implements ValueChangeListener {
 
@@ -39,7 +38,6 @@ public class GridTabDataBinder implements ValueChangeListener {
 	private GridTab gridTab;
 
 	/**
-	 * 
 	 * @param gridTab
 	 */
 	public GridTabDataBinder(GridTab gridTab) {
@@ -49,14 +47,14 @@ public class GridTabDataBinder implements ValueChangeListener {
 	/**
 	 * @param e
 	 */
+	@Override
 	public void valueChange(ValueChangeEvent e)
     {
-        if (gridTab.isProcessed())       //  only active records
+        if (gridTab.isProcessed())       //  only editable records
         {
             Object source = e.getSource();
             if (source instanceof WEditor)
             {
-            	// Elaine 2009/05/06
             	WEditor editor = (WEditor) source;
             	GridField gridField = editor.getGridField();
             	
@@ -92,20 +90,37 @@ public class GridTabDataBinder implements ValueChangeListener {
         //
         if (e.getNewValue() == null && e.getOldValue() != null 
             && e.getOldValue().toString().length() > 0)     //  some editors return "" instead of null
-//        	  this is the original code from GridController, don't know what it does there but it breaks ignore button for web ui        
-//            mTable.setChanged (true);  
-        	mTable.setValueAt (e.getNewValue(), row, col);
-        else
         {
-        	
+        	mTable.setValueAt (e.getNewValue(), row, col);
+        }
+        else
+        {        	
         	Object newValue = e.getNewValue();
 			Integer newValues[] = null;
 			
 			if (newValue instanceof Integer[])
 			{
 				newValues = ((Integer[])newValue);
+			}
+			else if (newValue instanceof Object[])
+			{
+				newValues = new Integer[((Object[])newValue).length];
+				for (int idx=0; idx<((Object[])newValue).length; idx++)
+				{
+					if (((Object[])newValue)[idx] instanceof Integer)
+					{
+						newValues[idx] = (Integer) ((Object[])newValue)[idx];
+					}
+					else
+					{
+						logger.severe("Multiple values can only be processed for IDs (Integer)");
+						throw new IllegalArgumentException("Multiple Selection values not available for this field. " + e.getPropertyName());
+					}
+				}
+			}
+			if (newValue instanceof Integer[] || newValue instanceof Object[])
+			{
 				newValue = newValues[0];
-				
 				if (newValues.length > 1)
 				{
 					Integer valuesCopy[] = new Integer[newValues.length - 1];
@@ -117,12 +132,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 					newValues = null;
 				}
 			}
-			else if (newValue instanceof Object[])
-			{
-				logger.severe("Multiple values can only be processed for IDs (Integer)");
-				throw new IllegalArgumentException("Multiple Selection values not available for this field. " + e.getPropertyName());
-			}
-			
+
 			if (e.isInitEdit())
 				mTable.setValueAt (newValue, row, col, false, true);
 			else
@@ -172,7 +182,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 
     } // ValueChange
 	
-	/**************************************************************************
+	/**
 	 * Save Multiple records - Clone a record and assign new values to each 
 	 * clone for a specific column.
 	 * @param ctx context
@@ -181,7 +191,7 @@ public class GridTabDataBinder implements ValueChangeListener {
 	 * @param recordId Record to clone
 	 * @param values Values to be assigned to clones for the specified column
 	 * @param trxName Transaction
-	 * @throws Exception If error is occured when loading the PO or saving clones
+	 * @throws Exception If error is occurred when loading the PO or saving clones
 	 * 
 	 * author ashley
 	 */

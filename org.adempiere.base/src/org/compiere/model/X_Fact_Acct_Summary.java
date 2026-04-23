@@ -24,22 +24,22 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for Fact_Acct_Summary
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="Fact_Acct_Summary")
-public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Persistent 
+public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
-    public X_Fact_Acct_Summary (Properties ctx, int Fact_Acct_Summary_ID, String trxName)
+    public X_Fact_Acct_Summary (Properties ctx, String Fact_Acct_Summary_UU, String trxName)
     {
-      super (ctx, Fact_Acct_Summary_ID, trxName);
-      /** if (Fact_Acct_Summary_ID == 0)
+      super (ctx, Fact_Acct_Summary_UU, trxName);
+      /** if (Fact_Acct_Summary_UU == null)
         {
 			setAccount_ID (0);
 			setAmtAcctCr (Env.ZERO);
@@ -53,10 +53,10 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
     }
 
     /** Standard Constructor */
-    public X_Fact_Acct_Summary (Properties ctx, int Fact_Acct_Summary_ID, String trxName, String ... virtualColumns)
+    public X_Fact_Acct_Summary (Properties ctx, String Fact_Acct_Summary_UU, String trxName, String ... virtualColumns)
     {
-      super (ctx, Fact_Acct_Summary_ID, trxName, virtualColumns);
-      /** if (Fact_Acct_Summary_ID == 0)
+      super (ctx, Fact_Acct_Summary_UU, trxName, virtualColumns);
+      /** if (Fact_Acct_Summary_UU == null)
         {
 			setAccount_ID (0);
 			setAmtAcctCr (Env.ZERO);
@@ -76,7 +76,7 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -93,9 +93,31 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_Fact_Acct_Summary[")
-        .append(get_ID()).append("]");
+        .append(get_UUID()).append("]");
       return sb.toString();
     }
+
+	/** Set Trx Organization.
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
+	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
+	{
+		if (AD_OrgTrx_ID < 1)
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
+	}
+
+	/** Get Trx Organization.
+		@return Performing or initiating organization
+	  */
+	public int getAD_OrgTrx_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException
 	{
@@ -120,28 +142,6 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
 	public int getAccount_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Trx Organization.
-		@param AD_OrgTrx_ID Performing or initiating organization
-	*/
-	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
-	{
-		if (AD_OrgTrx_ID < 1)
-			set_Value (COLUMNNAME_AD_OrgTrx_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
-	}
-
-	/** Get Trx Organization.
-		@return Performing or initiating organization
-	  */
-	public int getAD_OrgTrx_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -381,34 +381,6 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
-			.getPO(getC_Project_ID(), get_TrxName());
-	}
-
-	/** Set Project.
-		@param C_Project_ID Financial Project
-	*/
-	public void setC_Project_ID (int C_Project_ID)
-	{
-		if (C_Project_ID < 1)
-			set_Value (COLUMNNAME_C_Project_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
-	}
-
-	/** Get Project.
-		@return Financial Project
-	  */
-	public int getC_Project_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_ProjectPhase getC_ProjectPhase() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_ID)
@@ -460,6 +432,34 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
 	public int getC_ProjectTask_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectTask_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -650,10 +650,10 @@ public class X_Fact_Acct_Summary extends PO implements I_Fact_Acct_Summary, I_Pe
 	public boolean isPostingType()
 	{
 		Object oo = get_Value(COLUMNNAME_PostingType);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

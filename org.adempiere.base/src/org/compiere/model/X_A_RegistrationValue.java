@@ -19,19 +19,19 @@ package org.compiere.model;
 
 import java.sql.ResultSet;
 import java.util.Properties;
-import org.compiere.util.KeyNamePair;
+import org.compiere.util.ValueNamePair;
 
 /** Generated Model for A_RegistrationValue
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_RegistrationValue")
-public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, I_Persistent 
+public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_RegistrationValue (Properties ctx, int A_RegistrationValue_ID, String trxName)
@@ -57,6 +57,30 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
         } */
     }
 
+    /** Standard Constructor */
+    public X_A_RegistrationValue (Properties ctx, String A_RegistrationValue_UU, String trxName)
+    {
+      super (ctx, A_RegistrationValue_UU, trxName);
+      /** if (A_RegistrationValue_UU == null)
+        {
+			setA_RegistrationAttribute_ID (0);
+			setA_Registration_ID (0);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_RegistrationValue (Properties ctx, String A_RegistrationValue_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_RegistrationValue_UU, trxName, virtualColumns);
+      /** if (A_RegistrationValue_UU == null)
+        {
+			setA_RegistrationAttribute_ID (0);
+			setA_Registration_ID (0);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_A_RegistrationValue (Properties ctx, ResultSet rs, String trxName)
     {
@@ -64,7 +88,7 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -81,7 +105,7 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_A_RegistrationValue[")
-        .append(get_ID()).append(",Name=").append(getName()).append("]");
+        .append(get_UUID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -113,13 +137,28 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
 		return ii.intValue();
 	}
 
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
+    /** Get Record UU/ColumnName
+        @return UU/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public ValueNamePair getValueNamePair()
     {
-        return new KeyNamePair(get_ID(), String.valueOf(getA_RegistrationAttribute_ID()));
+        return new ValueNamePair(get_UUID(), String.valueOf(getA_RegistrationAttribute_ID()));
     }
+
+	/** Set A_RegistrationValue_UU.
+		@param A_RegistrationValue_UU A_RegistrationValue_UU
+	*/
+	public void setA_RegistrationValue_UU (String A_RegistrationValue_UU)
+	{
+		set_Value (COLUMNNAME_A_RegistrationValue_UU, A_RegistrationValue_UU);
+	}
+
+	/** Get A_RegistrationValue_UU.
+		@return A_RegistrationValue_UU	  */
+	public String getA_RegistrationValue_UU()
+	{
+		return (String)get_Value(COLUMNNAME_A_RegistrationValue_UU);
+	}
 
 	public org.compiere.model.I_A_Registration getA_Registration() throws RuntimeException
 	{
@@ -147,21 +186,6 @@ public class X_A_RegistrationValue extends PO implements I_A_RegistrationValue, 
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set A_RegistrationValue_UU.
-		@param A_RegistrationValue_UU A_RegistrationValue_UU
-	*/
-	public void setA_RegistrationValue_UU (String A_RegistrationValue_UU)
-	{
-		set_Value (COLUMNNAME_A_RegistrationValue_UU, A_RegistrationValue_UU);
-	}
-
-	/** Get A_RegistrationValue_UU.
-		@return A_RegistrationValue_UU	  */
-	public String getA_RegistrationValue_UU()
-	{
-		return (String)get_Value(COLUMNNAME_A_RegistrationValue_UU);
 	}
 
 	/** Set Description.

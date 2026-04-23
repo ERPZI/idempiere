@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for A_Asset_Addition
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="A_Asset_Addition")
-public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Persistent 
+public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_A_Asset_Addition (Properties ctx, int A_Asset_Addition_ID, String trxName)
@@ -108,6 +108,78 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
         } */
     }
 
+    /** Standard Constructor */
+    public X_A_Asset_Addition (Properties ctx, String A_Asset_Addition_UU, String trxName)
+    {
+      super (ctx, A_Asset_Addition_UU, trxName);
+      /** if (A_Asset_Addition_UU == null)
+        {
+			setA_Asset_Addition_ID (0);
+			setA_Asset_ID (0);
+			setA_CapvsExp (null);
+// 'Cap'
+			setA_CreateAsset (false);
+// 'N'
+			setA_QTY_Current (Env.ZERO);
+// 0
+			setA_SourceType (null);
+// 'INV'
+			setAssetAmtEntered (Env.ZERO);
+// 0
+			setAssetValueAmt (Env.ZERO);
+			setC_ConversionType_ID (0);
+			setC_Currency_ID (0);
+			setDateDoc (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocStatus (null);
+// 'DR'
+			setIsApproved (false);
+// @#IsCanApproveOwnDoc@
+			setPosted (false);
+// N
+			setPostingType (null);
+// A
+			setProcessed (false);
+// 'N'
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_A_Asset_Addition (Properties ctx, String A_Asset_Addition_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, A_Asset_Addition_UU, trxName, virtualColumns);
+      /** if (A_Asset_Addition_UU == null)
+        {
+			setA_Asset_Addition_ID (0);
+			setA_Asset_ID (0);
+			setA_CapvsExp (null);
+// 'Cap'
+			setA_CreateAsset (false);
+// 'N'
+			setA_QTY_Current (Env.ZERO);
+// 0
+			setA_SourceType (null);
+// 'INV'
+			setAssetAmtEntered (Env.ZERO);
+// 0
+			setAssetValueAmt (Env.ZERO);
+			setC_ConversionType_ID (0);
+			setC_Currency_ID (0);
+			setDateDoc (new Timestamp( System.currentTimeMillis() ));
+// @#Date@
+			setDocStatus (null);
+// 'DR'
+			setIsApproved (false);
+// @#IsCanApproveOwnDoc@
+			setPosted (false);
+// N
+			setPostingType (null);
+// A
+			setProcessed (false);
+// 'N'
+        } */
+    }
+
     /** Load Constructor */
     public X_A_Asset_Addition (Properties ctx, ResultSet rs, String trxName)
     {
@@ -115,7 +187,7 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -235,10 +307,10 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public boolean isA_CreateAsset()
 	{
 		Object oo = get_Value(COLUMNNAME_A_CreateAsset);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -537,34 +609,6 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
-			.getPO(getC_Invoice_ID(), get_TrxName());
-	}
-
-	/** Set Invoice.
-		@param C_Invoice_ID Invoice Identifier
-	*/
-	public void setC_Invoice_ID (int C_Invoice_ID)
-	{
-		if (C_Invoice_ID < 1)
-			set_Value (COLUMNNAME_C_Invoice_ID, null);
-		else
-			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
-	}
-
-	/** Get Invoice.
-		@return Invoice Identifier
-	  */
-	public int getC_Invoice_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_InvoiceLine getC_InvoiceLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_InvoiceLine)MTable.get(getCtx(), org.compiere.model.I_C_InvoiceLine.Table_ID)
@@ -588,6 +632,34 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public int getC_InvoiceLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_InvoiceLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
+			.getPO(getC_Invoice_ID(), get_TrxName());
+	}
+
+	/** Set Invoice.
+		@param C_Invoice_ID Invoice Identifier
+	*/
+	public void setC_Invoice_ID (int C_Invoice_ID)
+	{
+		if (C_Invoice_ID < 1)
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+	}
+
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -800,7 +872,7 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getDocumentNo());
     }
@@ -874,10 +946,10 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public boolean isApproved()
 	{
 		Object oo = get_Value(COLUMNNAME_IsApproved);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1056,10 +1128,10 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public boolean isPosted()
 	{
 		Object oo = get_Value(COLUMNNAME_Posted);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1108,10 +1180,10 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1149,10 +1221,10 @@ public class X_A_Asset_Addition extends PO implements I_A_Asset_Addition, I_Pers
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

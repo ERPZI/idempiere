@@ -16,24 +16,23 @@
  *****************************************************************************/
 package org.compiere.util;
 
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-
 /**
- *	idempiere Logger
+ *	iDempiere Logger
  *
  *  @author Jorg Janke
  *  @version $Id: CLogger.java,v 1.3 2006/08/09 16:38:47 jjanke Exp $
  */
 public class CLogger extends Logger
 {
-	private static final String LAST_INFO = "org.compiere.util.CLogger.lastInfo";
-	private static final String LAST_WARNING = "org.compiere.util.CLogger.lastWarning";
-	private static final String LAST_ERROR = "org.compiere.util.CLogger.lastError";
-	private static final String LAST_EXCEPTION = "org.compiere.util.CLogger.lastException";
-
-
+	private static final ThreadLocal<ValueNamePair> s_lastError = new ThreadLocal<>();
+	private static final ThreadLocal<Exception> s_lastErrorException = new ThreadLocal<>();
+	private static final ThreadLocal<ValueNamePair> s_lastWarning = new ThreadLocal<>();
+	private static final ThreadLocal<ValueNamePair> s_lastInfo = new ThreadLocal<>();
+	
 	/**
 	 * 	Get Logger
 	 *	@param className class name
@@ -52,7 +51,6 @@ public class CLogger extends Logger
 	 */
     public static synchronized CLogger getCLogger (String className, boolean usePackageLevel)
     {
-   	//	CLogMgt.initialize();
     	LogManager manager = LogManager.getLogManager();
     	if (className == null || className.trim().length() == 0)
     		className = "";
@@ -61,16 +59,20 @@ public class CLogger extends Logger
     	if (result != null && result instanceof CLogger)
     		return (CLogger)result;
     	
-    	Logger packageLogger = null;
+    	Level packageLevel = null;
     	if (className.indexOf(".") > 0 && usePackageLevel)
     	{
     		String s = className.substring(0, className.lastIndexOf("."));
     		while(s.indexOf(".") > 0)
     		{
+    			packageLevel = CLogMgt.getFromLevelMap(s);
+    			if (packageLevel != null)
+    				break;
+    			
     			result = manager.getLogger(s);
-    			if (result != null && result instanceof CLogger)
+    			if (result != null && result instanceof CLogger cl)
     			{
-    	    		packageLogger = result;
+    	    		packageLevel = cl.getLevel();
     	    		break;
     			}
     			s = s.substring(0, s.lastIndexOf("."));
@@ -78,10 +80,17 @@ public class CLogger extends Logger
     	}
     	//
    	    CLogger newLogger = new CLogger(className, null);
-   	    if (packageLogger != null && packageLogger.getLevel() != null)
-   	    	newLogger.setLevel(packageLogger.getLevel());
+   	    Level fromPropertyFile = CLogMgt.getFromLevelMap(className);
+   	    if (fromPropertyFile != null)
+   	    	newLogger.setLevel(fromPropertyFile);
+   	    else if (packageLevel != null)
+   	    	newLogger.setLevel(packageLevel);
    	    else
    	    	newLogger.setLevel(CLogMgt.getLevel());
+   	    if (!newLogger.getUseParentHandlers()) 
+		{
+   	    	newLogger.setUseParentHandlers(true);
+		}
    	    manager.addLogger(newLogger);
     	return newLogger;
     }	//	getLogger
@@ -99,8 +108,7 @@ public class CLogger extends Logger
     }	//	getLogger
 
     /**
-     * 	Get default idempiere Logger.
-     * 	Need to be used in serialized objects
+     * 	Get default iDempiere Logger.
      *	@return logger
      */
     public static CLogger get()
@@ -113,8 +121,7 @@ public class CLogger extends Logger
     /**	Default Logger			*/
     private volatile static CLogger	s_logger = null;
 
-
-	/**************************************************************************
+	/**
 	 * 	Standard constructor
 	 *	@param name logger name
 	 *	@param resourceBundleName optional resource bundle (ignored)
@@ -125,11 +132,8 @@ public class CLogger extends Logger
 	//	setLevel(Level.ALL);
 	}	//	CLogger
 
-
-	/*************************************************************************/
-
 	/**
-	 *  Set and issue Error and save as ValueNamePair
+	 *  Set and issue Error and save as ValueNamePair into thread local last error variable
 	 *  @param AD_Message message key
 	 *  @param message clear text message
 	 *  @return true (to avoid removal of method)
@@ -140,19 +144,19 @@ public class CLogger extends Logger
 	}   //  saveError
 
 	/**
-	 *  Set and issue Error and save as ValueNamePair
+	 *  Set and issue Error and save into context as ValueNamePair into thread local last exception variable
 	 *  @param AD_Message message key
 	 *  @param ex exception
 	 *  @return true (to avoid removal of method)
 	 */
 	public boolean saveError (String AD_Message, Exception ex)
 	{
-		Env.getCtx().put(LAST_EXCEPTION, ex);
+		s_lastErrorException.set(ex);
 		return saveError (AD_Message, ex.getLocalizedMessage(), true);
 	}   //  saveError
 
 	/**
-	 *  Set and issue (if specified) Error and save as ValueNamePair
+	 *  Set and issue (if specified) Error and save as ValueNamePair into thread local last exception and last error variable
 	 *  @param AD_Message message key
 	 *  @param ex exception
 	 *  @param issueError if true will issue an error
@@ -160,12 +164,44 @@ public class CLogger extends Logger
 	 */
 	public boolean saveError (String AD_Message, Exception ex, boolean issueError)
 	{
-		Env.getCtx().put(LAST_EXCEPTION, ex);
+		s_lastErrorException.set(ex);
 		return saveError (AD_Message, ex.getLocalizedMessage(), issueError);
 	}   //  saveError
 
 	/**
-	 *  Set Error and save as ValueNamePair
+	 *  Save exception as thread local last exception variable. <br/>
+	 *  Create ValueNamePair(AD_Message, message) and save into thread local as last error.<br/>
+	 *  Issue/publish AD_Message and message as severe log message
+	 *  @param AD_Message message key
+	 *  @param message
+	 *  @param ex exception
+	 *  @return true (to avoid removal of method)
+	 */
+	public boolean saveError (String AD_Message, String message, Exception ex)
+	{
+		s_lastErrorException.set(ex);
+		return saveError (AD_Message, message, true);
+	}   //  saveError
+
+	/**
+	 *  Save exception as thread local last exception variable. <br/>
+	 *  Create ValueNamePair(AD_Message, message) and save into thread local as last error.<br/>
+	 *  Issue/publish AD_Message and message as severe log message if issueError is true.  
+	 *  @param AD_Message message key
+	 *  @param message
+	 *  @param ex exception
+	 *  @param issueError if true will issue an error
+	 *  @return true (to avoid removal of method)
+	 */
+	public boolean saveError (String AD_Message, String message, Exception ex, boolean issueError)
+	{
+		s_lastErrorException.set(ex);
+		return saveError (AD_Message, message, issueError);
+	}   //  saveError
+
+	/**
+	 *  Create ValueNamePair(AD_Message, message) and save into thread local as last error variable.<br/>
+	 *  Issue/publish AD_Message and message as severe log message if issueError is true.
 	 *  @param AD_Message message key
 	 *  @param message clear text message
 	 *  @param issueError print error message (default true)
@@ -174,7 +210,7 @@ public class CLogger extends Logger
 	public boolean saveError (String AD_Message, String message, boolean issueError)
 	{
 		ValueNamePair lastError = new ValueNamePair (AD_Message, message);
-		Env.getCtx().put(LAST_ERROR, lastError);
+		s_lastError.set(lastError);
 		//  print it
 		if (issueError)
 			severe(AD_Message + " - " + message);
@@ -182,31 +218,32 @@ public class CLogger extends Logger
 	}   //  saveError
 
 	/**
-	 *  Get Error from Stack
+	 *  Get and remove last error from thread local variable
 	 *  @return AD_Message as Value and Message as String
 	 */
 	public static ValueNamePair retrieveError()
 	{
-		ValueNamePair vp = (ValueNamePair) Env.getCtx().remove(LAST_ERROR);
+		ValueNamePair vp = s_lastError.get();
+		if (vp != null)
+			s_lastError.remove();
 		return vp;
 	}   //  retrieveError
 
 	/**
-	 *  Peek Error from Stack
+	 *  Get last error from thread local variable
 	 *  @return AD_Message as Value and Message as String
 	 */
 	public static ValueNamePair peekError()
 	{
-		ValueNamePair vp = (ValueNamePair) Env.getCtx().get(LAST_ERROR);
+		ValueNamePair vp = s_lastError.get();
 		return vp;
 	}   //  peekError
 	
 	/**
-	 * Get Error message from stack
+	 * Get and remove last error message from thread local variable.
 	 * @param defaultMsg default message (used when there are no errors on stack)
-	 * @return error message, or defaultMsg if there is not error message saved
+	 * @return error message, or defaultMsg if there is no error message saved
 	 * @see #retrieveError()
-	 * author Teo Sarca, SC ARHIPAC SERVICE SRL
 	 */
 	public static String retrieveErrorString(String defaultMsg) {
 		ValueNamePair vp = retrieveError();
@@ -216,27 +253,30 @@ public class CLogger extends Logger
 	}
 
 	/**
-	 *  Get Error from Stack
+	 *  Get and remove last exception from thread local variable.
 	 *  @return last exception
 	 */
 	public static Exception retrieveException()
 	{
-		Exception ex = (Exception) Env.getCtx().remove(LAST_EXCEPTION);
+		Exception ex = s_lastErrorException.get();
+		if (ex != null)
+			s_lastErrorException.remove();
 		return ex;
 	}   //  retrieveError
 
 	/**
-	 *  Peek Exception from Stack
+	 *  Get last exception from thread local variable.
 	 *  @return last exception
 	 */
 	public static Exception peekException()
 	{
-		Exception ex = (Exception) Env.getCtx().get(LAST_EXCEPTION);
+		Exception ex = s_lastErrorException.get();
 		return ex;
 	}   //  peekException
 	
 	/**
-	 *  Save Warning as ValueNamePair.
+	 *  Create ValueNamePair(AD_Message, message) and save into thread local variable as last warning.<br/>
+	 *  Issue/publish AD_Message and message as warning log message
 	 *  @param AD_Message message key
 	 *  @param message clear text message
 	 *  @return true
@@ -244,7 +284,7 @@ public class CLogger extends Logger
 	public boolean saveWarning (String AD_Message, String message)
 	{
 		ValueNamePair lastWarning = new ValueNamePair(AD_Message, message);
-		Env.getCtx().put(LAST_WARNING, lastWarning);
+		s_lastWarning.set(lastWarning);
 		//  print it
 		if (true) //	issueError
 			warning(AD_Message + " - " + message);
@@ -252,7 +292,7 @@ public class CLogger extends Logger
 	}   //  saveWarning
 
 	/**
-	 * Get Warning message from stack
+	 * Get and remove last Warning message from thread local variable.
 	 * @param defaultMsg default message (used when there are no warnings on stack)
 	 * @return error message, or defaultMsg if there is not error message saved
 	 * @see #retrieveError()
@@ -265,55 +305,59 @@ public class CLogger extends Logger
 	}
 
 	/**
-	 *  Get Warning from Stack
+	 *  Get and remove last Warning from thread local variable
 	 *  @return AD_Message as Value and Message as String
 	 */
 	public static ValueNamePair retrieveWarning()
 	{
-		ValueNamePair vp = (ValueNamePair) Env.getCtx().remove(LAST_WARNING);
+		ValueNamePair vp = s_lastWarning.get();
+		if (vp != null)
+			s_lastWarning.remove();
 		return vp;
 	}   //  retrieveWarning
 
 	/**
-	 *  Save Info as ValueNamePair
+	 *  Create ValueNamePair(AD_Message, message) and save into thread local variable as last info.<br/>
+	 *  Issue/publish AD_Message and message as info log message
 	 *  @param AD_Message message key
 	 *  @param message clear text message
 	 *  @return true
 	 */
 	public boolean saveInfo (String AD_Message, String message)
 	{
-//		s_lastInfo = new ValueNamePair (AD_Message, message);
 		ValueNamePair lastInfo = new ValueNamePair (AD_Message, message);
-		Env.getCtx().put(LAST_INFO, lastInfo);
+		s_lastInfo.set(lastInfo);
 		return true;
 	}   //  saveInfo
 
 	/**
-	 *  Get Info from Stack
+	 *  Get and remove last Info from thread local variable
 	 *  @return AD_Message as Value and Message as String
 	 */
 	public static ValueNamePair retrieveInfo()
 	{
-		ValueNamePair vp = (ValueNamePair) Env.getCtx().remove(LAST_INFO);
+		ValueNamePair vp = s_lastInfo.get();
+		if (vp != null)
+			s_lastInfo.remove();
 		return vp;
 	}   //  retrieveInfo
 
 	/**
-	 * 	Reset Saved Messages/Errors/Info
+	 * 	Remove last Saved Messages/Errors/Info from thread local variable
 	 */
 	public static void resetLast()
 	{
-		Env.getCtx().remove(LAST_ERROR);
-		Env.getCtx().remove(LAST_EXCEPTION);
-		Env.getCtx().remove(LAST_WARNING);
-		Env.getCtx().remove(LAST_INFO);
+		s_lastError.remove();
+		s_lastErrorException.remove();
+		s_lastWarning.remove();
+		s_lastInfo.remove();
 	}	//	resetLast
 
 	/**
 	 * Get root cause
 	 * @param t
 	 * @return Throwable
-	 */
+	 */	
 	public static Throwable getRootCause(Throwable t)
 	{
 		Throwable cause = t;
@@ -328,6 +372,7 @@ public class CLogger extends Logger
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("CLogger[");
@@ -335,37 +380,5 @@ public class CLogger extends Logger
 			.append (",Level=").append (getLevel()).append ("]");
 		return sb.toString ();
 	}	 //	toString
-
-	/**
-	 * 	Write Object - Serialization
-	 *	@param out out
-	 *	@throws IOException
-	 *
-	private void writeObject (ObjectOutputStream out) throws IOException
-	{
-		out.writeObject(getName());
-		System.out.println("====writeObject:" + getName());
-	}	//	writeObject
-
-	private String m_className = null;
-
-	private void readObject (ObjectInputStream in) throws IOException
-	{
-		try
-		{
-			m_className = (String)in.readObject();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		System.out.println("====readObject:" + m_className);
-	}
-
-	protected Object readResolve() throws ObjectStreamException
-	{
-		System.out.println("====readResolve:" + m_className);
-		return getLogger(m_className);
-	}
-	/** **/
+	
 }	//	CLogger

@@ -24,16 +24,16 @@ import org.compiere.model.*;
 import org.compiere.util.Env;
 
 /** Generated Model for PP_Cost_CollectorMA
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PP_Cost_CollectorMA")
-public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, I_Persistent 
+public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PP_Cost_CollectorMA (Properties ctx, int PP_Cost_CollectorMA_ID, String trxName)
@@ -43,8 +43,8 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
         {
 			setM_AttributeSetInstance_ID (0);
 			setMovementQty (Env.ZERO);
-			setPP_Cost_Collector_ID (0);
 			setPP_Cost_CollectorMA_ID (0);
+			setPP_Cost_Collector_ID (0);
         } */
     }
 
@@ -56,8 +56,34 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
         {
 			setM_AttributeSetInstance_ID (0);
 			setMovementQty (Env.ZERO);
-			setPP_Cost_Collector_ID (0);
 			setPP_Cost_CollectorMA_ID (0);
+			setPP_Cost_Collector_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Cost_CollectorMA (Properties ctx, String PP_Cost_CollectorMA_UU, String trxName)
+    {
+      super (ctx, PP_Cost_CollectorMA_UU, trxName);
+      /** if (PP_Cost_CollectorMA_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setMovementQty (Env.ZERO);
+			setPP_Cost_CollectorMA_ID (0);
+			setPP_Cost_Collector_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Cost_CollectorMA (Properties ctx, String PP_Cost_CollectorMA_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_Cost_CollectorMA_UU, trxName, virtualColumns);
+      /** if (PP_Cost_CollectorMA_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setMovementQty (Env.ZERO);
+			setPP_Cost_CollectorMA_ID (0);
+			setPP_Cost_Collector_ID (0);
         } */
     }
 
@@ -68,7 +94,7 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -136,33 +162,6 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
 		return bd;
 	}
 
-	public org.eevolution.model.I_PP_Cost_Collector getPP_Cost_Collector() throws RuntimeException
-	{
-		return (org.eevolution.model.I_PP_Cost_Collector)MTable.get(getCtx(), org.eevolution.model.I_PP_Cost_Collector.Table_ID)
-			.getPO(getPP_Cost_Collector_ID(), get_TrxName());
-	}
-
-	/** Set Manufacturing Cost Collector.
-		@param PP_Cost_Collector_ID Manufacturing Cost Collector
-	*/
-	public void setPP_Cost_Collector_ID (int PP_Cost_Collector_ID)
-	{
-		if (PP_Cost_Collector_ID < 1)
-			set_Value (COLUMNNAME_PP_Cost_Collector_ID, null);
-		else
-			set_Value (COLUMNNAME_PP_Cost_Collector_ID, Integer.valueOf(PP_Cost_Collector_ID));
-	}
-
-	/** Get Manufacturing Cost Collector.
-		@return Manufacturing Cost Collector	  */
-	public int getPP_Cost_Collector_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Cost_Collector_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Manufacturing Order MA.
 		@param PP_Cost_CollectorMA_ID Manufacturing Order MA
 	*/
@@ -197,5 +196,32 @@ public class X_PP_Cost_CollectorMA extends PO implements I_PP_Cost_CollectorMA, 
 	public String getPP_Cost_CollectorMA_UU()
 	{
 		return (String)get_Value(COLUMNNAME_PP_Cost_CollectorMA_UU);
+	}
+
+	public org.eevolution.model.I_PP_Cost_Collector getPP_Cost_Collector() throws RuntimeException
+	{
+		return (org.eevolution.model.I_PP_Cost_Collector)MTable.get(getCtx(), org.eevolution.model.I_PP_Cost_Collector.Table_ID)
+			.getPO(getPP_Cost_Collector_ID(), get_TrxName());
+	}
+
+	/** Set Manufacturing Cost Collector.
+		@param PP_Cost_Collector_ID Manufacturing Cost Collector
+	*/
+	public void setPP_Cost_Collector_ID (int PP_Cost_Collector_ID)
+	{
+		if (PP_Cost_Collector_ID < 1)
+			set_Value (COLUMNNAME_PP_Cost_Collector_ID, null);
+		else
+			set_Value (COLUMNNAME_PP_Cost_Collector_ID, Integer.valueOf(PP_Cost_Collector_ID));
+	}
+
+	/** Get Manufacturing Cost Collector.
+		@return Manufacturing Cost Collector	  */
+	public int getPP_Cost_Collector_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Cost_Collector_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

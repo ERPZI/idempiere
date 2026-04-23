@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for Fact_Acct
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="Fact_Acct")
-public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent 
+public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_Fact_Acct (Properties ctx, int Fact_Acct_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
       super (ctx, Fact_Acct_ID, trxName);
       /** if (Fact_Acct_ID == 0)
         {
-			setAccount_ID (0);
 			setAD_Table_ID (0);
+			setAccount_ID (0);
 			setAmtAcctCr (Env.ZERO);
 			setAmtAcctDr (Env.ZERO);
 			setAmtSourceCr (Env.ZERO);
@@ -66,8 +66,56 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
       super (ctx, Fact_Acct_ID, trxName, virtualColumns);
       /** if (Fact_Acct_ID == 0)
         {
-			setAccount_ID (0);
 			setAD_Table_ID (0);
+			setAccount_ID (0);
+			setAmtAcctCr (Env.ZERO);
+			setAmtAcctDr (Env.ZERO);
+			setAmtSourceCr (Env.ZERO);
+			setAmtSourceDr (Env.ZERO);
+			setC_AcctSchema_ID (0);
+			setC_Currency_ID (0);
+			setC_Period_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+			setFact_Acct_ID (0);
+			setGL_Category_ID (0);
+			setPostingType (null);
+			setRecord_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_Fact_Acct (Properties ctx, String Fact_Acct_UU, String trxName)
+    {
+      super (ctx, Fact_Acct_UU, trxName);
+      /** if (Fact_Acct_UU == null)
+        {
+			setAD_Table_ID (0);
+			setAccount_ID (0);
+			setAmtAcctCr (Env.ZERO);
+			setAmtAcctDr (Env.ZERO);
+			setAmtSourceCr (Env.ZERO);
+			setAmtSourceDr (Env.ZERO);
+			setC_AcctSchema_ID (0);
+			setC_Currency_ID (0);
+			setC_Period_ID (0);
+			setDateAcct (new Timestamp( System.currentTimeMillis() ));
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+			setFact_Acct_ID (0);
+			setGL_Category_ID (0);
+			setPostingType (null);
+			setRecord_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_Fact_Acct (Properties ctx, String Fact_Acct_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, Fact_Acct_UU, trxName, virtualColumns);
+      /** if (Fact_Acct_UU == null)
+        {
+			setAD_Table_ID (0);
+			setAccount_ID (0);
 			setAmtAcctCr (Env.ZERO);
 			setAmtAcctDr (Env.ZERO);
 			setAmtSourceCr (Env.ZERO);
@@ -91,7 +139,7 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -111,50 +159,6 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	/** Set Asset.
-		@param A_Asset_ID Asset used internally or by customers
-	*/
-	public void setA_Asset_ID (int A_Asset_ID)
-	{
-		if (A_Asset_ID < 1)
-			set_Value (COLUMNNAME_A_Asset_ID, null);
-		else
-			set_Value (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
-	}
-
-	/** Get Asset.
-		@return Asset used internally or by customers
-	  */
-	public int getA_Asset_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Account.
-		@param Account_ID Account used
-	*/
-	public void setAccount_ID (int Account_ID)
-	{
-		if (Account_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_Account_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_Account_ID, Integer.valueOf(Account_ID));
-	}
-
-	/** Get Account.
-		@return Account used
-	  */
-	public int getAccount_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Trx Organization.
 		@param AD_OrgTrx_ID Performing or initiating organization
@@ -201,6 +205,50 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
 	public int getAD_Table_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Asset.
+		@param A_Asset_ID Asset used internally or by customers
+	*/
+	public void setA_Asset_ID (int A_Asset_ID)
+	{
+		if (A_Asset_ID < 1)
+			set_Value (COLUMNNAME_A_Asset_ID, null);
+		else
+			set_Value (COLUMNNAME_A_Asset_ID, Integer.valueOf(A_Asset_ID));
+	}
+
+	/** Get Asset.
+		@return Asset used internally or by customers
+	  */
+	public int getA_Asset_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_A_Asset_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Account.
+		@param Account_ID Account used
+	*/
+	public void setAccount_ID (int Account_ID)
+	{
+		if (Account_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_Account_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_Account_ID, Integer.valueOf(Account_ID));
+	}
+
+	/** Get Account.
+		@return Account used
+	  */
+	public int getAccount_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -506,34 +554,6 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
-			.getPO(getC_Project_ID(), get_TrxName());
-	}
-
-	/** Set Project.
-		@param C_Project_ID Financial Project
-	*/
-	public void setC_Project_ID (int C_Project_ID)
-	{
-		if (C_Project_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
-	}
-
-	/** Get Project.
-		@return Financial Project
-	  */
-	public int getC_Project_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_ProjectPhase getC_ProjectPhase() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ProjectPhase)MTable.get(getCtx(), org.compiere.model.I_C_ProjectPhase.Table_ID)
@@ -585,6 +605,34 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
 	public int getC_ProjectTask_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_ProjectTask_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -774,7 +822,7 @@ public class X_Fact_Acct extends PO implements I_Fact_Acct, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getFact_Acct_ID()));
     }

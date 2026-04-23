@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for I_BPartner
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 12
  */
 public interface I_I_BPartner 
 {
@@ -48,32 +48,6 @@ public interface I_I_BPartner
 	  * Tenant for this installation.
 	  */
 	public int getAD_Client_ID();
-
-    /** Column name Address1 */
-    public static final String COLUMNNAME_Address1 = "Address1";
-
-	/** Set Address 1.
-	  * Address line 1 for this location
-	  */
-	public void setAddress1 (String Address1);
-
-	/** Get Address 1.
-	  * Address line 1 for this location
-	  */
-	public String getAddress1();
-
-    /** Column name Address2 */
-    public static final String COLUMNNAME_Address2 = "Address2";
-
-	/** Set Address 2.
-	  * Address line 2 for this location
-	  */
-	public void setAddress2 (String Address2);
-
-	/** Get Address 2.
-	  * Address line 2 for this location
-	  */
-	public String getAddress2();
 
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
@@ -103,18 +77,83 @@ public interface I_I_BPartner
 
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 
-    /** Column name Birthday */
-    public static final String COLUMNNAME_Birthday = "Birthday";
+    /** Column name A_EMail */
+    public static final String COLUMNNAME_A_EMail = "A_EMail";
 
-	/** Set Birthday.
-	  * Birthday or Anniversary day
+	/** Set Account EMail.
+	  * Email Address
 	  */
-	public void setBirthday (Timestamp Birthday);
+	public void setA_EMail (String A_EMail);
 
-	/** Get Birthday.
-	  * Birthday or Anniversary day
+	/** Get Account EMail.
+	  * Email Address
 	  */
-	public Timestamp getBirthday();
+	public String getA_EMail();
+
+    /** Column name A_Name */
+    public static final String COLUMNNAME_A_Name = "A_Name";
+
+	/** Set Account Name.
+	  * Name on Credit Card or Account holder
+	  */
+	public void setA_Name (String A_Name);
+
+	/** Get Account Name.
+	  * Name on Credit Card or Account holder
+	  */
+	public String getA_Name();
+
+    /** Column name AccountNo */
+    public static final String COLUMNNAME_AccountNo = "AccountNo";
+
+	/** Set Account No.
+	  * Account Number
+	  */
+	public void setAccountNo (String AccountNo);
+
+	/** Get Account No.
+	  * Account Number
+	  */
+	public String getAccountNo();
+
+    /** Column name Address1 */
+    public static final String COLUMNNAME_Address1 = "Address1";
+
+	/** Set Address 1.
+	  * Address line 1 for this location
+	  */
+	public void setAddress1 (String Address1);
+
+	/** Get Address 1.
+	  * Address line 1 for this location
+	  */
+	public String getAddress1();
+
+    /** Column name Address2 */
+    public static final String COLUMNNAME_Address2 = "Address2";
+
+	/** Set Address 2.
+	  * Address line 2 for this location
+	  */
+	public void setAddress2 (String Address2);
+
+	/** Get Address 2.
+	  * Address line 2 for this location
+	  */
+	public String getAddress2();
+
+    /** Column name BPBankAcctUse */
+    public static final String COLUMNNAME_BPBankAcctUse = "BPBankAcctUse";
+
+	/** Set Account Usage.
+	  * Business Partner Bank Account usage
+	  */
+	public void setBPBankAcctUse (String BPBankAcctUse);
+
+	/** Get Account Usage.
+	  * Business Partner Bank Account usage
+	  */
+	public String getBPBankAcctUse();
 
     /** Column name BPContactGreeting */
     public static final String COLUMNNAME_BPContactGreeting = "BPContactGreeting";
@@ -128,6 +167,71 @@ public interface I_I_BPartner
 	  * Greeting for Business Partner Contact
 	  */
 	public String getBPContactGreeting();
+
+    /** Column name BankAccountType */
+    public static final String COLUMNNAME_BankAccountType = "BankAccountType";
+
+	/** Set Bank Account Type.
+	  * Bank Account Type
+	  */
+	public void setBankAccountType (String BankAccountType);
+
+	/** Get Bank Account Type.
+	  * Bank Account Type
+	  */
+	public String getBankAccountType();
+
+    /** Column name BankName */
+    public static final String COLUMNNAME_BankName = "BankName";
+
+	/** Set Bank Name	  */
+	public void setBankName (String BankName);
+
+	/** Get Bank Name	  */
+	public String getBankName();
+
+    /** Column name Birthday */
+    public static final String COLUMNNAME_Birthday = "Birthday";
+
+	/** Set Birthday.
+	  * Birthday or Anniversary day
+	  */
+	public void setBirthday (Timestamp Birthday);
+
+	/** Get Birthday.
+	  * Birthday or Anniversary day
+	  */
+	public Timestamp getBirthday();
+
+    /** Column name C_BP_BankAccount_ID */
+    public static final String COLUMNNAME_C_BP_BankAccount_ID = "C_BP_BankAccount_ID";
+
+	/** Set Partner Bank Account.
+	  * Bank Account of the Business Partner
+	  */
+	public void setC_BP_BankAccount_ID (int C_BP_BankAccount_ID);
+
+	/** Get Partner Bank Account.
+	  * Bank Account of the Business Partner
+	  */
+	public int getC_BP_BankAccount_ID();
+
+	public org.compiere.model.I_C_BP_BankAccount getC_BP_BankAccount() throws RuntimeException;
+
+    /** Column name C_BP_Group_ID */
+    public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
+
+	/** Set Business Partner Group.
+	  * Business Partner Group
+	  */
+	public void setC_BP_Group_ID (int C_BP_Group_ID);
+
+	/** Get Business Partner Group.
+	  * Business Partner Group
+	  */
+	public int getC_BP_Group_ID();
+
+	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException;
 
     /** Column name C_BPartner_ID */
     public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
@@ -159,20 +263,20 @@ public interface I_I_BPartner
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
 
-    /** Column name C_BP_Group_ID */
-    public static final String COLUMNNAME_C_BP_Group_ID = "C_BP_Group_ID";
+    /** Column name C_Bank_ID */
+    public static final String COLUMNNAME_C_Bank_ID = "C_Bank_ID";
 
-	/** Set Business Partner Group.
-	  * Business Partner Group
+	/** Set Bank.
+	  * Bank
 	  */
-	public void setC_BP_Group_ID (int C_BP_Group_ID);
+	public void setC_Bank_ID (int C_Bank_ID);
 
-	/** Get Business Partner Group.
-	  * Business Partner Group
+	/** Get Bank.
+	  * Bank
 	  */
-	public int getC_BP_Group_ID();
+	public int getC_Bank_ID();
 
-	public org.compiere.model.I_C_BP_Group getC_BP_Group() throws RuntimeException;
+	public org.compiere.model.I_C_Bank getC_Bank() throws RuntimeException;
 
     /** Column name C_Country_ID */
     public static final String COLUMNNAME_C_Country_ID = "C_Country_ID";
@@ -203,6 +307,36 @@ public interface I_I_BPartner
 	public int getC_Greeting_ID();
 
 	public org.compiere.model.I_C_Greeting getC_Greeting() throws RuntimeException;
+
+    /** Column name C_Job_ID */
+    public static final String COLUMNNAME_C_Job_ID = "C_Job_ID";
+
+	/** Set Position.
+	  * Job Position
+	  */
+	public void setC_Job_ID (int C_Job_ID);
+
+	/** Get Position.
+	  * Job Position
+	  */
+	public int getC_Job_ID();
+
+	public org.compiere.model.I_C_Job getC_Job() throws RuntimeException;
+
+    /** Column name C_Region_ID */
+    public static final String COLUMNNAME_C_Region_ID = "C_Region_ID";
+
+	/** Set Region.
+	  * Identifies a geographical Region
+	  */
+	public void setC_Region_ID (int C_Region_ID);
+
+	/** Get Region.
+	  * Identifies a geographical Region
+	  */
+	public int getC_Region_ID();
+
+	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException;
 
     /** Column name City */
     public static final String COLUMNNAME_City = "City";
@@ -285,34 +419,6 @@ public interface I_I_BPartner
 	  */
 	public int getCreatedBy();
 
-    /** Column name C_Region_ID */
-    public static final String COLUMNNAME_C_Region_ID = "C_Region_ID";
-
-	/** Set Region.
-	  * Identifies a geographical Region
-	  */
-	public void setC_Region_ID (int C_Region_ID);
-
-	/** Get Region.
-	  * Identifies a geographical Region
-	  */
-	public int getC_Region_ID();
-
-	public org.compiere.model.I_C_Region getC_Region() throws RuntimeException;
-
-    /** Column name Description */
-    public static final String COLUMNNAME_Description = "Description";
-
-	/** Set Description.
-	  * Optional short description of the record
-	  */
-	public void setDescription (String Description);
-
-	/** Get Description.
-	  * Optional short description of the record
-	  */
-	public String getDescription();
-
     /** Column name DUNS */
     public static final String COLUMNNAME_DUNS = "DUNS";
 
@@ -328,6 +434,19 @@ public interface I_I_BPartner
 	  */
 	public String getDUNS();
 
+    /** Column name Description */
+    public static final String COLUMNNAME_Description = "Description";
+
+	/** Set Description.
+	  * Optional short description of the record
+	  */
+	public void setDescription (String Description);
+
+	/** Get Description.
+	  * Optional short description of the record
+	  */
+	public String getDescription();
+
     /** Column name EMail */
     public static final String COLUMNNAME_EMail = "EMail";
 
@@ -340,6 +459,19 @@ public interface I_I_BPartner
 	  * Electronic Mail Address
 	  */
 	public String getEMail();
+
+    /** Column name ElementValueValue */
+    public static final String COLUMNNAME_ElementValueValue = "ElementValueValue";
+
+	/** Set Element Value Key.
+	  * Key of the Element Value
+	  */
+	public void setElementValueValue (String ElementValueValue);
+
+	/** Get Element Value Key.
+	  * Key of the Element Value
+	  */
+	public String getElementValueValue();
 
     /** Column name Fax */
     public static final String COLUMNNAME_Fax = "Fax";
@@ -424,6 +556,19 @@ public interface I_I_BPartner
 	  */
 	public String getInterestAreaName();
 
+    /** Column name IsACH */
+    public static final String COLUMNNAME_IsACH = "IsACH";
+
+	/** Set ACH.
+	  * Automatic Clearing House
+	  */
+	public void setIsACH (boolean IsACH);
+
+	/** Get ACH.
+	  * Automatic Clearing House
+	  */
+	public boolean isACH();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -462,6 +607,19 @@ public interface I_I_BPartner
 	  * Indicates if  this Business Partner is an employee
 	  */
 	public boolean isEmployee();
+
+    /** Column name IsSalesRep */
+    public static final String COLUMNNAME_IsSalesRep = "IsSalesRep";
+
+	/** Set Sales Representative.
+	  * Indicates if  the business partner is a sales representative or company agent
+	  */
+	public void setIsSalesRep (boolean IsSalesRep);
+
+	/** Get Sales Representative.
+	  * Indicates if  the business partner is a sales representative or company agent
+	  */
+	public boolean isSalesRep();
 
     /** Column name IsVendor */
     public static final String COLUMNNAME_IsVendor = "IsVendor";
@@ -515,6 +673,49 @@ public interface I_I_BPartner
 	  */
 	public String getName2();
 
+    /** Column name NotificationType */
+    public static final String COLUMNNAME_NotificationType = "NotificationType";
+
+	/** Set Notification Type.
+	  * Type of Notifications
+	  */
+	public void setNotificationType (String NotificationType);
+
+	/** Get Notification Type.
+	  * Type of Notifications
+	  */
+	public String getNotificationType();
+
+    /** Column name PO_PaymentTerm_ID */
+    public static final String COLUMNNAME_PO_PaymentTerm_ID = "PO_PaymentTerm_ID";
+
+	/** Set PO Payment Term.
+	  * Payment rules for a purchase order
+	  */
+	public void setPO_PaymentTerm_ID (int PO_PaymentTerm_ID);
+
+	/** Get PO Payment Term.
+	  * Payment rules for a purchase order
+	  */
+	public int getPO_PaymentTerm_ID();
+
+	public org.compiere.model.I_C_PaymentTerm getPO_PaymentTerm() throws RuntimeException;
+
+    /** Column name PO_PriceList_ID */
+    public static final String COLUMNNAME_PO_PriceList_ID = "PO_PriceList_ID";
+
+	/** Set Purchase Price List.
+	  * Price List used by this Business Partner
+	  */
+	public void setPO_PriceList_ID (int PO_PriceList_ID);
+
+	/** Get Purchase Price List.
+	  * Price List used by this Business Partner
+	  */
+	public int getPO_PriceList_ID();
+
+	public org.compiere.model.I_M_PriceList getPO_PriceList() throws RuntimeException;
+
     /** Column name Password */
     public static final String COLUMNNAME_Password = "Password";
 
@@ -527,6 +728,32 @@ public interface I_I_BPartner
 	  * Password of any length (case sensitive)
 	  */
 	public String getPassword();
+
+    /** Column name PaymentRulePO */
+    public static final String COLUMNNAME_PaymentRulePO = "PaymentRulePO";
+
+	/** Set Payment Rule.
+	  * Purchase payment option
+	  */
+	public void setPaymentRulePO (String PaymentRulePO);
+
+	/** Get Payment Rule.
+	  * Purchase payment option
+	  */
+	public String getPaymentRulePO();
+
+    /** Column name PaymentTermValue */
+    public static final String COLUMNNAME_PaymentTermValue = "PaymentTermValue";
+
+	/** Set Payment Term Key.
+	  * Key of the Payment Term
+	  */
+	public void setPaymentTermValue (String PaymentTermValue);
+
+	/** Get Payment Term Key.
+	  * Key of the Payment Term
+	  */
+	public String getPaymentTermValue();
 
     /** Column name Phone */
     public static final String COLUMNNAME_Phone = "Phone";
@@ -554,6 +781,19 @@ public interface I_I_BPartner
 	  */
 	public String getPhone2();
 
+    /** Column name PositionName */
+    public static final String COLUMNNAME_PositionName = "PositionName";
+
+	/** Set Position Name.
+	  * Name of the Position
+	  */
+	public void setPositionName (String PositionName);
+
+	/** Get Position Name.
+	  * Name of the Position
+	  */
+	public String getPositionName();
+
     /** Column name Postal */
     public static final String COLUMNNAME_Postal = "Postal";
 
@@ -580,6 +820,19 @@ public interface I_I_BPartner
 	  */
 	public String getPostal_Add();
 
+    /** Column name PriceListName */
+    public static final String COLUMNNAME_PriceListName = "PriceListName";
+
+	/** Set PriceList Name.
+	  * Name of the PriceList
+	  */
+	public void setPriceListName (String PriceListName);
+
+	/** Get PriceList Name.
+	  * Name of the PriceList
+	  */
+	public String getPriceListName();
+
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
 
@@ -602,19 +855,6 @@ public interface I_I_BPartner
 	/** Get Process Now	  */
 	public boolean isProcessing();
 
-    /** Column name RegionName */
-    public static final String COLUMNNAME_RegionName = "RegionName";
-
-	/** Set Region.
-	  * Name of the Region
-	  */
-	public void setRegionName (String RegionName);
-
-	/** Get Region.
-	  * Name of the Region
-	  */
-	public String getRegionName();
-
     /** Column name R_InterestArea_ID */
     public static final String COLUMNNAME_R_InterestArea_ID = "R_InterestArea_ID";
 
@@ -629,6 +869,19 @@ public interface I_I_BPartner
 	public int getR_InterestArea_ID();
 
 	public org.compiere.model.I_R_InterestArea getR_InterestArea() throws RuntimeException;
+
+    /** Column name RegionName */
+    public static final String COLUMNNAME_RegionName = "RegionName";
+
+	/** Set Region.
+	  * Name of the Region
+	  */
+	public void setRegionName (String RegionName);
+
+	/** Get Region.
+	  * Name of the Region
+	  */
+	public String getRegionName();
 
     /** Column name TaxID */
     public static final String COLUMNNAME_TaxID = "TaxID";
@@ -672,6 +925,21 @@ public interface I_I_BPartner
 	  */
 	public int getUpdatedBy();
 
+    /** Column name User2_ID */
+    public static final String COLUMNNAME_User2_ID = "User2_ID";
+
+	/** Set Cost Center.
+	  * User defined list element #2
+	  */
+	public void setUser2_ID (int User2_ID);
+
+	/** Get Cost Center.
+	  * User defined list element #2
+	  */
+	public int getUser2_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException;
+
     /** Column name Value */
     public static final String COLUMNNAME_Value = "Value";
 
@@ -684,4 +952,13 @@ public interface I_I_BPartner
 	  * Search key for the record in the format required - must be unique
 	  */
 	public String getValue();
+
+    /** Column name bp_isactive */
+    public static final String COLUMNNAME_bp_isactive = "bp_isactive";
+
+	/** Set bp_isactive	  */
+	public void setbp_isactive (boolean bp_isactive);
+
+	/** Get bp_isactive	  */
+	public boolean isbp_isactive();
 }

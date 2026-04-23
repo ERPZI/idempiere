@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for I_Inventory
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="I_Inventory")
-public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent 
+public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_I_Inventory (Properties ctx, int I_Inventory_ID, String trxName)
@@ -58,6 +58,28 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_I_Inventory (Properties ctx, String I_Inventory_UU, String trxName)
+    {
+      super (ctx, I_Inventory_UU, trxName);
+      /** if (I_Inventory_UU == null)
+        {
+			setI_Inventory_ID (0);
+			setI_IsImported (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_Inventory (Properties ctx, String I_Inventory_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_Inventory_UU, trxName, virtualColumns);
+      /** if (I_Inventory_UU == null)
+        {
+			setI_Inventory_ID (0);
+			setI_IsImported (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_I_Inventory (Properties ctx, ResultSet rs, String trxName)
     {
@@ -65,7 +87,7 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -250,7 +272,7 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getI_Inventory_ID()));
     }
@@ -284,10 +306,10 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -353,34 +375,6 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Inventory)MTable.get(getCtx(), org.compiere.model.I_M_Inventory.Table_ID)
-			.getPO(getM_Inventory_ID(), get_TrxName());
-	}
-
-	/** Set Phys.Inventory.
-		@param M_Inventory_ID Parameters for a Physical Inventory
-	*/
-	public void setM_Inventory_ID (int M_Inventory_ID)
-	{
-		if (M_Inventory_ID < 1)
-			set_Value (COLUMNNAME_M_Inventory_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Inventory_ID, Integer.valueOf(M_Inventory_ID));
-	}
-
-	/** Get Phys.Inventory.
-		@return Parameters for a Physical Inventory
-	  */
-	public int getM_Inventory_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Inventory_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_M_InventoryLine getM_InventoryLine() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_InventoryLine)MTable.get(getCtx(), org.compiere.model.I_M_InventoryLine.Table_ID)
@@ -404,6 +398,34 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 	public int getM_InventoryLine_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_InventoryLine_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Inventory)MTable.get(getCtx(), org.compiere.model.I_M_Inventory.Table_ID)
+			.getPO(getM_Inventory_ID(), get_TrxName());
+	}
+
+	/** Set Phys.Inventory.
+		@param M_Inventory_ID Parameters for a Physical Inventory
+	*/
+	public void setM_Inventory_ID (int M_Inventory_ID)
+	{
+		if (M_Inventory_ID < 1)
+			set_Value (COLUMNNAME_M_Inventory_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Inventory_ID, Integer.valueOf(M_Inventory_ID));
+	}
+
+	/** Get Phys.Inventory.
+		@return Parameters for a Physical Inventory
+	  */
+	public int getM_Inventory_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Inventory_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -435,22 +457,6 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Movement Date.
-		@param MovementDate Date a product was moved in or out of inventory
-	*/
-	public void setMovementDate (Timestamp MovementDate)
-	{
-		set_Value (COLUMNNAME_MovementDate, MovementDate);
-	}
-
-	/** Get Movement Date.
-		@return Date a product was moved in or out of inventory
-	  */
-	public Timestamp getMovementDate()
-	{
-		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
@@ -509,6 +515,22 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Movement Date.
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
 	/** Set Processed.
 		@param Processed The document has been processed
 	*/
@@ -523,10 +545,10 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -545,10 +567,10 @@ public class X_I_Inventory extends PO implements I_I_Inventory, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_PrintTableFormat
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_PrintTableFormat")
-public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, I_Persistent 
+public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_PrintTableFormat (Properties ctx, int AD_PrintTableFormat_ID, String trxName)
@@ -46,9 +46,9 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 			setIsMultiLineHeader (false);
 // N
 			setIsPaintBoundaryLines (false);
+			setIsPaintHLines (false);
 			setIsPaintHeaderLines (true);
 // Y
-			setIsPaintHLines (false);
 			setIsPaintVLines (false);
 			setIsPrintFunctionSymbols (false);
 			setName (null);
@@ -66,9 +66,49 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 			setIsMultiLineHeader (false);
 // N
 			setIsPaintBoundaryLines (false);
+			setIsPaintHLines (false);
 			setIsPaintHeaderLines (true);
 // Y
+			setIsPaintVLines (false);
+			setIsPrintFunctionSymbols (false);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_PrintTableFormat (Properties ctx, String AD_PrintTableFormat_UU, String trxName)
+    {
+      super (ctx, AD_PrintTableFormat_UU, trxName);
+      /** if (AD_PrintTableFormat_UU == null)
+        {
+			setAD_PrintTableFormat_ID (0);
+			setIsDefault (false);
+			setIsMultiLineHeader (false);
+// N
+			setIsPaintBoundaryLines (false);
 			setIsPaintHLines (false);
+			setIsPaintHeaderLines (true);
+// Y
+			setIsPaintVLines (false);
+			setIsPrintFunctionSymbols (false);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_PrintTableFormat (Properties ctx, String AD_PrintTableFormat_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_PrintTableFormat_UU, trxName, virtualColumns);
+      /** if (AD_PrintTableFormat_UU == null)
+        {
+			setAD_PrintTableFormat_ID (0);
+			setIsDefault (false);
+			setIsMultiLineHeader (false);
+// N
+			setIsPaintBoundaryLines (false);
+			setIsPaintHLines (false);
+			setIsPaintHeaderLines (true);
+// Y
 			setIsPaintVLines (false);
 			setIsPrintFunctionSymbols (false);
 			setName (null);
@@ -82,7 +122,7 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -344,34 +384,6 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_AD_PrintFont getHdr_PrintFont() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_PrintFont)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFont.Table_ID)
-			.getPO(getHdr_PrintFont_ID(), get_TrxName());
-	}
-
-	/** Set Header Row Font.
-		@param Hdr_PrintFont_ID Header row Font
-	*/
-	public void setHdr_PrintFont_ID (int Hdr_PrintFont_ID)
-	{
-		if (Hdr_PrintFont_ID < 1)
-			set_Value (COLUMNNAME_Hdr_PrintFont_ID, null);
-		else
-			set_Value (COLUMNNAME_Hdr_PrintFont_ID, Integer.valueOf(Hdr_PrintFont_ID));
-	}
-
-	/** Get Header Row Font.
-		@return Header row Font
-	  */
-	public int getHdr_PrintFont_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Hdr_PrintFont_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Header Stroke.
 		@param HdrStroke Width of the Header Line Stroke
 	*/
@@ -395,12 +407,12 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public static final int HDRSTROKETYPE_AD_Reference_ID=312;
 	/** Dash-Dotted Line = 2 */
 	public static final String HDRSTROKETYPE_Dash_DottedLine = "2";
-	/** Dotted Line = d */
-	public static final String HDRSTROKETYPE_DottedLine = "d";
 	/** Dashed Line = D */
 	public static final String HDRSTROKETYPE_DashedLine = "D";
 	/** Solid Line = S */
 	public static final String HDRSTROKETYPE_SolidLine = "S";
+	/** Dotted Line = d */
+	public static final String HDRSTROKETYPE_DottedLine = "d";
 	/** Set Header Stroke Type.
 		@param HdrStrokeType Type of the Header Line Stroke
 	*/
@@ -474,6 +486,34 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_AD_PrintFont getHdr_PrintFont() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_PrintFont)MTable.get(getCtx(), org.compiere.model.I_AD_PrintFont.Table_ID)
+			.getPO(getHdr_PrintFont_ID(), get_TrxName());
+	}
+
+	/** Set Header Row Font.
+		@param Hdr_PrintFont_ID Header row Font
+	*/
+	public void setHdr_PrintFont_ID (int Hdr_PrintFont_ID)
+	{
+		if (Hdr_PrintFont_ID < 1)
+			set_Value (COLUMNNAME_Hdr_PrintFont_ID, null);
+		else
+			set_Value (COLUMNNAME_Hdr_PrintFont_ID, Integer.valueOf(Hdr_PrintFont_ID));
+	}
+
+	/** Get Header Row Font.
+		@return Header row Font
+	  */
+	public int getHdr_PrintFont_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Hdr_PrintFont_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Header Center.
 		@param HeaderCenter Content of the center portion of the header.
 	*/
@@ -536,10 +576,10 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isImageIsAttached()
 	{
 		Object oo = get_Value(COLUMNNAME_ImageIsAttached);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -575,10 +615,10 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -598,10 +638,10 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isMultiLineHeader()
 	{
 		Object oo = get_Value(COLUMNNAME_IsMultiLineHeader);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -621,33 +661,10 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isPaintBoundaryLines()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPaintBoundaryLines);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Paint Header Lines.
-		@param IsPaintHeaderLines Paint Lines over/under the Header Line 
-	*/
-	public void setIsPaintHeaderLines (boolean IsPaintHeaderLines)
-	{
-		set_Value (COLUMNNAME_IsPaintHeaderLines, Boolean.valueOf(IsPaintHeaderLines));
-	}
-
-	/** Get Paint Header Lines.
-		@return Paint Lines over/under the Header Line 
-	  */
-	public boolean isPaintHeaderLines()
-	{
-		Object oo = get_Value(COLUMNNAME_IsPaintHeaderLines);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -667,10 +684,33 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isPaintHLines()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPaintHLines);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Paint Header Lines.
+		@param IsPaintHeaderLines Paint Lines over/under the Header Line 
+	*/
+	public void setIsPaintHeaderLines (boolean IsPaintHeaderLines)
+	{
+		set_Value (COLUMNNAME_IsPaintHeaderLines, Boolean.valueOf(IsPaintHeaderLines));
+	}
+
+	/** Get Paint Header Lines.
+		@return Paint Lines over/under the Header Line 
+	  */
+	public boolean isPaintHeaderLines()
+	{
+		Object oo = get_Value(COLUMNNAME_IsPaintHeaderLines);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -690,10 +730,10 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isPaintVLines()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPaintVLines);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -713,13 +753,59 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 	public boolean isPrintFunctionSymbols()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPrintFunctionSymbols);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set Line Stroke.
+		@param LineStroke Width of the Line Stroke
+	*/
+	public void setLineStroke (BigDecimal LineStroke)
+	{
+		set_Value (COLUMNNAME_LineStroke, LineStroke);
+	}
+
+	/** Get Line Stroke.
+		@return Width of the Line Stroke
+	  */
+	public BigDecimal getLineStroke()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineStroke);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** LineStrokeType AD_Reference_ID=312 */
+	public static final int LINESTROKETYPE_AD_Reference_ID=312;
+	/** Dash-Dotted Line = 2 */
+	public static final String LINESTROKETYPE_Dash_DottedLine = "2";
+	/** Dashed Line = D */
+	public static final String LINESTROKETYPE_DashedLine = "D";
+	/** Solid Line = S */
+	public static final String LINESTROKETYPE_SolidLine = "S";
+	/** Dotted Line = d */
+	public static final String LINESTROKETYPE_DottedLine = "d";
+	/** Set Line Stroke Type.
+		@param LineStrokeType Type of the Line Stroke
+	*/
+	public void setLineStrokeType (String LineStrokeType)
+	{
+
+		set_Value (COLUMNNAME_LineStrokeType, LineStrokeType);
+	}
+
+	/** Get Line Stroke Type.
+		@return Type of the Line Stroke
+	  */
+	public String getLineStrokeType()
+	{
+		return (String)get_Value(COLUMNNAME_LineStrokeType);
 	}
 
 	public org.compiere.model.I_AD_PrintColor getLine_PrintColor() throws RuntimeException
@@ -750,52 +836,6 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
 		return ii.intValue();
 	}
 
-	/** Set Line Stroke.
-		@param LineStroke Width of the Line Stroke
-	*/
-	public void setLineStroke (BigDecimal LineStroke)
-	{
-		set_Value (COLUMNNAME_LineStroke, LineStroke);
-	}
-
-	/** Get Line Stroke.
-		@return Width of the Line Stroke
-	  */
-	public BigDecimal getLineStroke()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_LineStroke);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
-	}
-
-	/** LineStrokeType AD_Reference_ID=312 */
-	public static final int LINESTROKETYPE_AD_Reference_ID=312;
-	/** Dash-Dotted Line = 2 */
-	public static final String LINESTROKETYPE_Dash_DottedLine = "2";
-	/** Dotted Line = d */
-	public static final String LINESTROKETYPE_DottedLine = "d";
-	/** Dashed Line = D */
-	public static final String LINESTROKETYPE_DashedLine = "D";
-	/** Solid Line = S */
-	public static final String LINESTROKETYPE_SolidLine = "S";
-	/** Set Line Stroke Type.
-		@param LineStrokeType Type of the Line Stroke
-	*/
-	public void setLineStrokeType (String LineStrokeType)
-	{
-
-		set_Value (COLUMNNAME_LineStrokeType, LineStrokeType);
-	}
-
-	/** Get Line Stroke Type.
-		@return Type of the Line Stroke
-	  */
-	public String getLineStrokeType()
-	{
-		return (String)get_Value(COLUMNNAME_LineStrokeType);
-	}
-
 	/** Set Name.
 		@param Name Alphanumeric identifier of the entity
 	*/
@@ -815,7 +855,7 @@ public class X_AD_PrintTableFormat extends PO implements I_AD_PrintTableFormat, 
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

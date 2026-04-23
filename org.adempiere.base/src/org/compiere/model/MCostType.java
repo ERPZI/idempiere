@@ -29,9 +29,19 @@ import org.compiere.util.Msg;
 public class MCostType extends X_M_CostType
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -2060640115481013228L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_CostType_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MCostType(Properties ctx, String M_CostType_UU, String trxName) {
+        super(ctx, M_CostType_UU, trxName);
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -59,6 +69,7 @@ public class MCostType extends X_M_CostType
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MCostType[");
@@ -66,11 +77,7 @@ public class MCostType extends X_M_CostType
 		return sb.toString ();
 	}	//	toString
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (getAD_Org_ID() != 0)
@@ -78,12 +85,10 @@ public class MCostType extends X_M_CostType
 		return true;
 	}	//	beforeSave
 
-	/**
-	 * 	Before Delete
-	 *	@return true if it can be deleted
-	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
+		// Disallow delete if cost type is use by accounting schema
 		MAcctSchema[] ass = MAcctSchema.getClientAcctSchema(getCtx(), getAD_Client_ID());
 		for (int i = 0; i < ass.length; i++)
 		{

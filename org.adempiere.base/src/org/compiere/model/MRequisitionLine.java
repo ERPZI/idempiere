@@ -29,6 +29,8 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
+import org.compiere.util.Util;
+
 /**
  *	Requisition Line Model
  *	
@@ -45,14 +47,14 @@ import org.compiere.util.Msg;
 public class MRequisitionLine extends X_M_RequisitionLine
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = -2567343619431184322L;
 
 	/**
-	 * Get corresponding Requisition Line for given Order Line
+	 * Get corresponding Requisition Line for given Order
 	 * @param ctx
-	 * @param C_Order_ID order line
+	 * @param C_Order_ID order
 	 * @param trxName
 	 * @return Requisition Line array
 	 */
@@ -68,7 +70,7 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	}
 	
 	/**
-	 * UnLink Requisition Lines for given Order
+	 * UnLink Requisition Lines from Order
 	 * @param ctx
 	 * @param C_Order_ID
 	 * @param trxName
@@ -82,7 +84,6 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		}
 	}
 	
-
 	/**
 	 * Get corresponding Requisition Line(s) for given Order Line
 	 * @param ctx
@@ -100,7 +101,7 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	}
 
 	/**
-	 * UnLink Requisition Lines for given Order Line
+	 * UnLink Requisition Lines from Order Line
 	 * @param ctx
 	 * @param C_OrderLine_ID
 	 * @param trxName
@@ -114,6 +115,17 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		}
 	}
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param M_RequisitionLine_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MRequisitionLine(Properties ctx, String M_RequisitionLine_UU, String trxName) {
+        super(ctx, M_RequisitionLine_UU, trxName);
+		if (Util.isEmpty(M_RequisitionLine_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -126,15 +138,26 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		this (ctx, M_RequisitionLine_ID, trxName, (String[]) null);
 	}	//	MRequisitionLine
 
+	/**
+	 * @param ctx
+	 * @param M_RequisitionLine_ID
+	 * @param trxName
+	 * @param virtualColumns
+	 */
 	public MRequisitionLine(Properties ctx, int M_RequisitionLine_ID, String trxName, String... virtualColumns) {
 		super(ctx, M_RequisitionLine_ID, trxName, virtualColumns);
 		if (M_RequisitionLine_ID == 0)
-		{
-			setLine (0);	// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
-			setLineNetAmt (Env.ZERO);
-			setPriceActual (Env.ZERO);
-			setQty (Env.ONE);	// 1
-		}
+			setInitialDefaults();
+	}
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setLine (0);	// @SQL=SELECT COALESCE(MAX(Line),0)+10 AS DefaultValue FROM M_RequisitionLine WHERE M_Requisition_ID=@M_Requisition_ID@
+		setLineNetAmt (Env.ZERO);
+		setPriceActual (Env.ZERO);
+		setQty (Env.ONE);	// 1
 	}
 
 	/**
@@ -206,7 +229,7 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	}
 	
 	/**
-	 * 	Set Price
+	 * 	Set PriceActual to charge amount or standard product price
 	 */
 	public void setPrice()
 	{
@@ -251,36 +274,33 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		BigDecimal lineNetAmt = getQty().multiply(getPriceActual());
 		super.setLineNetAmt (lineNetAmt);
 	}	//	setLineNetAmt
-	
-	
-	/**************************************************************************
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
+		
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (newRecord && getParent().isProcessed()) {
 			log.saveError("ParentComplete", Msg.translate(getCtx(), "M_Requisition_ID"));
 			return false;
 		}
+		// Set Line
 		if (getLine() == 0)
 		{
 			String sql = "SELECT COALESCE(MAX(Line),0)+10 FROM M_RequisitionLine WHERE M_Requisition_ID=?";
 			int ii = DB.getSQLValueEx (get_TrxName(), sql, getM_Requisition_ID());
 			setLine (ii);
 		}
-		//	Product & ASI - Charge
+		//	Set C_Charge_ID to 0 this is a product line
 		if (getM_Product_ID() != 0 && getC_Charge_ID() != 0)
 			setC_Charge_ID(0);
+		// Set M_AttributeSetInstance_ID to 0 if this is a charge line
 		if (getM_AttributeSetInstance_ID() != 0 && getC_Charge_ID() != 0)
 			setM_AttributeSetInstance_ID(0);
-		// Product UOM
+		// Default UOM to product UOM
 		if (getM_Product_ID() > 0 && getC_UOM_ID() <= 0)
 		{
 			setC_UOM_ID(getM_Product().getC_UOM_ID());
 		}
-		//
+		// Set price actual
 		if (getPriceActual().signum() == 0)
 			setPrice();
 		setLineNetAmt();
@@ -298,26 +318,15 @@ public class MRequisitionLine extends X_M_RequisitionLine
 		return true;
 	}	//	beforeSave
 	
-	/**
-	 * 	After Save.
-	 * 	Update Total on Header
-	 *	@param newRecord if new record
-	 *	@param success save was success
-	 *	@return true if saved
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (!success)
 			return success;
 		return updateHeader();
 	}	//	afterSave
-
 	
-	/**
-	 * 	After Delete
-	 *	@param success
-	 *	@return true/false
-	 */
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (!success)
@@ -332,12 +341,12 @@ public class MRequisitionLine extends X_M_RequisitionLine
 	}
 
 	/**
-	 * 	Update Header
+	 * 	Update Header (M_Requisition) Total
 	 *	@return header updated
 	 */
 	private boolean updateHeader()
 	{
-		log.fine("");
+		if (log.isLoggable(Level.FINE)) log.fine("");
 		String sql = "UPDATE M_Requisition r"
 			+ " SET TotalLines="
 				+ "(SELECT COALESCE(SUM(LineNetAmt),0) FROM M_RequisitionLine rl "

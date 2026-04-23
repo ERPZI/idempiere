@@ -25,16 +25,16 @@ import org.compiere.model.*;
 import org.compiere.util.Env;
 
 /** Generated Model for I_Movement
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="I_Movement")
-public class X_I_Movement extends PO implements I_I_Movement, I_Persistent 
+public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_I_Movement (Properties ctx, int I_Movement_ID, String trxName)
@@ -66,6 +66,36 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_I_Movement (Properties ctx, String I_Movement_UU, String trxName)
+    {
+      super (ctx, I_Movement_UU, trxName);
+      /** if (I_Movement_UU == null)
+        {
+			setI_IsImported (false);
+// N
+			setI_Movement_ID (0);
+			setProcessed (false);
+// N
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_I_Movement (Properties ctx, String I_Movement_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, I_Movement_UU, trxName, virtualColumns);
+      /** if (I_Movement_UU == null)
+        {
+			setI_IsImported (false);
+// N
+			setI_Movement_ID (0);
+			setProcessed (false);
+// N
+			setProcessing (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_I_Movement (Properties ctx, ResultSet rs, String trxName)
     {
@@ -73,7 +103,7 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -158,22 +188,6 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 	public String getBPartnerValue()
 	{
 		return (String)get_Value(COLUMNNAME_BPartnerValue);
-	}
-
-	/** Set Campaign Key.
-		@param CampaignValue Text key of the Campaign
-	*/
-	public void setCampaignValue (String CampaignValue)
-	{
-		set_Value (COLUMNNAME_CampaignValue, CampaignValue);
-	}
-
-	/** Get Campaign Key.
-		@return Text key of the Campaign
-	  */
-	public String getCampaignValue()
-	{
-		return (String)get_Value(COLUMNNAME_CampaignValue);
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
@@ -288,6 +302,22 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Campaign Key.
+		@param CampaignValue Text key of the Campaign
+	*/
+	public void setCampaignValue (String CampaignValue)
+	{
+		set_Value (COLUMNNAME_CampaignValue, CampaignValue);
+	}
+
+	/** Get Campaign Key.
+		@return Text key of the Campaign
+	  */
+	public String getCampaignValue()
+	{
+		return (String)get_Value(COLUMNNAME_CampaignValue);
+	}
+
 	/** Set Delivery Rule.
 		@param DeliveryRule Defines the timing of Delivery
 	*/
@@ -398,10 +428,10 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 	public boolean isI_IsImported()
 	{
 		Object oo = get_Value(COLUMNNAME_I_IsImported);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -474,34 +504,6 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 		return (String)get_Value(COLUMNNAME_LocatorValue);
 	}
 
-	public I_M_Locator getM_Locator() throws RuntimeException
-	{
-		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
-			.getPO(getM_Locator_ID(), get_TrxName());
-	}
-
-	/** Set Locator.
-		@param M_Locator_ID Warehouse Locator
-	*/
-	public void setM_Locator_ID (int M_Locator_ID)
-	{
-		if (M_Locator_ID < 1)
-			set_Value (COLUMNNAME_M_Locator_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
-	}
-
-	/** Get Locator.
-		@return Warehouse Locator
-	  */
-	public int getM_Locator_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public I_M_Locator getM_LocatorTo() throws RuntimeException
 	{
 		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
@@ -530,29 +532,29 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_M_Movement getM_Movement() throws RuntimeException
+	public I_M_Locator getM_Locator() throws RuntimeException
 	{
-		return (org.compiere.model.I_M_Movement)MTable.get(getCtx(), org.compiere.model.I_M_Movement.Table_ID)
-			.getPO(getM_Movement_ID(), get_TrxName());
+		return (I_M_Locator)MTable.get(getCtx(), I_M_Locator.Table_ID)
+			.getPO(getM_Locator_ID(), get_TrxName());
 	}
 
-	/** Set Inventory Move.
-		@param M_Movement_ID Movement of Inventory
+	/** Set Locator.
+		@param M_Locator_ID Warehouse Locator
 	*/
-	public void setM_Movement_ID (int M_Movement_ID)
+	public void setM_Locator_ID (int M_Locator_ID)
 	{
-		if (M_Movement_ID < 1)
-			set_Value (COLUMNNAME_M_Movement_ID, null);
+		if (M_Locator_ID < 1)
+			set_Value (COLUMNNAME_M_Locator_ID, null);
 		else
-			set_Value (COLUMNNAME_M_Movement_ID, Integer.valueOf(M_Movement_ID));
+			set_Value (COLUMNNAME_M_Locator_ID, Integer.valueOf(M_Locator_ID));
 	}
 
-	/** Get Inventory Move.
-		@return Movement of Inventory
+	/** Get Locator.
+		@return Warehouse Locator
 	  */
-	public int getM_Movement_ID()
+	public int getM_Locator_ID()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Movement_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Locator_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -586,39 +588,32 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Movement Date.
-		@param MovementDate Date a product was moved in or out of inventory
+	public org.compiere.model.I_M_Movement getM_Movement() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Movement)MTable.get(getCtx(), org.compiere.model.I_M_Movement.Table_ID)
+			.getPO(getM_Movement_ID(), get_TrxName());
+	}
+
+	/** Set Inventory Move.
+		@param M_Movement_ID Movement of Inventory
 	*/
-	public void setMovementDate (Timestamp MovementDate)
+	public void setM_Movement_ID (int M_Movement_ID)
 	{
-		set_Value (COLUMNNAME_MovementDate, MovementDate);
+		if (M_Movement_ID < 1)
+			set_Value (COLUMNNAME_M_Movement_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Movement_ID, Integer.valueOf(M_Movement_ID));
 	}
 
-	/** Get Movement Date.
-		@return Date a product was moved in or out of inventory
+	/** Get Inventory Move.
+		@return Movement of Inventory
 	  */
-	public Timestamp getMovementDate()
+	public int getM_Movement_ID()
 	{
-		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
-	}
-
-	/** Set Movement Quantity.
-		@param MovementQty Quantity of a product moved.
-	*/
-	public void setMovementQty (BigDecimal MovementQty)
-	{
-		set_Value (COLUMNNAME_MovementQty, MovementQty);
-	}
-
-	/** Get Movement Quantity.
-		@return Quantity of a product moved.
-	  */
-	public BigDecimal getMovementQty()
-	{
-		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
-		if (bd == null)
-			 return Env.ZERO;
-		return bd;
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Movement_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_M_Product getM_Product() throws RuntimeException
@@ -675,6 +670,41 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Movement Date.
+		@param MovementDate Date a product was moved in or out of inventory
+	*/
+	public void setMovementDate (Timestamp MovementDate)
+	{
+		set_Value (COLUMNNAME_MovementDate, MovementDate);
+	}
+
+	/** Get Movement Date.
+		@return Date a product was moved in or out of inventory
+	  */
+	public Timestamp getMovementDate()
+	{
+		return (Timestamp)get_Value(COLUMNNAME_MovementDate);
+	}
+
+	/** Set Movement Quantity.
+		@param MovementQty Quantity of a product moved.
+	*/
+	public void setMovementQty (BigDecimal MovementQty)
+	{
+		set_Value (COLUMNNAME_MovementQty, MovementQty);
+	}
+
+	/** Get Movement Quantity.
+		@return Quantity of a product moved.
+	  */
+	public BigDecimal getMovementQty()
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_MovementQty);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
 	}
 
 	/** Set Trx Org Key.
@@ -739,10 +769,10 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -761,10 +791,10 @@ public class X_I_Movement extends PO implements I_I_Movement, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

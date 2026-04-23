@@ -16,14 +16,13 @@ package org.adempiere.webui.factory;
 import org.adempiere.webui.panel.ADForm;
 
 /**
- * 
+ * Factory interface for {@link ADForm}
  * @author hengsin
- *
  */
 public interface IFormFactory {
 
 	/**
-	 * 
+	 * Create new form instance
 	 * @param formName
 	 * @return new form instance
 	 */

@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Subscription
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_Subscription")
-public class X_C_Subscription extends PO implements I_C_Subscription, I_Persistent 
+public class X_C_Subscription extends PO implements I_C_Subscription, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_Subscription (Properties ctx, int C_Subscription_ID, String trxName)
@@ -41,8 +41,8 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
       /** if (C_Subscription_ID == 0)
         {
 			setC_BPartner_ID (0);
-			setC_Subscription_ID (0);
 			setC_SubscriptionType_ID (0);
+			setC_Subscription_ID (0);
 			setIsDue (false);
 			setM_Product_ID (0);
 			setName (null);
@@ -59,8 +59,44 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
       /** if (C_Subscription_ID == 0)
         {
 			setC_BPartner_ID (0);
-			setC_Subscription_ID (0);
 			setC_SubscriptionType_ID (0);
+			setC_Subscription_ID (0);
+			setIsDue (false);
+			setM_Product_ID (0);
+			setName (null);
+			setPaidUntilDate (new Timestamp( System.currentTimeMillis() ));
+			setRenewalDate (new Timestamp( System.currentTimeMillis() ));
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Subscription (Properties ctx, String C_Subscription_UU, String trxName)
+    {
+      super (ctx, C_Subscription_UU, trxName);
+      /** if (C_Subscription_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_SubscriptionType_ID (0);
+			setC_Subscription_ID (0);
+			setIsDue (false);
+			setM_Product_ID (0);
+			setName (null);
+			setPaidUntilDate (new Timestamp( System.currentTimeMillis() ));
+			setRenewalDate (new Timestamp( System.currentTimeMillis() ));
+			setStartDate (new Timestamp( System.currentTimeMillis() ));
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Subscription (Properties ctx, String C_Subscription_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Subscription_UU, trxName, virtualColumns);
+      /** if (C_Subscription_UU == null)
+        {
+			setC_BPartner_ID (0);
+			setC_SubscriptionType_ID (0);
+			setC_Subscription_ID (0);
 			setIsDue (false);
 			setM_Product_ID (0);
 			setName (null);
@@ -77,7 +113,7 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -126,28 +162,6 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
 		return ii.intValue();
 	}
 
-	/** Set Subscription.
-		@param C_Subscription_ID Subscription of a Business Partner of a Product to renew
-	*/
-	public void setC_Subscription_ID (int C_Subscription_ID)
-	{
-		if (C_Subscription_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Subscription_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Subscription_ID, Integer.valueOf(C_Subscription_ID));
-	}
-
-	/** Get Subscription.
-		@return Subscription of a Business Partner of a Product to renew
-	  */
-	public int getC_Subscription_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Subscription_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_C_SubscriptionType getC_SubscriptionType() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_SubscriptionType)MTable.get(getCtx(), org.compiere.model.I_C_SubscriptionType.Table_ID)
@@ -171,6 +185,28 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
 	public int getC_SubscriptionType_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_SubscriptionType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Subscription.
+		@param C_Subscription_ID Subscription of a Business Partner of a Product to renew
+	*/
+	public void setC_Subscription_ID (int C_Subscription_ID)
+	{
+		if (C_Subscription_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Subscription_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Subscription_ID, Integer.valueOf(C_Subscription_ID));
+	}
+
+	/** Get Subscription.
+		@return Subscription of a Business Partner of a Product to renew
+	  */
+	public int getC_Subscription_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Subscription_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -205,10 +241,10 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
 	public boolean isDue()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDue);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -261,7 +297,7 @@ public class X_C_Subscription extends PO implements I_C_Subscription, I_Persiste
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

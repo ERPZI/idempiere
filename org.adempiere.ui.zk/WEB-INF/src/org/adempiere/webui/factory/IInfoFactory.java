@@ -19,14 +19,13 @@ import org.compiere.model.GridField;
 import org.compiere.model.Lookup;
 
 /**
- *
+ * Factory interface for {@link InfoPanel} ({@link InfoWindow})
  * @author hengsin
- *
  */
 public interface IInfoFactory {
 
 	/**
-	 * 
+	 * Create info panel or info window
 	 * @param WindowNo
 	 * @param tableName
 	 * @param keyColumn
@@ -42,7 +41,7 @@ public interface IInfoFactory {
             boolean multiSelection, String whereClause, int AD_InfoWindow_ID, boolean lookup);
 
 	/**
-	 * 
+	 * Create info panel or info window
 	 * @param lookup
 	 * @param field
 	 * @param tableName
@@ -58,14 +57,14 @@ public interface IInfoFactory {
             boolean multiSelection, String whereClause, int AD_InfoWindow_ID);
 	
 	/**
-	 * 
+	 * Create info window
 	 * @param AD_InfoWindow_ID
 	 * @return {@link InfoWindow}
 	 */
 	public InfoWindow create (int AD_InfoWindow_ID); 
 	
 	/**
-	 * 
+	 * Create info window
 	 * @param AD_InfoWindow_ID
 	 * @param predefinedContextVariables
 	 * @return {@link InfoWindow}
@@ -75,7 +74,7 @@ public interface IInfoFactory {
 	}
 	
 	/**
-	 * 
+	 * Create info window
 	 * @param AD_InfoWindow_ID
 	 * @param predefinedContextVariables
 	 * @return {@link InfoWindow}
@@ -85,7 +84,7 @@ public interface IInfoFactory {
 	}
 
 	/**
-	 * 
+	 * Create info panel or info window
 	 * @param WindowNo
 	 * @param tableName
 	 * @param keyColumn

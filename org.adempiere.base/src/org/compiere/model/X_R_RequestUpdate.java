@@ -25,16 +25,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for R_RequestUpdate
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="R_RequestUpdate")
-public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persistent 
+public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_R_RequestUpdate (Properties ctx, int R_RequestUpdate_ID, String trxName)
@@ -43,8 +43,8 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
       /** if (R_RequestUpdate_ID == 0)
         {
 			setConfidentialTypeEntry (null);
-			setR_Request_ID (0);
 			setR_RequestUpdate_ID (0);
+			setR_Request_ID (0);
         } */
     }
 
@@ -55,8 +55,32 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
       /** if (R_RequestUpdate_ID == 0)
         {
 			setConfidentialTypeEntry (null);
-			setR_Request_ID (0);
 			setR_RequestUpdate_ID (0);
+			setR_Request_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_RequestUpdate (Properties ctx, String R_RequestUpdate_UU, String trxName)
+    {
+      super (ctx, R_RequestUpdate_UU, trxName);
+      /** if (R_RequestUpdate_UU == null)
+        {
+			setConfidentialTypeEntry (null);
+			setR_RequestUpdate_ID (0);
+			setR_Request_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_R_RequestUpdate (Properties ctx, String R_RequestUpdate_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, R_RequestUpdate_UU, trxName, virtualColumns);
+      /** if (R_RequestUpdate_UU == null)
+        {
+			setConfidentialTypeEntry (null);
+			setR_RequestUpdate_ID (0);
+			setR_Request_ID (0);
         } */
     }
 
@@ -67,7 +91,7 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
     }
 
     /** AccessLevel
-      * @return 7 - System - Client - Org 
+      * @return 7 - System - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -197,20 +221,49 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
 		return bd;
 	}
 
-	/** Set Result.
-		@param Result Result of the action taken
+	/** Set Request Update.
+		@param R_RequestUpdate_ID Request Updates
 	*/
-	public void setResult (String Result)
+	public void setR_RequestUpdate_ID (int R_RequestUpdate_ID)
 	{
-		set_ValueNoCheck (COLUMNNAME_Result, Result);
+		if (R_RequestUpdate_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_R_RequestUpdate_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_R_RequestUpdate_ID, Integer.valueOf(R_RequestUpdate_ID));
 	}
 
-	/** Get Result.
-		@return Result of the action taken
+	/** Get Request Update.
+		@return Request Updates
 	  */
-	public String getResult()
+	public int getR_RequestUpdate_ID()
 	{
-		return (String)get_Value(COLUMNNAME_Result);
+		Integer ii = (Integer)get_Value(COLUMNNAME_R_RequestUpdate_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getR_RequestUpdate_ID()));
+    }
+
+	/** Set R_RequestUpdate_UU.
+		@param R_RequestUpdate_UU R_RequestUpdate_UU
+	*/
+	public void setR_RequestUpdate_UU (String R_RequestUpdate_UU)
+	{
+		set_Value (COLUMNNAME_R_RequestUpdate_UU, R_RequestUpdate_UU);
+	}
+
+	/** Get R_RequestUpdate_UU.
+		@return R_RequestUpdate_UU	  */
+	public String getR_RequestUpdate_UU()
+	{
+		return (String)get_Value(COLUMNNAME_R_RequestUpdate_UU);
 	}
 
 	public org.compiere.model.I_R_Request getR_Request() throws RuntimeException
@@ -241,49 +294,20 @@ public class X_R_RequestUpdate extends PO implements I_R_RequestUpdate, I_Persis
 		return ii.intValue();
 	}
 
-	/** Set Request Update.
-		@param R_RequestUpdate_ID Request Updates
+	/** Set Result.
+		@param Result Result of the action taken
 	*/
-	public void setR_RequestUpdate_ID (int R_RequestUpdate_ID)
+	public void setResult (String Result)
 	{
-		if (R_RequestUpdate_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_R_RequestUpdate_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_R_RequestUpdate_ID, Integer.valueOf(R_RequestUpdate_ID));
+		set_ValueNoCheck (COLUMNNAME_Result, Result);
 	}
 
-	/** Get Request Update.
-		@return Request Updates
+	/** Get Result.
+		@return Result of the action taken
 	  */
-	public int getR_RequestUpdate_ID()
+	public String getResult()
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_R_RequestUpdate_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getR_RequestUpdate_ID()));
-    }
-
-	/** Set R_RequestUpdate_UU.
-		@param R_RequestUpdate_UU R_RequestUpdate_UU
-	*/
-	public void setR_RequestUpdate_UU (String R_RequestUpdate_UU)
-	{
-		set_Value (COLUMNNAME_R_RequestUpdate_UU, R_RequestUpdate_UU);
-	}
-
-	/** Get R_RequestUpdate_UU.
-		@return R_RequestUpdate_UU	  */
-	public String getR_RequestUpdate_UU()
-	{
-		return (String)get_Value(COLUMNNAME_R_RequestUpdate_UU);
+		return (String)get_Value(COLUMNNAME_Result);
 	}
 
 	/** Set Start Time.

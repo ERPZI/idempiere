@@ -20,32 +20,37 @@ package org.adempiere.webui.panel;
 import java.util.logging.Level;
 
 import org.adempiere.webui.Extensions;
+import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.exception.ApplicationException;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridTab;
 import org.compiere.model.MForm;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.X_AD_CtxHelp;
 import org.compiere.process.ProcessInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.KeyEvent;
 
 /**
- * Adempiere Web UI custom form.
- * The form is abstract, so specific types of custom form must be implemented
+ * Abstract base class for iDempiere Web UI custom form (AD_Form).
  *
  * @author Andrew Kimball
  */
 public abstract class ADForm extends Window implements EventListener<Event>, IHelpContext
 {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -2238655179806815227L;
+	private static final long serialVersionUID = -836186022208822051L;
 
 	/** The class' logging enabler */
     protected static final CLogger logger;
@@ -55,18 +60,22 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
         logger = CLogger.getCLogger(ADForm.class);
     }
 
-    /** The unique identifier of the form type */
+    /** AD_Form_ID */
     private int m_adFormId;
-    /** The identifying number of the window in which the form is housed */
+    /** window number of desktop tab */
     protected int m_WindowNo;
 
-
+    /** Name of form */
 	private String m_name;
-
 
 	private ProcessInfo m_pi;
 
 	private IFormController m_customForm;
+
+	/**
+	 * SysConfig USE_ESC_FOR_TAB_CLOSING
+	 */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
     /**
      * Constructor
@@ -81,11 +90,19 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
          this.setContentSclass("adform-content");
     }
 
+    /**
+     * Get registered window number
+     * @return window number
+     */
     public int getWindowNo()
     {
     	return m_WindowNo;
     }
 
+    /**
+     * Get AD_Form_ID
+     * @return AD_Form_ID
+     */
     protected int getAdFormId()
     {
     	return m_adFormId;
@@ -94,15 +111,15 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
     /**
      * Initialise the form
      *
-     * @param adFormId	the Adempiere form identifier
-     * @param name		the name of the Adempiere form
+     * @param adFormId	AD_Form_ID
+     * @param name		Name of form
      */
 
     protected void init(int adFormId, String name)
     {
         if(adFormId <= 0)
         {
-	           throw new IllegalArgumentException("Form Id is invalid");
+        	throw new IllegalArgumentException("Form Id is invalid");
 	   	}
 
         m_adFormId = adFormId;
@@ -115,9 +132,13 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
         addEventListener(WindowContainer.ON_WINDOW_CONTAINER_SELECTION_CHANGED_EVENT, this);
     }
 
+    /**
+     * Initialize form layout
+     */
     abstract protected void initForm();
 
 	/**
+	 * Get form name
      * @return form name
      */
     public String getFormName() {
@@ -127,7 +148,7 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
 	/**
 	 * Create a new form corresponding to the specified identifier
 	 *
-	 * @param adFormID		The unique identifier for the form type
+	 * @param adFormID	AD_Form_ID
 	 * @return The created form
 	 */
 	public static ADForm openForm (int adFormID)
@@ -139,7 +160,7 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
 	 * Open a form based on it's ID with the predefined context variables from menu
 	 *
 	 * @param formId
-	 * @param predefinedContextVariables
+	 * @param predefinedContextVariables optional predefined context variables from menu
 	 * @return The created form
 	 */
 	public static ADForm openForm(int formId, String predefinedContextVariables) {
@@ -177,7 +198,8 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
      * @param adFormID
      * @param gridTab
      * @param pi
-     * @param predefinedContextVariables
+     * @param predefinedContextVariables optional predefined context variables from menu
+     * @param isSOTrx
      * @return The created form
      */
     public static ADForm openForm (int adFormID, GridTab gridTab, ProcessInfo pi, String predefinedContextVariables, boolean isSOTrx)
@@ -189,7 +211,7 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
 
     	if (mform.get_ID() == 0 || formName == null)
     	{
-			throw new ApplicationException("There is no form associated with the specified selection");
+			throw new ApplicationException("There is no form associated with the specified form ID");
     	}
     	else
     	{
@@ -203,6 +225,9 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
         		Env.setPredefinedVariables(Env.getCtx(), form.getWindowNo(), predefinedContextVariables);
         		Env.setContext(Env.getCtx(), form.getWindowNo(), "IsSOTrx", isSOTrx);
 				form.init(adFormID, name);
+		    	form.setAttribute(IDesktop.WINDOWNO_ATTRIBUTE, form.getWindowNo());	// for closing the window with shortcut
+		    	SessionManager.getSessionApplication().getKeylistener().addEventListener(Events.ON_CTRL_KEY, form);
+		    	form.addEventListener(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, form);
 				return form;
     		}
     		else
@@ -212,14 +237,24 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
     	}
 	}	//	openForm
 
-    /**
-     *
-     */
+    @Override
 	public void onEvent(Event event) throws Exception
     {
 		if (event.getName().equals(WindowContainer.ON_WINDOW_CONTAINER_SELECTION_CHANGED_EVENT)) {
     		SessionManager.getAppDesktop().updateHelpContext(X_AD_CtxHelp.CTXTYPE_Form, getAdFormId());
 		}
+		else if (event.getName().equals(Events.ON_CTRL_KEY)) {
+        	KeyEvent keyEvent = (KeyEvent) event;
+        	if (LayoutUtils.isReallyVisible(this))
+	        	this.onCtrlKeyEvent(keyEvent);
+		}
+		else if(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT.equals(event.getName())) {
+        	IDesktop desktop = SessionManager.getAppDesktop();
+        	if (m_WindowNo > 0 && desktop.isCloseTabWithShortcut())
+        		desktop.closeWindow(m_WindowNo);
+        	else
+        		desktop.setCloseTabWithShortcut(true);
+        }
     }
 
 	/**
@@ -237,11 +272,19 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
 		return m_pi;
 	}
 
+	/**
+	 * Set form controller
+	 * @param customForm
+	 */
 	public void setICustomForm(IFormController customForm)
 	{
 		m_customForm = customForm;
 	}
 
+	/**
+	 * Get form controller
+	 * @return IFormController
+	 */
 	public IFormController getICustomForm()
 	{
 		return m_customForm;
@@ -257,8 +300,30 @@ public abstract class ADForm extends Window implements EventListener<Event>, IHe
 	
 	private GridTab gridTab;
 	
+	/**
+	 * @return GridTab
+	 */
 	public GridTab getGridTab()
 	{
 		return gridTab;
+	}
+
+	/**
+	 * Handle shortcut key event
+	 * @param keyEvent
+	 */
+	private void onCtrlKeyEvent(KeyEvent keyEvent) {
+		if ((keyEvent.isAltKey() && keyEvent.getKeyCode() == 0x58)	// Alt-X
+				|| (keyEvent.getKeyCode() == 0x1B && isUseEscForTabClosing)) { 	// ESC
+			keyEvent.stopPropagation();
+			Events.echoEvent(new Event(IDesktop.ON_CLOSE_WINDOW_SHORTCUT_EVENT, this));
+		}
+	}
+
+	@Override
+	public void onPageDetached(Page page) {
+		super.onPageDetached(page);
+		if (m_WindowNo > 0)
+			Env.clearWinContext(m_WindowNo);
 	}
 }

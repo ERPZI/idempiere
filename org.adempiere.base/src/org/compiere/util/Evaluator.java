@@ -27,7 +27,6 @@ import java.util.logging.Level;
 
 import org.idempiere.expression.logic.LogicEvaluator;
 
-
 /**
  *	Expression Evaluator	
  *	
@@ -41,6 +40,18 @@ public class Evaluator
 	
 	private static final Map<String, SQLLogicResult> sqlLogicCache = new ConcurrentHashMap<>();
 
+	public static final String VARIABLE_PO_PROPERTY_OPERATOR = "=";
+	public static final String VARIABLE_FORMATTING_OPERATOR_START = "<";
+	public static final String VARIABLE_FORMATTING_OPERATOR_END = ">";	
+	public static final String VARIABLE_DEFAULT_VALUE_OPERATOR = ":";
+	public static final String VARIABLE_START_END_MARKER = "@";
+	public static final String VARIABLE_SELF_TAB_OPERATOR = "~";
+	public static final String VARIABLE_REFERENCE_OPERATOR = ".";
+	public static final String VARIABLE_TAB_NO_SEPARATOR = "|";
+	
+	public static final String ID_COLUMN_SUFFIX = "_ID";
+	
+	/** Value object for SQL logic result */
 	public static class SQLLogicResult {
 		long timestamp;
 		boolean value;
@@ -81,10 +92,10 @@ public class Evaluator
 	}	//	isAllVariablesDefined
 	
 	/**
-	 *	Evaluate Logic.
+	 *	Evaluate logic expression
 	 *  @see LogicEvaluator#evaluateLogic(Evaluatee, String)
 	 *  @param source class implementing get_ValueAsString(variable)
-	 *  @param logic logic string
+	 *  @param logic logic expression
 	 *  @return logic result
 	 */
 	public static boolean evaluateLogic (Evaluatee source, String logic)
@@ -93,15 +104,14 @@ public class Evaluator
 	}   //  evaluateLogic
 
 	/**
-	 *  Parse String and add variables with @ to the list.
+	 *  Parse expression and add variables with @ to the list.
 	 *  @param list list to be added to
-	 *  @param parseString string to parse for variables
+	 *  @param parseString expression to parse for variables
 	 */
 	public static void parseDepends (ArrayList<String> list, String parseString)
 	{
 		if (parseString == null || parseString.length() == 0)
 			return;
-	//	log.fine( "MField.parseDepends", parseString);
 		String s = parseString;
 		//  while we have variables
 		while (s.indexOf('@') != -1)
@@ -113,7 +123,6 @@ public class Evaluator
 				continue;	//	error number of @@ not correct
 			String variable = s.substring(0, pos);
 			s = s.substring(pos+1);
-		//	log.fine( variable);
 			if (variable.startsWith("~")) 
 				variable = variable.substring(1);
 			// strip also @tabno|
@@ -127,13 +136,13 @@ public class Evaluator
 	}   //  parseDepends
 
 	/**
-	 * evaluator a expression logic base on sql
+	 * Evaluate a SQL logic expression (with @SQL= prefix)
 	 * @param sqlLogic
 	 * @param ctx
 	 * @param windowNo
 	 * @param tabNo
-	 * @param targetObjectName expression logic is evaluated for, that target object (purpose for logging) can be field name, toolbar button name,..
-	 * @return
+	 * @param targetObjectName expression logic is evaluated for, that target object (for logging purpose) can be field name, toolbar button name,..
+	 * @return result of logic expression
 	 */
 	public static boolean parseSQLLogic(String sqlLogic, Properties ctx, int windowNo, int tabNo, String targetObjectName) {
 		String sql = sqlLogic.substring(5); // remove @SQL=

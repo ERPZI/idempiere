@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for PA_Report
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PA_Report")
-public class X_PA_Report extends PO implements I_PA_Report, I_Persistent 
+public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PA_Report (Properties ctx, int PA_Report_ID, String trxName)
@@ -47,8 +47,8 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 			setListTrx (false);
 			setName (null);
 			setPA_ReportColumnSet_ID (0);
-			setPA_Report_ID (0);
 			setPA_ReportLineSet_ID (0);
+			setPA_Report_ID (0);
 			setProcessing (false);
         } */
     }
@@ -67,8 +67,48 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 			setListTrx (false);
 			setName (null);
 			setPA_ReportColumnSet_ID (0);
-			setPA_Report_ID (0);
 			setPA_ReportLineSet_ID (0);
+			setPA_Report_ID (0);
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_Report (Properties ctx, String PA_Report_UU, String trxName)
+    {
+      super (ctx, PA_Report_UU, trxName);
+      /** if (PA_Report_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_Calendar_ID (0);
+			setExcludeAdjustmentPeriods (null);
+// 1
+			setListSources (false);
+			setListTrx (false);
+			setName (null);
+			setPA_ReportColumnSet_ID (0);
+			setPA_ReportLineSet_ID (0);
+			setPA_Report_ID (0);
+			setProcessing (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PA_Report (Properties ctx, String PA_Report_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PA_Report_UU, trxName, virtualColumns);
+      /** if (PA_Report_UU == null)
+        {
+			setC_AcctSchema_ID (0);
+			setC_Calendar_ID (0);
+			setExcludeAdjustmentPeriods (null);
+// 1
+			setListSources (false);
+			setListTrx (false);
+			setName (null);
+			setPA_ReportColumnSet_ID (0);
+			setPA_ReportLineSet_ID (0);
+			setPA_Report_ID (0);
 			setProcessing (false);
         } */
     }
@@ -80,7 +120,7 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -282,10 +322,10 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public boolean isListSources()
 	{
 		Object oo = get_Value(COLUMNNAME_ListSources);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -305,10 +345,10 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public boolean isListSourcesXTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_ListSourcesXTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -328,10 +368,10 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public boolean isListTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_ListTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -356,7 +396,7 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -417,28 +457,6 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Financial Report.
-		@param PA_Report_ID Financial Report
-	*/
-	public void setPA_Report_ID (int PA_Report_ID)
-	{
-		if (PA_Report_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_PA_Report_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_PA_Report_ID, Integer.valueOf(PA_Report_ID));
-	}
-
-	/** Get Financial Report.
-		@return Financial Report
-	  */
-	public int getPA_Report_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PA_Report_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_PA_ReportLineSet getPA_ReportLineSet() throws RuntimeException
 	{
 		return (org.compiere.model.I_PA_ReportLineSet)MTable.get(getCtx(), org.compiere.model.I_PA_ReportLineSet.Table_ID)
@@ -461,6 +479,28 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public int getPA_ReportLineSet_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_PA_ReportLineSet_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Financial Report.
+		@param PA_Report_ID Financial Report
+	*/
+	public void setPA_Report_ID (int PA_Report_ID)
+	{
+		if (PA_Report_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_PA_Report_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_PA_Report_ID, Integer.valueOf(PA_Report_ID));
+	}
+
+	/** Get Financial Report.
+		@return Financial Report
+	  */
+	public int getPA_Report_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PA_Report_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -494,10 +534,10 @@ public class X_PA_Report extends PO implements I_PA_Report, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

@@ -21,16 +21,16 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 /** Generated Model for M_RelatedProduct
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_RelatedProduct")
-public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Persistent 
+public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_RelatedProduct (Properties ctx, int M_RelatedProduct_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
         {
 			setM_Product_ID (0);
 			setName (null);
-			setRelatedProduct_ID (0);
 			setRelatedProductType (null);
+			setRelatedProduct_ID (0);
         } */
     }
 
@@ -53,8 +53,34 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
         {
 			setM_Product_ID (0);
 			setName (null);
-			setRelatedProduct_ID (0);
 			setRelatedProductType (null);
+			setRelatedProduct_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_RelatedProduct (Properties ctx, String M_RelatedProduct_UU, String trxName)
+    {
+      super (ctx, M_RelatedProduct_UU, trxName);
+      /** if (M_RelatedProduct_UU == null)
+        {
+			setM_Product_ID (0);
+			setName (null);
+			setRelatedProductType (null);
+			setRelatedProduct_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_RelatedProduct (Properties ctx, String M_RelatedProduct_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_RelatedProduct_UU, trxName, virtualColumns);
+      /** if (M_RelatedProduct_UU == null)
+        {
+			setM_Product_ID (0);
+			setName (null);
+			setRelatedProductType (null);
+			setRelatedProduct_ID (0);
         } */
     }
 
@@ -65,7 +91,7 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -82,7 +108,7 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
     public String toString()
     {
       StringBuilder sb = new StringBuilder ("X_M_RelatedProduct[")
-        .append(get_ID()).append(",Name=").append(getName()).append("]");
+        .append(get_UUID()).append(",Name=").append(getName()).append("]");
       return sb.toString();
     }
 
@@ -161,6 +187,30 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
 		return (String)get_Value(COLUMNNAME_Name);
 	}
 
+	/** RelatedProductType AD_Reference_ID=313 */
+	public static final int RELATEDPRODUCTTYPE_AD_Reference_ID=313;
+	/** Alternative = A */
+	public static final String RELATEDPRODUCTTYPE_Alternative = "A";
+	/** Web Promotion = P */
+	public static final String RELATEDPRODUCTTYPE_WebPromotion = "P";
+	/** Supplemental = S */
+	public static final String RELATEDPRODUCTTYPE_Supplemental = "S";
+	/** Set Related Product Type.
+		@param RelatedProductType Related Product Type
+	*/
+	public void setRelatedProductType (String RelatedProductType)
+	{
+
+		set_ValueNoCheck (COLUMNNAME_RelatedProductType, RelatedProductType);
+	}
+
+	/** Get Related Product Type.
+		@return Related Product Type	  */
+	public String getRelatedProductType()
+	{
+		return (String)get_Value(COLUMNNAME_RelatedProductType);
+	}
+
 	public org.compiere.model.I_M_Product getRelatedProduct() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_Product)MTable.get(getCtx(), org.compiere.model.I_M_Product.Table_ID)
@@ -187,29 +237,5 @@ public class X_M_RelatedProduct extends PO implements I_M_RelatedProduct, I_Pers
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** RelatedProductType AD_Reference_ID=313 */
-	public static final int RELATEDPRODUCTTYPE_AD_Reference_ID=313;
-	/** Alternative = A */
-	public static final String RELATEDPRODUCTTYPE_Alternative = "A";
-	/** Web Promotion = P */
-	public static final String RELATEDPRODUCTTYPE_WebPromotion = "P";
-	/** Supplemental = S */
-	public static final String RELATEDPRODUCTTYPE_Supplemental = "S";
-	/** Set Related Product Type.
-		@param RelatedProductType Related Product Type
-	*/
-	public void setRelatedProductType (String RelatedProductType)
-	{
-
-		set_ValueNoCheck (COLUMNNAME_RelatedProductType, RelatedProductType);
-	}
-
-	/** Get Related Product Type.
-		@return Related Product Type	  */
-	public String getRelatedProductType()
-	{
-		return (String)get_Value(COLUMNNAME_RelatedProductType);
 	}
 }

@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_InfoWindow
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_InfoWindow")
-public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent 
+public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_InfoWindow (Properties ctx, int AD_InfoWindow_ID, String trxName)
@@ -87,6 +87,60 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_InfoWindow (Properties ctx, String AD_InfoWindow_UU, String trxName)
+    {
+      super (ctx, AD_InfoWindow_UU, trxName);
+      /** if (AD_InfoWindow_UU == null)
+        {
+			setAD_InfoWindow_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setFromClause (null);
+			setIsDefault (false);
+// N
+			setIsDistinct (false);
+// N
+			setIsShowInDashboard (true);
+// Y
+			setIsValid (false);
+// N
+			setMaxQueryRecords (0);
+// 0
+			setName (null);
+			setPagingSize (0);
+// 0
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_InfoWindow (Properties ctx, String AD_InfoWindow_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_InfoWindow_UU, trxName, virtualColumns);
+      /** if (AD_InfoWindow_UU == null)
+        {
+			setAD_InfoWindow_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setFromClause (null);
+			setIsDefault (false);
+// N
+			setIsDistinct (false);
+// N
+			setIsShowInDashboard (true);
+// Y
+			setIsValid (false);
+// N
+			setMaxQueryRecords (0);
+// 0
+			setName (null);
+			setPagingSize (0);
+// 0
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_InfoWindow (Properties ctx, ResultSet rs, String trxName)
     {
@@ -94,7 +148,7 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -332,10 +386,10 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public boolean isDefault()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDefault);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -355,33 +409,10 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public boolean isDistinct()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDistinct);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
-	}
-
-	/** Set Load Page Num.
-		@param isLoadPageNum When load data for info window, also load number of paging
-	*/
-	public void setisLoadPageNum (boolean isLoadPageNum)
-	{
-		set_Value (COLUMNNAME_isLoadPageNum, Boolean.valueOf(isLoadPageNum));
-	}
-
-	/** Get Load Page Num.
-		@return When load data for info window, also load number of paging
-	  */
-	public boolean isLoadPageNum()
-	{
-		Object oo = get_Value(COLUMNNAME_isLoadPageNum);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -401,10 +432,10 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public boolean isShowInDashboard()
 	{
 		Object oo = get_Value(COLUMNNAME_IsShowInDashboard);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -424,10 +455,10 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public boolean isValid()
 	{
 		Object oo = get_Value(COLUMNNAME_IsValid);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -471,7 +502,7 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -508,24 +539,6 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 		return (String)get_Value(COLUMNNAME_OtherClause);
 	}
 
-	/** Set Paging Size.
-		@param PagingSize Paging Size
-	*/
-	public void setPagingSize (int PagingSize)
-	{
-		set_Value (COLUMNNAME_PagingSize, Integer.valueOf(PagingSize));
-	}
-
-	/** Get Paging Size.
-		@return Paging Size	  */
-	public int getPagingSize()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PagingSize);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_AD_Window getPO_Window() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Window)MTable.get(getCtx(), org.compiere.model.I_AD_Window.Table_ID)
@@ -554,6 +567,24 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Paging Size.
+		@param PagingSize Paging Size
+	*/
+	public void setPagingSize (int PagingSize)
+	{
+		set_Value (COLUMNNAME_PagingSize, Integer.valueOf(PagingSize));
+	}
+
+	/** Get Paging Size.
+		@return Paging Size	  */
+	public int getPagingSize()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PagingSize);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Process Now.
 		@param Processing Process Now
 	*/
@@ -567,10 +598,10 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -609,5 +640,28 @@ public class X_AD_InfoWindow extends PO implements I_AD_InfoWindow, I_Persistent
 	public String getWhereClause()
 	{
 		return (String)get_Value(COLUMNNAME_WhereClause);
+	}
+
+	/** Set Load Page Num.
+		@param isLoadPageNum When load data for info window, also load number of paging
+	*/
+	public void setisLoadPageNum (boolean isLoadPageNum)
+	{
+		set_Value (COLUMNNAME_isLoadPageNum, Boolean.valueOf(isLoadPageNum));
+	}
+
+	/** Get Load Page Num.
+		@return When load data for info window, also load number of paging
+	  */
+	public boolean isLoadPageNum()
+	{
+		Object oo = get_Value(COLUMNNAME_isLoadPageNum);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 }

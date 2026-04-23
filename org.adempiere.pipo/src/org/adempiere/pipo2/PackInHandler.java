@@ -173,7 +173,7 @@ public class PackInHandler extends DefaultHandler {
 			packageImp.setReleaseNo(atts.getValue("CompVer"));
 			packageImp.setPK_Version(packageVersion);
 			packageImp.setVersion(atts.getValue("DataBase"));
-			packageImp.setDescription(atts.getValue("Description").replaceAll("'","''"));
+			packageImp.setDescription(atts.getValue("Description").replace("'","''"));
 			packageImp.setName(packageName);
 			packageImp.setCreator(atts.getValue("Creator"));
 			packageImp.setCreatorContact(atts.getValue("CreatorContact"));
@@ -191,7 +191,7 @@ public class PackInHandler extends DefaultHandler {
 				packageInst.setReleaseNo(atts.getValue("CompVer"));
 				packageInst.setPK_Version(atts.getValue("Version"));
 				packageInst.setVersion(atts.getValue("DataBase"));
-				packageInst.setDescription(atts.getValue("Description").replaceAll("'","''"));
+				packageInst.setDescription(atts.getValue("Description").replace("'","''"));
 				packageInst.setName(atts.getValue("Name"));
 				packageInst.setCreator(atts.getValue("Creator"));
 				packageInst.setCreatorContact(atts.getValue("CreatorContact"));
@@ -483,6 +483,9 @@ public class PackInHandler extends DefaultHandler {
 				if (!entry.startElement)
 				{
 					Element e = entry.element;
+					if (e.unresolved == null || e.unresolved.length() == 0)
+						continue;
+					
 					StringBuilder s = new StringBuilder(e.qName);
 					s.append(" [");
 					Set<String> keys = e.properties.keySet();
@@ -498,8 +501,7 @@ public class PackInHandler extends DefaultHandler {
 						i++;
 					}
 					s.append("]");
-					if (e.unresolved != null && e.unresolved.length() > 0)
-						s.append(" unresolved ").append(e.unresolved);
+					s.append(" unresolved ").append(e.unresolved);
 					log.warning(s.toString());
 					packIn.getNotifier().addFailureLine(s.toString());
 				}

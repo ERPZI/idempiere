@@ -17,6 +17,8 @@
 package org.compiere.model;
 
 import java.sql.ResultSet;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -24,6 +26,7 @@ import java.util.logging.Level;
 import org.adempiere.process.UUIDGenerator;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.idempiere.cache.ImmutableIntPOCache;
 import org.idempiere.cache.ImmutablePOSupport;
 
@@ -41,14 +44,14 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MDocType extends X_C_DocType implements ImmutablePOSupport
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 1830844263371227816L;
 
 	/**
 	 * Return the first Doc Type for this BaseType
 	 * @param DocBaseType
-	 * @return
+	 * @return C_DocType_ID
 	 */
 	static public int getDocType(String DocBaseType)
 	{
@@ -121,7 +124,19 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	/**	Cache					*/
 	static private ImmutableIntPOCache<Integer,MDocType>	s_cache = new ImmutableIntPOCache<Integer,MDocType>(Table_Name, 20);
 	
-	/**************************************************************************
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_DocType_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MDocType(Properties ctx, String C_DocType_UU, String trxName) {
+        super(ctx, C_DocType_UU, trxName);
+		if (Util.isEmpty(C_DocType_UU))
+			setInitialDefaults();
+    }
+
+	/**
 	 * 	Standard Constructor
 	 *	@param ctx context
 	 *	@param C_DocType_ID id
@@ -131,20 +146,25 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	{
 		super(ctx, C_DocType_ID, trxName);
 		if (C_DocType_ID == 0)
-		{
-			setDocumentCopies (0);
-			setHasCharges (false);
-			setIsDefault (false);
-			setIsDocNoControlled (false);
-			setIsSOTrx (false);
-			setIsPickQAConfirm(false);
-			setIsShipConfirm(false);
-			setIsSplitWhenDifference(false);
-			setIsCreateCounter(true);
-			setIsDefaultCounterDoc(false);
-			setIsIndexed(true);
-		}
+			setInitialDefaults();
 	}	//	MDocType
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocumentCopies (0);
+		setHasCharges (false);
+		setIsDefault (false);
+		setIsDocNoControlled (false);
+		setIsSOTrx (false);
+		setIsPickQAConfirm(false);
+		setIsShipConfirm(false);
+		setIsSplitWhenDifference(false);
+		setIsCreateCounter(true);
+		setIsDefaultCounterDoc(false);
+		setIsIndexed(true);
+	}
 
 	/**
 	 * 	Load Constructor
@@ -158,7 +178,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	}	//	MDocType
 
 	/**
-	 * 	New Constructor
+	 * 	New MDocType Constructor
 	 *	@param ctx context
 	 *	@param DocBaseType document base type
 	 *	@param Name name
@@ -175,7 +195,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	}	//	MDocType
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param copy
 	 */
 	public MDocType(MDocType copy) 
@@ -184,7 +204,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 */
@@ -194,7 +214,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	}
 
 	/**
-	 * 
+	 * Copy constructor
 	 * @param ctx
 	 * @param copy
 	 * @param trxName
@@ -219,7 +239,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 
 	
 	/**
-	 * 	Set SOTrx based on document base type
+	 * 	Set IsSOTrx based on document base type
 	 */
 	public void setIsSOTrx ()
 	{
@@ -233,6 +253,7 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("MDocType[");
@@ -272,12 +293,11 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 				|| DOCSUBTYPESO_Quotation.equals(getDocSubTypeSO()))
 			&& DOCBASETYPE_SalesOrder.equals(getDocBaseType());
 	}	//	isOffer
-
 	
 	/**
 	 * 	Get Print Name
 	 * 	@param AD_Language language
-	 *	@return print Name if available translated
+	 *	@return print name if available translated
 	 */
 	public String getPrintName (String AD_Language)
 	{
@@ -286,27 +306,54 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 		return get_Translation (COLUMNNAME_PrintName, AD_Language);
 	}	//	getPrintName
 	
-	/**
-	 * 	Before Save
-	 *	@param newRecord new
-	 *	@return true
-	 */
-	protected boolean beforeSave (boolean newRecord)
-	{
-		return true;
-	}	//	beforeSave
+	/** List of document sub-types which are always auto-generating Shipment */
+	public static final List<String> autoGenerateInOutList = Collections.unmodifiableList(Arrays.asList(
+		DOCSUBTYPESO_POSOrder,
+	    DOCSUBTYPESO_OnCreditOrder,
+	    DOCSUBTYPESO_WarehouseOrder
+	));
+
+	/** List of document sub-types which are always auto-generating Invoice */
+	public static final List<String> autoGenerateInvoiceList = Collections.unmodifiableList(Arrays.asList(
+		DOCSUBTYPESO_POSOrder,
+	    DOCSUBTYPESO_OnCreditOrder
+	));
 	
 	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
+	 * Get AutogenerateInout based on DocSubTypeSO
+	 * @param docSubTypeSO
+	 * @return
 	 */
+	public static boolean getIsAutoGenerateInout(String docSubTypeSO) {
+		return autoGenerateInOutList.contains(docSubTypeSO);
+	}
+	
+	/**
+	 * Get AutogenerateInvoice based on DocSubTypeSO
+	 * @param docSubTypeSO
+	 * @return
+	 */
+	public static boolean getIsAutoGenerateInvoice(String docSubTypeSO) {
+		return autoGenerateInvoiceList.contains(docSubTypeSO);
+	}
+	
+	@Override
+	protected boolean beforeSave (boolean newRecord) {
+		if(newRecord || is_ValueChanged(COLUMNNAME_IsAutoGenerateInout) || is_ValueChanged(COLUMNNAME_IsAutoGenerateInvoice)) {
+			if(!DOCSUBTYPESO_PrepayOrder.equals(getDocSubTypeSO())) {
+				setIsAutoGenerateInout(getIsAutoGenerateInout(getDocSubTypeSO()));
+				setIsAutoGenerateInvoice(getIsAutoGenerateInvoice(getDocSubTypeSO()));
+			}
+		}
+		return true;
+	} // beforeSave
+	
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (newRecord && success)
 		{
-			//	Add doctype/docaction access to all roles of client
+			// Create doctype/docaction access records for all roles of client
 			StringBuilder sqlDocAction = new StringBuilder("INSERT INTO AD_Document_Action_Access ")
 				.append("(AD_Client_ID,AD_Org_ID,IsActive,Created,CreatedBy,Updated,UpdatedBy,")
 				.append("C_DocType_ID , AD_Ref_List_ID, AD_Role_ID) ")
@@ -335,14 +382,10 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 		return success;
 	}	//	afterSave
 	
-	/**
-	 * 	Executed before Delete operation.
-	 *
-	 *	@return true if delete is a success
-	 */
+	@Override
 	protected boolean beforeDelete ()
 	{
-		// delete access records
+		// Delete document action access records
 		StringBuilder msgdb = new StringBuilder("DELETE FROM AD_Document_Action_Access WHERE C_DocType_ID=").append(get_ID());
 		int docactDel = DB.executeUpdate(msgdb.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Delete AD_Document_Action_Access=" + docactDel + " for C_DocType_ID: " + get_ID());
@@ -350,55 +393,64 @@ public class MDocType extends X_C_DocType implements ImmutablePOSupport
 	}   //  beforeDelete
 
 	/**
-     * Returns Document type for the shipment/receipt based
-     * on Document type provided for order/rma
-     * @param docTypeId
+     * Get shipment/receipt document type based
+     * on document type (docTypeId) provided
+     * @param docTypeId order/rma/vendor return/return material
      * @return shipment/receipt doctype id
      */
     public static int getShipmentReceiptDocType(int docTypeId)
     {
         int relatedDocTypeId = 0;
-        if (docTypeId != 0)
+        if (docTypeId > 0)
         {
             MDocType docType = MDocType.get(docTypeId);
-            // FIXME: Should refactor code and remove the hard coded name
-            // Should change document type to allow query the value
-            if ("Return Material".equals(docType.getName()) ||
-                    "Vendor Return".equals(docType.getName())|| !docType.isSOTrx())
-            {
-                String relatedDocTypeName = null;
-                if (("Purchase Order").equals(docType.getName()))
-                {
-                    relatedDocTypeName = "MM Receipt";
-                }
-                else if ("Return Material".equals(docType.getName()))
-                {
-                    relatedDocTypeName = "MM Returns";
-                }
-                else if ("Vendor Return".equals(docType.getName()))
-                {
-                    relatedDocTypeName = "MM Vendor Returns";
-                }
+            			
+			var docBaseType = docType.getDocBaseType();
+			var docSubTypeSO = docType.getDocSubTypeSO();
+			String relatedDocBaseType = null;
+			String isSOTrx = null;
+			if (DOCBASETYPE_PurchaseOrder.equals(docBaseType))
+			{
+			    if (DOCSUBTYPESO_ReturnMaterial.equals(docSubTypeSO)) {
+			        relatedDocBaseType = DOCBASETYPE_MaterialDelivery;
+			    } else if (docSubTypeSO == null) {
+			        relatedDocBaseType = DOCBASETYPE_MaterialReceipt;
+			    }
+			    isSOTrx = "N";
+			}
+			else if (DOCBASETYPE_SalesOrder.equals(docBaseType)) 
+			{ 
+				if (DOCSUBTYPESO_ReturnMaterial.equals(docSubTypeSO)) 
+				{ 
+					relatedDocBaseType = DOCBASETYPE_MaterialReceipt; 
+				} else { 
+					relatedDocBaseType = DOCBASETYPE_MaterialDelivery; 
+				} 
+				isSOTrx = "Y";
+			}
+            
+			// For non-return, if the document type has a specific shipment/receipt doctype defined, use it
+			if (!DOCSUBTYPESO_ReturnMaterial.equals(docSubTypeSO) && docType.getC_DocTypeShipment_ID() > 0)
+			{
+				return docType.getC_DocTypeShipment_ID();
+			}
 
-                if (relatedDocTypeName != null)
-                {
-                    StringBuilder whereClause = new StringBuilder(30);
-                    whereClause.append("Name='").append(relatedDocTypeName).append("' ");
-                    whereClause.append("and AD_Client_ID=").append(Env.getAD_Client_ID(Env.getCtx()));
-                    whereClause.append(" AND IsActive='Y'");
+			if (relatedDocBaseType != null)
+			{
+			    StringBuilder whereClause = new StringBuilder(30);
+			    whereClause.append("DocBaseType='").append(relatedDocBaseType).append("' ");
+			    whereClause.append("AND AD_Client_ID=").append(Env.getAD_Client_ID(Env.getCtx()));
+			    whereClause.append(" AND IsActive='Y'");
+			    whereClause.append(" AND IsSOTrx='").append(isSOTrx).append("'");
+			    whereClause.append(" Order By C_DocType_ID ASC ");
 
-                    int relDocTypeIds[] = MDocType.getAllIDs(MDocType.Table_Name, whereClause.toString(), null);
+			    int relDocTypeIds[] = MDocType.getAllIDs(MDocType.Table_Name, whereClause.toString(), null);
 
-                    if (relDocTypeIds.length > 0)
-                    {
-                        relatedDocTypeId = relDocTypeIds[0];
-                    }
-                }
-            }
-            else
-            {
-                relatedDocTypeId = docType.getC_DocTypeShipment_ID();
-            }
+			    if (relDocTypeIds.length > 0)
+			    {
+			        relatedDocTypeId = relDocTypeIds[0];
+			    }
+			}
         }
 
         return relatedDocTypeId;

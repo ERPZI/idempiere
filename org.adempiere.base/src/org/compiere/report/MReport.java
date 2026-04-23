@@ -20,10 +20,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 
 import org.compiere.model.X_PA_Report;
-
+import org.compiere.util.Util;
 
 /**
- *  Report Model
+ *  Financial Report Model
  *
  *  @author Jorg Janke
  *  @version $Id: MReport.java,v 1.3 2006/08/03 22:16:52 jjanke Exp $
@@ -31,9 +31,26 @@ import org.compiere.model.X_PA_Report;
 public class MReport extends X_PA_Report
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 1765138347185608173L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param PA_Report_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MReport(Properties ctx, String PA_Report_UU, String trxName) {
+        super(ctx, PA_Report_UU, trxName);
+		if (Util.isEmpty(PA_Report_UU))
+			setInitialDefaults();
+		else
+		{
+			m_columnSet = new MReportColumnSet (ctx, getPA_ReportColumnSet_ID(), trxName);
+			m_lineSet = new MReportLineSet (ctx, getPA_ReportLineSet_ID(), trxName);
+		}
+    }
 
 	/**
 	 * 	Constructor
@@ -45,19 +62,24 @@ public class MReport extends X_PA_Report
 	{
 		super (ctx, PA_Report_ID, trxName);
 		if (PA_Report_ID == 0)
-		{
-		//	setName (null);
-		//	setPA_ReportLineSet_ID (0);
-		//	setPA_ReportColumnSet_ID (0);
-			setListSources(false);
-			setListTrx(false);
-		}
+			setInitialDefaults();
 		else
 		{
 			m_columnSet = new MReportColumnSet (ctx, getPA_ReportColumnSet_ID(), trxName);
 			m_lineSet = new MReportLineSet (ctx, getPA_ReportLineSet_ID(), trxName);
 		}
 	}	//	MReport
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		//	setName (null);
+		//	setPA_ReportLineSet_ID (0);
+		//	setPA_ReportColumnSet_ID (0);
+		setListSources(false);
+		setListTrx(false);
+	}
 
 	/** 
 	 * 	Load Constructor 
@@ -102,12 +124,11 @@ public class MReport extends X_PA_Report
 		return sb.toString();
 	}	//	getWhereClause
 
-	/*************************************************************************/
-
 	/**
 	 * 	String Representation
 	 * 	@return Info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MReport[")

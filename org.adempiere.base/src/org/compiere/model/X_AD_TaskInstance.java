@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_TaskInstance
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_TaskInstance")
-public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persistent 
+public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_TaskInstance (Properties ctx, int AD_TaskInstance_ID, String trxName)
@@ -39,8 +39,8 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
       super (ctx, AD_TaskInstance_ID, trxName);
       /** if (AD_TaskInstance_ID == 0)
         {
-			setAD_Task_ID (0);
 			setAD_TaskInstance_ID (0);
+			setAD_Task_ID (0);
         } */
     }
 
@@ -50,8 +50,30 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
       super (ctx, AD_TaskInstance_ID, trxName, virtualColumns);
       /** if (AD_TaskInstance_ID == 0)
         {
-			setAD_Task_ID (0);
 			setAD_TaskInstance_ID (0);
+			setAD_Task_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_TaskInstance (Properties ctx, String AD_TaskInstance_UU, String trxName)
+    {
+      super (ctx, AD_TaskInstance_UU, trxName);
+      /** if (AD_TaskInstance_UU == null)
+        {
+			setAD_TaskInstance_ID (0);
+			setAD_Task_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_TaskInstance (Properties ctx, String AD_TaskInstance_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_TaskInstance_UU, trxName, virtualColumns);
+      /** if (AD_TaskInstance_UU == null)
+        {
+			setAD_TaskInstance_ID (0);
+			setAD_Task_ID (0);
         } */
     }
 
@@ -62,7 +84,7 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -82,28 +104,6 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
         .append(get_ID()).append("]");
       return sb.toString();
     }
-
-	/** Set OS Task.
-		@param AD_Task_ID Operation System Task
-	*/
-	public void setAD_Task_ID (int AD_Task_ID)
-	{
-		if (AD_Task_ID < 1)
-			set_Value (COLUMNNAME_AD_Task_ID, null);
-		else
-			set_Value (COLUMNNAME_AD_Task_ID, Integer.valueOf(AD_Task_ID));
-	}
-
-	/** Get OS Task.
-		@return Operation System Task
-	  */
-	public int getAD_Task_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Task_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
 
 	/** Set Task Instance.
 		@param AD_TaskInstance_ID Task Instance
@@ -129,7 +129,7 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getAD_TaskInstance_ID()));
     }
@@ -147,5 +147,27 @@ public class X_AD_TaskInstance extends PO implements I_AD_TaskInstance, I_Persis
 	public String getAD_TaskInstance_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_TaskInstance_UU);
+	}
+
+	/** Set OS Task.
+		@param AD_Task_ID Operation System Task
+	*/
+	public void setAD_Task_ID (int AD_Task_ID)
+	{
+		if (AD_Task_ID < 1)
+			set_Value (COLUMNNAME_AD_Task_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Task_ID, Integer.valueOf(AD_Task_ID));
+	}
+
+	/** Get OS Task.
+		@return Operation System Task
+	  */
+	public int getAD_Task_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Task_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 }

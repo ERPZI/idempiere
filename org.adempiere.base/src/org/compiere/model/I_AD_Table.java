@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Table
  *  @author iDempiere (generated) 
- *  @version Release 10
+ *  @version Release 12
  */
 public interface I_AD_Table 
 {
@@ -40,19 +40,6 @@ public interface I_AD_Table
     BigDecimal accessLevel = BigDecimal.valueOf(4);
 
     /** Load Meta Data */
-
-    /** Column name AccessLevel */
-    public static final String COLUMNNAME_AccessLevel = "AccessLevel";
-
-	/** Set Data Access Level.
-	  * Access Level required
-	  */
-	public void setAccessLevel (String AccessLevel);
-
-	/** Get Data Access Level.
-	  * Access Level required
-	  */
-	public String getAccessLevel();
 
     /** Column name AD_Client_ID */
     public static final String COLUMNNAME_AD_Client_ID = "AD_Client_ID";
@@ -127,6 +114,19 @@ public interface I_AD_Table
 
 	public org.compiere.model.I_AD_Window getAD_Window() throws RuntimeException;
 
+    /** Column name AccessLevel */
+    public static final String COLUMNNAME_AccessLevel = "AccessLevel";
+
+	/** Set Data Access Level.
+	  * Access Level required
+	  */
+	public void setAccessLevel (String AccessLevel);
+
+	/** Get Data Access Level.
+	  * Access Level required
+	  */
+	public String getAccessLevel();
+
     /** Column name CopyColumnsFromTable */
     public static final String COLUMNNAME_CopyColumnsFromTable = "CopyColumnsFromTable";
 
@@ -145,6 +145,28 @@ public interface I_AD_Table
 	/** Get Copy Components From View	  */
 	public String getCopyComponentsFromView();
 
+    /** Column name CreatePartition */
+    public static final String COLUMNNAME_CreatePartition = "CreatePartition";
+
+	/** Set Create/update partition.
+	  * Process which create or update table partitions based on the table and column records
+	  */
+	public void setCreatePartition (String CreatePartition);
+
+	/** Get Create/update partition.
+	  * Process which create or update table partitions based on the table and column records
+	  */
+	public String getCreatePartition();
+
+    /** Column name CreateWindowFromTable */
+    public static final String COLUMNNAME_CreateWindowFromTable = "CreateWindowFromTable";
+
+	/** Set Create Window From Table	  */
+	public void setCreateWindowFromTable (String CreateWindowFromTable);
+
+	/** Get Create Window From Table	  */
+	public String getCreateWindowFromTable();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -160,15 +182,6 @@ public interface I_AD_Table
 	  * User who created this records
 	  */
 	public int getCreatedBy();
-
-    /** Column name CreateWindowFromTable */
-    public static final String COLUMNNAME_CreateWindowFromTable = "CreateWindowFromTable";
-
-	/** Set Create Window From Table	  */
-	public void setCreateWindowFromTable (String CreateWindowFromTable);
-
-	/** Get Create Window From Table	  */
-	public String getCreateWindowFromTable();
 
     /** Column name DatabaseViewDrop */
     public static final String COLUMNNAME_DatabaseViewDrop = "DatabaseViewDrop";
@@ -297,6 +310,19 @@ public interface I_AD_Table
 	  * Use Search instead of Pick list
 	  */
 	public boolean isHighVolume();
+
+    /** Column name IsPartition */
+    public static final String COLUMNNAME_IsPartition = "IsPartition";
+
+	/** Set Partition.
+	  * This is a partitioned table
+	  */
+	public void setIsPartition (boolean IsPartition);
+
+	/** Get Partition.
+	  * This is a partitioned table
+	  */
+	public boolean isPartition();
 
     /** Column name IsSecurityEnabled */
     public static final String COLUMNNAME_IsSecurityEnabled = "IsSecurityEnabled";

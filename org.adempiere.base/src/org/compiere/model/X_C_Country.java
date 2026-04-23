@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_Country
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_Country")
-public class X_C_Country extends PO implements I_C_Country, I_Persistent 
+public class X_C_Country extends PO implements I_C_Country, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241226L;
 
     /** Standard Constructor */
     public X_C_Country (Properties ctx, int C_Country_ID, String trxName)
@@ -69,6 +69,42 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_Country (Properties ctx, String C_Country_UU, String trxName)
+    {
+      super (ctx, C_Country_UU, trxName);
+      /** if (C_Country_UU == null)
+        {
+			setC_Country_ID (0);
+			setCountryCode (null);
+			setDisplaySequence (null);
+// @C@, @R@ @P@
+			setHasPostal_Add (false);
+			setHasRegion (false);
+			setIsAddressLinesLocalReverse (false);
+			setIsAddressLinesReverse (false);
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_Country (Properties ctx, String C_Country_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_Country_UU, trxName, virtualColumns);
+      /** if (C_Country_UU == null)
+        {
+			setC_Country_ID (0);
+			setCountryCode (null);
+			setDisplaySequence (null);
+// @C@, @R@ @P@
+			setHasPostal_Add (false);
+			setHasRegion (false);
+			setIsAddressLinesLocalReverse (false);
+			setIsAddressLinesReverse (false);
+			setName (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_Country (Properties ctx, ResultSet rs, String trxName)
     {
@@ -76,7 +112,7 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -130,28 +166,13 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isAllowCitiesOutOfList()
 	{
 		Object oo = get_Value(COLUMNNAME_AllowCitiesOutOfList);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
-	}
-
-	/** Set Capture Sequence.
-		@param CaptureSequence Capture Sequence
-	*/
-	public void setCaptureSequence (String CaptureSequence)
-	{
-		set_Value (COLUMNNAME_CaptureSequence, CaptureSequence);
-	}
-
-	/** Get Capture Sequence.
-		@return Capture Sequence	  */
-	public String getCaptureSequence()
-	{
-		return (String)get_Value(COLUMNNAME_CaptureSequence);
 	}
 
 	/** Set Country.
@@ -219,8 +240,23 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set Capture Sequence.
+		@param CaptureSequence Capture Sequence
+	*/
+	public void setCaptureSequence (String CaptureSequence)
+	{
+		set_Value (COLUMNNAME_CaptureSequence, CaptureSequence);
+	}
+
+	/** Get Capture Sequence.
+		@return Capture Sequence	  */
+	public String getCaptureSequence()
+	{
+		return (String)get_Value(COLUMNNAME_CaptureSequence);
+	}
+
 	/** Set ISO Country Code.
-		@param CountryCode Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+		@param CountryCode Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	*/
 	public void setCountryCode (String CountryCode)
 	{
@@ -228,7 +264,7 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	}
 
 	/** Get ISO Country Code.
-		@return Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+		@return Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	  */
 	public String getCountryCode()
 	{
@@ -377,10 +413,10 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isHasPostal_Add()
 	{
 		Object oo = get_Value(COLUMNNAME_HasPostal_Add);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -400,13 +436,29 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isHasRegion()
 	{
 		Object oo = get_Value(COLUMNNAME_HasRegion);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set ISO Alpha-3 Code.
+		@param ISOCountryCodeAlpha3 ISO Alpha-3 country code - a three-letter code that represents a country name, which is usually more closely related to the country name
+	*/
+	public void setISOCountryCodeAlpha3 (String ISOCountryCodeAlpha3)
+	{
+		set_Value (COLUMNNAME_ISOCountryCodeAlpha3, ISOCountryCodeAlpha3);
+	}
+
+	/** Get ISO Alpha-3 Code.
+		@return ISO Alpha-3 country code - a three-letter code that represents a country name, which is usually more closely related to the country name
+	  */
+	public String getISOCountryCodeAlpha3()
+	{
+		return (String)get_Value(COLUMNNAME_ISOCountryCodeAlpha3);
 	}
 
 	/** Set Reverse Local Address Lines.
@@ -423,10 +475,10 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isAddressLinesLocalReverse()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAddressLinesLocalReverse);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -446,10 +498,10 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isAddressLinesReverse()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAddressLinesReverse);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -469,10 +521,10 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 	public boolean isPostcodeLookup()
 	{
 		Object oo = get_Value(COLUMNNAME_IsPostcodeLookup);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -542,6 +594,22 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
 		return (String)get_Value(COLUMNNAME_LookupUrl);
 	}
 
+	/** Set M49 Code.
+		@param M49Code Standard country codes for statistical use (M49) defined by the United Nations
+	*/
+	public void setM49Code (String M49Code)
+	{
+		set_Value (COLUMNNAME_M49Code, M49Code);
+	}
+
+	/** Get M49 Code.
+		@return Standard country codes for statistical use (M49) defined by the United Nations
+	  */
+	public String getM49Code()
+	{
+		return (String)get_Value(COLUMNNAME_M49Code);
+	}
+
 	/** Set Media Size.
 		@param MediaSize Java Media Size
 	*/
@@ -577,7 +645,7 @@ public class X_C_Country extends PO implements I_C_Country, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

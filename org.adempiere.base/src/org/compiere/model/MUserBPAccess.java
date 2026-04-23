@@ -37,9 +37,19 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MUserBPAccess extends X_AD_UserBPAccess implements ImmutablePOSupport {
 
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 4549943360035715233L;
+
+    /**
+    * UUID based Constructor
+    * @param ctx  Context
+    * @param AD_UserBPAccess_UU  UUID key
+    * @param trxName Transaction
+    */
+    public MUserBPAccess(Properties ctx, String AD_UserBPAccess_UU, String trxName) {
+        super(ctx, AD_UserBPAccess_UU, trxName);
+    }
 
 	/**
 	 * @param ctx

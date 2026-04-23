@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for T_InvoiceGL
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="T_InvoiceGL")
-public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent 
+public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_T_InvoiceGL (Properties ctx, int T_InvoiceGL_ID, String trxName)
@@ -81,6 +81,52 @@ public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_T_InvoiceGL (Properties ctx, String T_InvoiceGL_UU, String trxName)
+    {
+      super (ctx, T_InvoiceGL_UU, trxName);
+      /** if (T_InvoiceGL_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setAmtAcctBalance (Env.ZERO);
+			setAmtRevalCr (Env.ZERO);
+			setAmtRevalCrDiff (Env.ZERO);
+			setAmtRevalDr (Env.ZERO);
+			setAmtRevalDrDiff (Env.ZERO);
+			setAmtSourceBalance (Env.ZERO);
+			setC_ConversionTypeReval_ID (0);
+			setC_Invoice_ID (0);
+			setDateReval (new Timestamp( System.currentTimeMillis() ));
+			setFact_Acct_ID (0);
+			setGrandTotal (Env.ZERO);
+			setIsAllCurrencies (false);
+			setOpenAmt (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_T_InvoiceGL (Properties ctx, String T_InvoiceGL_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, T_InvoiceGL_UU, trxName, virtualColumns);
+      /** if (T_InvoiceGL_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setAmtAcctBalance (Env.ZERO);
+			setAmtRevalCr (Env.ZERO);
+			setAmtRevalCrDiff (Env.ZERO);
+			setAmtRevalDr (Env.ZERO);
+			setAmtRevalDrDiff (Env.ZERO);
+			setAmtSourceBalance (Env.ZERO);
+			setC_ConversionTypeReval_ID (0);
+			setC_Invoice_ID (0);
+			setDateReval (new Timestamp( System.currentTimeMillis() ));
+			setFact_Acct_ID (0);
+			setGrandTotal (Env.ZERO);
+			setIsAllCurrencies (false);
+			setOpenAmt (Env.ZERO);
+        } */
+    }
+
     /** Load Constructor */
     public X_T_InvoiceGL (Properties ctx, ResultSet rs, String trxName)
     {
@@ -88,7 +134,7 @@ public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -135,6 +181,31 @@ public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** APAR AD_Reference_ID=332 */
+	public static final int APAR_AD_Reference_ID=332;
+	/** Receivables &amp; Payables = A */
+	public static final String APAR_ReceivablesPayables = "A";
+	/** Payables only = P */
+	public static final String APAR_PayablesOnly = "P";
+	/** Receivables only = R */
+	public static final String APAR_ReceivablesOnly = "R";
+	/** Set AP - AR.
+		@param APAR Include Receivables and/or Payables transactions
+	*/
+	public void setAPAR (String APAR)
+	{
+
+		set_Value (COLUMNNAME_APAR, APAR);
+	}
+
+	/** Get AP - AR.
+		@return Include Receivables and/or Payables transactions
+	  */
+	public String getAPAR()
+	{
+		return (String)get_Value(COLUMNNAME_APAR);
 	}
 
 	/** Set Accounted Balance.
@@ -249,31 +320,6 @@ public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
-	}
-
-	/** APAR AD_Reference_ID=332 */
-	public static final int APAR_AD_Reference_ID=332;
-	/** Receivables &amp; Payables = A */
-	public static final String APAR_ReceivablesPayables = "A";
-	/** Payables only = P */
-	public static final String APAR_PayablesOnly = "P";
-	/** Receivables only = R */
-	public static final String APAR_ReceivablesOnly = "R";
-	/** Set AP - AR.
-		@param APAR Include Receivables and/or Payables transactions
-	*/
-	public void setAPAR (String APAR)
-	{
-
-		set_Value (COLUMNNAME_APAR, APAR);
-	}
-
-	/** Get AP - AR.
-		@return Include Receivables and/or Payables transactions
-	  */
-	public String getAPAR()
-	{
-		return (String)get_Value(COLUMNNAME_APAR);
 	}
 
 	public org.compiere.model.I_C_ConversionType getC_ConversionTypeReval() throws RuntimeException
@@ -430,10 +476,10 @@ public class X_T_InvoiceGL extends PO implements I_T_InvoiceGL, I_Persistent
 	public boolean isAllCurrencies()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAllCurrencies);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

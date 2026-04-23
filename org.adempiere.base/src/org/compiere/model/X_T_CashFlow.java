@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for T_CashFlow
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="T_CashFlow")
-public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent 
+public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_T_CashFlow (Properties ctx, int T_CashFlow_ID, String trxName)
@@ -59,6 +59,30 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_T_CashFlow (Properties ctx, String T_CashFlow_UU, String trxName)
+    {
+      super (ctx, T_CashFlow_UU, trxName);
+      /** if (T_CashFlow_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+			setIsSOTrx (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_T_CashFlow (Properties ctx, String T_CashFlow_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, T_CashFlow_UU, trxName, virtualColumns);
+      /** if (T_CashFlow_UU == null)
+        {
+			setAD_PInstance_ID (0);
+			setDateTrx (new Timestamp( System.currentTimeMillis() ));
+			setIsSOTrx (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_T_CashFlow (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +90,7 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -169,56 +193,6 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** CashFlowSource AD_Reference_ID=53387 */
-	public static final int CASHFLOWSOURCE_AD_Reference_ID=53387;
-	/** 1_Initial Balance = 1 */
-	public static final String CASHFLOWSOURCE_1_InitialBalance = "1";
-	/** 2_Plan = 2 */
-	public static final String CASHFLOWSOURCE_2_Plan = "2";
-	/** 3_Commitments (Orders) = 3 */
-	public static final String CASHFLOWSOURCE_3_CommitmentsOrders = "3";
-	/** 4_Actual Debt (Invoices) = 4 */
-	public static final String CASHFLOWSOURCE_4_ActualDebtInvoices = "4";
-	/** Set Cash Flow Source.
-		@param CashFlowSource Cash Flow Source
-	*/
-	public void setCashFlowSource (String CashFlowSource)
-	{
-
-		set_Value (COLUMNNAME_CashFlowSource, CashFlowSource);
-	}
-
-	/** Get Cash Flow Source.
-		@return Cash Flow Source	  */
-	public String getCashFlowSource()
-	{
-		return (String)get_Value(COLUMNNAME_CashFlowSource);
-	}
-
-	/** CashFlowType AD_Reference_ID=53385 */
-	public static final int CASHFLOWTYPE_AD_Reference_ID=53385;
-	/** Financing = F */
-	public static final String CASHFLOWTYPE_Financing = "F";
-	/** Investment = I */
-	public static final String CASHFLOWTYPE_Investment = "I";
-	/** Operational = O */
-	public static final String CASHFLOWTYPE_Operational = "O";
-	/** Set Cash Flow Type.
-		@param CashFlowType Cash Flow Type
-	*/
-	public void setCashFlowType (String CashFlowType)
-	{
-
-		set_Value (COLUMNNAME_CashFlowType, CashFlowType);
-	}
-
-	/** Get Cash Flow Type.
-		@return Cash Flow Type	  */
-	public String getCashFlowType()
-	{
-		return (String)get_Value(COLUMNNAME_CashFlowType);
 	}
 
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException
@@ -444,6 +418,56 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
 		return ii.intValue();
 	}
 
+	/** CashFlowSource AD_Reference_ID=53387 */
+	public static final int CASHFLOWSOURCE_AD_Reference_ID=53387;
+	/** 1_Initial Balance = 1 */
+	public static final String CASHFLOWSOURCE_1_InitialBalance = "1";
+	/** 2_Plan = 2 */
+	public static final String CASHFLOWSOURCE_2_Plan = "2";
+	/** 3_Commitments (Orders) = 3 */
+	public static final String CASHFLOWSOURCE_3_CommitmentsOrders = "3";
+	/** 4_Actual Debt (Invoices) = 4 */
+	public static final String CASHFLOWSOURCE_4_ActualDebtInvoices = "4";
+	/** Set Cash Flow Source.
+		@param CashFlowSource Cash Flow Source
+	*/
+	public void setCashFlowSource (String CashFlowSource)
+	{
+
+		set_Value (COLUMNNAME_CashFlowSource, CashFlowSource);
+	}
+
+	/** Get Cash Flow Source.
+		@return Cash Flow Source	  */
+	public String getCashFlowSource()
+	{
+		return (String)get_Value(COLUMNNAME_CashFlowSource);
+	}
+
+	/** CashFlowType AD_Reference_ID=53385 */
+	public static final int CASHFLOWTYPE_AD_Reference_ID=53385;
+	/** Financing = F */
+	public static final String CASHFLOWTYPE_Financing = "F";
+	/** Investment = I */
+	public static final String CASHFLOWTYPE_Investment = "I";
+	/** Operational = O */
+	public static final String CASHFLOWTYPE_Operational = "O";
+	/** Set Cash Flow Type.
+		@param CashFlowType Cash Flow Type
+	*/
+	public void setCashFlowType (String CashFlowType)
+	{
+
+		set_Value (COLUMNNAME_CashFlowType, CashFlowType);
+	}
+
+	/** Get Cash Flow Type.
+		@return Cash Flow Type	  */
+	public String getCashFlowType()
+	{
+		return (String)get_Value(COLUMNNAME_CashFlowType);
+	}
+
 	/** Set Date To.
 		@param DateTo End date of a date range
 	*/
@@ -506,10 +530,10 @@ public class X_T_CashFlow extends PO implements I_T_CashFlow, I_Persistent
 	public boolean isSOTrx()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSOTrx);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

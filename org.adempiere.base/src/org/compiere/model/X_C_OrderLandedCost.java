@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for C_OrderLandedCost
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_OrderLandedCost")
-public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Persistent 
+public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_OrderLandedCost (Properties ctx, int C_OrderLandedCost_ID, String trxName)
@@ -42,8 +42,8 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
         {
 			setAmt (Env.ZERO);
 // 0
-			setC_Order_ID (0);
 			setC_OrderLandedCost_ID (0);
+			setC_Order_ID (0);
 			setLandedCostDistribution (null);
 // Q
 			setM_CostElement_ID (0);
@@ -60,8 +60,44 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
         {
 			setAmt (Env.ZERO);
 // 0
-			setC_Order_ID (0);
 			setC_OrderLandedCost_ID (0);
+			setC_Order_ID (0);
+			setLandedCostDistribution (null);
+// Q
+			setM_CostElement_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_OrderLandedCost (Properties ctx, String C_OrderLandedCost_UU, String trxName)
+    {
+      super (ctx, C_OrderLandedCost_UU, trxName);
+      /** if (C_OrderLandedCost_UU == null)
+        {
+			setAmt (Env.ZERO);
+// 0
+			setC_OrderLandedCost_ID (0);
+			setC_Order_ID (0);
+			setLandedCostDistribution (null);
+// Q
+			setM_CostElement_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_OrderLandedCost (Properties ctx, String C_OrderLandedCost_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_OrderLandedCost_UU, trxName, virtualColumns);
+      /** if (C_OrderLandedCost_UU == null)
+        {
+			setAmt (Env.ZERO);
+// 0
+			setC_OrderLandedCost_ID (0);
+			setC_Order_ID (0);
 			setLandedCostDistribution (null);
 // Q
 			setM_CostElement_ID (0);
@@ -77,7 +113,7 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -117,34 +153,6 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
 		return bd;
 	}
 
-	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
-			.getPO(getC_Order_ID(), get_TrxName());
-	}
-
-	/** Set Order.
-		@param C_Order_ID Order
-	*/
-	public void setC_Order_ID (int C_Order_ID)
-	{
-		if (C_Order_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
-	}
-
-	/** Get Order.
-		@return Order
-	  */
-	public int getC_Order_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Estimated Landed Cost.
 		@param C_OrderLandedCost_ID Estimated Landed Cost
 	*/
@@ -179,6 +187,34 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
 	public String getC_OrderLandedCost_UU()
 	{
 		return (String)get_Value(COLUMNNAME_C_OrderLandedCost_UU);
+	}
+
+	public org.compiere.model.I_C_Order getC_Order() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Order)MTable.get(getCtx(), org.compiere.model.I_C_Order.Table_ID)
+			.getPO(getC_Order_ID(), get_TrxName());
+	}
+
+	/** Set Order.
+		@param C_Order_ID Order
+	*/
+	public void setC_Order_ID (int C_Order_ID)
+	{
+		if (C_Order_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_C_Order_ID, Integer.valueOf(C_Order_ID));
+	}
+
+	/** Get Order.
+		@return Order
+	  */
+	public int getC_Order_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Order_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Description.
@@ -268,10 +304,10 @@ public class X_C_OrderLandedCost extends PO implements I_C_OrderLandedCost, I_Pe
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

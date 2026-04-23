@@ -30,7 +30,7 @@ import org.adempiere.exceptions.FillMandatoryException;
 import org.adempiere.util.IProcessUI;
 import org.compiere.util.Env;
 import org.compiere.util.Language;
-
+import org.compiere.util.Util;
 
 /**
  *	Year Model
@@ -45,9 +45,21 @@ import org.compiere.util.Language;
 public class MYear extends X_C_Year
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 2110541427179611810L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param C_Year_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MYear(Properties ctx, String C_Year_UU, String trxName) {
+        super(ctx, C_Year_UU, trxName);
+		if (Util.isEmpty(C_Year_UU))
+			setInitialDefaults();
+    }
 
 	/**
 	 * 	Standard Constructor
@@ -59,10 +71,15 @@ public class MYear extends X_C_Year
 	{
 		super (ctx, C_Year_ID, trxName);
 		if (C_Year_ID == 0)
-		{
-			setProcessing (false);	// N
-		}		
+			setInitialDefaults();
 	}	//	MYear
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setProcessing (false);	// N
+	}
 
 	/**
 	 * 	Load Constructor
@@ -86,8 +103,7 @@ public class MYear extends X_C_Year
 		setC_Calendar_ID(calendar.getC_Calendar_ID());
 		setYear();
 	}	//	MYear
-	
-	
+		
 	/**
 	 * 	Set current Year
 	 */
@@ -132,7 +148,7 @@ public class MYear extends X_C_Year
 	
 	/**
 	 * 	Get last two characters of year
-	 *	@return 01
+	 *	@return last two characters of year, for e.g 01 for year 2001
 	 */
 	public String getYY()
 	{
@@ -147,6 +163,7 @@ public class MYear extends X_C_Year
 	 * 	String Representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MYear[");
@@ -168,10 +185,10 @@ public class MYear extends X_C_Year
 		return true;
 	}	//	beforeSave
 	
-		/**
-	 * 	Create 12 Standard (Jan-Dec) Periods.
-	 * 	Creates also Period Control from DocType.
-	 * 	see DocumentTypeVerify#createPeriodControls(Properties, int, SvrProcess, String)
+	/**
+	 * 	Create 12 Standard (Jan-Dec) Periods. <br/>
+	 * 	Creates also Period Control from DocType.<br/>
+	 * 	Cross Reference: org.compiere.process.DocumentTypeVerify.createPeriodControls(Properties, int, SvrProcess, String)
 	 * 	@param locale locale 
 	 */
 	public void createStdPeriods(Locale locale)
@@ -181,8 +198,8 @@ public class MYear extends X_C_Year
 	}	//	createStdPeriods
 	
 	/**
-	 * 	Create 12 Standard Periods from the specified start date.
-	 * 	Creates also Period Control from DocType.
+	 * 	Create 12 Standard Periods from the specified start date.<br/>
+	 * 	Creates also Period Control from DocType.<br/>
 	 * 	see DocumentTypeVerify#createPeriodControls(Properties, int, SvrProcess, String)
 	 * 	@param locale locale
 	 *	@param startDate first day of the calendar year

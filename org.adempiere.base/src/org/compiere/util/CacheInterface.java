@@ -17,7 +17,7 @@
 package org.compiere.util;
 
 /**
- *  Adempiere Cache Interface
+ *  iDempiere Cache interaction Interface
  *
  *  @author Jorg Janke
  *  @version $Id: CacheInterface.java,v 1.2 2006/07/30 00:54:35 jjanke Exp $
@@ -38,6 +38,15 @@ public interface CacheInterface
 	public int reset(int recordId);
 
 	/**
+	 * Reset Cache by String key
+	 * @param key
+	 * @return number of items reset
+	 */
+	default int resetByStringKey(String key) {
+		return 0;
+	}
+	
+	/**
 	 * 	Get Size of Cache
 	 *	@return number of items
 	 */
@@ -48,6 +57,5 @@ public interface CacheInterface
 	 * @param record_ID
 	 */
 	public void newRecord(int record_ID);
-	
-	
+		
 }	//	CacheInterface

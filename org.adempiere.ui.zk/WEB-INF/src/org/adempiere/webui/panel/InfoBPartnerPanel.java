@@ -37,8 +37,8 @@ import org.adempiere.webui.event.WTableModelListener;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.minigrid.ColumnInfo;
 import org.compiere.minigrid.IDColumn;
+import org.compiere.model.MBPartner;
 import org.compiere.model.MQuery;
-import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
@@ -92,8 +92,6 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
 	/** SalesOrder Trx          */
 	private boolean 		m_isSOTrx;
 		
-	/**	Logger			*/
-	protected transient CLogger log = CLogger.getCLogger(getClass());
 	private Borderlayout layout;
 	private Vbox southBody;
 	
@@ -185,22 +183,22 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
 		
 		fieldValue = new Textbox();
 		fieldValue.setMaxlength(40);
-		fieldValue.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "value");
+		fieldValue.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "value");
 		fieldName = new Textbox();
 		fieldName.setMaxlength(40);
-		fieldName.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "name");
+		fieldName.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "name");
 		fieldContact = new Textbox();
 		fieldContact.setMaxlength(40);
-		fieldContact.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "contact");
+		fieldContact.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "contact");
 		fieldEMail = new Textbox();
 		fieldEMail.setMaxlength(40);
-		fieldEMail.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "email");
+		fieldEMail.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "email");
 		fieldPostal = new Textbox();
 		fieldPostal.setMaxlength(40);
-		fieldPostal.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "postal");
+		fieldPostal.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "postal");
 		fieldPhone = new Textbox();		
 		fieldPhone.setMaxlength(40);
-		fieldPhone.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "phone");
+		fieldPhone.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "phone");
 		
 		checkAND = new Checkbox();
 		checkAND.setLabel(Msg.getMsg(Env.getCtx(), "SearchAND", true));
@@ -226,7 +224,7 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
 		ZKUpdateUtil.setHflex(fieldPostal, "1");
 		
 		Grid grid = GridFactory.newGridLayout();
-		grid.setWidgetAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "infoParameterPanel");
+		grid.setClientAttribute(AdempiereWebUI.WIDGET_INSTANCE_NAME, "infoParameterPanel");
 		
 		Rows rows = new Rows();
 		grid.appendChild(rows);
@@ -510,7 +508,7 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
                 C_BPartner_Location_ID = ((KeyNamePair)data).getKey();
         }
         //  publish for Callout to read
-        Integer ID = getSelectedRowKey();
+        Integer ID = getIntSelectedRowKey(MBPartner.Table_ID);
         Env.setContext(Env.getCtx(), p_WindowNo, Env.TAB_INFO, "C_BPartner_ID", ID == null ? "0" : ID.toString());
         Env.setContext(Env.getCtx(), p_WindowNo, Env.TAB_INFO, "AD_User_ID", String.valueOf(AD_User_ID));
         Env.setContext(Env.getCtx(), p_WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID", String.valueOf(C_BPartner_Location_ID));
@@ -524,7 +522,7 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
 	protected void showHistory()
 	{
 		log.info("");
-		Integer C_BPartner_ID = getSelectedRowKey();
+		Integer C_BPartner_ID = getIntSelectedRowKey(MBPartner.Table_ID);
 		if (C_BPartner_ID == null)
 			return;
 		InvoiceHistory ih = new InvoiceHistory (this, C_BPartner_ID.intValue(), 
@@ -548,7 +546,7 @@ public class InfoBPartnerPanel extends InfoPanel implements EventListener<Event>
 	public void zoom()
 	{
 		log.info( "InfoBPartner.zoom");
-		Integer C_BPartner_ID = getSelectedRowKey();
+		Integer C_BPartner_ID = getIntSelectedRowKey(MBPartner.Table_ID);
 		if (C_BPartner_ID == null)
 			return;
 	//	AEnv.zoom(MBPartner.Table_ID, C_BPartner_ID.intValue(), true);	//	SO

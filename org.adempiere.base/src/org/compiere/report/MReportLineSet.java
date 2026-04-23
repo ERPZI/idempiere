@@ -24,10 +24,10 @@ import java.util.logging.Level;
 
 import org.compiere.model.X_PA_ReportLineSet;
 import org.compiere.util.DB;
-
+import org.compiere.util.Util;
 
 /**
- *	Report Line Set Model
+ *	Financial Report Line Set Model
  *
  *  @author Jorg Janke
  *  @version $Id: MReportLineSet.java,v 1.3 2006/08/03 22:16:52 jjanke Exp $
@@ -35,9 +35,21 @@ import org.compiere.util.DB;
 public class MReportLineSet extends X_PA_ReportLineSet
 {
 	/**
-	 * 
+	 * generated serial id 
 	 */
 	private static final long serialVersionUID = 6882950634644885097L;
+
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param PA_ReportLineSet_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MReportLineSet(Properties ctx, String PA_ReportLineSet_UU, String trxName) {
+        super(ctx, PA_ReportLineSet_UU, trxName);
+		if (!Util.isEmpty(PA_ReportLineSet_UU))
+			loadLines();
+    }
 
 	/**
 	 * 	Constructor
@@ -48,13 +60,15 @@ public class MReportLineSet extends X_PA_ReportLineSet
 	public MReportLineSet (Properties ctx, int PA_ReportLineSet_ID, String trxName)
 	{
 		super (ctx, PA_ReportLineSet_ID, trxName);
-		if (PA_ReportLineSet_ID == 0)
-		{
-		}
-		else
+		if (PA_ReportLineSet_ID != 0)
 			loadLines();
 	}	//	MReportLineSet
 	
+	/**
+	 * @param ctx
+	 * @param rs
+	 * @param trxName
+	 */
 	public MReportLineSet (Properties ctx, ResultSet rs, String trxName)
 	{
 		super (ctx, rs, trxName);
@@ -64,7 +78,7 @@ public class MReportLineSet extends X_PA_ReportLineSet
 	private MReportLine[]	m_lines = null;
 
 	/**
-	 * 	Load Lines
+	 * 	Load Lines (MReportLine)
 	 */
 	private void loadLines()
 	{
@@ -100,7 +114,7 @@ public class MReportLineSet extends X_PA_ReportLineSet
 	}	//	loadColumns
 
 	/**
-	 * 	Get Liness
+	 * 	Get Lines
 	 *	@return array of lines
 	 */
 	public MReportLine[] getLiness()
@@ -124,6 +138,7 @@ public class MReportLineSet extends X_PA_ReportLineSet
 	 * 	String representation
 	 *	@return info
 	 */
+	@Override
 	public String toString ()
 	{
 		StringBuilder sb = new StringBuilder ("MReportLineSet[")

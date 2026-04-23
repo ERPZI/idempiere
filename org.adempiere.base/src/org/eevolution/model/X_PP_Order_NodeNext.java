@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.model.*;
 
 /** Generated Model for PP_Order_NodeNext
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="PP_Order_NodeNext")
-public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Persistent 
+public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_PP_Order_NodeNext (Properties ctx, int PP_Order_NodeNext_ID, String trxName)
@@ -65,6 +65,38 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
         } */
     }
 
+    /** Standard Constructor */
+    public X_PP_Order_NodeNext (Properties ctx, String PP_Order_NodeNext_UU, String trxName)
+    {
+      super (ctx, PP_Order_NodeNext_UU, trxName);
+      /** if (PP_Order_NodeNext_UU == null)
+        {
+			setAD_WF_Node_ID (0);
+			setEntityType (null);
+// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
+			setPP_Order_ID (0);
+			setPP_Order_Node_ID (0);
+			setSeqNo (0);
+// 10
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_PP_Order_NodeNext (Properties ctx, String PP_Order_NodeNext_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, PP_Order_NodeNext_UU, trxName, virtualColumns);
+      /** if (PP_Order_NodeNext_UU == null)
+        {
+			setAD_WF_Node_ID (0);
+			setEntityType (null);
+// @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
+			setPP_Order_ID (0);
+			setPP_Order_Node_ID (0);
+			setSeqNo (0);
+// 10
+        } */
+    }
+
     /** Load Constructor */
     public X_PP_Order_NodeNext (Properties ctx, ResultSet rs, String trxName)
     {
@@ -72,7 +104,7 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -198,10 +230,10 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
 	public boolean isStdUserWorkflow()
 	{
 		Object oo = get_Value(COLUMNNAME_IsStdUserWorkflow);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -262,34 +294,6 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
 		return ii.intValue();
 	}
 
-	public org.eevolution.model.I_PP_Order_Node getPP_Order_Node() throws RuntimeException
-	{
-		return (org.eevolution.model.I_PP_Order_Node)MTable.get(getCtx(), org.eevolution.model.I_PP_Order_Node.Table_ID)
-			.getPO(getPP_Order_Node_ID(), get_TrxName());
-	}
-
-	/** Set Manufacturing Order Activity.
-		@param PP_Order_Node_ID Workflow Node (activity), step or process
-	*/
-	public void setPP_Order_Node_ID (int PP_Order_Node_ID)
-	{
-		if (PP_Order_Node_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_PP_Order_Node_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_PP_Order_Node_ID, Integer.valueOf(PP_Order_Node_ID));
-	}
-
-	/** Get Manufacturing Order Activity.
-		@return Workflow Node (activity), step or process
-	  */
-	public int getPP_Order_Node_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Order_Node_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Manufacturing Order Activity Next.
 		@param PP_Order_NodeNext_ID Manufacturing Order Activity Next
 	*/
@@ -324,6 +328,34 @@ public class X_PP_Order_NodeNext extends PO implements I_PP_Order_NodeNext, I_Pe
 	public String getPP_Order_NodeNext_UU()
 	{
 		return (String)get_Value(COLUMNNAME_PP_Order_NodeNext_UU);
+	}
+
+	public org.eevolution.model.I_PP_Order_Node getPP_Order_Node() throws RuntimeException
+	{
+		return (org.eevolution.model.I_PP_Order_Node)MTable.get(getCtx(), org.eevolution.model.I_PP_Order_Node.Table_ID)
+			.getPO(getPP_Order_Node_ID(), get_TrxName());
+	}
+
+	/** Set Manufacturing Order Activity.
+		@param PP_Order_Node_ID Workflow Node (activity), step or process
+	*/
+	public void setPP_Order_Node_ID (int PP_Order_Node_ID)
+	{
+		if (PP_Order_Node_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_PP_Order_Node_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_PP_Order_Node_ID, Integer.valueOf(PP_Order_Node_ID));
+	}
+
+	/** Get Manufacturing Order Activity.
+		@return Workflow Node (activity), step or process
+	  */
+	public int getPP_Order_Node_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_PP_Order_Node_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Sequence.

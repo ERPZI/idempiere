@@ -36,6 +36,9 @@ import org.compiere.model.MUser;
 import org.compiere.model.ModelValidationEngine;
 import org.compiere.model.X_I_BPartner;
 import org.compiere.util.DB;
+//MPo, 24/3/25
+import org.compiere.model.MBPBankAccount;
+//
 
 /**
  *	Import BPartners from I_BPartner
@@ -148,7 +151,92 @@ implements ImportProcess
 				.append(" AND I_IsImported<>'Y'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.CONFIG)) log.config("Invalid Group=" + no);
-
+		// MPo, 23/3/25 Set Employee CCtr (User2_ID)
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET User2_ID=(SELECT C_ElementValue_ID FROM C_ElementValue ev")
+				.append(" WHERE i.ElementValueValue=ev.Value AND ev.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE User2_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Cost Center=" + no);
+		sql = new StringBuilder ("UPDATE I_BPartner ")
+				.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Cost Center, ' ")
+				.append("WHERE User2_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.CONFIG)) log.config("Invalid Cost Center=" + no);
+		//
+		//MPo, 27/3/25 Set Employee Purchase Price List
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET PO_PriceList_ID=(SELECT M_PriceList_ID FROM M_PriceList pl")
+				.append(" WHERE i.PriceListName=pl.Name AND pl.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE PO_PriceList_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Purchase Price List=" + no);
+		sql = new StringBuilder ("UPDATE I_BPartner ")
+				.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Purchase Price List, ' ")
+				.append("WHERE PO_PriceList_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.CONFIG)) log.config("Invalid Purchase Price List=" + no);
+		//
+		//MPo, 28/3/25 Set Employee PO Payment Term
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET PO_PaymentTerm_ID=(SELECT C_PaymentTerm_ID FROM C_PaymentTerm pt")
+				.append(" WHERE i.PaymentTermValue=pt.Value AND pt.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE PO_PaymentTerm_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set PO Payment Term=" + no);
+		sql = new StringBuilder ("UPDATE I_BPartner ")
+				.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid PO Payment Term, ' ")
+				.append("WHERE PO_PriceList_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.CONFIG)) log.config("Invalid PO Payment Term=" + no);		
+		//
+		//MPo, 24/3/25 Set Employee Position (C_Job_ID)
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET C_Job_ID=(SELECT C_Job_ID FROM C_Job j")
+				.append(" WHERE i.PositionName=j.Name AND j.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE C_Job_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Position=" + no);
+		sql = new StringBuilder ("UPDATE I_BPartner ")
+				.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Position, ' ")
+				.append("WHERE C_Job_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.CONFIG)) log.config("Invalid Position=" + no);
+		//
+		//MPo, 24/3/25 Set employee Bank (C_Bank_ID)
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET C_Bank_ID=(SELECT C_Bank_ID FROM C_Bank b")
+				.append(" WHERE i.BankName=b.Name AND b.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE C_Bank_ID IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Set Bank=" + no);
+		//Import without Bank should be possible
+		//sql = new StringBuilder ("UPDATE I_BPartner ")
+		//		.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||'ERR=Invalid Bank, ' ")
+		//		.append("WHERE C_Bank_ID IS NULL")
+		//		.append(" AND GroupValue='ZI Employee'")
+		//		.append(" AND I_IsImported<>'Y'").append(clientCheck);
+		//no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		//if (log.isLoggable(Level.CONFIG)) log.config("Invalid Bank=" + no);
+		//
 		//	Set Country
 		sql = new StringBuilder ("UPDATE I_BPartner i ")
 				.append("SET C_Country_ID=(SELECT C_Country_ID FROM C_Country c")
@@ -227,6 +315,17 @@ implements ImportProcess
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found BPartner=" + no);
 
+		//MPo, 27/3/25 Get Contact Name/User for Employees
+		sql = new StringBuilder ("UPDATE I_BPartner i ")
+				.append("SET ContactName=(SELECT Name FROM AD_User u")
+				.append(" WHERE i.C_BPartner_ID=u.C_BPartner_ID AND u.AD_Client_ID=i.AD_Client_ID) ")
+				.append("WHERE C_BPartner_ID IS NOT NULL AND ContactName IS NULL")
+				.append(" AND GroupValue='ZI Employee'")
+				.append(" AND I_IsImported='N'").append(clientCheck);
+		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+		if (log.isLoggable(Level.FINE)) log.fine("Found ContactName=" + no);
+		//
+		
 		//	Existing Contact ? Match Name
 		sql = new StringBuilder ("UPDATE I_BPartner i ")
 				.append("SET AD_User_ID=(SELECT AD_User_ID FROM AD_User c")
@@ -252,7 +351,17 @@ implements ImportProcess
 				.append(" AND I_IsImported='N'").append(clientCheck);
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Found Location=" + no);
-
+		
+		//MPo, 24/3/25 Existing Bank Details for Employees ? Exact Match
+			sql = new StringBuilder ("UPDATE I_BPartner i ")
+					.append("SET C_BP_BankAccount_ID=(SELECT C_BP_BankAccount_ID FROM C_BP_BankAccount ba")
+					.append(" WHERE i.C_BPartner_ID=ba.C_BPartner_ID AND ba.AD_Client_ID=i.AD_Client_ID) ")
+					.append("WHERE C_BPartner_ID IS NOT NULL AND C_BP_BankAccount_ID IS NULL")
+					.append(" AND GroupValue='ZI Employee'")
+					.append(" AND I_IsImported='N'").append(clientCheck);
+			no = DB.executeUpdateEx(sql.toString(), get_TrxName());
+			if (log.isLoggable(Level.FINE)) log.fine("Found Bank Details=" + no);
+		//		
 		//	Interest Area
 		sql = new StringBuilder ("UPDATE I_BPartner i ") 
 				.append("SET R_InterestArea_ID=(SELECT R_InterestArea_ID FROM R_InterestArea ia ")
@@ -351,7 +460,7 @@ implements ImportProcess
 						}
 						if (impBP.getDUNS() != null)
 							bp.setDUNS(impBP.getDUNS());
-						if (impBP.getTaxID() != null)
+						if (impBP.getTaxID() != null || impBP.getGroupValue().equals("ZI Employee")) //MPo, 6/4/25 HR requirement to delete sensitive employee information
 							bp.setTaxID(impBP.getTaxID());
 						if (impBP.getNAICS() != null)
 							bp.setNAICS(impBP.getNAICS());
@@ -359,6 +468,21 @@ implements ImportProcess
 							bp.setDescription(impBP.getDescription());
 						if (impBP.getC_BP_Group_ID() != 0)
 							bp.setC_BP_Group_ID(impBP.getC_BP_Group_ID());
+						//MPo, 23/3/25 Set Employee Cost Center
+						if (impBP.getUser2_ID() != 0)
+							bp.setUser2_ID(impBP.getUser2_ID());
+						//Set Employee active/inactive to 
+						bp.setIsActive(impBP.isbp_isactive());
+						//Set Employee Purchase Price List
+						if (impBP.getPO_PriceList_ID() != 0)
+							bp.setPO_PriceList_ID(impBP.getPO_PriceList_ID());
+						//Set Employee PO Payment Term
+						if (impBP.getPO_PaymentTerm_ID() !=0)
+							bp.setPO_PaymentTerm_ID(impBP.getPO_PaymentTerm_ID());
+						//Set Employee Payment Rule
+						if (impBP.getPaymentRulePO() != null)
+							bp.setPaymentRulePO(impBP.getPaymentRulePO());
+						//
 						ModelValidationEngine.get().fireImportValidate(this, impBP, bp, ImportValidator.TIMING_AFTER_IMPORT);
 						
 						setTypeOfBPartner(impBP,bp);
@@ -385,6 +509,7 @@ implements ImportProcess
 					bpl = null;
 					if (impBP.getC_BPartner_Location_ID() != 0)		//	Update Location
 					{
+						System.out.println("getC_BPartner_Location_ID: " + impBP.getC_BPartner_Location_ID());
 						bpl = new MBPartnerLocation(getCtx(), impBP.getC_BPartner_Location_ID(), get_TrxName());
 						MLocation location = new MLocation(getCtx(), bpl.getC_Location_ID(), get_TrxName());
 						location.setC_Country_ID(impBP.getC_Country_ID());
@@ -459,11 +584,66 @@ implements ImportProcess
 							}
 						}
 				}
-
+				//MPo, 24/3/25
+//				****	Create/Update Employee Bank Details	****
+				MBPBankAccount bpb = null;
+				if (impBP.getC_BP_BankAccount_ID() != 0 &&  
+					impBP.getGroupValue().equals("ZI Employee")) //	Bank Account-subtab exists - Update Employee Bank Details
+				{
+					bpb = new MBPBankAccount(getCtx(), impBP.getC_BP_BankAccount_ID(), get_TrxName());
+					bpb.setIsACH(impBP.isACH());
+					if (impBP.getBPBankAcctUse() != null)
+						bpb.setBPBankAcctUse(impBP.getBPBankAcctUse());
+					if (impBP.getBankAccountType() != null)
+						bpb.setBankAccountType(impBP.getBankAccountType());
+					//if (impBP.getC_Bank_ID() != 0) //HR requirement to delete sensitive employee information
+						bpb.setC_Bank_ID(impBP.getC_Bank_ID());
+					//if (impBP.getAccountNo() != null) //HR requirement to delete sensitive employee information
+						bpb.setAccountNo(impBP.getAccountNo());
+					//if (impBP.getA_Name() != null) //HR requirement to delete sensitive employee information
+						bpb.setA_Name(impBP.getA_Name());
+					//if (impBP.getA_EMail() != null) //HR requirement to delete sensitive employee information
+						bpb.setA_EMail(impBP.getA_EMail());
+					ModelValidationEngine.get().fireImportValidate(this, impBP, bpb, ImportValidator.TIMING_AFTER_IMPORT);
+					bpb.saveEx();
+				}
+				else 	//	New Employee Bank Details
+					if (impBP.getGroupValue().equals("ZI Employee"))
+					{
+						bpb = new MBPBankAccount(bp.getCtx(),0,bp.get_TrxName());
+						bpb.set_ValueNoCheck("C_BPartner_ID", Integer.valueOf(bp.getC_BPartner_ID()));
+						bpb.setIsACH(impBP.isACH());
+						bpb.setBPBankAcctUse(impBP.getBPBankAcctUse());
+						bpb.setBankAccountType(impBP.getBankAccountType());
+						bpb.setC_Bank_ID(impBP.getC_Bank_ID());
+						bpb.setAccountNo(impBP.getAccountNo());
+						bpb.setA_Name(impBP.getA_Name());
+						bpb.setA_EMail(impBP.getA_EMail());
+						ModelValidationEngine.get().fireImportValidate(this, impBP, bpb, ImportValidator.TIMING_AFTER_IMPORT);
+						if (bpb.save())
+						{
+							msglog = new StringBuilder("Insert BP Bank Details - ").append(bpb.getC_BP_BankAccount_ID());
+							if (log.isLoggable(Level.FINEST)) log.finest(msglog.toString());
+							impBP.setC_BPartner_Location_ID(bpb.getC_BP_BankAccount_ID());
+						}
+						else
+						{
+							rollback();
+							noInsert--;
+							sql = new StringBuilder ("UPDATE I_BPartner i ")
+									.append("SET I_IsImported='E', I_ErrorMsg=I_ErrorMsg||")
+							.append("'Cannot Insert BP Bank Details, ' ")
+							.append("WHERE I_BPartner_ID=").append(impBP.getI_BPartner_ID());
+							DB.executeUpdateEx(sql.toString(), get_TrxName());
+							continue;
+						}
+					}
+				//
 				Old_BPValue = New_BPValue ;
 
 				//	****	Create/Update Contact	****
 				MUser user = null;
+				
 				if (impBP.getAD_User_ID() != 0)
 				{
 					user = new MUser (getCtx(), impBP.getAD_User_ID(), get_TrxName());
@@ -492,16 +672,22 @@ implements ImportProcess
 						user.setDescription(impBP.getContactDescription());
 					if (impBP.getComments() != null)
 						user.setComments(impBP.getComments());
-					if (impBP.getPhone() != null)
+					if (impBP.getPhone() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information
 						user.setPhone(impBP.getPhone());
 					if (impBP.getPhone2() != null)
 						user.setPhone2(impBP.getPhone2());
 					if (impBP.getFax() != null)
 						user.setFax(impBP.getFax());
-					if (impBP.getEMail() != null)
+					if (impBP.getEMail() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information
 						user.setEMail(impBP.getEMail());
-					if (impBP.getBirthday() != null)
+					if (impBP.getBirthday() != null || impBP.getGroupValue().equals("ZI Employee")) //HR requirement to delete sensitive employee information)
 						user.setBirthday(impBP.getBirthday());
+					//MPo, 27/3/25
+					if (impBP.getC_Job_ID() != 0)
+						user.setC_Job_ID(impBP.getC_Job_ID());
+					if (impBP.getNotificationType() != null)
+						user.setNotificationType(impBP.getNotificationType());
+					//	
 					if (bpl != null)
 						user.setC_BPartner_Location_ID(bpl.getC_BPartner_Location_ID());
 					ModelValidationEngine.get().fireImportValidate(this, impBP, user, ImportValidator.TIMING_AFTER_IMPORT);
@@ -540,6 +726,10 @@ implements ImportProcess
 						user.setFax(impBP.getFax());
 						user.setEMail(impBP.getEMail());
 						user.setBirthday(impBP.getBirthday());
+						//MPo, 27/3/25 
+						user.setC_Job_ID(impBP.getC_Job_ID());
+						user.setNotificationType(impBP.getNotificationType());
+						//
 						if (bpl != null)
 							user.setC_BPartner_Location_ID(bpl.getC_BPartner_Location_ID());
 						ModelValidationEngine.get().fireImportValidate(this, impBP, user, ImportValidator.TIMING_AFTER_IMPORT);
@@ -635,6 +825,9 @@ implements ImportProcess
 		if (impBP.isCustomer()){		
 			bp.setIsCustomer(true);
 		}
+		//MPo, 13/4/25
+		bp.setIsSalesRep(impBP.isSalesRep());	//As agreed with HR.
+		//
 	}	// setTypeOfBPartner
 	
 }	//	ImportBPartner

@@ -23,16 +23,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_AttributeSetInstance
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_AttributeSetInstance")
-public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInstance, I_Persistent 
+public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInstance, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_AttributeSetInstance (Properties ctx, int M_AttributeSetInstance_ID, String trxName)
@@ -40,8 +40,8 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
       super (ctx, M_AttributeSetInstance_ID, trxName);
       /** if (M_AttributeSetInstance_ID == 0)
         {
-			setM_AttributeSet_ID (0);
 			setM_AttributeSetInstance_ID (0);
+			setM_AttributeSet_ID (0);
         } */
     }
 
@@ -51,8 +51,30 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
       super (ctx, M_AttributeSetInstance_ID, trxName, virtualColumns);
       /** if (M_AttributeSetInstance_ID == 0)
         {
-			setM_AttributeSet_ID (0);
 			setM_AttributeSetInstance_ID (0);
+			setM_AttributeSet_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_AttributeSetInstance (Properties ctx, String M_AttributeSetInstance_UU, String trxName)
+    {
+      super (ctx, M_AttributeSetInstance_UU, trxName);
+      /** if (M_AttributeSetInstance_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setM_AttributeSet_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_AttributeSetInstance (Properties ctx, String M_AttributeSetInstance_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_AttributeSetInstance_UU, trxName, virtualColumns);
+      /** if (M_AttributeSetInstance_UU == null)
+        {
+			setM_AttributeSetInstance_ID (0);
+			setM_AttributeSet_ID (0);
         } */
     }
 
@@ -63,7 +85,7 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
     }
 
     /** AccessLevel
-      * @return 3 - Client - Org 
+      * @return 3 - Client - Org
       */
     protected int get_AccessLevel()
     {
@@ -132,6 +154,51 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
 		return (String)get_Value(COLUMNNAME_Lot);
 	}
 
+	/** Set Attribute Set Instance.
+		@param M_AttributeSetInstance_ID Product Attribute Set Instance
+	*/
+	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
+	{
+		if (M_AttributeSetInstance_ID < 0)
+			set_ValueNoCheck (COLUMNNAME_M_AttributeSetInstance_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
+	}
+
+	/** Get Attribute Set Instance.
+		@return Product Attribute Set Instance
+	  */
+	public int getM_AttributeSetInstance_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), String.valueOf(getM_AttributeSetInstance_ID()));
+    }
+
+	/** Set M_AttributeSetInstance_UU.
+		@param M_AttributeSetInstance_UU M_AttributeSetInstance_UU
+	*/
+	public void setM_AttributeSetInstance_UU (String M_AttributeSetInstance_UU)
+	{
+		set_Value (COLUMNNAME_M_AttributeSetInstance_UU, M_AttributeSetInstance_UU);
+	}
+
+	/** Get M_AttributeSetInstance_UU.
+		@return M_AttributeSetInstance_UU	  */
+	public String getM_AttributeSetInstance_UU()
+	{
+		return (String)get_Value(COLUMNNAME_M_AttributeSetInstance_UU);
+	}
+
 	public org.compiere.model.I_M_AttributeSet getM_AttributeSet() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_AttributeSet)MTable.get(getCtx(), org.compiere.model.I_M_AttributeSet.Table_ID)
@@ -158,51 +225,6 @@ public class X_M_AttributeSetInstance extends PO implements I_M_AttributeSetInst
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set Attribute Set Instance.
-		@param M_AttributeSetInstance_ID Product Attribute Set Instance
-	*/
-	public void setM_AttributeSetInstance_ID (int M_AttributeSetInstance_ID)
-	{
-		if (M_AttributeSetInstance_ID < 0)
-			set_ValueNoCheck (COLUMNNAME_M_AttributeSetInstance_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_AttributeSetInstance_ID, Integer.valueOf(M_AttributeSetInstance_ID));
-	}
-
-	/** Get Attribute Set Instance.
-		@return Product Attribute Set Instance
-	  */
-	public int getM_AttributeSetInstance_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), String.valueOf(getM_AttributeSetInstance_ID()));
-    }
-
-	/** Set M_AttributeSetInstance_UU.
-		@param M_AttributeSetInstance_UU M_AttributeSetInstance_UU
-	*/
-	public void setM_AttributeSetInstance_UU (String M_AttributeSetInstance_UU)
-	{
-		set_Value (COLUMNNAME_M_AttributeSetInstance_UU, M_AttributeSetInstance_UU);
-	}
-
-	/** Get M_AttributeSetInstance_UU.
-		@return M_AttributeSetInstance_UU	  */
-	public String getM_AttributeSetInstance_UU()
-	{
-		return (String)get_Value(COLUMNNAME_M_AttributeSetInstance_UU);
 	}
 
 	public org.compiere.model.I_M_Lot getM_Lot() throws RuntimeException

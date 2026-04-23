@@ -24,16 +24,16 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for M_InventoryLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_InventoryLine")
-public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persistent 
+public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20240217L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_InventoryLine (Properties ctx, int M_InventoryLine_ID, String trxName)
@@ -44,8 +44,8 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 			setInventoryType (null);
 // D
 			setM_AttributeSetInstance_ID (0);
-			setM_Inventory_ID (0);
 			setM_InventoryLine_ID (0);
+			setM_Inventory_ID (0);
 			setM_Product_ID (0);
 			setProcessed (false);
 			setQtyBook (Env.ZERO);
@@ -63,8 +63,46 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 			setInventoryType (null);
 // D
 			setM_AttributeSetInstance_ID (0);
-			setM_Inventory_ID (0);
 			setM_InventoryLine_ID (0);
+			setM_Inventory_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+			setQtyBook (Env.ZERO);
+			setQtyCount (Env.ZERO);
+			setQtyCsv (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InventoryLine (Properties ctx, String M_InventoryLine_UU, String trxName)
+    {
+      super (ctx, M_InventoryLine_UU, trxName);
+      /** if (M_InventoryLine_UU == null)
+        {
+			setInventoryType (null);
+// D
+			setM_AttributeSetInstance_ID (0);
+			setM_InventoryLine_ID (0);
+			setM_Inventory_ID (0);
+			setM_Product_ID (0);
+			setProcessed (false);
+			setQtyBook (Env.ZERO);
+			setQtyCount (Env.ZERO);
+			setQtyCsv (Env.ZERO);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_InventoryLine (Properties ctx, String M_InventoryLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_InventoryLine_UU, trxName, virtualColumns);
+      /** if (M_InventoryLine_UU == null)
+        {
+			setInventoryType (null);
+// D
+			setM_AttributeSetInstance_ID (0);
+			setM_InventoryLine_ID (0);
+			setM_Inventory_ID (0);
 			setM_Product_ID (0);
 			setProcessed (false);
 			setQtyBook (Env.ZERO);
@@ -80,7 +118,7 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -209,7 +247,7 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), String.valueOf(getLine()));
     }
@@ -237,34 +275,6 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 	public int getM_AttributeSetInstance_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_AttributeSetInstance_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Inventory)MTable.get(getCtx(), org.compiere.model.I_M_Inventory.Table_ID)
-			.getPO(getM_Inventory_ID(), get_TrxName());
-	}
-
-	/** Set Phys.Inventory.
-		@param M_Inventory_ID Parameters for a Physical Inventory
-	*/
-	public void setM_Inventory_ID (int M_Inventory_ID)
-	{
-		if (M_Inventory_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_M_Inventory_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_M_Inventory_ID, Integer.valueOf(M_Inventory_ID));
-	}
-
-	/** Get Phys.Inventory.
-		@return Parameters for a Physical Inventory
-	  */
-	public int getM_Inventory_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Inventory_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -305,6 +315,34 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 	public String getM_InventoryLine_UU()
 	{
 		return (String)get_Value(COLUMNNAME_M_InventoryLine_UU);
+	}
+
+	public org.compiere.model.I_M_Inventory getM_Inventory() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Inventory)MTable.get(getCtx(), org.compiere.model.I_M_Inventory.Table_ID)
+			.getPO(getM_Inventory_ID(), get_TrxName());
+	}
+
+	/** Set Phys.Inventory.
+		@param M_Inventory_ID Parameters for a Physical Inventory
+	*/
+	public void setM_Inventory_ID (int M_Inventory_ID)
+	{
+		if (M_Inventory_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_M_Inventory_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_M_Inventory_ID, Integer.valueOf(M_Inventory_ID));
+	}
+
+	/** Get Phys.Inventory.
+		@return Parameters for a Physical Inventory
+	  */
+	public int getM_Inventory_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Inventory_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public I_M_Locator getM_Locator() throws RuntimeException
@@ -396,10 +434,10 @@ public class X_M_InventoryLine extends PO implements I_M_InventoryLine, I_Persis
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

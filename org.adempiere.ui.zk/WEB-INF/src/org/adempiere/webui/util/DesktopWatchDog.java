@@ -40,9 +40,8 @@ import org.zkoss.zk.ui.sys.WebAppCtrl;
 import fi.jawsy.jawwa.zk.atmosphere.AtmosphereServerPush;
 
 /**
- * watch for disconnected desktop and destroy it
+ * Watch for disconnected desktop and destroy it
  * @author hengsin
- *
  */
 public class DesktopWatchDog {
 
@@ -56,6 +55,7 @@ public class DesktopWatchDog {
 	 * default constructor
 	 */
 	private DesktopWatchDog() {
+		//Check disconnected desktop every 40 seconds
 		Adempiere.getThreadPoolExecutor().scheduleWithFixedDelay(() -> {
 			doMonitoring();
 		}, 60, 40, TimeUnit.SECONDS);
@@ -112,7 +112,7 @@ public class DesktopWatchDog {
 	}
 	
 	/**
-	 * add desktop to watch list
+	 * Add desktop to watch list
 	 * @param desktop
 	 */
 	public static void addDesktop(Desktop desktop) {
@@ -120,7 +120,7 @@ public class DesktopWatchDog {
 	}
 	
 	/**
-	 * remove desktop from watch list
+	 * Remove desktop from watch list
 	 * @param desktop
 	 */
 	public static void removeDesktop(Desktop desktop) {
@@ -131,6 +131,31 @@ public class DesktopWatchDog {
 				iterator.remove();
 				break;
 			}
+		}
+	}
+	
+	/**
+	 * Remove other desktops that share the same session with the pass in desktop parameter
+	 * @param desktop
+	 */
+	public static void removeOtherDesktopsInSession(Desktop desktop) {
+		Iterator<DesktopEntry> iterator = INSTANCE.desktops.iterator();
+		while (iterator.hasNext()) {
+			DesktopEntry entry = iterator.next();
+			if (entry.desktop == desktop)
+				continue;
+			if (entry.desktop.getSession() != desktop.getSession())
+				continue;
+			
+			iterator.remove();
+	        try {
+	        	final WebApp wapp = desktop.getWebApp();
+	        	final Session session = desktop.getSession();
+	    	    final DesktopCache desktopCache = ((WebAppCtrl) wapp).getDesktopCache(session);
+	    		desktopCache.removeDesktop(entry.desktop);
+	    	} catch (Throwable t) {
+	    		t.printStackTrace();
+	    	}
 		}
 	}
 }

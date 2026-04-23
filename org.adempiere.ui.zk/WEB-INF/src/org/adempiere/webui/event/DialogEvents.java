@@ -14,20 +14,19 @@
 package org.adempiere.webui.event;
 
 /**
- * 
+ * Event constant for popup modal/highlighted dialog.
  * @author hengsin
- *
  */
 public interface DialogEvents {
 
 	/**
-	 * on window close event, use this for highlight mode window to simulate modal window
+	 * On window close event, use this for highlight mode window to simulate modal window
 	 */
 	public final static String ON_WINDOW_CLOSE = "onWindowClose";
 	
 	/**
-	 * rise event before run process, other code can inject a long process in there
-	 * example: at info window, save info to database before run process
+	 * Event before running of process, other code can inject a long process in there.<br/>
+	 * Example: at info window, save info to database before running of process
 	 */
 	public final static String ON_BEFORE_RUN_PROCESS = "onBeforeRunProcess";
 	

@@ -24,16 +24,16 @@ import java.util.Properties;
 import org.compiere.util.Env;
 
 /** Generated Model for M_Package
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="M_Package")
-public class X_M_Package extends PO implements I_M_Package, I_Persistent 
+public class X_M_Package extends PO implements I_M_Package, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_M_Package (Properties ctx, int M_Package_ID, String trxName)
@@ -129,6 +129,100 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_M_Package (Properties ctx, String M_Package_UU, String trxName)
+    {
+      super (ctx, M_Package_UU, trxName);
+      /** if (M_Package_UU == null)
+        {
+			setCashOnDelivery (false);
+// N
+			setDeliveryConfirmation (false);
+// N
+			setDocumentNo (null);
+			setIsAccessible (false);
+// N
+			setIsAddedHandling (false);
+// N
+			setIsCargoAircraftOnly (false);
+// N
+			setIsDryIce (false);
+// N
+			setIsDutiable (false);
+// N
+			setIsFutureDayShipment (false);
+// N
+			setIsHazMat (false);
+// N
+			setIsHoldAtLocation (false);
+// N
+			setIsIgnoreZipNotFound (false);
+// N
+			setIsIgnoreZipStateNotMatch (false);
+// N
+			setIsResidential (true);
+// Y
+			setIsSaturdayDelivery (false);
+// N
+			setIsSaturdayPickup (false);
+// N
+			setIsVerbalConfirmation (false);
+// N
+			setM_InOut_ID (0);
+			setM_Package_ID (0);
+			setM_Shipper_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_M_Package (Properties ctx, String M_Package_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, M_Package_UU, trxName, virtualColumns);
+      /** if (M_Package_UU == null)
+        {
+			setCashOnDelivery (false);
+// N
+			setDeliveryConfirmation (false);
+// N
+			setDocumentNo (null);
+			setIsAccessible (false);
+// N
+			setIsAddedHandling (false);
+// N
+			setIsCargoAircraftOnly (false);
+// N
+			setIsDryIce (false);
+// N
+			setIsDutiable (false);
+// N
+			setIsFutureDayShipment (false);
+// N
+			setIsHazMat (false);
+// N
+			setIsHoldAtLocation (false);
+// N
+			setIsIgnoreZipNotFound (false);
+// N
+			setIsIgnoreZipStateNotMatch (false);
+// N
+			setIsResidential (true);
+// Y
+			setIsSaturdayDelivery (false);
+// N
+			setIsSaturdayPickup (false);
+// N
+			setIsVerbalConfirmation (false);
+// N
+			setM_InOut_ID (0);
+			setM_Package_ID (0);
+			setM_Shipper_ID (0);
+			setProcessed (false);
+// N
+        } */
+    }
+
     /** Load Constructor */
     public X_M_Package (Properties ctx, ResultSet rs, String trxName)
     {
@@ -136,7 +230,7 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
     }
 
     /** AccessLevel
-      * @return 1 - Org 
+      * @return 1 - Org
       */
     protected int get_AccessLevel()
     {
@@ -175,26 +269,31 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set COD.
-		@param CashOnDelivery COD
-	*/
-	public void setCashOnDelivery (boolean CashOnDelivery)
+	public org.compiere.model.I_C_BP_ShippingAcct getC_BP_ShippingAcct() throws RuntimeException
 	{
-		set_Value (COLUMNNAME_CashOnDelivery, Boolean.valueOf(CashOnDelivery));
+		return (org.compiere.model.I_C_BP_ShippingAcct)MTable.get(getCtx(), org.compiere.model.I_C_BP_ShippingAcct.Table_ID)
+			.getPO(getC_BP_ShippingAcct_ID(), get_TrxName());
 	}
 
-	/** Get COD.
-		@return COD	  */
-	public boolean isCashOnDelivery()
+	/** Set Business Partner Shipping Account.
+		@param C_BP_ShippingAcct_ID Business Partner Shipping Account
+	*/
+	public void setC_BP_ShippingAcct_ID (int C_BP_ShippingAcct_ID)
 	{
-		Object oo = get_Value(COLUMNNAME_CashOnDelivery);
-		if (oo != null) 
-		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
-			return "Y".equals(oo);
-		}
-		return false;
+		if (C_BP_ShippingAcct_ID < 1)
+			set_Value (COLUMNNAME_C_BP_ShippingAcct_ID, null);
+		else
+			set_Value (COLUMNNAME_C_BP_ShippingAcct_ID, Integer.valueOf(C_BP_ShippingAcct_ID));
+	}
+
+	/** Get Business Partner Shipping Account.
+		@return Business Partner Shipping Account	  */
+	public int getC_BP_ShippingAcct_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_ShippingAcct_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException
@@ -220,33 +319,6 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public int getC_BPartner_Location_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	public org.compiere.model.I_C_BP_ShippingAcct getC_BP_ShippingAcct() throws RuntimeException
-	{
-		return (org.compiere.model.I_C_BP_ShippingAcct)MTable.get(getCtx(), org.compiere.model.I_C_BP_ShippingAcct.Table_ID)
-			.getPO(getC_BP_ShippingAcct_ID(), get_TrxName());
-	}
-
-	/** Set Business Partner Shipping Account.
-		@param C_BP_ShippingAcct_ID Business Partner Shipping Account
-	*/
-	public void setC_BP_ShippingAcct_ID (int C_BP_ShippingAcct_ID)
-	{
-		if (C_BP_ShippingAcct_ID < 1)
-			set_Value (COLUMNNAME_C_BP_ShippingAcct_ID, null);
-		else
-			set_Value (COLUMNNAME_C_BP_ShippingAcct_ID, Integer.valueOf(C_BP_ShippingAcct_ID));
-	}
-
-	/** Get Business Partner Shipping Account.
-		@return Business Partner Shipping Account	  */
-	public int getC_BP_ShippingAcct_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_ShippingAcct_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -336,6 +408,28 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 		return ii.intValue();
 	}
 
+	/** Set COD.
+		@param CashOnDelivery COD
+	*/
+	public void setCashOnDelivery (boolean CashOnDelivery)
+	{
+		set_Value (COLUMNNAME_CashOnDelivery, Boolean.valueOf(CashOnDelivery));
+	}
+
+	/** Get COD.
+		@return COD	  */
+	public boolean isCashOnDelivery()
+	{
+		Object oo = get_Value(COLUMNNAME_CashOnDelivery);
+		if (oo != null)
+		{
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Date Received.
 		@param DateReceived Date a product was received
 	*/
@@ -366,10 +460,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isDeliveryConfirmation()
 	{
 		Object oo = get_Value(COLUMNNAME_DeliveryConfirmation);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -782,10 +876,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isAccessible()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAccessible);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -804,10 +898,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isAddedHandling()
 	{
 		Object oo = get_Value(COLUMNNAME_IsAddedHandling);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -826,10 +920,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isCargoAircraftOnly()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCargoAircraftOnly);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -848,10 +942,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isDryIce()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDryIce);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -870,10 +964,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isDutiable()
 	{
 		Object oo = get_Value(COLUMNNAME_IsDutiable);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -892,10 +986,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isFutureDayShipment()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFutureDayShipment);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -914,10 +1008,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isHazMat()
 	{
 		Object oo = get_Value(COLUMNNAME_IsHazMat);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -936,10 +1030,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isHoldAtLocation()
 	{
 		Object oo = get_Value(COLUMNNAME_IsHoldAtLocation);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -958,10 +1052,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isIgnoreZipNotFound()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIgnoreZipNotFound);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -980,10 +1074,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isIgnoreZipStateNotMatch()
 	{
 		Object oo = get_Value(COLUMNNAME_IsIgnoreZipStateNotMatch);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1002,10 +1096,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isResidential()
 	{
 		Object oo = get_Value(COLUMNNAME_IsResidential);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1024,10 +1118,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isSaturdayDelivery()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSaturdayDelivery);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1046,10 +1140,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isSaturdayPickup()
 	{
 		Object oo = get_Value(COLUMNNAME_IsSaturdayPickup);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1068,10 +1162,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isVerbalConfirmation()
 	{
 		Object oo = get_Value(COLUMNNAME_IsVerbalConfirmation);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -1190,34 +1284,6 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 		return (String)get_Value(COLUMNNAME_M_Package_UU);
 	}
 
-	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException
-	{
-		return (org.compiere.model.I_M_Shipper)MTable.get(getCtx(), org.compiere.model.I_M_Shipper.Table_ID)
-			.getPO(getM_Shipper_ID(), get_TrxName());
-	}
-
-	/** Set Shipper.
-		@param M_Shipper_ID Method or manner of product delivery
-	*/
-	public void setM_Shipper_ID (int M_Shipper_ID)
-	{
-		if (M_Shipper_ID < 1)
-			set_Value (COLUMNNAME_M_Shipper_ID, null);
-		else
-			set_Value (COLUMNNAME_M_Shipper_ID, Integer.valueOf(M_Shipper_ID));
-	}
-
-	/** Get Shipper.
-		@return Method or manner of product delivery
-	  */
-	public int getM_Shipper_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_M_Shipper_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	public org.compiere.model.I_M_ShipperLabels getM_ShipperLabels() throws RuntimeException
 	{
 		return (org.compiere.model.I_M_ShipperLabels)MTable.get(getCtx(), org.compiere.model.I_M_ShipperLabels.Table_ID)
@@ -1294,6 +1360,34 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public int getM_ShipperPickupTypes_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_M_ShipperPickupTypes_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Shipper getM_Shipper() throws RuntimeException
+	{
+		return (org.compiere.model.I_M_Shipper)MTable.get(getCtx(), org.compiere.model.I_M_Shipper.Table_ID)
+			.getPO(getM_Shipper_ID(), get_TrxName());
+	}
+
+	/** Set Shipper.
+		@param M_Shipper_ID Method or manner of product delivery
+	*/
+	public void setM_Shipper_ID (int M_Shipper_ID)
+	{
+		if (M_Shipper_ID < 1)
+			set_Value (COLUMNNAME_M_Shipper_ID, null);
+		else
+			set_Value (COLUMNNAME_M_Shipper_ID, Integer.valueOf(M_Shipper_ID));
+	}
+
+	/** Get Shipper.
+		@return Method or manner of product delivery
+	  */
+	public int getM_Shipper_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Shipper_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -1463,10 +1557,10 @@ public class X_M_Package extends PO implements I_M_Package, I_Persistent
 	public boolean isProcessed()
 	{
 		Object oo = get_Value(COLUMNNAME_Processed);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

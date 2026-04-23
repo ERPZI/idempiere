@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_ValidCombination
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="C_ValidCombination")
-public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_Persistent 
+public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_C_ValidCombination (Properties ctx, int C_ValidCombination_ID, String trxName)
@@ -59,6 +59,32 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
         } */
     }
 
+    /** Standard Constructor */
+    public X_C_ValidCombination (Properties ctx, String C_ValidCombination_UU, String trxName)
+    {
+      super (ctx, C_ValidCombination_UU, trxName);
+      /** if (C_ValidCombination_UU == null)
+        {
+			setAccount_ID (0);
+			setC_AcctSchema_ID (0);
+			setC_ValidCombination_ID (0);
+			setIsFullyQualified (false);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_C_ValidCombination (Properties ctx, String C_ValidCombination_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, C_ValidCombination_UU, trxName, virtualColumns);
+      /** if (C_ValidCombination_UU == null)
+        {
+			setAccount_ID (0);
+			setC_AcctSchema_ID (0);
+			setC_ValidCombination_ID (0);
+			setIsFullyQualified (false);
+        } */
+    }
+
     /** Load Constructor */
     public X_C_ValidCombination (Properties ctx, ResultSet rs, String trxName)
     {
@@ -66,7 +92,7 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
     }
 
     /** AccessLevel
-      * @return 2 - Client 
+      * @return 2 - Client
       */
     protected int get_AccessLevel()
     {
@@ -86,6 +112,28 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Trx Organization.
+		@param AD_OrgTrx_ID Performing or initiating organization
+	*/
+	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
+	{
+		if (AD_OrgTrx_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_OrgTrx_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
+	}
+
+	/** Get Trx Organization.
+		@return Performing or initiating organization
+	  */
+	public int getAD_OrgTrx_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	public org.compiere.model.I_C_ElementValue getAccount() throws RuntimeException
 	{
@@ -110,28 +158,6 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
 	public int getAccount_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Account_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
-	/** Set Trx Organization.
-		@param AD_OrgTrx_ID Performing or initiating organization
-	*/
-	public void setAD_OrgTrx_ID (int AD_OrgTrx_ID)
-	{
-		if (AD_OrgTrx_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_OrgTrx_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_OrgTrx_ID, Integer.valueOf(AD_OrgTrx_ID));
-	}
-
-	/** Get Trx Organization.
-		@return Performing or initiating organization
-	  */
-	public int getAD_OrgTrx_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_OrgTrx_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -321,30 +347,6 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
 		return ii.intValue();
 	}
 
-	/** Set Combination.
-		@param Combination Unique combination of account elements
-	*/
-	public void setCombination (String Combination)
-	{
-		set_ValueNoCheck (COLUMNNAME_Combination, Combination);
-	}
-
-	/** Get Combination.
-		@return Unique combination of account elements
-	  */
-	public String getCombination()
-	{
-		return (String)get_Value(COLUMNNAME_Combination);
-	}
-
-    /** Get Record ID/ColumnName
-        @return ID/ColumnName pair
-      */
-    public KeyNamePair getKeyNamePair() 
-    {
-        return new KeyNamePair(get_ID(), getCombination());
-    }
-
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
@@ -466,6 +468,30 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
 		return (String)get_Value(COLUMNNAME_C_ValidCombination_UU);
 	}
 
+	/** Set Combination.
+		@param Combination Unique combination of account elements
+	*/
+	public void setCombination (String Combination)
+	{
+		set_ValueNoCheck (COLUMNNAME_Combination, Combination);
+	}
+
+	/** Get Combination.
+		@return Unique combination of account elements
+	  */
+	public String getCombination()
+	{
+		return (String)get_Value(COLUMNNAME_Combination);
+	}
+
+    /** Get Record ID/ColumnName
+        @return ID/ColumnName pair
+      */
+    public KeyNamePair getKeyNamePair()
+    {
+        return new KeyNamePair(get_ID(), getCombination());
+    }
+
 	/** Set Description.
 		@param Description Optional short description of the record
 	*/
@@ -496,10 +522,10 @@ public class X_C_ValidCombination extends PO implements I_C_ValidCombination, I_
 	public boolean isFullyQualified()
 	{
 		Object oo = get_Value(COLUMNNAME_IsFullyQualified);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

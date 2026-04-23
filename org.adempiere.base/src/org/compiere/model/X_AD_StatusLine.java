@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_StatusLine
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_StatusLine")
-public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent 
+public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_StatusLine (Properties ctx, int AD_StatusLine_ID, String trxName)
@@ -63,6 +63,36 @@ public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_StatusLine (Properties ctx, String AD_StatusLine_UU, String trxName)
+    {
+      super (ctx, AD_StatusLine_UU, trxName);
+      /** if (AD_StatusLine_UU == null)
+        {
+			setAD_Message_ID (0);
+			setAD_StatusLine_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setName (null);
+			setSQLStatement (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_StatusLine (Properties ctx, String AD_StatusLine_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_StatusLine_UU, trxName, virtualColumns);
+      /** if (AD_StatusLine_UU == null)
+        {
+			setAD_Message_ID (0);
+			setAD_StatusLine_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setName (null);
+			setSQLStatement (null);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_StatusLine (Properties ctx, ResultSet rs, String trxName)
     {
@@ -70,7 +100,7 @@ public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -155,6 +185,34 @@ public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
 		return (String)get_Value(COLUMNNAME_AD_StatusLine_UU);
 	}
 
+	public org.compiere.model.I_AD_Style getAD_Style() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Style)MTable.get(getCtx(), org.compiere.model.I_AD_Style.Table_ID)
+			.getPO(getAD_Style_ID(), get_TrxName());
+	}
+
+	/** Set Style.
+		@param AD_Style_ID CSS style for field and label
+	*/
+	public void setAD_Style_ID (int AD_Style_ID)
+	{
+		if (AD_Style_ID < 1)
+			set_Value (COLUMNNAME_AD_Style_ID, null);
+		else
+			set_Value (COLUMNNAME_AD_Style_ID, Integer.valueOf(AD_Style_ID));
+	}
+
+	/** Get Style.
+		@return CSS style for field and label
+	  */
+	public int getAD_Style_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Style_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** EntityType AD_Reference_ID=389 */
 	public static final int ENTITYTYPE_AD_Reference_ID=389;
 	/** Set Entity Type.
@@ -193,7 +251,7 @@ public class X_AD_StatusLine extends PO implements I_AD_StatusLine, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }

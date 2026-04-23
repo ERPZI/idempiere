@@ -44,10 +44,12 @@ import org.adempiere.webui.component.Rows;
 import org.adempiere.webui.component.Textbox;
 import org.adempiere.webui.component.Timebox;
 import org.adempiere.webui.component.Window;
+import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MResourceAssignment;
 import org.compiere.model.MRole;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUOMConversion;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -65,7 +67,6 @@ import org.zkoss.zul.Listitem;
  *	Resource Assignment Dialog
  *
  * 	@author 	Jorg Janke
- * 	@version 	$Id: VAssignmentDialog.java,v 1.2 2006/07/30 00:51:28 jjanke Exp $
  * 
  *  Zk Port
  *  @author Low Heng Sin
@@ -73,17 +74,20 @@ import org.zkoss.zul.Listitem;
 public class WAssignmentDialog extends Window implements EventListener<Event>
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = -1762339564864115852L;
+	
+	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
+	private boolean isUseEscForTabClosing = MSysConfig.getBooleanValue(MSysConfig.USE_ESC_FOR_TAB_CLOSING, false, Env.getAD_Client_ID(Env.getCtx()));
 
 	/**
 	 * 	Assignment Dialog.
 	 * 	<pre>
-	 * 		Creates a new assignment oor displays an assignment
+	 * 		Creates a new assignment or displays an assignment
 	 * 		Create new:	(ID == 0)
 	 * 			check availability and create assignment
-	 * 			(confirmed when order/incoice/timeExpense is processed)
+	 * 			(confirmed when order/invoice/timeExpense is processed)
 	 * 			alternatively let InfoResource do the assignment
 	 * 			return ID
 	 * 		Existing assignment: (ID != 0)
@@ -93,7 +97,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 	 * 	</pre>
 	 *  @param mAssignment Assignment
 	 *  @param allowZoom allow to zoom to schedule
-	 *  @param allowDelete allow to delete recorde
+	 *  @param allowDelete allow to delete record
 	 */
 	public WAssignmentDialog (MResourceAssignment mAssignment, 
 		boolean allowZoom, boolean allowDelete)
@@ -131,8 +135,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 	/**	Logger							*/
 	private static final CLogger log = CLogger.getCLogger(WAssignmentDialog.class);
 	/**	Lookup with Resource and UOM		*/
-	private HashMap<KeyNamePair,KeyNamePair>	m_lookup = new HashMap<KeyNamePair,KeyNamePair>();
-	
+	private HashMap<KeyNamePair,KeyNamePair>	m_lookup = new HashMap<KeyNamePair,KeyNamePair>();	
 	//
 	private Grid mainPanel = new Grid();
 	private Label lResource = new Label(Msg.translate(Env.getCtx(), "S_Resource_ID"));
@@ -153,7 +156,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 	private boolean m_zoom;
 
 	/**
-	 * 	Static Init
+	 * 	Layout dialog
 	 * 	@throws Exception
 	 */
 	private void init() throws Exception
@@ -218,7 +221,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		
 		addEventListener(Events.ON_CANCEL, e -> onCancel());
 		//
-	}	//	jbInit
+	}	//	init
 
 	/**
 	 * 	Initialize component & values from m_mAssignment
@@ -266,9 +269,9 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		fQty.setEnabled(readWrite);
 
 		m_setting = false;
-	}	//	dynInit
+	}	//	setDisplay
 
-	/**************************************************************************
+	/**
 	 * 	Get Assignment
 	 * 	@return Assignment
 	 */
@@ -277,14 +280,12 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		return m_mAssignment;
 	}	//	getMResourceAssignment
 
-
 	/**
 	 * 	Check availability and insert record
 	 *  @return true if saved/updated
 	 */
 	private boolean cmd_save()
 	{
-		log.config("");
 		//	Set AssignDateTo
 		Calendar date = new GregorianCalendar();
 		getDateAndTimeFrom(date);
@@ -297,14 +298,12 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		Timestamp assignDateTo = TimeUtil.addMinutess(assignDateFrom, minutes);
 		m_mAssignment.setAssignDateTo (assignDateTo);
 		//
-	//	m_mAssignment.dump();
 		return m_mAssignment.save();
 	}	//	cmdSave
 
 	
-	/**************************************************************************
+	/**
 	 * 	Load Resources.
-	 *  called from variable constructor
 	 * 	@return Array with resources
 	 */
 	private KeyNamePair[] getResources()
@@ -313,7 +312,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		{
 			String sql = MRole.getDefault().addAccessSQL(
 				"SELECT r.S_Resource_ID, r.Name, r.IsActive,"	//	1..3
-				+ "uom.C_UOM_ID,uom.UOMSymbol "					//	4..5
+				+ "uom.C_UOM_ID,COALESCE(uom.UOMSymbol, uom.Name) "					//	4..5
 				+ "FROM S_Resource r, S_ResourceType rt, C_UOM uom "
 				+ "WHERE r.S_ResourceType_ID=rt.S_ResourceType_ID AND rt.C_UOM_ID=uom.C_UOM_ID",
 				"r", MRole.SQL_FULLYQUALIFIED, MRole.SQL_RO);
@@ -353,6 +352,7 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		return retValue;
 	}	//	getResources
 
+	@Override
 	public void onEvent(Event e) throws Exception {
 		if (m_setting)
 			return;
@@ -423,11 +423,21 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		}		
 	}
 
+	/**
+	 * onCancel event
+	 */
 	private void onCancel() {
+		// do not allow to close tab for Events.ON_CTRL_KEY event
+		if(isUseEscForTabClosing)
+			SessionManager.getAppDesktop().setCloseTabWithShortcut(false);
+
 		m_cancel = true;
 		detach();
 	}
 
+	/**
+	 * Open info schedule window
+	 */
 	public void onShowSchedule() 
 	{
 		InfoSchedule is = new InfoSchedule (m_mAssignment, true, this, new Callback<MResourceAssignment>() {			
@@ -447,6 +457,10 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		is.focus();
 	}
 	
+	/**
+	 * Set date and time from to date calendar
+	 * @param date
+	 */
 	private void getDateAndTimeFrom(Calendar date) {
 		Date dateFrom = fDateFrom.getValue();
 		Date timeFrom = fTimeFrom.getValue();		
@@ -457,10 +471,16 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 		date.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
 	}
 
+	/**
+	 * @return true if cancel by user
+	 */
 	public boolean isCancelled() {
 		return m_cancel;
 	}
 	
+	/**
+	 * @return from Datebox
+	 */
 	public Datebox getDateFrom() {
 		return fDateFrom;
 	}
@@ -474,7 +494,5 @@ public class WAssignmentDialog extends Window implements EventListener<Event>
 			}
 		}
 		return b;
-	}
-	
-	
-}	//	VAssignmentDialog
+	}		
+}	//	WAssignmentDialog

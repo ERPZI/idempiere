@@ -1,3 +1,24 @@
+/***********************************************************************
+ * This file is part of iDempiere ERP Open Source                      *
+ * http://www.idempiere.org                                            *
+ *                                                                     *
+ * Copyright (C) Contributors                                          *
+ *                                                                     *
+ * This program is free software; you can redistribute it and/or       *
+ * modify it under the terms of the GNU General Public License         *
+ * as published by the Free Software Foundation; either version 2      *
+ * of the License, or (at your option) any later version.              *
+ *                                                                     *
+ * This program is distributed in the hope that it will be useful,     *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of      *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the        *
+ * GNU General Public License for more details.                        *
+ *                                                                     *
+ * You should have received a copy of the GNU General Public License   *
+ * along with this program; if not, write to the Free Software         *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,          *
+ * MA 02110-1301, USA.                                                 *
+ **********************************************************************/
 package org.compiere.model;
 
 import java.io.File;
@@ -19,13 +40,13 @@ import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+import org.compiere.util.Util;
 import org.idempiere.fa.exceptions.AssetAlreadyDepreciatedException;
 import org.idempiere.fa.exceptions.AssetException;
 import org.idempiere.fa.exceptions.AssetNotImplementedException;
 import org.idempiere.fa.exceptions.AssetNotSupportedException;
 import org.idempiere.fa.feature.UseLifeImpl;
 import org.idempiere.fa.util.POCacheLocal;
-
 
 /**
  *  Asset Addition Model
@@ -37,29 +58,57 @@ public class MAssetAddition extends X_A_Asset_Addition
 	implements DocAction
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 5977180589101094202L;
 
 	/** Static Logger */
 	private static CLogger s_log = CLogger.getCLogger(MAssetAddition.class);
 
+    /**
+     * UUID based Constructor
+     * @param ctx  Context
+     * @param A_Asset_Addition_UU  UUID key
+     * @param trxName Transaction
+     */
+    public MAssetAddition(Properties ctx, String A_Asset_Addition_UU, String trxName) {
+        super(ctx, A_Asset_Addition_UU, trxName);
+		if (Util.isEmpty(A_Asset_Addition_UU))
+			setInitialDefaults();
+    }
+
+    /**
+     * @param ctx
+     * @param A_Asset_Addition_ID
+     * @param trxName
+     */
 	public MAssetAddition (Properties ctx, int A_Asset_Addition_ID, String trxName)
 	{
 		super (ctx, A_Asset_Addition_ID, trxName);
 		if (A_Asset_Addition_ID == 0)
-		{
-			setDocStatus(DOCSTATUS_Drafted);
-			setDocAction(DOCACTION_Complete);
-			setProcessed(false);
-		}
+			setInitialDefaults();
 	}	//	MAssetAddition
+
+	/**
+	 * Set the initial defaults for a new record
+	 */
+	private void setInitialDefaults() {
+		setDocStatus(DOCSTATUS_Drafted);
+		setDocAction(DOCACTION_Complete);
+		setProcessed(false);
+	}
+
+	/**
+	 * @param ctx
+	 * @param rs
+	 * @param trxName
+	 */
 	public MAssetAddition (Properties ctx, ResultSet rs, String trxName)
 	{
 		super (ctx, rs, trxName);
 	}	//	MAAssetAddition
 
-	
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		setA_CreateAsset();
@@ -140,7 +189,6 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return assetAdd;
 	}
 	
-	//@win create asset from Project
 	/**
 	 * Create Asset and asset Addition from MProject. MAssetAddition is saved. 
 	 * Addition from Project only allows initial addition (will definitely create new asset)
@@ -171,9 +219,10 @@ public class MAssetAddition extends X_A_Asset_Addition
 		
 		return assetAdd;
 	}
-	//end @win create asset from Project
+
 	/**	
 	 * Create Asset
+	 * @return MAsset
 	 */
 	private MAsset createAsset()
 	{
@@ -204,9 +253,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 			else if (A_SOURCETYPE_Project.equals(sourceType))
 			{
-				//@win add code for generate from Project
 				asset = new MAsset(getC_Project(false));
-				//end @win add code for generate from Project
 			}
 			else
 			{
@@ -232,9 +279,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		setC_DocType_ID();
 	}
 	
-	//added by @win
 	/**
-	 * @author @win
 	 * Construct addition from Project
 	 * @param project 
 	 */
@@ -267,17 +312,26 @@ public class MAssetAddition extends X_A_Asset_Addition
 	}
 	
 	private final POCacheLocal<MProject> m_cacheCProject = POCacheLocal.newInstance(this, MProject.class);
+	
+	/**
+	 * @param requery
+	 * @return MProject
+	 */
 	public MProject getC_Project(boolean requery)
 	{
 		return m_cacheCProject.get(requery);
 	}
+	
+	/**
+	 * @param project
+	 */
 	private void setC_Project(MProject project)
 	{
 		set_Value("C_Project_ID", project.get_ID());
 		m_cacheCProject.set(project);
 	}
-	//end added by @win
-	/**IDR
+	
+	/**
 	 * Construct addition from import
 	 * @param ifa	fixed asset import
 	 */
@@ -328,13 +382,16 @@ public class MAssetAddition extends X_A_Asset_Addition
 
 	/**
 	 * @param requery
-	 * @return
+	 * @return MMatchInv
 	 */
 	private MMatchInv getMatchInv(boolean requery)
 	{
 		return m_cacheMatchInv.get(requery);
 	}
 	
+	/**
+	 * @param mi
+	 */
 	private void setM_MatchInv(MMatchInv mi)
 	{
 		mi.load(get_TrxName());
@@ -412,15 +469,24 @@ public class MAssetAddition extends X_A_Asset_Addition
 		
 		SetGetUtil.updateColumns(model, null, query, trxName);
 		
-		s_log.fine("Leaving: RETURN TRUE");
 		return true;
 	}
 	
 	private final POCacheLocal<MIFixedAsset> m_cacheIFixedAsset = POCacheLocal.newInstance(this, MIFixedAsset.class);
+	
+	/**
+	 * @param requery
+	 * @return MIFixedAsset
+	 */
 	public MIFixedAsset getI_FixedAsset(boolean requery)
 	{
 		return m_cacheIFixedAsset.get(requery);
 	}
+	
+	/**
+	 * Set fixed asset import model
+	 * @param ifa
+	 */
 	private void setI_FixedAsset(MIFixedAsset ifa)
 	{
 		setI_FixedAsset_ID(ifa.get_ID());
@@ -428,7 +494,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 	}
 	
 	/**
-	 *	Sets the AssetValueAmt from AssetSourceAmt using C_Currency_ID and C_ConversionRate_ID
+	 *	Set AssetValueAmt from AssetSourceAmt using C_Currency_ID and C_ConversionRate_ID
 	 */
 	private void setAssetValueAmt()
 	{
@@ -442,6 +508,10 @@ public class MAssetAddition extends X_A_Asset_Addition
 				null);
 	}
 	
+	/**
+	 * Set source amount
+	 * @param amt
+	 */
 	public void setSourceAmt(BigDecimal amt)
 	{
 		setAssetAmtEntered(amt);
@@ -449,7 +519,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 	}
 	
 	/**
-	 *
+	 * Set IsApproved to true if current role can approved it, false otherwise.
 	 */
 	public void setIsApproved()
 	{
@@ -461,7 +531,10 @@ public class MAssetAddition extends X_A_Asset_Addition
 		}
 	}
 	
-	
+	/**
+	 * Set DateAcct to DateDoc if is still null
+	 */
+	@Override
 	public Timestamp getDateAcct()
 	{
 		Timestamp dateAcct = super.getDateAcct();
@@ -472,7 +545,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return dateAcct;
 	}
 	
-	
+	@Override
 	public boolean processIt (String processAction)
 	{
 		m_processMsg = null;
@@ -485,21 +558,21 @@ public class MAssetAddition extends X_A_Asset_Addition
 	/**	Just Prepared Flag			*/
 	private boolean		m_justPrepared = false;
 
-	
+	@Override
 	public boolean unlockIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("unlockIt - " + toString());
 		return true;
 	}	//	unlockIt
 	
-	
+	@Override
 	public boolean invalidateIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("invalidateIt - " + toString());
 		return false;
 	}	//	invalidateIt
 	
-	
+	@Override
 	public String prepareIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info(toString());
@@ -583,7 +656,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return DocAction.STATUS_InProgress;
 	}	//	prepareIt
 	
-	
+	@Override
 	public boolean approveIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("approveIt - " + toString());
@@ -591,7 +664,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return true;
 	}	//	approveIt
 	
-	
+	@Override
 	public boolean rejectIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("rejectIt - " + toString());
@@ -599,7 +672,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return true;
 	}	//	rejectIt
 	
-	
+	@Override
 	public String completeIt() 
 	{
 		//	Re-Check
@@ -739,7 +812,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return DocAction.STATUS_Completed;
 	}	//	completeIt
 	
-	
+	@Override
 	public boolean voidIt()
 	{
 		// Before Void
@@ -763,6 +836,9 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return true;
 	}	//	voidIt
 	
+	/**
+	 * @param isReActivate
+	 */
 	private void reverseIt(boolean isReActivate)
 	{
 		if (DOCSTATUS_Closed.equals(getDocStatus())
@@ -847,7 +923,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		updateSourceDocument(true);
 	}
 	
-	
+	@Override
 	public boolean closeIt()
 	{
 		if (log.isLoggable(Level.INFO)) log.info("closeIt - " + toString());
@@ -855,19 +931,19 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return true;
 	}	//	closeIt
 	
-	
+	@Override
 	public boolean reverseCorrectIt()
 	{
 		throw new AssetNotImplementedException("reverseCorrectIt");
 	}	//	reverseCorrectionIt
 	
-	
+	@Override
 	public boolean reverseAccrualIt()
 	{
 		throw new AssetNotImplementedException("reverseAccrualIt");
 	}	//	reverseAccrualIt
 	
-	
+	@Override
 	public boolean reActivateIt()
 	{
 		// Before
@@ -890,7 +966,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return true;
 	}	//	reActivateIt
 	
-	
+	@Override
 	public String getSummary()
 	{
 		MAsset asset = getA_Asset(false);
@@ -906,19 +982,19 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return Msg.parseTranslation(getCtx(), sb.toString());
 	}	//	getSummary
 
-	
+	@Override
 	public String getProcessMsg()
 	{
 		return m_processMsg;
 	}	//	getProcessMsg
 	
-	
+	@Override
 	public int getDoc_User_ID()
 	{
 		return getCreatedBy();
 	}	//	getDoc_User_ID
 
-	
+	@Override
 	public BigDecimal getApprovalAmt()
 	{
 		return getAssetValueAmt();
@@ -948,7 +1024,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 		m_cacheAsset.set(asset);
 	} // setAsset
 	
-	
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if(!success)
@@ -1032,8 +1108,9 @@ public class MAssetAddition extends X_A_Asset_Addition
 		// Manual
 		else if (A_SOURCETYPE_Manual.equals(sourceType) && isProcessed())
 		{
-		  // nothing to do
-		 log.fine("Nothing to do");
+			// nothing to do
+			if (log.isLoggable(Level.FINE))
+				log.fine("Nothing to do");
 		}
 	}
 	
@@ -1056,7 +1133,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 	}
 	
 	/**
-	 * Creating/Updating asset product
+	 * Creating/Updating asset product (MAssetProduct)
 	 * @param isReversal
 	 */
 	private void updateA_Asset_Product(boolean isReversal)
@@ -1095,6 +1172,9 @@ public class MAssetAddition extends X_A_Asset_Addition
 		}
 	}
 	
+	/**
+	 * @return true if assert value &lt;= 0
+	 */
 	public boolean hasZeroValues()
 	{
 		return				
@@ -1102,19 +1182,19 @@ public class MAssetAddition extends X_A_Asset_Addition
 		;
 	}
 
-	
+	@Override
 	public File createPDF ()
 	{
 		return null;
 	}	//	createPDF
 	
-	
+	@Override
 	public String getDocumentInfo()
 	{
 		return getDocumentNo() + " / " + getDateDoc();
 	}	//	getDocumentInfo
 
-	
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder("@DocumentNo@: " + getDocumentNo());
@@ -1126,6 +1206,9 @@ public class MAssetAddition extends X_A_Asset_Addition
 		return sb.toString();
 	}	// toString
 	
+	/**
+	 * Update A_CreateAsset flag
+	 */
 	private void setA_CreateAsset()
 	{
 		if (DOCSTATUS_Voided.equals(getDocStatus()))
@@ -1152,7 +1235,7 @@ public class MAssetAddition extends X_A_Asset_Addition
 			}
 			else
 			{
-				// Succesfull creation of Asset
+				// Successful creation of Asset
 				if (cnt == 0)
 				{
 					setA_CreateAsset(true);
@@ -1161,9 +1244,12 @@ public class MAssetAddition extends X_A_Asset_Addition
 		}
 	}
 	
+	/**
+	 * Set C_DocType_ID value by DocBaseType (FAA)
+	 */
 	private void setC_DocType_ID() 
 	{
-	StringBuilder sql = new StringBuilder ("SELECT C_DocType_ID FROM C_DocType ")
+		StringBuilder sql = new StringBuilder ("SELECT C_DocType_ID FROM C_DocType ")
 			.append( "WHERE AD_Client_ID=? AND AD_Org_ID IN (0,").append( getAD_Org_ID())
 			.append( ") AND DocBaseType='FAA' ")
 			.append( "ORDER BY AD_Org_ID DESC, IsDefault DESC");

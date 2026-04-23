@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_TableIndex
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_TableIndex")
-public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent 
+public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_TableIndex (Properties ctx, int AD_TableIndex_ID, String trxName)
@@ -39,8 +39,8 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
       super (ctx, AD_TableIndex_ID, trxName);
       /** if (AD_TableIndex_ID == 0)
         {
-			setAD_Table_ID (0);
 			setAD_TableIndex_ID (0);
+			setAD_Table_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsCreateConstraint (false);
@@ -59,8 +59,48 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
       super (ctx, AD_TableIndex_ID, trxName, virtualColumns);
       /** if (AD_TableIndex_ID == 0)
         {
-			setAD_Table_ID (0);
 			setAD_TableIndex_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsCreateConstraint (false);
+// N
+			setIsKey (false);
+// N
+			setIsUnique (false);
+// N
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_TableIndex (Properties ctx, String AD_TableIndex_UU, String trxName)
+    {
+      super (ctx, AD_TableIndex_UU, trxName);
+      /** if (AD_TableIndex_UU == null)
+        {
+			setAD_TableIndex_ID (0);
+			setAD_Table_ID (0);
+			setEntityType (null);
+// @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
+			setIsCreateConstraint (false);
+// N
+			setIsKey (false);
+// N
+			setIsUnique (false);
+// N
+			setName (null);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_TableIndex (Properties ctx, String AD_TableIndex_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_TableIndex_UU, trxName, virtualColumns);
+      /** if (AD_TableIndex_UU == null)
+        {
+			setAD_TableIndex_ID (0);
+			setAD_Table_ID (0);
 			setEntityType (null);
 // @SQL=SELECT CASE WHEN '@P|AdempiereSys:N@'='Y' THEN 'D' ELSE get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) END FROM Dual
 			setIsCreateConstraint (false);
@@ -80,7 +120,7 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
     }
 
     /** AccessLevel
-      * @return 4 - System 
+      * @return 4 - System
       */
     protected int get_AccessLevel()
     {
@@ -129,34 +169,6 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 		return ii.intValue();
 	}
 
-	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
-	{
-		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
-			.getPO(getAD_Table_ID(), get_TrxName());
-	}
-
-	/** Set Table.
-		@param AD_Table_ID Database Table information
-	*/
-	public void setAD_Table_ID (int AD_Table_ID)
-	{
-		if (AD_Table_ID < 1)
-			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, null);
-		else
-			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
-	}
-
-	/** Get Table.
-		@return Database Table information
-	  */
-	public int getAD_Table_ID()
-	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
-		if (ii == null)
-			 return 0;
-		return ii.intValue();
-	}
-
 	/** Set Table Index.
 		@param AD_TableIndex_ID Table Index
 	*/
@@ -191,6 +203,34 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 	public String getAD_TableIndex_UU()
 	{
 		return (String)get_Value(COLUMNNAME_AD_TableIndex_UU);
+	}
+
+	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
+	{
+		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
+			.getPO(getAD_Table_ID(), get_TrxName());
+	}
+
+	/** Set Table.
+		@param AD_Table_ID Database Table information
+	*/
+	public void setAD_Table_ID (int AD_Table_ID)
+	{
+		if (AD_Table_ID < 1)
+			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, null);
+		else
+			set_ValueNoCheck (COLUMNNAME_AD_Table_ID, Integer.valueOf(AD_Table_ID));
+	}
+
+	/** Get Table.
+		@return Database Table information
+	  */
+	public int getAD_Table_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Table_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Description.
@@ -257,10 +297,10 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 	public boolean isCreateConstraint()
 	{
 		Object oo = get_Value(COLUMNNAME_IsCreateConstraint);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -280,10 +320,10 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 	public boolean isKey()
 	{
 		Object oo = get_Value(COLUMNNAME_IsKey);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -302,10 +342,10 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 	public boolean isUnique()
 	{
 		Object oo = get_Value(COLUMNNAME_IsUnique);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -330,7 +370,7 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -348,10 +388,10 @@ public class X_AD_TableIndex extends PO implements I_AD_TableIndex, I_Persistent
 	public boolean isProcessing()
 	{
 		Object oo = get_Value(COLUMNNAME_Processing);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;

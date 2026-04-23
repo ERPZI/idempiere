@@ -47,12 +47,8 @@ import org.zkoss.zul.Space;
 /**
  * Status bar component of AD Window.
  * 
- * This class is based on org.compiere.apps.StatusBar written by Jorg Janke.
- * @author Jorg Janke
- *
  * @author  <a href="mailto:agramdass@gmail.com">Ashley G Ramdass</a>
  * @date    Mar 12, 2007
- * @version $Revision: 0.10 $
  */
 public class StatusBar extends Panel implements EventListener<Event> 
 {
@@ -174,7 +170,6 @@ public class StatusBar extends Panel implements EventListener<Event>
     public void setStatusLine (String text, boolean error, ProcessInfoLog[] m_logs)
     {
     	pInfoLogs = m_logs;
-    	Div div = null;
     	
     	//detect duplicate call within the current execution cycle
        	Execution execution = Executions.getCurrent();
@@ -206,6 +201,8 @@ public class StatusBar extends Panel implements EventListener<Event>
     		Notification.show(buildNotificationText(m_statusText), "info", findTabpanel(this), "top_left", 2000, true);
     	}
     	
+    	Div div = buildProcessLogContent(m_logs);
+    	
     	messageContainer.setSclass(error ? "docstatus-error" : "docstatus-normal");
     	if (!ClientInfo.maxWidth(ClientInfo.SMALL_WIDTH))
     	{
@@ -229,7 +226,15 @@ public class StatusBar extends Panel implements EventListener<Event>
 			messageContainer.appendChild(label);
 			label.addEventListener(Events.ON_CLICK, this);
     	}
-    	
+    }
+
+    /**
+     * Add document/record link from ProcessInfoLog to popup
+     * @param m_logs
+     * @return
+     */
+    private Div buildProcessLogContent(ProcessInfoLog[] m_logs) {
+    	Div div = null;
     	//add document/record link from ProcessInfoLog
     	if (m_logs != null) {
 			div = new Div();
@@ -251,10 +256,12 @@ public class StatusBar extends Panel implements EventListener<Event>
     	{
     		msgPopupCnt.appendChild(div);
     	}
+    	
+    	return div;
     }
-
+    
     /**
-     * shorten statusText if exceed predefine max length of 80
+     * Shorten statusText if exceed predefine max length of 80
      * @param statusText
      * @return shorten statusText
      */
@@ -330,6 +337,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 	}
 	
 	/**
+	 * Get process logs
 	 * @return process logs
 	 */
 	public ProcessInfoLog[] getPLogs() {
@@ -337,6 +345,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 	}
 
 	/**
+	 * Get status line text
      * @return current status line text
      */
     public String getStatusLine() {
@@ -344,6 +353,7 @@ public class StatusBar extends Panel implements EventListener<Event>
   	}
    
     /**
+     * Get status error text
      * @return true if current status text is error text
      */
     public boolean getStatusError() {
@@ -372,7 +382,7 @@ public class StatusBar extends Panel implements EventListener<Event>
 	}
 
     /**
-     * handle onClientInfo event from browser
+     * Handle onClientInfo event from browser
      */
     protected void onClientInfo() {
     	ZKUpdateUtil.setWindowWidthX(msgPopup, 500);

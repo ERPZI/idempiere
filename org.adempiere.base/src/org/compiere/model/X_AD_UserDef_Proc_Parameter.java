@@ -22,16 +22,16 @@ import java.util.Properties;
 import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_UserDef_Proc_Parameter
- *  @author iDempiere (generated) 
- *  @version Release 10 - $Id$ */
+ *  @author iDempiere (generated)
+ *  @version Release 12 - $Id$ */
 @org.adempiere.base.Model(table="AD_UserDef_Proc_Parameter")
-public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc_Parameter, I_Persistent 
+public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc_Parameter, I_Persistent
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20221224L;
+	private static final long serialVersionUID = 20241222L;
 
     /** Standard Constructor */
     public X_AD_UserDef_Proc_Parameter (Properties ctx, int AD_UserDef_Proc_Parameter_ID, String trxName)
@@ -57,6 +57,30 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
         } */
     }
 
+    /** Standard Constructor */
+    public X_AD_UserDef_Proc_Parameter (Properties ctx, String AD_UserDef_Proc_Parameter_UU, String trxName)
+    {
+      super (ctx, AD_UserDef_Proc_Parameter_UU, trxName);
+      /** if (AD_UserDef_Proc_Parameter_UU == null)
+        {
+			setAD_Process_Para_ID (0);
+			setAD_UserDef_Proc_ID (0);
+			setAD_UserDef_Proc_Parameter_ID (0);
+        } */
+    }
+
+    /** Standard Constructor */
+    public X_AD_UserDef_Proc_Parameter (Properties ctx, String AD_UserDef_Proc_Parameter_UU, String trxName, String ... virtualColumns)
+    {
+      super (ctx, AD_UserDef_Proc_Parameter_UU, trxName, virtualColumns);
+      /** if (AD_UserDef_Proc_Parameter_UU == null)
+        {
+			setAD_Process_Para_ID (0);
+			setAD_UserDef_Proc_ID (0);
+			setAD_UserDef_Proc_Parameter_ID (0);
+        } */
+    }
+
     /** Load Constructor */
     public X_AD_UserDef_Proc_Parameter (Properties ctx, ResultSet rs, String trxName)
     {
@@ -64,7 +88,7 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
     }
 
     /** AccessLevel
-      * @return 6 - System - Client 
+      * @return 6 - System - Client
       */
     protected int get_AccessLevel()
     {
@@ -429,10 +453,10 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
 	public boolean isRange()
 	{
 		Object oo = get_Value(COLUMNNAME_IsRange);
-		if (oo != null) 
+		if (oo != null)
 		{
-			 if (oo instanceof Boolean) 
-				 return ((Boolean)oo).booleanValue(); 
+			 if (oo instanceof Boolean)
+				 return ((Boolean)oo).booleanValue();
 			return "Y".equals(oo);
 		}
 		return false;
@@ -472,7 +496,7 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
     /** Get Record ID/ColumnName
         @return ID/ColumnName pair
       */
-    public KeyNamePair getKeyNamePair() 
+    public KeyNamePair getKeyNamePair()
     {
         return new KeyNamePair(get_ID(), getName());
     }
@@ -542,6 +566,22 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
 		return ii.intValue();
 	}
 
+	/** Set Value Format.
+		@param VFormat Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;, or ~regex
+	*/
+	public void setVFormat (String VFormat)
+	{
+		set_Value (COLUMNNAME_VFormat, VFormat);
+	}
+
+	/** Get Value Format.
+		@return Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;, or ~regex
+	  */
+	public String getVFormat()
+	{
+		return (String)get_Value(COLUMNNAME_VFormat);
+	}
+
 	/** Set Max. Value.
 		@param ValueMax Maximum Value for a field
 	*/
@@ -572,21 +612,5 @@ public class X_AD_UserDef_Proc_Parameter extends PO implements I_AD_UserDef_Proc
 	public String getValueMin()
 	{
 		return (String)get_Value(COLUMNNAME_ValueMin);
-	}
-
-	/** Set Value Format.
-		@param VFormat Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;
-	*/
-	public void setVFormat (String VFormat)
-	{
-		set_Value (COLUMNNAME_VFormat, VFormat);
-	}
-
-	/** Get Value Format.
-		@return Format of the value; Can contain fixed format elements, Variables: &quot;_lLoOaAcCa09&quot;
-	  */
-	public String getVFormat()
-	{
-		return (String)get_Value(COLUMNNAME_VFormat);
 	}
 }
