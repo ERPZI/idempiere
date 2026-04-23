@@ -325,7 +325,7 @@ public class Doc_Production extends Doc
 										costMap.put(line0.get_ID()+ "_"+ ma.getM_AttributeSetInstance_ID(),maCost);
 										costs0 = costs0.add(maCost);
 									}						
-									bomCost = bomCost.add(costs0);
+									bomCost = bomCost.add(costs0.setScale(stdPrecision, RoundingMode.HALF_UP));
 								} 
 								else
 									p_Error = "Failed to post - No Attribute Set for line";
@@ -346,7 +346,7 @@ public class Doc_Production extends Doc
 									costs0 = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
 								}
 								costMap.put(line0.get_ID()+ "_"+ line0.getM_AttributeSetInstance_ID(),costs0);
-								bomCost = bomCost.add(costs0);
+								bomCost = bomCost.add(costs0.setScale(stdPrecision, RoundingMode.HALF_UP));
 							}
 							
 						}  
@@ -365,7 +365,7 @@ public class Doc_Production extends Doc
 								costs0 = line0.getProductCosts(as, line0.getAD_Org_ID(), false);
 							}
 							costMap.put(line0.get_ID()+ "_"+ line0.getM_AttributeSetInstance_ID(),costs0);
-							bomCost = bomCost.add(costs0);
+							bomCost = bomCost.add(costs0.setScale(stdPrecision, RoundingMode.HALF_UP));
 						}
 					}
 				}
@@ -374,7 +374,7 @@ public class Doc_Production extends Doc
 				if (line.getQty().compareTo(qtyProduced) != 0) 
 				{
 					BigDecimal factor = line.getQty().divide(qtyProduced, 12, RoundingMode.HALF_UP);
-					bomCost = bomCost.multiply(factor);
+					bomCost = bomCost.multiply(factor).setScale(stdPrecision, RoundingMode.HALF_UP);
 				}
 				
 				if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel))

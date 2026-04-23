@@ -41,7 +41,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
-import org.compiere.util.Ini;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trace;
@@ -453,12 +452,23 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 	@Override
 	protected boolean beforeSave(boolean newRecord)
 	{
-		if (getAD_Client_ID() == 0)
+		//Validate User Level
+		if (isMasterRole())
+			return true;
+		else if (getAD_Client_ID() == 0)
 			setUserLevel(USERLEVEL_System);
-		else if (getUserLevel().equals(USERLEVEL_System))
+		else if (USERLEVEL_System.equals(getUserLevel()))
 		{
 			log.saveError("AccessTableNoUpdate", Msg.getElement(getCtx(), "UserLevel"));
 			return false;
+		}
+		else
+		{
+			if (Util.isEmpty(getUserLevel(), true))
+			{
+				log.saveError("FillMandatory", Msg.getElement(getCtx(), "UserLevel"));
+				return false;
+			}
 		}
 		return true;
 	}	//	beforeSave
@@ -470,14 +480,18 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 			return success;
 		if (newRecord && success)
 		{
-			// Assign Role to SuperUser
-			MUserRoles su = new MUserRoles(getCtx(), SUPERUSER_USER_ID, getAD_Role_ID(), get_TrxName());
-			su.saveEx();
-			// Assign Role to Created By user
-			if (getCreatedBy() != SUPERUSER_USER_ID && MSysConfig.getBooleanValue(MSysConfig.AUTO_ASSIGN_ROLE_TO_CREATOR_USER, false, getAD_Client_ID()))
+			// Don't assign Role Template
+			if (!isMasterRole())
 			{
-				MUserRoles ur = new MUserRoles(getCtx(), getCreatedBy(), getAD_Role_ID(), get_TrxName());
-				ur.saveEx();
+				// Assign Role to SuperUser
+				MUserRoles su = new MUserRoles(getCtx(), SUPERUSER_USER_ID, getAD_Role_ID(), get_TrxName());
+				su.saveEx();
+				// Assign Role to Created By user
+				if (getCreatedBy() != SUPERUSER_USER_ID && MSysConfig.getBooleanValue(MSysConfig.AUTO_ASSIGN_ROLE_TO_CREATOR_USER, false, getAD_Client_ID()))
+				{
+					MUserRoles ur = new MUserRoles(getCtx(), getCreatedBy(), getAD_Role_ID(), get_TrxName());
+					ur.saveEx();
+				}
 			}
 			updateAccessRecords();
 		}
@@ -823,17 +837,14 @@ public final class MRole extends X_AD_Role implements ImmutablePOSupport
 		m_orgAccess = new OrgAccess[list.size()];
 		list.toArray(m_orgAccess); 
 		if (log.isLoggable(Level.FINE)) log.fine("#" + m_orgAccess.length + (reload ? " - reload" : "")); 
-		if (Ini.isClient())
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < m_orgAccess.length; i++)
 		{
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < m_orgAccess.length; i++)
-			{
-				if (i > 0)
-					sb.append(",");
-				sb.append(m_orgAccess[i].AD_Org_ID);
-			}
-			Env.setContext(Env.getCtx(), "#User_Org", sb.toString());
+			if (i > 0)
+				sb.append(",");
+			sb.append(m_orgAccess[i].AD_Org_ID);
 		}
+		Env.setContext(Env.getCtx(), Env.USER_ORG, sb.toString());
 	}	//	loadOrgAccess
 
 	/**

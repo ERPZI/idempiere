@@ -47,7 +47,7 @@ public class MSysConfig extends X_AD_SysConfig
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4467301251742419106L;
+	private static final long serialVersionUID = -330972530035864592L;
 
 	/** Constant for Predefine System Configuration Names (in alphabetical order) */
 	
@@ -95,6 +95,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String CHECK_CREDIT_ON_CASH_POS_ORDER = "CHECK_CREDIT_ON_CASH_POS_ORDER";
     public static final String CHECK_CREDIT_ON_PREPAY_ORDER = "CHECK_CREDIT_ON_PREPAY_ORDER";
     public static final String CLIENT_ACCOUNTING = "CLIENT_ACCOUNTING";
+    public static final String CSV_EXPORT_SANITIZATION = "CSV_EXPORT_SANITIZATION";
     public static final String DASHBOARD_LAYOUT_ORIENTATION = "DASHBOARD_LAYOUT_ORIENTATION";
     public static final String DB_READ_REPLICA_NORMAL_MAX_ITERATIONS = "DB_READ_REPLICA_NORMAL_MAX_ITERATIONS";
     public static final String DB_READ_REPLICA_NORMAL_TIMEOUT_IN_MILLISECONDS = "DB_READ_REPLICA_NORMAL_TIMEOUT_IN_MILLISECONDS";
@@ -196,6 +197,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String RecentItems_MaxShown = "RecentItems_MaxShown";
 	public static final String REPORT_LOAD_TIMEOUT_IN_SECONDS = "REPORT_LOAD_TIMEOUT_IN_SECONDS";
     public static final String REPORT_SWAP_MAX_ROWS = "REPORT_SWAP_MAX_ROWS";
+    public static final String SECURITY_DASHBOARD_LEGACY_KEY_WARNING = "SECURITY_DASHBOARD_LEGACY_KEY_WARNING";
     public static final String SHIPPING_DEFAULT_WEIGHT_PER_PACKAGE = "SHIPPING_DEFAULT_WEIGHT_PER_PACKAGE";
     public static final String STANDARD_REPORT_FOOTER_TRADEMARK_TEXT = "STANDARD_REPORT_FOOTER_TRADEMARK_TEXT";
     public static final String START_VALUE_BPLOCATION_NAME = "START_VALUE_BPLOCATION_NAME";
@@ -220,6 +222,7 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String USER_LOCKING_MAX_PASSWORD_AGE_DAY = "USER_LOCKING_MAX_PASSWORD_AGE_DAY";
     public static final String USER_LOCKING_PASSWORD_NOTIFY_DAY = "USER_LOCKING_PASSWORD_NOTIFY_DAY";
     public static final String USER_PASSWORD_HASH = "USER_PASSWORD_HASH";
+    public static final String USER_PASSWORD_HASH_ALGORITHM = "USER_PASSWORD_HASH_ALGORITHM";
     public static final String VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT = "VALIDATE_MATCHING_PRODUCT_ON_SHIPMENT";
     public static final String VALIDATE_MATCHING_TO_ORDERED_QTY = "VALIDATE_MATCHING_TO_ORDERED_QTY";
     public static final String WEBUI_LOGOURL = "WEBUI_LOGOURL";
@@ -284,6 +287,12 @@ public class MSysConfig extends X_AD_SysConfig
     public static final String ZK_ROOT_FOLDER_BROWSER = "ZK_ROOT_FOLDER_BROWSER";
     public static final String ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS = "ZK_SEARCH_AUTO_COMPLETE_MAX_ROWS";
     public static final String ZK_SEQ_DEFAULT_VALUE_PANEL = "ZK_SEQ_DEFAULT_VALUE_PANEL";
+	public static final String ZK_SESSION_FINGERPRINT_CHECK_ACCEPT_LANGUAGE = "ZK_SESSION_FINGERPRINT_CHECK_ACCEPT_LANGUAGE";
+	public static final String ZK_SESSION_FINGERPRINT_CHECK_IP = "ZK_SESSION_FINGERPRINT_CHECK_IP";
+	public static final String ZK_SESSION_FINGERPRINT_CHECK_USER_AGENT = "ZK_SESSION_FINGERPRINT_CHECK_USER_AGENT";
+	public static final String ZK_SESSION_FINGERPRINT_ENABLED = "ZK_SESSION_FINGERPRINT_ENABLED";
+	public static final String ZK_SESSION_SAVE_JSESSIONID = "ZK_SESSION_SAVE_JSESSIONID";
+	public static final String ZK_SESSION_SAVE_USER_AGENT = "ZK_SESSION_SAVE_USER_AGENT";
     public static final String ZK_SESSION_TIMEOUT_IN_SECONDS = "ZK_SESSION_TIMEOUT_IN_SECONDS";
     public static final String ZK_THEME = "ZK_THEME";
     public static final String ZK_THEME_USE_FONT_ICON_FOR_IMAGE = "ZK_THEME_USE_FONT_ICON_FOR_IMAGE";

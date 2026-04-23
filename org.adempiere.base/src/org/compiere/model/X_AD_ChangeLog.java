@@ -31,7 +31,7 @@ public class X_AD_ChangeLog extends PO implements I_AD_ChangeLog, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260421L;
 
     /** Standard Constructor */
     public X_AD_ChangeLog (Properties ctx, int AD_ChangeLog_ID, String trxName)
@@ -285,6 +285,22 @@ public class X_AD_ChangeLog extends PO implements I_AD_ChangeLog, I_Persistent
 	public String getEventChangeLog()
 	{
 		return (String)get_Value(COLUMNNAME_EventChangeLog);
+	}
+
+	/** Set External Trace ID.
+		@param ExternalTraceId External identifier used for audit tracing
+	*/
+	public void setExternalTraceId (String ExternalTraceId)
+	{
+		set_Value (COLUMNNAME_ExternalTraceId, ExternalTraceId);
+	}
+
+	/** Get External Trace ID.
+		@return External identifier used for audit tracing
+	  */
+	public String getExternalTraceId()
+	{
+		return (String)get_Value(COLUMNNAME_ExternalTraceId);
 	}
 
 	/** Set Customization.

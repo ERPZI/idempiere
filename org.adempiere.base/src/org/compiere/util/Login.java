@@ -391,7 +391,7 @@ public class Login
 						Env.setContext(m_ctx, "#AD_User_Description", "SuperUser Forced Login");
 						Env.setContext(m_ctx, Env.USER_LEVEL, "S  ");  	//	Format 'SCO'
 						Env.setContext(m_ctx, "#User_Client", "0");		//	Format c1, c2, ...
-						Env.setContext(m_ctx, "#User_Org", "0"); 		//	Format o1, o2, ...
+						Env.setContext(m_ctx, Env.USER_ORG, "0"); 		//	Format o1, o2, ...
 						retValue = new KeyNamePair[] {new KeyNamePair(0, "System Administrator")};
 						return retValue;
 					}
@@ -1276,15 +1276,29 @@ public class Login
 	}
 
 	/**
+	 * Validate Client Login. Sets Context with login info.
+	 * 
+	 * @param app_user  user id
+	 * @param app_pwd   password, ignore for SSO login
+	 * @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
+	 * @param token token to validate SSO login user (app_user).
+	 * @return client array or null if in error.
+	 */
+	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token) {
+		return getClients(app_user, app_pwd, roleTypes, token, null);
+	}
+
+	/**
 	 *  Validate Client Login.<br/>
 	 *  Sets Context with login info.
 	 *  @param app_user user id
 	 *  @param app_pwd password, ignore for SSO login
 	 *  @param roleTypes comma separated list of the role types allowed to login (NULL can be added)
 	 *  @param token token to validate SSO login user (app_user).
+	 *  @param tenant the tenant query parameter value (tenant login prefix)
 	 *  @return client array or null if in error.
 	 */
-	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token) {
+	public KeyNamePair[] getClients(String app_user, String app_pwd, String roleTypes, Object token, String tenant) {
 		if (log.isLoggable(Level.INFO)) log.info("User=" + app_user);
 
 		if (Util.isEmpty(app_user))
@@ -1321,11 +1335,20 @@ public class Login
 		}
 
 		MClient client = null;
+		// Check tenant login prefix
+		if (!Util.isEmpty(tenant, true)) {
+			client = MClient.getByLoginPrefix(tenant.trim());
+			if (client == null) {
+				loginErrMsg = Msg.getMsg(m_ctx, "FailedLogin");
+				return null;
+			}
+		}
+
 		if (MSystem.isUseLoginPrefix()) {
 			String app_tenant = Login.getAppTenant(app_user);
 			app_user = Login.getAppUser(app_user);
 			boolean hasTenant = ! Util.isEmpty(app_tenant, true);
-			if (MSystem.isLoginPrefixMandatory() && ! hasTenant) {
+			if (MSystem.isLoginPrefixMandatory() && ! hasTenant && client == null) {
 				loginErrMsg = Msg.getMsg(m_ctx, "MissingLoginTenant");
 				return null;
 			}
@@ -1334,11 +1357,12 @@ public class Login
 				return null;
 			}
 			if (hasTenant) {
-				client = MClient.getByLoginPrefix(app_tenant);
-				if (client == null) {
+				MClient prefixClient = MClient.getByLoginPrefix(app_tenant);
+				if (prefixClient == null || (client != null && client.getAD_Client_ID() != prefixClient.getAD_Client_ID())) {
 					loginErrMsg = Msg.getMsg(m_ctx, "FailedLogin");
 					return null;
 				}
+				client = prefixClient;
 			}
 		}
 
@@ -1556,8 +1580,14 @@ public class Login
 				user.setFailedLoginCount(0);
 				user.setDateLastLogin(new Timestamp(now));
 				Env.setContext(Env.getCtx(), Env.AD_CLIENT_ID, user.getAD_Client_ID());
-				if (!user.save())
-					log.severe("Failed to update user record with date last login (" + user.getName() + " / clientID = " + user.getAD_Client_ID() + ")");
+				migrateUserPasswordIfNeeded(user, app_pwd);
+				user.set_Attribute(MUser.SAVING_MIGRATE_USER_PASSWORD_IF_NEEDED, "Y");
+				try {
+					if (!user.save())
+						log.severe("Failed to update user record with date last login (" + user.getName() + " / clientID = " + user.getAD_Client_ID() + ")");
+				} finally {
+					user.set_Attribute(MUser.SAVING_MIGRATE_USER_PASSWORD_IF_NEEDED, null);
+				}
 			}
 		}
 		else if (validButLocked)
@@ -1623,6 +1653,21 @@ public class Login
 			Env.setContext(Env.getCtx(), Env.IS_SSO_LOGIN, false);
 		
 		return retValue;
+	}
+
+	private void migrateUserPasswordIfNeeded(MUser user, String app_pwd) {
+		boolean hash_password = MSysConfig.getBooleanValue(MSysConfig.USER_PASSWORD_HASH, false);
+		if (!hash_password || app_pwd == null || app_pwd.isEmpty()) {
+			return;
+		}
+
+		// re-hash password if current hash algo or salt algo is different from the one configured
+		String currentHashAlgo = MSysConfig.getValue(MSysConfig.USER_PASSWORD_HASH_ALGORITHM, Secure.LEGACY_PASSWORD_HASH_ALGORITHM);
+		if (!currentHashAlgo.equals(user.getPasswordHashAlgorithm()) || !SecureEngine.DEFAULT_SECURE_RANDOM_ALGORITHM.equals(user.getSaltAlgorithm())) {
+			user.setPasswordHashAlgorithm(currentHashAlgo);
+			user.setSaltAlgorithm(SecureEngine.DEFAULT_SECURE_RANDOM_ALGORITHM);
+			user.setPassword(app_pwd);
+		}
 	}
 
 	/**

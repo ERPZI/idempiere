@@ -171,6 +171,19 @@ public interface I_AD_ChangeLog
 	  */
 	public String getEventChangeLog();
 
+    /** Column name ExternalTraceId */
+    public static final String COLUMNNAME_ExternalTraceId = "ExternalTraceId";
+
+	/** Set External Trace ID.
+	  * External identifier used for audit tracing
+	  */
+	public void setExternalTraceId (String ExternalTraceId);
+
+	/** Get External Trace ID.
+	  * External identifier used for audit tracing
+	  */
+	public String getExternalTraceId();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 

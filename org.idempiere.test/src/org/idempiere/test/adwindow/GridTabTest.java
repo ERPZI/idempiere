@@ -60,7 +60,7 @@ import org.idempiere.test.DictionaryIDs;
 import org.junit.jupiter.api.Test;
 
 /**
- * 
+ *
  * @author hengsin
  *
  */
@@ -72,16 +72,16 @@ public class GridTabTest extends AbstractTestCase {
 	}
 
 	@Test
-	public void testQuery() {		
+	public void testQuery() {
 		int AD_Window_ID = SystemIDs.WINDOW_BUSINESS_PARTNER;
 		var gWindowVO = GridWindowVO.create (Env.getCtx(), 1, AD_Window_ID);
 		var gridWindow = new GridWindow(gWindowVO, true);
 		int tabCount = gridWindow.getTabCount();
 		assertTrue(tabCount > 0, "Tab Count is Zero. AD_Window_ID="+AD_Window_ID);
-		
+
 		MQuery query = new MQuery(MBPartner.Table_Name);
 		query.addRestriction(MBPartner.COLUMNNAME_C_BPartner_ID, MQuery.EQUAL, DictionaryIDs.C_BPartner.JOE_BLOCK.id);
-		
+
 		for(int i = 0; i < gridWindow.getTabCount(); i++) {
 			gridWindow.initTab(i);
 			GridTab gTab = gridWindow.getTab(i);
@@ -93,15 +93,85 @@ public class GridTabTest extends AbstractTestCase {
 				gTab.setUpdateWindowContext(false);
 			}
 		}
-		
+
 		GridTab gTab = gridWindow.getTab(0);
-		assertTrue(gTab.getRowCount()==1, "GridTab Row Count is not 1. GridTab="+gTab.getName());
-		
+		gTab.getTableModel().setImportingMode(true, getTrxName());
+		assertTrue(gTab.getRowCount() == 1, "GridTab Row Count is not 1. GridTab=" + gTab.getName());
+
 		String name = (String) gTab.getValue("Name");
 		MBPartner bpartner = new MBPartner(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id, getTrxName());
 		assertTrue(bpartner.getName().equals(name), "GridTab Name != MBPartner.getName(). GridTab.Name="+name + " MBPartner.getName="+bpartner.getName());
+		
+		//test query with no restriction
+		query = new MQuery(MBPartner.Table_Name);
+		gTab.setQuery(query);
+		gTab.query(false, 0, 3);
+		assertTrue(gTab.getRowCount() >= 3, "GridTab Row Count is less than 3. GridTab="+gTab.getName());
+		
+		//test query with 2 restrictions
+		query = new MQuery(MBPartner.Table_Name);
+		query.addRestriction(MBPartner.COLUMNNAME_IsCustomer, MQuery.EQUAL, "Y");
+		query.addRestriction(MBPartner.COLUMNNAME_IsVendor, MQuery.EQUAL, "Y");
+		gTab.setQuery(query);
+		gTab.query(false, 0, 0);
+		assertTrue(gTab.getRowCount() > 0, "GridTab Row Count is 0. GridTab="+gTab.getName());
+		int customerCount = 0;
+		int vendorCount = 0;
+		for(int row = 0; row < gTab.getRowCount(); row++) {
+			gTab.setCurrentRow(row);
+			Boolean isCustomer = (Boolean) gTab.getValue(MBPartner.COLUMNNAME_IsCustomer);
+			if (isCustomer != null && isCustomer.booleanValue())
+				customerCount++;
+			Boolean isVendor = (Boolean) gTab.getValue(MBPartner.COLUMNNAME_IsVendor);
+			if (isVendor != null && isVendor.booleanValue())
+				vendorCount++;
+		}
+		assertTrue(customerCount == vendorCount && customerCount == gTab.getRowCount(), "GridTab Row Count != Customer/Vendor count. GridTab="+gTab.getName()
+				+ " RowCount="+gTab.getRowCount() + " CustomerCount="+customerCount + " VendorCount="+vendorCount);
+		
+		// test with function
+		query = new MQuery(MBPartner.Table_Name);
+		query.addRestriction("Upper("+MBPartner.COLUMNNAME_Name+")", MQuery.EQUAL, bpartner.getName().toUpperCase());
+		gTab.setQuery(query);
+		gTab.query(false, 0, 0);
+		assertTrue(gTab.getRowCount()==1, "GridTab Row Count is not 1. GridTab="+gTab.getName());
+		assertEquals(bpartner.getName(), gTab.getValue(MBPartner.COLUMNNAME_Name), "GridTab Name != MBPartner.getName. GridTab.Name="+gTab.getValue(MBPartner.COLUMNNAME_Name) + " MBPartner.getName="+bpartner.getName());
+		
+		// test with reference column
+		query = new MQuery(MBPartner.Table_Name);
+		query.addRestriction(MOrder.COLUMNNAME_Bill_BPartner_ID, MQuery.EQUAL, DictionaryIDs.C_BPartner.JOE_BLOCK.id);
+		gTab.setQuery(query);
+		gTab.query(false, 0, 0);
+		assertTrue(gTab.getRowCount()==1, "GridTab Row Count is not 1. GridTab="+gTab.getName());
+		assertEquals(DictionaryIDs.C_BPartner.JOE_BLOCK.id, gTab.getRecord_ID(), "GridTab Record_ID != BP_JOE_BLOCK id. GridTab.Record_ID="+gTab.getRecord_ID());
+		
+		// test with set negative current row
+		assertEquals(0, gTab.setCurrentRow(-1, true),
+				"Setting current row to -1 did not result in 0. GridTab=" + gTab.getName());
+		assertEquals(0, gTab.getCurrentRow(), "Current row is not 0 after setting to -1. GridTab=" + gTab.getName());
+
+		// test two email address don't confuse the parse context variable logic
+		bpartner.setDescription("test1@test.com,test2@test.com");
+		bpartner.saveEx();
+		query = new MQuery(MBPartner.Table_Name);
+		query.addRestriction(MBPartner.COLUMNNAME_Description, MQuery.EQUAL, "test1@test.com,test2@test.com");
+		gTab.setQuery(query);
+		gTab.query(false, 0, 0);
+		assertTrue(gTab.getRowCount() == 1, "GridTab Row Count is not 1. GridTab=" + gTab.getName());
+		assertEquals(DictionaryIDs.C_BPartner.JOE_BLOCK.id, gTab.getRecord_ID(),
+				"GridTab Record_ID != BP_JOE_BLOCK id. GridTab.Record_ID=" + gTab.getRecord_ID());
+		
+		// test parsing of @CreatedBy@
+		Env.setContext(Env.getCtx(), gTab.getWindowNo(), "CreatedBy", DictionaryIDs.AD_User.SUPER_USER.id);
+		query = new MQuery(MBPartner.Table_Name);
+		query.addRestriction(MBPartner.COLUMNNAME_CreatedBy, MQuery.EQUAL, "@CreatedBy:0@");
+		gTab.setQuery(query);
+		gTab.query(false, 0, 0);
+		assertTrue(gTab.getRowCount() > 0, "GridTab Row Count is not > 0. GridTab=" + gTab.getName());
+		assertEquals(DictionaryIDs.AD_User.SUPER_USER.id, gTab.getValue(MBPartner.COLUMNNAME_CreatedBy),
+				"GridTab CreatedBy != SUPER_USER id. GridTab.CreatedBy=" + gTab.getValue(MBPartner.COLUMNNAME_CreatedBy));
 	}
-	
+
 	@Test
 	public void testCallout() {
 		//Sales Order
@@ -110,7 +180,7 @@ public class GridTabTest extends AbstractTestCase {
 		var gridWindow = new GridWindow(gWindowVO, true);
 		int tabCount = gridWindow.getTabCount();
 		assertTrue(tabCount > 0, "Tab Count is Zero. AD_Window_ID="+AD_Window_ID);
-		
+
 		for(int i = 0; i < gridWindow.getTabCount(); i++) {
 			gridWindow.initTab(i);
 			GridTab gTab = gridWindow.getTab(i);
@@ -122,31 +192,31 @@ public class GridTabTest extends AbstractTestCase {
 				gTab.setUpdateWindowContext(false);
 			}
 		}
-		
+
 		//insert new row
 		GridTab gTab = gridWindow.getTab(0);
 		gTab.dataNew(false);
 		assertTrue(gTab.isNew(), "Grid Tab dataNew call not working as expected");
-		
+
 		//initial value of Bill_BPartner_ID should be null
 		assertNull(gTab.getValue(MOrder.COLUMNNAME_Bill_BPartner_ID), "Bill_BPartner_ID not null");
 		gTab.setValue(MOrder.COLUMNNAME_C_BPartner_ID, DictionaryIDs.C_BPartner.JOE_BLOCK.id);
-		
+
 		//set C_BPartner_ID to BP_JOE_BLOCK
 		Object value = gTab.getValue(MOrder.COLUMNNAME_C_BPartner_ID);
 		assertNotNull(value, "C_BPartner_ID is null");
 		assertEquals(DictionaryIDs.C_BPartner.JOE_BLOCK.id, ((Number)value).intValue(), "C_BPartner_ID not equals to " + DictionaryIDs.C_BPartner.JOE_BLOCK.id);
-		
+
 		//invoke org.compiere.model.CalloutOrder.bPartner
 		GridField mField = gTab.getField(MOrder.COLUMNNAME_C_BPartner_ID);
 		gTab.processFieldChange(mField);
-		
+
 		//org.compiere.model.CalloutOrder.bPartner should set Bill_BPartner_ID to BP_JOE_BLOCK
 		value = gTab.getValue(MOrder.COLUMNNAME_Bill_BPartner_ID);
 		assertNotNull(value, "Bill_BPartner_ID is null");
 		assertEquals(DictionaryIDs.C_BPartner.JOE_BLOCK.id, ((Number)value).intValue(), "Bill_BPartner_ID not equals to " + DictionaryIDs.C_BPartner.JOE_BLOCK.id);
 	}
-	
+
 	@Test
 	public void testUpdate() {
 		//Business Partner
@@ -155,11 +225,11 @@ public class GridTabTest extends AbstractTestCase {
 		var gridWindow = new GridWindow(gWindowVO, true);
 		int tabCount = gridWindow.getTabCount();
 		assertTrue(tabCount > 0, "Tab Count is Zero. AD_Window_ID="+AD_Window_ID);
-		
+
 		//retrieve for update
 		MQuery query = new MQuery(MBPartner.Table_Name);
 		query.addRestriction(MBPartner.COLUMNNAME_C_BPartner_ID, MQuery.EQUAL, DictionaryIDs.C_BPartner.JOE_BLOCK.id);
-		
+
 		for(int i = 0; i < gridWindow.getTabCount(); i++) {
 			gridWindow.initTab(i);
 			GridTab gTab = gridWindow.getTab(i);
@@ -171,20 +241,20 @@ public class GridTabTest extends AbstractTestCase {
 				gTab.setUpdateWindowContext(false);
 			}
 		}
-		
+
 		GridTab gTab = gridWindow.getTab(0);
 		assertTrue(gTab.getRowCount()==1, "GridTab Row Count is not 1. GridTab="+gTab.getName());
-		
+
 		String name = (String) gTab.getValue("Name");
 		MBPartner bpartner = new MBPartner(Env.getCtx(), DictionaryIDs.C_BPartner.JOE_BLOCK.id, getTrxName());
 		assertTrue(bpartner.getName().equals(name), "GridTab Name != MBPartner.getName(). GridTab.Name="+name + " MBPartner.getName="+bpartner.getName());
-		
+
 		//use trx to perform update
 		gTab.getTableModel().setImportingMode(true, getTrxName());
 		String updateValue = "testUpdate";
 		gTab.setValue(MBPartner.COLUMNNAME_Description, updateValue);
 		gTab.dataSave(true);
-		
+
 		//verify update is working
 		bpartner.load(getTrxName());
 		String description = (String) gTab.getValue(MBPartner.COLUMNNAME_Description);
@@ -217,6 +287,8 @@ public class GridTabTest extends AbstractTestCase {
 		MField field = MField.get(FIELD_ORDERLINE_SHIPPER);
 		boolean displayOri = field.isDisplayed();
 		boolean displayGridOri = field.isDisplayed();
+		int createdOrderId = -1;
+
 		try {
 			/* IDEMPIERE-5560 */
 			// must not use trx here for the test case below to get the update
@@ -283,6 +355,8 @@ public class GridTabTest extends AbstractTestCase {
 			// gTab0.setValue(MOrder.COLUMNNAME_SalesRep_ID, DictionaryIDs.AD_User.GARDEN_USER.id);
 			assertTrue(gTab0.dataSave(true), CLogger.retrieveWarningString("Could not save order"));
 
+	        createdOrderId = ((Integer) gTab0.getValue(MOrder.COLUMNNAME_C_Order_ID)).intValue();
+
 			GridTab gTab1 = gridWindow.getTab(1);
 			if (!gTab1.getTableModel().isOpen())
 				gTab1.getTableModel().open(0);
@@ -295,6 +369,15 @@ public class GridTabTest extends AbstractTestCase {
 			assertTrue(gTab1.dataSave(true));
 
 		} finally {
+			// Clean up the created records
+	        if (createdOrderId > 0) {
+	            String deleteLines = "DELETE FROM C_OrderLine WHERE C_Order_ID=?";
+	            String deleteOrder = "DELETE FROM C_Order WHERE C_Order_ID=?";
+
+	            DB.executeUpdateEx(deleteLines, new Object[]{createdOrderId}, null);
+	            DB.executeUpdateEx(deleteOrder, new Object[]{createdOrderId}, null);
+	        }
+
 			// rollback the work from the test
 			rollback();
 			DB.executeUpdateEx("UPDATE AD_Field SET IsDisplayed=?, IsDisplayedGrid=? WHERE AD_Field_ID=?", new Object[] {displayOri, displayGridOri, FIELD_ORDERLINE_SHIPPER}, null);

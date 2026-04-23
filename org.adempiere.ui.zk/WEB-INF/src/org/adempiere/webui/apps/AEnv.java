@@ -429,7 +429,7 @@ public final class AEnv
             return;
 		// still null means the field is empty or not selected item
 		if (value == null)
-			value = -1;
+			value = DisplayType.isUUID(lookup.getDisplayType()) ? "" : -1;
         //
         MQuery zoomQuery = new MQuery();   //  ColumnName might be changed in MTab.validateQuery
 		String column = lookup.getColumnName();
@@ -526,7 +526,7 @@ public final class AEnv
 			}
 		}
 		else
-			log.warning("No Table found for " + data.getQuery().getWhereClause(true));
+			log.warning("No Table found for " + data.getQuery().getSQLFilter(true));
     }
     
     /**
