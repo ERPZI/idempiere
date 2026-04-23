@@ -311,6 +311,7 @@ public class ImportOrder extends SvrProcess
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set UOM=" + no);		
 		//		
+		
 		// MPo, 7/6/23 WarehouseValue => M_Warehouse_ID
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET M_Warehouse_ID=(SELECT M_Warehouse_ID FROM M_Warehouse w")
@@ -392,7 +393,7 @@ public class ImportOrder extends SvrProcess
 			  .append(" AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Set Default BP=" + no);
-		
+
 		//	Set Country
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET C_Country_ID=(SELECT C_Country_ID FROM C_Country c")
@@ -438,7 +439,6 @@ public class ImportOrder extends SvrProcess
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
 			log.warning ("Invalid Region=" + no);
-
 		//	Existing Location ? Exact Match
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET (BillTo_ID,C_BPartner_Location_ID)=(SELECT C_BPartner_Location_ID,C_BPartner_Location_ID")
@@ -587,8 +587,8 @@ public class ImportOrder extends SvrProcess
 			.append(" AND I_IsImported<>'Y'").append (clientCheck);
 		no = DB.executeUpdate(sql.toString(), get_TrxName());
 		if (no != 0)
-			log.warning ("No Invoice Rule=" + no);				
-
+			log.warning ("No Invoice Rule=" + no);
+		
 		//	Product
 		sql = new StringBuilder ("UPDATE I_Order o ")
 			  .append("SET M_Product_ID=(SELECT MAX(M_Product_ID) FROM M_Product p")
@@ -703,7 +703,7 @@ public class ImportOrder extends SvrProcess
 						continue;
 				}
 				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
-				
+								
 				//	BP Location
 				MBPartnerLocation bpl = null; 
 				MBPartnerLocation[] bpls = bp.getLocations(true);
@@ -864,7 +864,7 @@ public class ImportOrder extends SvrProcess
 					if (imp.getDeliveryRule() != null ) {
 						order.setDeliveryRule(imp.getDeliveryRule());
 					}
-										
+  		
 					if (imp.getDocumentNo() != null)
 						order.setDocumentNo(imp.getDocumentNo());
 					//	Ship Partner

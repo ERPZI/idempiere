@@ -118,6 +118,21 @@ public interface I_ZI_Woo_Product
 	/** Get locator	  */
 	public String getlocator();
 
+    /** Column name M_Locator_ID */
+    public static final String COLUMNNAME_M_Locator_ID = "M_Locator_ID";
+
+	/** Set Locator.
+	  * Warehouse Locator
+	  */
+	public void setM_Locator_ID (int M_Locator_ID);
+
+	/** Get Locator.
+	  * Warehouse Locator
+	  */
+	public int getM_Locator_ID();
+
+	public I_M_Locator getM_Locator() throws RuntimeException;
+
     /** Column name M_Product_ID */
     public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
 
@@ -317,6 +332,15 @@ public interface I_ZI_Woo_Product
 
 	/** Get woo_sale_price	  */
 	public BigDecimal getwoo_sale_price();
+
+    /** Column name woo_sku */
+    public static final String COLUMNNAME_woo_sku = "woo_sku";
+
+	/** Set woo_sku	  */
+	public void setwoo_sku (String woo_sku);
+
+	/** Get woo_sku	  */
+	public String getwoo_sku();
 
     /** Column name woo_stock_management */
     public static final String COLUMNNAME_woo_stock_management = "woo_stock_management";
