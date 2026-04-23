@@ -33,7 +33,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260205L;
 
     /** Standard Constructor */
     public X_I_Order (Properties ctx, int I_Order_ID, String trxName)
@@ -189,6 +189,36 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_Address2);
 	}
 
+	/** Set BP Name.
+		@param BPName BP Name
+	*/
+	public void setBPName (String BPName)
+	{
+		set_Value (COLUMNNAME_BPName, BPName);
+	}
+
+	/** Get BP Name.
+		@return BP Name	  */
+	public String getBPName()
+	{
+		return (String)get_Value(COLUMNNAME_BPName);
+	}
+
+	/** Set BP Name2.
+		@param BPName2 BP Name2
+	*/
+	public void setBPName2 (String BPName2)
+	{
+		set_Value (COLUMNNAME_BPName2, BPName2);
+	}
+
+	/** Get BP Name2.
+		@return BP Name2	  */
+	public String getBPName2()
+	{
+		return (String)get_Value(COLUMNNAME_BPName2);
+	}
+
 	/** Set Business Partner Key.
 		@param BPartnerValue Key of the Business Partner
 	*/
@@ -231,36 +261,6 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
-	}
-
-	/** Set BP Name.
-		@param BPName BP Name
-	*/
-	public void setBPName (String BPName)
-	{
-		set_Value (COLUMNNAME_BPName, BPName);
-	}
-
-	/** Get BP Name.
-		@return BP Name	  */
-	public String getBPName()
-	{
-		return (String)get_Value(COLUMNNAME_BPName);
-	}
-
-	/** Set BP Name2.
-		@param BPName2 BP Name2
-	*/
-	public void setBPName2 (String BPName2)
-	{
-		set_Value (COLUMNNAME_BPName2, BPName2);
-	}
-
-	/** Get BP Name2.
-		@return BP Name2	  */
-	public String getBPName2()
-	{
-		return (String)get_Value(COLUMNNAME_BPName2);
 	}
 
 	/** Set Branch Key.
@@ -818,7 +818,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Set ISO Country Code.
-		@param CountryCode Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+		@param CountryCode Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	*/
 	public void setCountryCode (String CountryCode)
 	{
@@ -826,7 +826,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Get ISO Country Code.
-		@return Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+		@return Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	  */
 	public String getCountryCode()
 	{
@@ -944,22 +944,6 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_DocumentNo);
 	}
 
-	/** Set Element Value Key.
-		@param ElementValueValue Key of the Element Value
-	*/
-	public void setElementValueValue (String ElementValueValue)
-	{
-		set_Value (COLUMNNAME_ElementValueValue, ElementValueValue);
-	}
-
-	/** Get Element Value Key.
-		@return Key of the Element Value
-	  */
-	public String getElementValueValue()
-	{
-		return (String)get_Value(COLUMNNAME_ElementValueValue);
-	}
-
 	/** Set EMail Address.
 		@param EMail Electronic Mail Address
 	*/
@@ -974,6 +958,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	public String getEMail()
 	{
 		return (String)get_Value(COLUMNNAME_EMail);
+	}
+
+	/** Set Element Value Key.
+		@param ElementValueValue Key of the Element Value
+	*/
+	public void setElementValueValue (String ElementValueValue)
+	{
+		set_Value (COLUMNNAME_ElementValueValue, ElementValueValue);
+	}
+
+	/** Get Element Value Key.
+		@return Key of the Element Value
+	  */
+	public String getElementValueValue()
+	{
+		return (String)get_Value(COLUMNNAME_ElementValueValue);
 	}
 
 	/** Set Freight Amount.
@@ -993,6 +993,22 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;
+	}
+
+	/** Set ISO Currency Code.
+		@param ISO_Code Three letter ISO 4217 Code of the Currency
+	*/
+	public void setISO_Code (String ISO_Code)
+	{
+		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
+	}
+
+	/** Get ISO Currency Code.
+		@return Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code()
+	{
+		return (String)get_Value(COLUMNNAME_ISO_Code);
 	}
 
 	/** Set Import Error Message.
@@ -1071,20 +1087,46 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_I_Order_UU);
 	}
 
-	/** Set ISO Currency Code.
-		@param ISO_Code Three letter ISO 4217 Code of the Currency
+	/** Set InvoiceLocationName.
+		@param InvoiceLocationName InvoiceLocationName
 	*/
-	public void setISO_Code (String ISO_Code)
+	public void setInvoiceLocationName (String InvoiceLocationName)
 	{
-		set_Value (COLUMNNAME_ISO_Code, ISO_Code);
+		set_Value (COLUMNNAME_InvoiceLocationName, InvoiceLocationName);
 	}
 
-	/** Get ISO Currency Code.
-		@return Three letter ISO 4217 Code of the Currency
-	  */
-	public String getISO_Code()
+	/** Get InvoiceLocationName.
+		@return InvoiceLocationName	  */
+	public String getInvoiceLocationName()
 	{
-		return (String)get_Value(COLUMNNAME_ISO_Code);
+		return (String)get_Value(COLUMNNAME_InvoiceLocationName);
+	}
+
+	/** InvoiceRule AD_Reference_ID=150 */
+	public static final int INVOICERULE_AD_Reference_ID=150;
+	/** After Delivery = D */
+	public static final String INVOICERULE_AfterDelivery = "D";
+	/** Immediate = I */
+	public static final String INVOICERULE_Immediate = "I";
+	/** After Order delivered = O */
+	public static final String INVOICERULE_AfterOrderDelivered = "O";
+	/** Customer Schedule after Delivery = S */
+	public static final String INVOICERULE_CustomerScheduleAfterDelivery = "S";
+	/** Set Invoice Rule.
+		@param InvoiceRule Frequency and method of invoicing 
+	*/
+	public void setInvoiceRule (String InvoiceRule)
+	{
+
+		set_Value (COLUMNNAME_InvoiceRule, InvoiceRule);
+	}
+
+	/** Get Invoice Rule.
+		@return Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule()
+	{
+		return (String)get_Value(COLUMNNAME_InvoiceRule);
 	}
 
 	/** Set Sales Transaction.
@@ -1268,6 +1310,64 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	public String getOrgValue()
 	{
 		return (String)get_Value(COLUMNNAME_OrgValue);
+	}
+
+	/** Set PartnerLocationName.
+		@param PartnerLocationName PartnerLocationName
+	*/
+	public void setPartnerLocationName (String PartnerLocationName)
+	{
+		set_Value (COLUMNNAME_PartnerLocationName, PartnerLocationName);
+	}
+
+	/** Get PartnerLocationName.
+		@return PartnerLocationName	  */
+	public String getPartnerLocationName()
+	{
+		return (String)get_Value(COLUMNNAME_PartnerLocationName);
+	}
+
+	/** PaymentRule AD_Reference_ID=195 */
+	public static final int PAYMENTRULE_AD_Reference_ID=195;
+	/** Cash = B */
+	public static final String PAYMENTRULE_Cash = "B";
+	/** Direct Debit = D */
+	public static final String PAYMENTRULE_DirectDebit = "D";
+	/** Credit Card = K */
+	public static final String PAYMENTRULE_CreditCard = "K";
+	/** Mixed POS Payment = M */
+	public static final String PAYMENTRULE_MixedPOSPayment = "M";
+	/** On Credit = P */
+	public static final String PAYMENTRULE_OnCredit = "P";
+	/** [ID] Direct Deposit HSBC Priority Payment = R */
+	public static final String PAYMENTRULE_IDDirectDepositHSBCPriorityPayment = "R";
+	/** Check = S */
+	public static final String PAYMENTRULE_Check = "S";
+	/** Direct Deposit AR and AP HSBC ACH = T */
+	public static final String PAYMENTRULE_DirectDepositARAndAPHSBCACH = "T";
+	/** [TH] Direct Deposit HSBC PromptPay = W */
+	public static final String PAYMENTRULE_THDirectDepositHSBCPromptPay = "W";
+	/** [TH] Direct Deposit BBL SMART = X */
+	public static final String PAYMENTRULE_THDirectDepositBBLSMART = "X";
+	/** [TH] Direct Deposit BBL Direct Credit = Y */
+	public static final String PAYMENTRULE_THDirectDepositBBLDirectCredit = "Y";
+	/** [TH] Check HSBC COS = Z */
+	public static final String PAYMENTRULE_THCheckHSBCCOS = "Z";
+	/** Set Payment Rule.
+		@param PaymentRule How you pay the invoice
+	*/
+	public void setPaymentRule (String PaymentRule)
+	{
+
+		set_Value (COLUMNNAME_PaymentRule, PaymentRule);
+	}
+
+	/** Get Payment Rule.
+		@return How you pay the invoice
+	  */
+	public String getPaymentRule()
+	{
+		return (String)get_Value(COLUMNNAME_PaymentRule);
 	}
 
 	/** Set Payment Term Key.
@@ -1472,7 +1572,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Set Sales Rep Name.
-		@param RepName Name of the Sales Representative
+		@param RepName Sales Rep Name
 	*/
 	public void setRepName (String RepName)
 	{
@@ -1480,12 +1580,12 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Get Sales Rep Name.
-		@return Name of the Sales Representative
-	  */
+		@return Sales Rep Name	  */
 	public String getRepName()
 	{
 		return (String)get_Value(COLUMNNAME_RepName);
-	}	
+	}
+
 	/** Set SKU.
 		@param SKU Stock Keeping Unit
 	*/
@@ -1530,17 +1630,16 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set ShipperName.
-		@param ShipperName Name of the Shipper
+	/** Set Shipper Name.
+		@param ShipperName Shipper Name
 	*/
 	public void setShipperName (String ShipperName)
 	{
 		set_Value (COLUMNNAME_ShipperName, ShipperName);
 	}
 
-	/** Get ShipperName.
-		@return Name of the Shipper
-	  */
+	/** Get Shipper Name.
+		@return Shipper Name	  */
 	public String getShipperName()
 	{
 		return (String)get_Value(COLUMNNAME_ShipperName);

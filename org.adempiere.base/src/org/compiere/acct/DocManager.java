@@ -324,7 +324,6 @@ public class DocManager {
 			StringBuilder msgreturn = new StringBuilder("Table not a financial document. AD_Table_ID=").append(AD_Table_ID);
 			return msgreturn.toString();
 		}
-		System.out.println("postDocument="+tableName+","+Record_ID+","+isInBackDatePostingProcess);
 
 		StringBuilder sql = new StringBuilder("SELECT * FROM ")
 		.append(tableName)
@@ -664,7 +663,9 @@ public class DocManager {
 		for (int x = bdcds.size() - 1; x >= 0; x--) {
 			MCostDetail bdcd = bdcds.get(x);
 			MAcctSchema as = new MAcctSchema(Env.getCtx(), bdcd.getC_AcctSchema_ID(), trxName);
-			Timestamp allowedBackDate = TimeUtil.addDays(today, - bdcd.getC_AcctSchema().getBackDateDay());
+			Timestamp allowedBackDate = TimeUtil.addDays(today, - as.getBackDateDay());
+			// Do not skip when MAcctSchema.getBackDateDay() == 0, as some documents with the current account date 
+			// still require reposting (e.g. MR reversal and related MatchPOs)
 			if (bdcd.getDateAcct().before(allowedBackDate))
 				bdcds.remove(x);
 		}
@@ -757,6 +758,9 @@ public class DocManager {
 		
 		// re-post all the documents after the back-date transaction
 		List<String> repostedRecordIds = new ArrayList<String>();
+		// NOTE: Do not skip repost the back-date transaction
+		// All the cost detail records after the back-date transaction were set to unprocessed
+    	// If skip repost the back-date transaction, some records might remains unprocessed
 		
 		StringBuilder selectSql = new StringBuilder();
 		selectSql.append("SELECT mpo.M_MatchPO_ID, il.C_Invoice_ID, iol.M_InOut_ID, mi.M_MatchInv_ID, invl.M_Inventory_ID, ");
@@ -834,8 +838,8 @@ public class DocManager {
 
 				if (tableID == MMatchInv.Table_ID) {
 					MMatchInv mi = new MMatchInv(Env.getCtx(), recordID, trxName);
-					MInvoiceLine il = new MInvoiceLine(Env.getCtx(), mi.getC_InvoiceLine_ID(), trxName);
-					if (repostedRecordId.contains(MInvoice.Table_ID + "_" + mi.getC_InvoiceLine().getC_Invoice_ID()))
+					MInvoiceLine il = new MInvoiceLine(Env.getCtx(), mi.getC_InvoiceLine_ID(), trxName);	
+					if (repostedRecordIds.contains(MInvoice.Table_ID + "_" + il.getC_Invoice_ID()))
 						continue;
 				}
 				
@@ -852,8 +856,10 @@ public class DocManager {
 					MMatchInv[] miList = MMatchInv.getInvoiceByDateAcct(Env.getCtx(), recordID, cd.getDateAcct(), trxName);
 					for (MMatchInv mi : miList) {
 						if (AD_Table_ID == MMatchInv.Table_ID) {
-							if (mi.get_ID() != Record_ID && mi.getReversal_ID() != Record_ID)
-								continue;
+							if (mi.get_ID() != Record_ID && mi.getReversal_ID() != Record_ID) {
+								if (mi.getDateAcct().compareTo(cd.getDateAcct()) == 0 && mi.get_ID() < Record_ID) // skip if before the back-date transaction
+									continue;
+							}
 						} else if (AD_Table_ID == MMatchPO.Table_ID) {
 							if (mpo != null && mi.getM_Product_ID() != mpo.getM_Product_ID())
 								continue;

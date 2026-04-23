@@ -116,6 +116,24 @@ public interface I_I_Order
 	  */
 	public String getAddress2();
 
+    /** Column name BPName */
+    public static final String COLUMNNAME_BPName = "BPName";
+
+	/** Set BP Name	  */
+	public void setBPName (String BPName);
+
+	/** Get BP Name	  */
+	public String getBPName();
+
+    /** Column name BPName2 */
+    public static final String COLUMNNAME_BPName2 = "BPName2";
+
+	/** Set BP Name2	  */
+	public void setBPName2 (String BPName2);
+
+	/** Get BP Name2	  */
+	public String getBPName2();
+
     /** Column name BPartnerValue */
     public static final String COLUMNNAME_BPartnerValue = "BPartnerValue";
 
@@ -143,24 +161,6 @@ public interface I_I_Order
 	public int getBillTo_ID();
 
 	public org.compiere.model.I_C_BPartner_Location getBillTo() throws RuntimeException;
-
-    /** Column name BPName */
-    public static final String COLUMNNAME_BPName = "BPName";
-
-	/** Set BP Name	  */
-	public void setBPName (String BPName);
-
-	/** Get BP Name	  */
-	public String getBPName();
-
-    /** Column name BPName2 */
-    public static final String COLUMNNAME_BPName2 = "BPName2";
-
-	/** Set BP Name2	  */
-	public void setBPName2 (String BPName2);
-
-	/** Get BP Name2	  */
-	public String getBPName2();
 
     /** Column name BranchValue */
     public static final String COLUMNNAME_BranchValue = "BranchValue";
@@ -478,12 +478,12 @@ public interface I_I_Order
     public static final String COLUMNNAME_CountryCode = "CountryCode";
 
 	/** Set ISO Country Code.
-	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	  */
 	public void setCountryCode (String CountryCode);
 
 	/** Get ISO Country Code.
-	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1 - http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html
+	  * Upper-case two-letter alphanumeric ISO Country code according to ISO 3166-1
 	  */
 	public String getCountryCode();
 
@@ -581,19 +581,6 @@ public interface I_I_Order
 	  */
 	public String getDocumentNo();
 
-    /** Column name ElementValueValue */
-    public static final String COLUMNNAME_ElementValueValue = "ElementValueValue";
-
-	/** Set Element Value Key.
-	  * Key of the Element Value
-	  */
-	public void setElementValueValue (String ElementValueValue);
-
-	/** Get Element Value Key.
-	  * Key of the Element Value
-	  */
-	public String getElementValueValue();
-
     /** Column name EMail */
     public static final String COLUMNNAME_EMail = "EMail";
 
@@ -607,6 +594,19 @@ public interface I_I_Order
 	  */
 	public String getEMail();
 
+    /** Column name ElementValueValue */
+    public static final String COLUMNNAME_ElementValueValue = "ElementValueValue";
+
+	/** Set Element Value Key.
+	  * Key of the Element Value
+	  */
+	public void setElementValueValue (String ElementValueValue);
+
+	/** Get Element Value Key.
+	  * Key of the Element Value
+	  */
+	public String getElementValueValue();
+
     /** Column name FreightAmt */
     public static final String COLUMNNAME_FreightAmt = "FreightAmt";
 
@@ -619,6 +619,19 @@ public interface I_I_Order
 	  * Freight Amount 
 	  */
 	public BigDecimal getFreightAmt();
+
+    /** Column name ISO_Code */
+    public static final String COLUMNNAME_ISO_Code = "ISO_Code";
+
+	/** Set ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public void setISO_Code (String ISO_Code);
+
+	/** Get ISO Currency Code.
+	  * Three letter ISO 4217 Code of the Currency
+	  */
+	public String getISO_Code();
 
     /** Column name I_ErrorMsg */
     public static final String COLUMNNAME_I_ErrorMsg = "I_ErrorMsg";
@@ -668,6 +681,28 @@ public interface I_I_Order
 	/** Get I_Order_UU	  */
 	public String getI_Order_UU();
 
+    /** Column name InvoiceLocationName */
+    public static final String COLUMNNAME_InvoiceLocationName = "InvoiceLocationName";
+
+	/** Set InvoiceLocationName	  */
+	public void setInvoiceLocationName (String InvoiceLocationName);
+
+	/** Get InvoiceLocationName	  */
+	public String getInvoiceLocationName();
+
+    /** Column name InvoiceRule */
+    public static final String COLUMNNAME_InvoiceRule = "InvoiceRule";
+
+	/** Set Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public void setInvoiceRule (String InvoiceRule);
+
+	/** Get Invoice Rule.
+	  * Frequency and method of invoicing 
+	  */
+	public String getInvoiceRule();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -680,19 +715,6 @@ public interface I_I_Order
 	  * The record is active in the system
 	  */
 	public boolean isActive();
-
-    /** Column name ISO_Code */
-    public static final String COLUMNNAME_ISO_Code = "ISO_Code";
-
-	/** Set ISO Currency Code.
-	  * Three letter ISO 4217 Code of the Currency
-	  */
-	public void setISO_Code (String ISO_Code);
-
-	/** Get ISO Currency Code.
-	  * Three letter ISO 4217 Code of the Currency
-	  */
-	public String getISO_Code();
 
     /** Column name IsSOTrx */
     public static final String COLUMNNAME_IsSOTrx = "IsSOTrx";
@@ -805,6 +827,28 @@ public interface I_I_Order
 	  * Key of the Organization
 	  */
 	public String getOrgValue();
+
+    /** Column name PartnerLocationName */
+    public static final String COLUMNNAME_PartnerLocationName = "PartnerLocationName";
+
+	/** Set PartnerLocationName	  */
+	public void setPartnerLocationName (String PartnerLocationName);
+
+	/** Get PartnerLocationName	  */
+	public String getPartnerLocationName();
+
+    /** Column name PaymentRule */
+    public static final String COLUMNNAME_PaymentRule = "PaymentRule";
+
+	/** Set Payment Rule.
+	  * How you pay the invoice
+	  */
+	public void setPaymentRule (String PaymentRule);
+
+	/** Get Payment Rule.
+	  * How you pay the invoice
+	  */
+	public String getPaymentRule();
 
     /** Column name PaymentTermValue */
     public static final String COLUMNNAME_PaymentTermValue = "PaymentTermValue";
@@ -948,16 +992,25 @@ public interface I_I_Order
     /** Column name RepName */
     public static final String COLUMNNAME_RepName = "RepName";
 
-	/** Set Sales Rep Name.
-	  * Name of the Sales Representative
-	  */
+	/** Set Sales Rep Name	  */
 	public void setRepName (String RepName);
 
-	/** Get Sales Rep Name.
-	  * Name of the Sales Representative
-	  */
+	/** Get Sales Rep Name	  */
 	public String getRepName();
- 
+
+    /** Column name SKU */
+    public static final String COLUMNNAME_SKU = "SKU";
+
+	/** Set SKU.
+	  * Stock Keeping Unit
+	  */
+	public void setSKU (String SKU);
+
+	/** Get SKU.
+	  * Stock Keeping Unit
+	  */
+	public String getSKU();
+
     /** Column name SalesRep_ID */
     public static final String COLUMNNAME_SalesRep_ID = "SalesRep_ID";
 
@@ -976,28 +1029,11 @@ public interface I_I_Order
     /** Column name ShipperName */
     public static final String COLUMNNAME_ShipperName = "ShipperName";
 
-	/** Set ShipperName.
-	  * Name of the Shipper
-	  */
+	/** Set Shipper Name	  */
 	public void setShipperName (String ShipperName);
 
-	/** Get ShipperName.
-	  * Name of the Shipper
-	  */
+	/** Get Shipper Name	  */
 	public String getShipperName();
-
-    /** Column name SKU */
-    public static final String COLUMNNAME_SKU = "SKU";
-
-	/** Set SKU.
-	  * Stock Keeping Unit
-	  */
-	public void setSKU (String SKU);
-
-	/** Get SKU.
-	  * Stock Keeping Unit
-	  */
-	public String getSKU();
 
     /** Column name TaxAmt */
     public static final String COLUMNNAME_TaxAmt = "TaxAmt";
