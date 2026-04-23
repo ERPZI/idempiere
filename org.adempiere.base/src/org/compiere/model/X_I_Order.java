@@ -33,7 +33,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241204L;
+	private static final long serialVersionUID = 20221224L;
 
     /** Standard Constructor */
     public X_I_Order (Properties ctx, int I_Order_ID, String trxName)
@@ -1012,21 +1012,6 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return false;
 	}
 
-	/** Set Invoice Location Name.
-		@param InvoiceLocationName Invoice Location Name
-	*/
-	public void setInvoiceLocationName (String InvoiceLocationName)
-	{
-		set_Value (COLUMNNAME_InvoiceLocationName, InvoiceLocationName);
-	}
-
-	/** Get Invoice Location Name.
-		@return Invoice Location Name	  */
-	public String getInvoiceLocationName()
-	{
-		return (String)get_Value(COLUMNNAME_InvoiceLocationName);
-	}
-
 	/** Set Import Order.
 		@param I_Order_ID Import Orders
 	*/
@@ -1263,21 +1248,6 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return (String)get_Value(COLUMNNAME_OrgValue);
 	}
 
-	/** Set Partner Location Name.
-		@param PartnerLocationName Partner Location Name
-	*/
-	public void setPartnerLocationName (String PartnerLocationName)
-	{
-		set_Value (COLUMNNAME_PartnerLocationName, PartnerLocationName);
-	}
-
-	/** Get Partner Location Name.
-		@return Partner Location Name	  */
-	public String getPartnerLocationName()
-	{
-		return (String)get_Value(COLUMNNAME_PartnerLocationName);
-	}
-
 	/** Set Payment Term Key.
 		@param PaymentTermValue Key of the Payment Term
 	*/
@@ -1480,7 +1450,7 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Set Sales Rep Name.
-		@param RepName Sales Rep Name
+		@param RepName Name of the Sales Representative
 	*/
 	public void setRepName (String RepName)
 	{
@@ -1488,7 +1458,8 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 	}
 
 	/** Get Sales Rep Name.
-		@return Sales Rep Name	  */
+		@return Name of the Sales Representative
+	  */
 	public String getRepName()
 	{
 		return (String)get_Value(COLUMNNAME_RepName);
@@ -1522,16 +1493,17 @@ public class X_I_Order extends PO implements I_I_Order, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set Shipper Name.
-		@param ShipperName Shipper Name
+	/** Set ShipperName.
+		@param ShipperName Name of the Shipper
 	*/
 	public void setShipperName (String ShipperName)
 	{
 		set_Value (COLUMNNAME_ShipperName, ShipperName);
 	}
 
-	/** Get Shipper Name.
-		@return Shipper Name	  */
+	/** Get ShipperName.
+		@return Name of the Shipper
+	  */
 	public String getShipperName()
 	{
 		return (String)get_Value(COLUMNNAME_ShipperName);
