@@ -790,6 +790,14 @@ public class DocManager {
 		selectSql.append("CASE WHEN COALESCE(refcd.DateAcct,cd.DateAcct) = cd.DateAcct THEN COALESCE(cd.Ref_CostDetail_ID,cd.M_CostDetail_ID) ELSE cd.M_CostDetail_ID END, ");
 		selectSql.append("cd.M_CostDetail_ID ");
 		
+		int backDateMatchInvInvoiceId = 0;
+		if (AD_Table_ID == MMatchInv.Table_ID) {
+				MMatchInv backDateMatchInv = new MMatchInv(Env.getCtx(), Record_ID, trxName);
+				MInvoiceLine backDateInvoiceLine = new MInvoiceLine(Env.getCtx(), backDateMatchInv.getC_InvoiceLine_ID(), trxName);
+				backDateMatchInvInvoiceId = backDateInvoiceLine.getC_Invoice_ID();
+		}
+		
+		
 		PreparedStatement pstmt = null;
     	ResultSet rs = null;
     	try
@@ -854,12 +862,14 @@ public class DocManager {
 					if (AD_Table_ID == MMatchPO.Table_ID)
 						mpo = new MMatchPO(Env.getCtx(), Record_ID, trxName);
 					MMatchInv[] miList = MMatchInv.getInvoiceByDateAcct(Env.getCtx(), recordID, cd.getDateAcct(), trxName);
+					boolean isBeforeBackDateMatchInv = recordID == backDateMatchInvInvoiceId;					
 					for (MMatchInv mi : miList) {
 						if (AD_Table_ID == MMatchInv.Table_ID) {
 							if (mi.get_ID() != Record_ID && mi.getReversal_ID() != Record_ID) {
-								if (mi.getDateAcct().compareTo(cd.getDateAcct()) == 0 && mi.get_ID() < Record_ID) // skip if before the back-date transaction
+								if (mi.getDateAcct().compareTo(cd.getDateAcct()) == 0 && isBeforeBackDateMatchInv) // skip if before the back-date transaction
 									continue;
 							}
+							isBeforeBackDateMatchInv = false;
 						} else if (AD_Table_ID == MMatchPO.Table_ID) {
 							if (mpo != null && mi.getM_Product_ID() != mpo.getM_Product_ID())
 								continue;
