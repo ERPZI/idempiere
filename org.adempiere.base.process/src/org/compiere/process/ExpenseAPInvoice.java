@@ -169,10 +169,12 @@ public class ExpenseAPInvoice extends SvrProcess
 						invoice = null;
 						break;
 					}
-					// ZI,MPo, 13/5/2016 
+					//MPo, 13/5/2016 
 					invoice.setUser1_ID(te.getUser1_ID()); // UEL1 Profit Center
-  					// 
-					//ZI,MPo, 28/7/2016 copy payment rule from expense report to expense invoice
+  					//MPo, 18/6/2026
+					if (te.getC_Project_ID() != 0)
+						invoice.setC_Project_ID(te.getC_Project_ID()); 
+					//MPo, 28/7/2016
 					invoice.setPaymentRule(te.getPaymentRule()); // 
 					//
 					invoice.setM_PriceList_ID(te.getM_PriceList_ID());
