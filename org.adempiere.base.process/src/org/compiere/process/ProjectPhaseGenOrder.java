@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.model.MProcessPara;
+import org.compiere.model.MProduct;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
 import org.compiere.model.MProjectPhase;
@@ -68,8 +69,18 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 			throw new IllegalArgumentException("C_ProjectPhase_ID == 0");
 		MProjectPhase fromPhase = new MProjectPhase (getCtx(), m_C_ProjectPhase_ID, get_TrxName());
 		MProject fromProject = ProjectGenOrder.getProject (getCtx(), fromPhase.getC_Project_ID(), get_TrxName());
-		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		//MPo, 8/6/2026 Warehouse order allows separate billing to change document type, roll-up 
+		//MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_Warehouse);
+		//
 		order.setDescription(order.getDescription() + " - " + fromPhase.getName());
+		//MPo, 7/5/2026 PrCtr mandatory in sales order
+		if (fromProject.getUser1_ID() != 0)
+			order.setUser1_ID(fromProject.getUser1_ID()); 
+		if (fromProject.getZI_Branch_ID() != 0)
+			order.setZI_Branch_ID(fromProject.getZI_Branch_ID());
+		//
+		
 		if (!order.save())
 			throw new Exception("Could not create Order");
 
@@ -89,8 +100,17 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 			if (fromPhase.getPriceActual() != null && fromPhase.getPriceActual().compareTo(Env.ZERO) != 0)
 				ol.setPrice(fromPhase.getPriceActual());
 			ol.setTax();
+			//MPo, 6/5/2026 PrCtr mandatory in sales order line
+			if (fromPhase.getC_Project().getUser1_ID() != 0) 
+				ol.setUser1_ID(fromPhase.getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
+			//
 			if (!ol.save())
 				log.log(Level.SEVERE, "doIt - Lines not generated");
+			else {
+				//MPo, 14/5/2026 Update Phase
+				fromPhase.setC_Order_ID(order.getC_Order_ID());
+				fromPhase.saveEx();
+			}	
 			StringBuilder msgreturn = new StringBuilder("@C_Order_ID@ ").append(order.getDocumentNo()).append(" (1)");
 			return msgreturn.toString();
 		}
@@ -100,6 +120,12 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 		MProjectLine[] lines = fromPhase.getLines();
 		for (int i = 0; i < lines.length; i++)
 		{
+			//MPo, 14/5/2026 Order already created for phase line?
+			if (lines[i].getC_Order_ID() != 0) continue;
+			//MPo, 8/6/2026 Skip product not sold
+			MProduct product  = new MProduct(getCtx(), lines[i].getM_Product_ID(), get_TrxName());
+			if (!product.isSold()) continue;
+			//	
 			MOrderLine ol = new MOrderLine(order);
 			ol.setLine(lines[i].getLine());
 			ol.setDescription(lines[i].getDescription());
@@ -111,8 +137,15 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 				ol.setPrice(lines[i].getPlannedPrice());
 			ol.setDiscount();
 			ol.setTax();
+			//MPo, 6/5/2026 Add PrCtr in Order Line
+			if (lines[i].getC_Project().getUser1_ID() != 0)
+				ol.setUser1_ID(lines[i].getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
+			//
 			if (ol.save())
 				count++;
+			//MPo, 14/5/2026 Update Phase Line
+			lines[i].setC_Order_ID(order.getC_Order_ID());
+			lines[i].saveEx();
 		}	//	for all lines
 		if (lines.length != count)
 			log.log(Level.SEVERE, "Lines difference - ProjectLines=" + lines.length + " <> Saved=" + count);

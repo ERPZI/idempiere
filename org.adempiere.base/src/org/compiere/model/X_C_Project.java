@@ -34,7 +34,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260507L;
 
     /** Standard Constructor */
     public X_C_Project (Properties ctx, int C_Project_ID, String trxName)
@@ -61,6 +61,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			setProjectBalanceAmt (Env.ZERO);
 			setProjectLineLevel (null);
 // P
+			setUser1_ID (0);
 			setValue (null);
         } */
     }
@@ -90,6 +91,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			setProjectBalanceAmt (Env.ZERO);
 			setProjectLineLevel (null);
 // P
+			setUser1_ID (0);
 			setValue (null);
         } */
     }
@@ -119,6 +121,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			setProjectBalanceAmt (Env.ZERO);
 			setProjectLineLevel (null);
 // P
+			setUser1_ID (0);
 			setValue (null);
         } */
     }
@@ -148,6 +151,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			setProjectBalanceAmt (Env.ZERO);
 			setProjectLineLevel (null);
 // P
+			setUser1_ID (0);
 			setValue (null);
         } */
     }
@@ -236,7 +240,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			.getPO(getC_Activity_ID(), get_TrxName());
 	}
 
-	/** Set Activity.
+	/** Set Functional Area.
 		@param C_Activity_ID Business Activity
 	*/
 	public void setC_Activity_ID (int C_Activity_ID)
@@ -247,7 +251,7 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 			set_Value (COLUMNNAME_C_Activity_ID, Integer.valueOf(C_Activity_ID));
 	}
 
-	/** Get Activity.
+	/** Get Functional Area.
 		@return Business Activity
 	  */
 	public int getC_Activity_ID()
@@ -1072,6 +1076,34 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
 		return ii.intValue();
 	}
 
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
+
+	/** Set Profit Center.
+		@param User1_ID User defined list element #1
+	*/
+	public void setUser1_ID (int User1_ID)
+	{
+		if (User1_ID < 1)
+			set_Value (COLUMNNAME_User1_ID, null);
+		else
+			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
+	}
+
+	/** Get Profit Center.
+		@return User defined list element #1
+	  */
+	public int getUser1_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Search Key.
 		@param Value Search key for the record in the format required - must be unique
 	*/
@@ -1095,4 +1127,31 @@ public class X_C_Project extends PO implements I_C_Project, I_Persistent
     {
         return new KeyNamePair(get_ID(), getValue());
     }
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException
+	{
+		return (I_ZI_Branch)MTable.get(getCtx(), I_ZI_Branch.Table_ID)
+			.getPO(getZI_Branch_ID(), get_TrxName());
+	}
+
+	/** Set Branch.
+		@param ZI_Branch_ID Branch
+	*/
+	public void setZI_Branch_ID (int ZI_Branch_ID)
+	{
+		if (ZI_Branch_ID < 1)
+			set_Value (COLUMNNAME_ZI_Branch_ID, null);
+		else
+			set_Value (COLUMNNAME_ZI_Branch_ID, Integer.valueOf(ZI_Branch_ID));
+	}
+
+	/** Get Branch.
+		@return Branch	  */
+	public int getZI_Branch_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ZI_Branch_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 }

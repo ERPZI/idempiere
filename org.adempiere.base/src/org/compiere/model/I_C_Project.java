@@ -93,12 +93,12 @@ public interface I_C_Project
     /** Column name C_Activity_ID */
     public static final String COLUMNNAME_C_Activity_ID = "C_Activity_ID";
 
-	/** Set Activity.
+	/** Set Functional Area.
 	  * Business Activity
 	  */
 	public void setC_Activity_ID (int C_Activity_ID);
 
-	/** Get Activity.
+	/** Get Functional Area.
 	  * Business Activity
 	  */
 	public int getC_Activity_ID();
@@ -645,6 +645,21 @@ s planned margin amount
 	  */
 	public int getUpdatedBy();
 
+    /** Column name User1_ID */
+    public static final String COLUMNNAME_User1_ID = "User1_ID";
+
+	/** Set Profit Center.
+	  * User defined list element #1
+	  */
+	public void setUser1_ID (int User1_ID);
+
+	/** Get Profit Center.
+	  * User defined list element #1
+	  */
+	public int getUser1_ID();
+
+	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException;
+
     /** Column name Value */
     public static final String COLUMNNAME_Value = "Value";
 
@@ -657,4 +672,15 @@ s planned margin amount
 	  * Search key for the record in the format required - must be unique
 	  */
 	public String getValue();
+
+    /** Column name ZI_Branch_ID */
+    public static final String COLUMNNAME_ZI_Branch_ID = "ZI_Branch_ID";
+
+	/** Set Branch	  */
+	public void setZI_Branch_ID (int ZI_Branch_ID);
+
+	/** Get Branch	  */
+	public int getZI_Branch_ID();
+
+	public I_ZI_Branch getZI_Branch() throws RuntimeException;
 }

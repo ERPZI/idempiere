@@ -69,7 +69,16 @@ public class ProjectGenOrder extends SvrProcess
 
 		/** @todo duplicate invoice prevention */
 
-		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		//MPo, 8/6/2026 Warehouse order allows separate billing to change document type, roll-up 
+		//MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_OnCredit);
+		MOrder order = new MOrder (fromProject, true, MOrder.DocSubTypeSO_Warehouse);
+		//
+		//MPo, 7/5/2026 PrCtr mandatory in sales order
+		if (fromProject.getUser1_ID() != 0)
+			order.setUser1_ID(fromProject.getUser1_ID()); 
+		if (fromProject.getZI_Branch_ID() != 0)
+			order.setZI_Branch_ID(fromProject.getZI_Branch_ID());
+		//		
 		if (!order.save())
 			throw new Exception("Could not create Order");
 
@@ -99,6 +108,11 @@ public class ProjectGenOrder extends SvrProcess
 					ol.setPrice(lines[i].getPlannedPrice());
 				ol.setDiscount();
 				ol.setTax();
+				//MPo, 6/5/2026 PrCtr mandatory in sales order line
+				if (lines[i].getC_Project().getUser1_ID() != 0) {
+					ol.setUser1_ID(lines[i].getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
+				}	
+				//
 				if (ol.save())
 					count++;
 			}	//	for all lines

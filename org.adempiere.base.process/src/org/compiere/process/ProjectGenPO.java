@@ -28,6 +28,9 @@ import org.compiere.model.MProcessPara;
 import org.compiere.model.MProductPO;
 import org.compiere.model.MProject;
 import org.compiere.model.MProjectLine;
+//MPo, 2/6/26
+import org.compiere.model.MProduct;
+//
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
@@ -123,15 +126,28 @@ public class ProjectGenPO extends SvrProcess
 		}
 		if (projectLine.getC_OrderPO_ID() != 0)
 		{
-			addLog (projectLine.getLine() ,null,null, "Line was ordered previously");
+			//MPo, 8/6/26 Add Product Info
+			//addLog (projectLine.getLine() ,null,null, "Line was ordered previously");
+			addLog (projectLine.getLine() ,null,null, "Product " + projectLine.getM_Product().getValue() + " was ordered previously");
 			return;
 		}
+		
+		// MPo, 2/6/26 Skip product not purchased
+		MProduct product  = new MProduct(getCtx(), projectLine.getM_Product_ID(), get_TrxName());
+		if (!product.isPurchased())
+		{
+			addLog (projectLine.getLine() ,null,null, "Product " + product.getValue() + " defined as not purchased");
+			return;
+		}
+		//
 
 		//	PO Record
 		MProductPO[] pos = MProductPO.getOfProduct(getCtx(), projectLine.getM_Product_ID(), get_TrxName());
 		if (pos == null || pos.length == 0)
 		{
-			addLog (projectLine.getLine() ,null,null, "Product has no PO record");
+			//MPo, 8/6/26 Add Product info
+			//addLog (projectLine.getLine() ,null,null, "Product has no PO record");
+			addLog (projectLine.getLine() ,null,null, "Product " + projectLine.getM_Product().getValue() + " has no Purchasing record");
 			return;
 		}
 
@@ -163,6 +179,9 @@ public class ProjectGenPO extends SvrProcess
 			}
 			order.setClientOrg (projectLine.getAD_Client_ID (), AD_Org_ID);
 			order.setBPartner (bp);
+			//MPo, 11/5/2026 PrCtr mandatory in purchase order
+			if (project.getUser1_ID() != 0)
+				order.setUser1_ID(project.getUser1_ID()); 
 			order.saveEx();
 			//	optionally save for consolidation
 			if (m_ConsolidateDocument)
@@ -200,6 +219,10 @@ public class ProjectGenPO extends SvrProcess
 		}
 		
 		orderLine.setTax();
+		//MPo, 11/5/2026 PrCtr mandatory in purchase order line
+		if (project.getUser1_ID() != 0)
+			orderLine.setUser1_ID(project.getUser1_ID());
+		//
 		orderLine.saveEx();
 
 		//	update ProjectLine
