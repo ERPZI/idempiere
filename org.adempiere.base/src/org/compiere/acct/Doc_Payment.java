@@ -127,6 +127,9 @@ public class Doc_Payment extends Doc
 			if (fl != null && AD_Org_ID != 0)
 				fl.setAD_Org_ID(AD_Org_ID);
 			//
+			//MPo, 24/06/2026 No project in payment document facts
+			fl.setC_Project_ID(0);
+			//
 			MAccount acct = null;
 			if (getC_Charge_ID() != 0)
 				acct = MCharge.getAccount(getC_Charge_ID(), as);
@@ -139,6 +142,9 @@ public class Doc_Payment extends Doc
 			if (fl != null && AD_Org_ID != 0
 				&& getC_Charge_ID() == 0)		//	don't overwrite charge
 				fl.setAD_Org_ID(AD_Org_ID);
+			//MPo, 24/06/2026 No project in payment document facts
+			fl.setC_Project_ID(0);
+			//
 		}
 		//  APP
 		else if (getDocumentType().equals(DOCTYPE_APPayment))
@@ -155,12 +161,17 @@ public class Doc_Payment extends Doc
 			if (fl != null && AD_Org_ID != 0
 				&& getC_Charge_ID() == 0)		//	don't overwrite charge
 				fl.setAD_Org_ID(AD_Org_ID);
-
+			//MPo, 24/06/2026 No project in payment document facts
+			fl.setC_Project_ID(0);
+			//
 			//	Asset
 			fl = fact.createLine(null, getAccount(Doc.ACCTTYPE_BankInTransit, as),
 				getC_Currency_ID(), null, getAmount());
 			if (fl != null && AD_Org_ID != 0)
 				fl.setAD_Org_ID(AD_Org_ID);
+			//MPo, 24/06/2026 No project in payment document facts
+			fl.setC_Project_ID(0);
+			//
 		}
 		else
 		{

@@ -166,7 +166,9 @@ public final class FactLine extends X_Fact_Acct
 			setAD_Client_ID(m_acct.getAD_Client_ID());
 		setAccount_ID (m_acct.getAccount_ID());
 		setC_SubAcct_ID(m_acct.getC_SubAcct_ID());
-
+		//MPo, 6/7/26
+		System.out.println("Account: " + getUser2_ID());
+		//
 		//	User Defined References
 		MAcctSchemaElement ud1 = m_acctSchema.getAcctSchemaElement(
 				X_C_AcctSchema_Element.ELEMENTTYPE_UserColumn1);
@@ -960,6 +962,10 @@ public final class FactLine extends X_Fact_Acct
 				setUser1_ID (m_acct.getUser1_ID());
 			if (getUser2_ID() == 0)
 				setUser2_ID (m_acct.getUser2_ID());
+			//MPo, 6/7/26 Project or CCtr, not both. Product>Accounting>Code combination overwrites document info 
+			if (getUser2_ID() != 0 && getC_Project_ID() != 0)
+				setC_Project_ID(0);
+			//
 			
 			//  Create Revenue Recognition for AR/AP Invoices
 			if ((m_doc.getDocumentType().equals(Doc.DOCTYPE_ARInvoice) || m_doc.getDocumentType().equals(Doc.DOCTYPE_APInvoice)) 

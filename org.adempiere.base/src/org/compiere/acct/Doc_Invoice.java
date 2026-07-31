@@ -454,7 +454,11 @@ public class Doc_Invoice extends Doc
 					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
 						getC_Currency_ID(), null, amt);
 					if (tl != null)
-						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());					
+						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					//MPo, 25/06/2026 Remove project in tax line 
+					if (tl != null)
+						tl.setC_Project_ID(0);
+					//
 				}
 			}
 			//  Revenue                 CR
@@ -537,6 +541,10 @@ public class Doc_Invoice extends Doc
 						getC_Currency_ID(), amt, null);
 					if (tl != null)
 						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+					//MPo, 25/06/2026 Remove project in tax line 
+					if (tl != null)
+						tl.setC_Project_ID(0);
+					//
 				}
 			}
 			//  Revenue         CR
@@ -621,6 +629,10 @@ public class Doc_Invoice extends Doc
 					getC_Currency_ID(), m_taxes[i].getAmount(), null);
 				if (tl != null)
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				//MPo, 25/06/2026 Remove project in tax line 
+				if (tl != null)
+					tl.setC_Project_ID(0);
+				//
 				if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
 				{
 					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
@@ -785,6 +797,10 @@ public class Doc_Invoice extends Doc
 					getC_Currency_ID(), null, m_taxes[i].getAmount());
 				if (tl != null)
 					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				//MPo, 25/06/2026 Remove project in tax line 
+				if (tl != null)
+					tl.setC_Project_ID(0);
+				//
 			}
 			//  Expense                 CR
 			for (int i = 0; i < p_lines.length; i++)
@@ -977,6 +993,10 @@ public class Doc_Invoice extends Doc
 					getC_Currency_ID(), amt2, amt);
 			if (tl != null)
 				tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+			//MPo, 25/06/2026 Remove project in tax line 
+			if (tl != null)
+				tl.setC_Project_ID(0);
+			//
 		}
 		//  Set Locations
 		FactLine[] fLines = fact.getLines();

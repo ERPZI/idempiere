@@ -194,6 +194,10 @@ public class Doc_BankStatement extends Doc
 						fl.setAD_Org_ID(AD_Org_ID);
 					if (fl != null && C_BPartner_ID != 0)
 						fl.setC_BPartner_ID(C_BPartner_ID);
+					//MPo, 8/7/26 Remove project in BankAsset
+					if (fl != null)
+						fl.setC_Project_ID(0);
+					//
 
 				}
 
@@ -207,6 +211,10 @@ public class Doc_BankStatement extends Doc
 					fl.setAD_Org_ID(AD_Org_ID);
 				if (fl != null && C_BPartner_ID != 0)
 					fl.setC_BPartner_ID(C_BPartner_ID);
+				//MPo, 8/7/26 Remove project in BankAsset
+				if (fl != null)
+					fl.setC_Project_ID(0);
+				//
 
 				// BankInTransit DR CR (Payment)
 				MBankStatementLine statementLine = (MBankStatementLine) line.getPO();
@@ -235,6 +243,10 @@ public class Doc_BankStatement extends Doc
 							else
 								fl.setAD_Org_ID(docDepositLine.getAD_Org_ID(true)); // from payment
 						}
+						//MPo, 8/7/26 Remove project in BankInTransit
+						if (fl != null)
+							fl.setC_Project_ID(0);
+						//
 					}
 				} else {
 					fl = fact.createLine(line, getAccount(Doc.ACCTTYPE_BankInTransit, as), line.getC_Currency_ID(), line.getTrxAmt().negate());
@@ -247,6 +259,10 @@ public class Doc_BankStatement extends Doc
 						else
 							fl.setAD_Org_ID(line.getAD_Org_ID(true)); // from payment
 					}
+					//MPo, 8/7/26 Remove project in BankInTransit
+					if (fl != null)
+						fl.setC_Project_ID(0);
+					//
 				}
 
 			}

@@ -84,6 +84,8 @@ public class Doc_AllocationHdr extends Doc
 	//MPo, 14/3/21 Use as overall Fact PrCtr e.g. balancing
 	private int fact_user1_id = 0;
 	//
+	//MPo, 8/7/26 Determine project
+	private int fact_c_project_id = 0;
 
 	/**
 	 *  Load Specific Document Details
@@ -234,6 +236,11 @@ public class Doc_AllocationHdr extends Doc
 				new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName()).getUser1_ID() : 
 				new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName()).getUser1_ID();
 			//
+			//MPo, 8/7/26 Determine Project
+			if (fact_c_project_id == 0)
+				fact_c_project_id = line.getC_Invoice_ID() != 0 ? 
+				new MInvoice (getCtx(), line.getC_Invoice_ID(), getTrxName()).getC_Project_ID() : 
+				new MPayment (getCtx(), line.getC_Payment_ID(), getTrxName()).getC_Project_ID();
 
 			//  CashBankTransfer - all references null and Discount/WriteOff = 0
 			if (line.getC_Payment_ID() != 0
@@ -268,15 +275,19 @@ public class Doc_AllocationHdr extends Doc
 			//	No Invoice
 			if (invoice == null)
 			{
-					//	adaxa-pb: allocate to charges
-			    	// Charge Only 
+				//	adaxa-pb: allocate to charges
+			    // Charge Only 
 				if (line.getC_Invoice_ID() == 0 && line.getC_Payment_ID() == 0 && line.getC_Charge_ID() != 0 )
 				{
 					fl = fact.createLine (line, line.getChargeAccount(as, line.getAmtSource()),
 						getC_Currency_ID(), line.getAmtSource());
 					// MPo, 22/2/23
-					fl.setUser1_ID(fact_user1_id);
-					//	
+					if (fl != null) {
+						fl.setUser1_ID(fact_user1_id);
+						//MPo, 8/7/26
+						fl.setC_Project_ID(fact_c_project_id);
+						//
+					}	
 				}
 				//	Payment Only
 				else if (line.getC_Invoice_ID() == 0 && line.getC_Payment_ID() != 0)
@@ -360,7 +371,12 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && payment != null)
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 					//MPo, 22/2/23 
-					if (fl != null) fl.setUser1_ID(fact_user1_id);
+					if (fl != null) {
+						fl.setUser1_ID(fact_user1_id);
+						//MPo, 25/06/2026 Project in Discount line 
+						fl.setC_Project_ID(payment.getC_Project_ID());
+						//
+					}
 					//
 				}
 				
@@ -372,7 +388,12 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && payment != null)
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 					//MPo, 22/2/23
-					if (fl != null) fl.setUser1_ID(fact_user1_id);
+					if (fl != null) {
+						fl.setUser1_ID(fact_user1_id);
+						//MPo, 25/06/2026 Project in WriteOff line 
+						fl.setC_Project_ID(payment.getC_Project_ID());
+						//
+					}
 					//
 				}
 				
@@ -389,13 +410,21 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && invoice != null)
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 					//MPo, 22/2/23
-					if (fl != null) fl.setUser1_ID(fact_user1_id);
+					if (fl != null) { 
+						fl.setUser1_ID(fact_user1_id);
+						//MPo, 25/06/2026 Project in AR line
+						fl.setC_Project_ID(invoice.getC_Project_ID());
+					}
 
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), null, allocationSourceForRGL);		//	payment currency
 					if (flForRGL != null)
 						allocationAccountedForRGL = flForRGL.getAcctBalance().negate();
+					//MPo, 25/06/2026 Project in RGL AR adjustment line 
+					if (flForRGL != null)
+						flForRGL.setC_Project_ID(invoice.getC_Project_ID());
+					//
 				}
 				else	//	Cash Based
 				{
@@ -446,13 +475,21 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && invoice != null)
 						fl.setAD_Org_ID(invoice.getAD_Org_ID());
 					//MPo, 22/2/23
-					if (fl != null) fl.setUser1_ID(fact_user1_id);
+					if (fl != null) { 
+						fl.setUser1_ID(fact_user1_id);
+						//MPo, 25/06/2026 Project in AP line
+						fl.setC_Project_ID(invoice.getC_Project_ID());						
+					}
 					//
 					// for Realized Gain & Loss
 					flForRGL = factForRGL.createLine (line, bpAcct,
 						getC_Currency_ID(), allocationSourceForRGL, null);		//	payment currency
 					if (flForRGL != null)
 						allocationAccountedForRGL = flForRGL.getAcctBalance();
+					//MPo, 25/06/2026 Project in RGL AP adjustment line 
+					if (flForRGL != null)
+						flForRGL.setC_Project_ID(invoice.getC_Project_ID());
+					//
 				}
 				else	//	Cash Based
 				{
@@ -469,7 +506,13 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && payment != null)
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 					//MPo, 22/2/23						
- 					if (fl != null) fl.setUser1_ID(fact_user1_id);
+ 					if (fl != null) { 
+ 						fl.setUser1_ID(fact_user1_id);
+ 						//MPo, 25/06/2026 Project in Discount line 
+						fl.setC_Project_ID(payment.getC_Project_ID());
+						System.out.println("payment c_project_id (createFacts Line 514): ");
+						//
+ 					}
 					//
 				}
 				//	Write off		CR
@@ -480,7 +523,12 @@ public class Doc_AllocationHdr extends Doc
 					if (fl != null && payment != null)
 						fl.setAD_Org_ID(payment.getAD_Org_ID());
 					//MPo, 22/2/23						
- 					if (fl != null) fl.setUser1_ID(fact_user1_id);
+ 					if (fl != null) { 
+ 						fl.setUser1_ID(fact_user1_id);
+ 						//MPo, 25/06/2026 Project in WriteOff line 
+						fl.setC_Project_ID(payment.getC_Project_ID());
+						//
+ 					}
 					//	
 				}
 				//	Payment/Cash	CR
@@ -1006,33 +1054,41 @@ public class Doc_AllocationHdr extends Doc
 			{
 				FactLine fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference);
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1060): ");
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
 					invGainLossFactLines.add(fl);
 				fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference.negate());
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL AR/AP line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1071): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID()); //no c_project_id in allocation line
 				//				
 			}
 			else
 			{
 				FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
 				//
+				//MPo, 25/06/2026 Project in RGL AR/AP line 
+				fl.setC_Project_ID(invoice.getC_Project_ID()); //no c_project_id in allocation line
+				//
 				fl = fact.createLine (line, loss, gain, as.getC_Currency_ID(), acctDifference.negate());
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1090): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
@@ -1045,15 +1101,19 @@ public class Doc_AllocationHdr extends Doc
 			{
 				FactLine fl = fact.createLine (line, acct, as.getC_Currency_ID(), acctDifference);
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL AR/AP line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1105): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 				fl = fact.createLine (line, gain, loss, as.getC_Currency_ID(), acctDifference.negate());
 				//MPo, 22/2/23
-				//fl.setDescription(description.toString());
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1115): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
@@ -1065,6 +1125,9 @@ public class Doc_AllocationHdr extends Doc
 				//MPo, 22/2/23
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1127): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 				fl.setDescription(description.toString());
 				if (!isReversedInvoice)
@@ -1073,6 +1136,9 @@ public class Doc_AllocationHdr extends Doc
 				//MPo, 22/2/23
 				fl.setDescription("InvoiceRLGainLoss / "+description.toString());
 				fl.setUser1_ID(fact_user1_id);
+				//MPo, 25/06/2026 Project in RGL AR/AP line 
+				System.out.println("Invoice c_project_id (createInvoiceGainLoss Line 1138): " + invoice.getC_Project_ID());
+				fl.setC_Project_ID(invoice.getC_Project_ID());
 				//
 			}
 		}
@@ -1177,6 +1243,9 @@ public class Doc_AllocationHdr extends Doc
 			//MPo, 2/10/23 add PrCtr and better description
 			fl.setUser1_ID(fact_user1_id);
 			fl.setDescription("PaymentRLGainLoss / "+description.toString());
+			//MPo, 8/7/26 Project in RGL line
+			System.out.println("Payment c_project_id (createPaymentGainLoss Line 1248): " + payment.getC_Project_ID());
+			fl.setC_Project_ID(payment.getC_Project_ID());
 			//
 			payGainLossFactLines.add(fl);
 						
@@ -1192,6 +1261,9 @@ public class Doc_AllocationHdr extends Doc
 			//MPo, 2/10/23 add PrCtr and better description
 			fl.setUser1_ID(fact_user1_id);
 			fl.setDescription("PaymentRLGainLoss / "+description.toString());
+			//MPo, 8/7/26 Project in RGL line
+			System.out.println("Payment c_project_id (createPaymentGainLoss Line 1265): " + payment.getC_Project_ID());
+			fl.setC_Project_ID(payment.getC_Project_ID());
 			//
 			payGainLossFactLines.add(fl);
 						
@@ -1537,6 +1609,7 @@ public class Doc_AllocationHdr extends Doc
 						//MPo, 22/2/23 Add PrCtr and better description
 						fl.setUser1_ID(fact_user1_id);
 						fl.setDescription("InvoiceRounding / "+description.toString());
+						System.out.println("invoice rounding (createFacts Line 1612): ");
 						//
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 					}				
@@ -1558,6 +1631,7 @@ public class Doc_AllocationHdr extends Doc
 						//MPo, 22/2/23 Add PrCtr and better description
 						fl.setUser1_ID(fact_user1_id);
 						fl.setDescription("InvoiceRounding / "+description.toString());
+						System.out.println("invoice rounding (createFacts Line 1634): ");
 						//
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 					}
@@ -1582,6 +1656,7 @@ public class Doc_AllocationHdr extends Doc
 						//MPo, 22/2/23 Add PrCtr and better description
 						fl.setUser1_ID(fact_user1_id);
 						fl.setDescription("InvoiceRounding / "+description.toString());
+						System.out.println("invoice rounding (createFacts Line 1659): ");
 						//
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 					}
@@ -1603,6 +1678,7 @@ public class Doc_AllocationHdr extends Doc
 						//MPo, 22/2/23 Add PrCtr and better description
 						fl.setUser1_ID(fact_user1_id);
 						fl.setDescription("InvoiceRounding / "+description.toString());
+						System.out.println("invoice rounding (createFacts Line 1681): ");
 						//
 						fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 					}
@@ -1928,6 +2004,7 @@ public class Doc_AllocationHdr extends Doc
 					//MPo, 2/10/23 Add PrCtr and description
 					fl.setUser1_ID(fact_user1_id);
 					fl.setDescription("PaymentRounding / "+description.toString());
+					System.out.println("payment rounding (createFacts Line 2007): ");
 					//
 					fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 				}
@@ -1949,6 +2026,7 @@ public class Doc_AllocationHdr extends Doc
 					//MPo, 2/10/23 Add PrCtr and description
 					fl.setUser1_ID(fact_user1_id);
 					fl.setDescription("PaymentRounding / "+description.toString());
+					System.out.println("payment rounding (createFacts Line 2024): ");
 					//	
 					fl.setLine_ID(C_AllocationLine_ID == null ? 0 : C_AllocationLine_ID);
 				}
@@ -1987,6 +2065,10 @@ public class Doc_AllocationHdr extends Doc
 				//MPo, 2/10/23 Add PrCtr and better description
 				line.setUser1_ID(fact_user1_id);
 				line.setDescription("BalanceAccounting / "+line.getDescription());
+				//MPo, 9/7/26 Project in Balancing line, which includes RGL line generated by REVERSE-ACCRUAL allocations 
+				//between payment documents
+				//the project is only correct in an allocation referring to a single project.
+				line.setC_Project_ID(fact_c_project_id);
 				//
 		}
 		return line;
