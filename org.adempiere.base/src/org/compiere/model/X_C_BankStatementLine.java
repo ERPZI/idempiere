@@ -34,7 +34,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260707L;
 
     /** Standard Constructor */
     public X_C_BankStatementLine (Properties ctx, int C_BankStatementLine_ID, String trxName)
@@ -60,6 +60,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 // @StatementLineDate@
 			setStmtAmt (Env.ZERO);
 			setTrxAmt (Env.ZERO);
+			setUser1_ID (0);
 			setValutaDate (new Timestamp( System.currentTimeMillis() ));
 // @StatementDate@
         } */
@@ -89,6 +90,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 // @StatementLineDate@
 			setStmtAmt (Env.ZERO);
 			setTrxAmt (Env.ZERO);
+			setUser1_ID (0);
 			setValutaDate (new Timestamp( System.currentTimeMillis() ));
 // @StatementDate@
         } */
@@ -118,6 +120,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 // @StatementLineDate@
 			setStmtAmt (Env.ZERO);
 			setTrxAmt (Env.ZERO);
+			setUser1_ID (0);
 			setValutaDate (new Timestamp( System.currentTimeMillis() ));
 // @StatementDate@
         } */
@@ -147,6 +150,7 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 // @StatementLineDate@
 			setStmtAmt (Env.ZERO);
 			setTrxAmt (Env.ZERO);
+			setUser1_ID (0);
 			setValutaDate (new Timestamp( System.currentTimeMillis() ));
 // @StatementDate@
         } */
@@ -407,6 +411,34 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	public int getC_Payment_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_Payment_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_Project)MTable.get(getCtx(), org.compiere.model.I_C_Project.Table_ID)
+			.getPO(getC_Project_ID(), get_TrxName());
+	}
+
+	/** Set Project.
+		@param C_Project_ID Financial Project
+	*/
+	public void setC_Project_ID (int C_Project_ID)
+	{
+		if (C_Project_ID < 1)
+			set_Value (COLUMNNAME_C_Project_ID, null);
+		else
+			set_Value (COLUMNNAME_C_Project_ID, Integer.valueOf(C_Project_ID));
+	}
+
+	/** Get Project.
+		@return Financial Project
+	  */
+	public int getC_Project_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Project_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -874,28 +906,56 @@ public class X_C_BankStatementLine extends PO implements I_C_BankStatementLine, 
 	}
 
 	public org.compiere.model.I_C_ElementValue getUser1() throws RuntimeException
-    {
-		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_Name)
-			.getPO(getUser1_ID(), get_TrxName());	}
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser1_ID(), get_TrxName());
+	}
 
 	/** Set Profit Center.
-		@param User1_ID 
-		User defined list element #1
-	  */
+		@param User1_ID User defined list element #1
+	*/
 	public void setUser1_ID (int User1_ID)
 	{
-		if (User1_ID < 1) 
+		if (User1_ID < 1)
 			set_Value (COLUMNNAME_User1_ID, null);
-		else 
+		else
 			set_Value (COLUMNNAME_User1_ID, Integer.valueOf(User1_ID));
 	}
 
 	/** Get Profit Center.
 		@return User defined list element #1
 	  */
-	public int getUser1_ID () 
+	public int getUser1_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_User1_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_ElementValue getUser2() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_ElementValue)MTable.get(getCtx(), org.compiere.model.I_C_ElementValue.Table_ID)
+			.getPO(getUser2_ID(), get_TrxName());
+	}
+
+	/** Set Cost Center.
+		@param User2_ID User defined list element #2
+	*/
+	public void setUser2_ID (int User2_ID)
+	{
+		if (User2_ID < 1)
+			set_Value (COLUMNNAME_User2_ID, null);
+		else
+			set_Value (COLUMNNAME_User2_ID, Integer.valueOf(User2_ID));
+	}
+
+	/** Get Cost Center.
+		@return User defined list element #2
+	  */
+	public int getUser2_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_User2_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
