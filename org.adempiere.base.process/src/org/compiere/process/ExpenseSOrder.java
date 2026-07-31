@@ -174,7 +174,9 @@ public class ExpenseSOrder extends SvrProcess
 			if (log.isLoggable(Level.INFO)) log.info("New Order for " + bp + ", Project=" + tel.getC_Project_ID());
 			m_order = new MOrder (getCtx(), 0, get_TrxName());
 			m_order.setAD_Org_ID(tel.getAD_Org_ID());
-			m_order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_OnCredit);
+			//MPo, 2/7/26 Warehouse order allows separate billing to change document type, roll-up
+			//m_order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_OnCredit);
+			m_order.setC_DocTypeTarget_ID(MOrder.DocSubTypeSO_Warehouse); //Document Type
 			//
 			m_order.setBPartner(bp);
 			if (m_order.getC_BPartner_Location_ID() == 0)
@@ -199,8 +201,14 @@ public class ExpenseSOrder extends SvrProcess
 				MProject project = new MProject (getCtx(), tel.getC_Project_ID(), get_TrxName());
 				if (project.getM_PriceList_ID() != 0)
 					m_order.setM_PriceList_ID(project.getM_PriceList_ID());
+				//MPo, 2/7/26 Branch mandatory in sales order
+				if (project.getZI_Branch_ID() != 0)
+					m_order.setZI_Branch_ID(project.getZI_Branch_ID());
 			}
 			m_order.setSalesRep_ID(te.getDoc_User_ID());
+			//MPo, 2/7/26 PrCtr mandatory in sales order
+			if (tel.getUser1_ID() != 0)
+				m_order.setUser1_ID(tel.getUser1_ID());
 			//
 			if (!m_order.save())
 			{
@@ -239,6 +247,10 @@ public class ExpenseSOrder extends SvrProcess
 		if (tel.getC_UOM_ID() != 0 && ol.getC_UOM_ID() == 0)
 			ol.setC_UOM_ID(tel.getC_UOM_ID());
 		ol.setTax();
+		//MPo, 2/7/26 PrCtr mandatory in sales order line
+		if (tel.getUser1_ID() != 0)
+			ol.setUser1_ID(tel.getUser1_ID());
+		//
 		if (!ol.save())
 		{
 			throw new IllegalStateException("Cannot save Order Line");
