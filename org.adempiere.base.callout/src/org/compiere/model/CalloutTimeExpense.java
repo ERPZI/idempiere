@@ -53,7 +53,7 @@ public class CalloutTimeExpense extends CalloutEngine
 		if (M_Product_ID == null || M_Product_ID.intValue() == 0)
 			return "";
 		BigDecimal priceActual = null;
-
+		
 		//	get expense date - or default to today's date
 		Timestamp DateExpense = Env.getContextAsDate(ctx, WindowNo, "DateExpense");
 		if (DateExpense == null)
@@ -84,6 +84,7 @@ public class CalloutTimeExpense extends CalloutEngine
 			pstmt.setInt(1, M_Product_ID.intValue());
 			pstmt.setInt(2, Env.getContextAsInt(ctx, WindowNo, "M_PriceList_ID"));
 			rs = pstmt.executeQuery();
+			
 			while (rs.next() && noPrice)
 			{
 				java.sql.Date plDate = rs.getDate("ValidFrom");
@@ -102,6 +103,10 @@ public class CalloutTimeExpense extends CalloutEngine
 					Integer ii = Integer.valueOf(rs.getInt("C_Currency_ID"));
 					if (!rs.wasNull())
 						mTab.setValue("C_Currency_ID", ii);
+					//MPo, 3/7/26 overwrite default UOM "Each" with product UOM
+					if (!rs.wasNull())
+						mTab.setValue("C_UOM_ID", Integer.valueOf(rs.getInt("C_UOM_ID")));
+					//
 				}
 			}
 
@@ -148,6 +153,10 @@ public class CalloutTimeExpense extends CalloutEngine
 						Integer ii = Integer.valueOf(rs.getInt("C_Currency_ID"));
 						if (!rs.wasNull())
 							mTab.setValue("C_Currency_ID", ii);
+						//MPo, 3/7/26 overwrite default UOM "Each" with product UOM
+						if (!rs.wasNull())
+							mTab.setValue("C_UOM_ID", Integer.valueOf(rs.getInt("C_UOM_ID")));
+						//
 					}
 				}
 			}
