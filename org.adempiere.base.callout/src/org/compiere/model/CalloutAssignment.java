@@ -60,7 +60,10 @@ public class CalloutAssignment extends CalloutEngine
 		String Name = null;
 		String Description = null;
 		BigDecimal Qty = null;
-		String sql = "SELECT p.M_Product_ID, ra.Name, ra.Description, ra.Qty "
+		int UOM = 0;
+		//MPo, 6/7/26 UOM display in Expense Line
+		//String sql = "SELECT p.M_Product_ID, ra.Name, ra.Description, ra.Qty "
+		String sql = "SELECT p.M_Product_ID, ra.Name, ra.Description, ra.Qty, p.C_UOM_ID "		
 			+ "FROM S_ResourceAssignment ra"
 			+ " INNER JOIN M_Product p ON (p.S_Resource_ID=ra.S_Resource_ID) "
 			+ "WHERE ra.S_ResourceAssignment_ID=?";
@@ -77,6 +80,8 @@ public class CalloutAssignment extends CalloutEngine
 				Name = rs.getString(2);
 				Description = rs.getString(3);
 				Qty = rs.getBigDecimal(4);
+				//MPo, 6/7/26 UOM display in Expense Line
+				UOM = rs.getInt(5);
 			}
 		}
 		catch (SQLException e)
@@ -106,6 +111,9 @@ public class CalloutAssignment extends CalloutEngine
 			if (Qty != null)
 				mTab.setValue(variable, Qty);
 				mTab.setValue("QtyEntered", Qty);  //red1 BR2836655-Resource Assignment always return Qty 1
+			//MPo, 6/7/26
+			if (UOM != 0)
+				mTab.setValue("C_UOM_ID", UOM);
 		}
 		return "";
 	}	//	product
