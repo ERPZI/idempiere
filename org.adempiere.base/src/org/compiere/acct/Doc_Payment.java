@@ -124,11 +124,11 @@ public class Doc_Payment extends Doc
 			//	Asset
 			FactLine fl = fact.createLine(null, getAccount(Doc.ACCTTYPE_BankInTransit, as),
 				getC_Currency_ID(), getAmount(), null);
-			if (fl != null && AD_Org_ID != 0)
+			if (fl != null && AD_Org_ID != 0) {
 				fl.setAD_Org_ID(AD_Org_ID);
-			//
-			//MPo, 24/06/2026 No project in payment document facts
-			fl.setC_Project_ID(0);
+				//MPo, 24/06/2026 No project in payment document facts
+				fl.setC_Project_ID(0);
+			}
 			//
 			MAccount acct = null;
 			if (getC_Charge_ID() != 0)
@@ -139,11 +139,11 @@ public class Doc_Payment extends Doc
 				acct = getAccount(Doc.ACCTTYPE_UnallocatedCash, as);
 			fl = fact.createLine(null, acct,
 				getC_Currency_ID(), null, getAmount());
-			if (fl != null && AD_Org_ID != 0
-				&& getC_Charge_ID() == 0)		//	don't overwrite charge
+			if (fl != null && AD_Org_ID != 0 && getC_Charge_ID() == 0) {		//	don't overwrite charge
 				fl.setAD_Org_ID(AD_Org_ID);
-			//MPo, 24/06/2026 No project in payment document facts
-			fl.setC_Project_ID(0);
+				//MPo, 24/06/2026 No project in payment document facts
+				fl.setC_Project_ID(0);
+			}
 			//
 		}
 		//  APP
@@ -159,18 +159,20 @@ public class Doc_Payment extends Doc
 			FactLine fl = fact.createLine(null, acct,
 				getC_Currency_ID(), getAmount(), null);
 			if (fl != null && AD_Org_ID != 0
-				&& getC_Charge_ID() == 0)		//	don't overwrite charge
+				&& getC_Charge_ID() == 0) {		//	don't overwrite charge
 				fl.setAD_Org_ID(AD_Org_ID);
-			//MPo, 24/06/2026 No project in payment document facts
-			fl.setC_Project_ID(0);
+				//MPo, 24/06/2026 No project in payment document facts
+				fl.setC_Project_ID(0);
+			}	
 			//
 			//	Asset
 			fl = fact.createLine(null, getAccount(Doc.ACCTTYPE_BankInTransit, as),
 				getC_Currency_ID(), null, getAmount());
-			if (fl != null && AD_Org_ID != 0)
+			if (fl != null && AD_Org_ID != 0) {
 				fl.setAD_Org_ID(AD_Org_ID);
-			//MPo, 24/06/2026 No project in payment document facts
-			fl.setC_Project_ID(0);
+				//MPo, 24/06/2026 No project in payment document facts
+				fl.setC_Project_ID(0);
+			}	
 			//
 		}
 		else
