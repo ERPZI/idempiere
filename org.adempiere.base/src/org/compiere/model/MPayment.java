@@ -737,13 +737,14 @@ public class MPayment extends X_C_Payment
 			{
 				setIsPrepayment(getReversal().isPrepayment());
 			}
-			else
-			{
-				setIsPrepayment (getC_Charge_ID() == 0 
-					&& getC_BPartner_ID() != 0
-					&& (getC_Order_ID() != 0 
-						|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0)));
-			}
+			//MPo, 8/9/26 setIsPrepayment doesn't check for allocated invoice(s) in C_Payment => C_PaymentAllocate 
+			//else
+			//{
+			//	setIsPrepayment (getC_Charge_ID() == 0 
+			//		&& getC_BPartner_ID() != 0
+			//		&& (getC_Order_ID() != 0 
+			//			|| (getC_Project_ID() != 0 && getC_Invoice_ID() == 0)));
+			//}
 		}
 		// Prepayment: reset write off, discount,IsOverUnderPayment and OverUnderAmt for new record or after change of order/project.
 		if (isPrepayment())
