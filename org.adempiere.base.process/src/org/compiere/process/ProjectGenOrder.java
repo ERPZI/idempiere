@@ -111,7 +111,9 @@ public class ProjectGenOrder extends SvrProcess
 				//MPo, 6/5/2026 PrCtr mandatory in sales order line
 				if (lines[i].getC_Project().getUser1_ID() != 0) {
 					ol.setUser1_ID(lines[i].getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
-				}	
+				}
+				//MPo, 20/8/2026 Add Project in Order Line
+				ol.setC_Project_ID(lines[i].getC_Project_ID());
 				//
 				if (ol.save())
 					count++;

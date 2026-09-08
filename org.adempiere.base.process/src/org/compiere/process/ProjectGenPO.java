@@ -219,9 +219,12 @@ public class ProjectGenPO extends SvrProcess
 		}
 		
 		orderLine.setTax();
-		//MPo, 11/5/2026 PrCtr mandatory in purchase order line
+		//MPo, 11/5/2026 PrCtr mandatory in PO line
 		if (project.getUser1_ID() != 0)
 			orderLine.setUser1_ID(project.getUser1_ID());
+		//MPo, 20/8/2026 Add Project and Phase to PO line
+		orderLine.setC_Project_ID(project.getC_Project_ID());
+		orderLine.setC_ProjectPhase_ID(projectLine.getC_ProjectPhase_ID());
 		//
 		orderLine.saveEx();
 

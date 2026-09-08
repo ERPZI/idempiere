@@ -103,6 +103,9 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 			//MPo, 6/5/2026 PrCtr mandatory in sales order line
 			if (fromPhase.getC_Project().getUser1_ID() != 0) 
 				ol.setUser1_ID(fromPhase.getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
+			//MPo, 20/8/2026 Add Project and Project Phase in Order Line
+			ol.setC_Project_ID(fromPhase.getC_Project_ID());
+			ol.setC_ProjectPhase_ID(fromPhase.getC_ProjectPhase_ID());
 			//
 			if (!ol.save())
 				log.log(Level.SEVERE, "doIt - Lines not generated");
@@ -140,6 +143,9 @@ public class ProjectPhaseGenOrder  extends SvrProcess
 			//MPo, 6/5/2026 Add PrCtr in Order Line
 			if (lines[i].getC_Project().getUser1_ID() != 0)
 				ol.setUser1_ID(lines[i].getC_Project().getUser1_ID()); //Save as PrCtr mandatory in C_Project
+			//MPo, 20/8/2026 Add Project and Project Phase in Order Line
+			ol.setC_Project_ID(lines[i].getC_ProjectPhase().getC_Project_ID());
+			ol.setC_ProjectPhase_ID(lines[i].getC_ProjectPhase().getC_ProjectPhase_ID());
 			//
 			if (ol.save())
 				count++;

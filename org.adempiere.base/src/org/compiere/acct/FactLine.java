@@ -963,8 +963,10 @@ public final class FactLine extends X_Fact_Acct
 			if (getUser2_ID() == 0)
 				setUser2_ID (m_acct.getUser2_ID());
 			//MPo, 6/7/26 Project or CCtr, not both. Product>Accounting>Code combination overwrites document info 
-			if (getUser2_ID() != 0 && getC_Project_ID() != 0)
+			if (getUser2_ID() != 0 && getC_Project_ID() != 0) {
 				setC_Project_ID(0);
+				setC_ProjectPhase_ID(0);
+			}	
 			//
 			
 			//  Create Revenue Recognition for AR/AP Invoices
