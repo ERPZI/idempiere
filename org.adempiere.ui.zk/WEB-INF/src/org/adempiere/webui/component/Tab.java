@@ -30,6 +30,7 @@ import org.compiere.model.MAttachment;
 import org.compiere.model.MForm;
 import org.compiere.model.MImage;
 import org.compiere.model.MInfoWindow;
+import org.compiere.model.MUserDefForm;
 import org.compiere.model.MUserDefInfo;
 import org.compiere.util.Env;
 import org.compiere.util.Util;
@@ -123,7 +124,7 @@ public class Tab extends org.zkoss.zul.Tab
 			if (imageIntenalUrl != null) {
 				if (ThemeManager.isUseFontIconForImage()) {
 					String iconClass = imageIntenalUrl.getFile().replace("16.png", "").replaceAll(".*\\/", "");
-					comp.setIconSclass("z-icon-" + iconClass);
+					comp.setIconSclass(Icon.getIconSclass(iconClass));
 				} else {
 					Image image = ManageImageCache.instance().getImage(imageIntenalUrl);
 					if (image != null)
@@ -132,7 +133,7 @@ public class Tab extends org.zkoss.zul.Tab
 			} else if (imageKey != null){
 				if (ThemeManager.isUseFontIconForImage() && imageKey.indexOf("://") == -1 && !MAttachment.isAttachmentURLPath(imageKey)) {
 					String iconClass = imageKey;
-					comp.setIconSclass("z-icon-" + iconClass);
+					comp.setIconSclass(Icon.getIconSclass(iconClass));
 				} else {
 					Image ico = ManageImageCache.instance().getImage(imageKey);
 					if (ico != null)
@@ -196,6 +197,11 @@ public class Tab extends org.zkoss.zul.Tab
 
 		public static DecorateInfo get(MForm form){
 			if (form != null){
+				
+				MUserDefForm userDef = MUserDefForm.getBestMatch(Env.getCtx(), form.getAD_Form_ID());
+				if (userDef != null && !Util.isEmpty(userDef.getImageURL()))
+					return new DecorateInfo(userDef.getImageURL());
+
 				return new DecorateInfo(!Util.isEmpty(form.getImageURL()) ? form.getImageURL() : Icon.FORM);
 			}
 			return null;

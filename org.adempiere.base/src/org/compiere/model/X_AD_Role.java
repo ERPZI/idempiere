@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Role
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_Role")
 public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260309L;
 
     /** Standard Constructor */
     public X_AD_Role (Properties ctx, int AD_Role_ID, String trxName)
@@ -98,7 +98,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // N
 			setPreferenceType (null);
 // O
-			setUserLevel (null);
         } */
     }
 
@@ -165,7 +164,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // N
 			setPreferenceType (null);
 // O
-			setUserLevel (null);
         } */
     }
 
@@ -232,7 +230,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // N
 			setPreferenceType (null);
 // O
-			setUserLevel (null);
         } */
     }
 
@@ -299,7 +296,6 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 // N
 			setPreferenceType (null);
 // O
-			setUserLevel (null);
         } */
     }
 
@@ -368,6 +364,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return (String)get_Value(COLUMNNAME_AD_Role_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Menu() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Tree)MTable.get(getCtx(), org.compiere.model.I_AD_Tree.Table_ID)
@@ -396,6 +393,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Org() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Tree)MTable.get(getCtx(), org.compiere.model.I_AD_Tree.Table_ID)
@@ -682,6 +680,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return bd;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
@@ -991,16 +990,16 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return false;
 	}
 
-	/** Set Master Role.
-		@param IsMasterRole A master role cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
+	/** Set Role Template.
+		@param IsMasterRole A role template cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
 	*/
 	public void setIsMasterRole (boolean IsMasterRole)
 	{
 		set_Value (COLUMNNAME_IsMasterRole, Boolean.valueOf(IsMasterRole));
 	}
 
-	/** Get Master Role.
-		@return A master role cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
+	/** Get Role Template.
+		@return A role template cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
 	  */
 	public boolean isMasterRole()
 	{
@@ -1276,6 +1275,7 @@ public class X_AD_Role extends PO implements I_AD_Role, I_Persistent
 		return (String)get_Value(COLUMNNAME_RoleType);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getSupervisor() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_ID)

@@ -38,6 +38,7 @@ import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.component.Window;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MDashboardContent;
 import org.compiere.model.MDashboardPreference;
@@ -57,7 +58,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Hlayout;
-import org.zkoss.zul.Vbox;
+import org.adempiere.webui.component.FlexVlayout;
 import org.zkoss.zul.Vlayout;
 
 /**
@@ -175,8 +176,8 @@ public class WGadgets extends Window implements  EventListener<Event>{
 		noList.setSeltype("multiple");
 
 		if (ThemeManager.isUseFontIconForImage()) {
-    		bAdd.setIconSclass("z-icon-Next");
-    		bRemove.setIconSclass("z-icon-Previous");
+    		bAdd.setIconSclass(Icon.getIconSclass(Icon.NEXT));
+    		bRemove.setIconSclass(Icon.getIconSclass(Icon.PREVIOUS));
     	} else {
     		bAdd.setImage(ThemeManager.getThemeResource("images/Next24.png"));
     		bRemove.setImage(ThemeManager.getThemeResource("images/Previous24.png"));
@@ -225,7 +226,7 @@ public class WGadgets extends Window implements  EventListener<Event>{
 		ZKUpdateUtil.setHflex(noList, "1");
 		ZKUpdateUtil.setVflex(noList, true);
 		hlayout.appendChild(noList);
-		Vbox vbox = new Vbox();
+		FlexVlayout vbox = new FlexVlayout();
 		vbox.appendChild(bAdd);
 		vbox.appendChild(bRemove);
 		ZKUpdateUtil.setWidth(vbox, "50px");
@@ -348,7 +349,7 @@ public class WGadgets extends Window implements  EventListener<Event>{
 	    }
 
 		for(MDashboardPreference pre : dirtyList.values()) {
-			MDashboardContent content = (MDashboardContent) pre.getPA_DashboardContent();
+			MDashboardContent content = new MDashboardContent(pre.getCtx(), pre.getPA_DashboardContent_ID(), pre.get_TrxName());
 			if (pre.isActive())
 				yesItems.add(content);
 			else

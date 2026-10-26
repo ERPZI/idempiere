@@ -26,6 +26,7 @@ import org.adempiere.model.MWizardProcess;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.adempiere.webui.component.Label;
 import org.adempiere.webui.component.Panel;
 import org.adempiere.webui.component.Textbox;
@@ -38,6 +39,7 @@ import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.part.WindowContainer;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.form.SetupWizard;
@@ -68,7 +70,7 @@ import org.zkoss.zul.Treecell;
 import org.zkoss.zul.Treechildren;
 import org.zkoss.zul.Treeitem;
 import org.zkoss.zul.Treerow;
-import org.zkoss.zul.Vbox;
+import org.adempiere.webui.component.FlexVlayout;
 
 /**
  * Form for Client/Tenant Setup Wizard
@@ -107,7 +109,7 @@ public class WSetupWizard extends SetupWizard implements IFormController, EventL
 	private Textbox			notesField  = new Textbox();
 	
 	/** Footer of east panel of {@link #mainLayout} */
-	private Vbox westdown = new Vbox();
+	private FlexHlayout westdown = new FlexHlayout();
 	/** {@link #westdown} contents */	
 	private Label 			userLabel = new Label(Msg.getMsg(Env.getCtx(), "User"));
 	private WSearchEditor	userField;	
@@ -134,9 +136,9 @@ public class WSetupWizard extends SetupWizard implements IFormController, EventL
 	private boolean allFinished = true;
 	private boolean allPending = true;
 	/** Center of {@link #mainLayout} */
-	private Vbox centerBox = new Vbox();
+	private FlexVlayout centerBox = new FlexVlayout();
 	/** Footer of {@link #centerBox} */ 
-	private Vbox centerBoxdown = new Vbox();	
+	private FlexHlayout centerBoxdown = new FlexHlayout();	
 	private ArrayList<Integer> openNodes = new ArrayList<Integer>();
 
 	/**
@@ -387,28 +389,28 @@ public class WSetupWizard extends SetupWizard implements IFormController, EventL
 		mainLayout.setStyle("position: absolute");
 
 		if (ThemeManager.isUseFontIconForImage())
-			bRefresh.setIconSclass("z-icon-Refresh");
+			bRefresh.setIconSclass(Icon.getIconSclass(Icon.REFRESH));
 		else
 			bRefresh.setImage(ThemeManager.getThemeResource("images/Refresh16.png"));
 		bRefresh.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "Refresh"));
 		bRefresh.addEventListener(Events.ON_CLICK, this);
 
 		if (ThemeManager.isUseFontIconForImage())
-			bOK.setIconSclass("z-icon-Ok");
+			bOK.setIconSclass(Icon.getIconSclass(Icon.OK));
 		else
 			bOK.setImage(ThemeManager.getThemeResource("images/Ok16.png"));
 		bOK.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "Update"));
 		bOK.addEventListener(Events.ON_CLICK, this);
 
 		if (ThemeManager.isUseFontIconForImage())
-			bNext.setIconSclass("z-icon-Next");
+			bNext.setIconSclass(Icon.getIconSclass(Icon.NEXT));
 		else
 			bNext.setImage(ThemeManager.getThemeResource("images/Next16.png"));
 		bNext.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "Next"));
 		bNext.addEventListener(Events.ON_CLICK, this);
 		
 		if (ThemeManager.isUseFontIconForImage())
-			bZoom.setIconSclass("z-icon-Zoom");
+			bZoom.setIconSclass(Icon.getIconSclass(Icon.ZOOM));
 		else
 			bZoom.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
 		bZoom.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "Zoom"));
@@ -455,9 +457,8 @@ public class WSetupWizard extends SetupWizard implements IFormController, EventL
 		ZKUpdateUtil.setWidth(centerBox, "100%");
 		ZKUpdateUtil.setVflex(wfnodeTree, "1");
 		centerBox.appendChild(centerBoxdown);
-		centerBoxdown.setOrient("horizontal");
-		centerBoxdown.setAlign("center");
-		centerBoxdown.setPack("start");
+		centerBoxdown.setAlign(FlexHlayout.AlignType.CENTER);
+		centerBoxdown.setPack(FlexHlayout.PackType.START);
 		centerBoxdown.appendChild(bExpand);
 		centerBoxdown.appendChild(justmine);
 		centerBoxdown.appendChild(showColors);
@@ -493,9 +494,8 @@ public class WSetupWizard extends SetupWizard implements IFormController, EventL
 		userField = new WSearchEditor(lookup, Msg.translate(
                 Env.getCtx(), "AD_User_ID"), "", false, false, true);
 
-		westdown.setOrient("horizontal");
-		westdown.setAlign("center");
-		westdown.setPack("center");
+		westdown.setAlign(FlexHlayout.AlignType.CENTER);
+		westdown.setPack(FlexHlayout.PackType.CENTER);
 		westdown.appendChild(bZoomLabel);
 		westdown.appendChild(bZoom);
 		westdown.appendChild(userLabel);

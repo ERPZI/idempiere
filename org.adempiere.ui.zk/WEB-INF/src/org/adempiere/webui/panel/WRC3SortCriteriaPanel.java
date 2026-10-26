@@ -31,6 +31,7 @@ import org.adempiere.webui.component.ListItem;
 import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.component.SimpleListModel;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MRefList;
 import org.compiere.print.MPrintFormatItem;
@@ -49,7 +50,7 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Menuitem;
 import org.zkoss.zul.Menupopup;
-import org.zkoss.zul.Vbox;
+import org.adempiere.webui.component.FlexVlayout;
 
 /**
  * Wizard panel to edit sorting of print format
@@ -124,8 +125,8 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		noList.setSeltype("multiple");
 
 		if (ThemeManager.isUseFontIconForImage()) {
-    		bAdd.setIconSclass("z-icon-Next");
-    		bRemove.setIconSclass("z-icon-Previous");
+    		bAdd.setIconSclass(Icon.getIconSclass(Icon.NEXT));
+    		bRemove.setIconSclass(Icon.getIconSclass(Icon.PREVIOUS));
     	} else {
     		bAdd.setImage(ThemeManager.getThemeResource("images/Next24.png"));
     		bRemove.setImage(ThemeManager.getThemeResource("images/Previous24.png"));
@@ -158,7 +159,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		ZKUpdateUtil.setHflex(noList, "1");
 		ZKUpdateUtil.setVflex(noList, true);
 		hlayout.appendChild(noList);
-		Vbox vbox = new Vbox();
+		FlexVlayout vbox = new FlexVlayout();
 		vbox.appendChild(bAdd);
 		vbox.appendChild(bRemove);
 		ZKUpdateUtil.setWidth(vbox, "50px");
@@ -177,8 +178,8 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		};
 
     	if (ThemeManager.isUseFontIconForImage()) {
-    		bUp.setIconSclass("z-icon-Parent");
-    		bDown.setIconSclass("z-icon-Detail");
+    		bUp.setIconSclass(Icon.getIconSclass(Icon.PARENT));
+    		bDown.setIconSclass(Icon.getIconSclass(Icon.DETAIL));
     	} else {
     		bUp.setImage(ThemeManager.getThemeResource("images/Parent24.png"));
     		bDown.setImage(ThemeManager.getThemeResource("images/Detail24.png"));
@@ -186,7 +187,7 @@ public class WRC3SortCriteriaPanel extends WRCTabPanel implements  EventListener
 		bUp.addEventListener(Events.ON_CLICK, actionListener2);
 		bDown.addEventListener(Events.ON_CLICK, actionListener2);
 		
-		vbox = new Vbox();
+		vbox = new FlexVlayout();
 		vbox.appendChild(bUp);
 		vbox.appendChild(bDown);
 		ZKUpdateUtil.setWidth(vbox, "46px");

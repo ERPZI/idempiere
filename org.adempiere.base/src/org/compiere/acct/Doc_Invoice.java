@@ -31,7 +31,6 @@ import java.util.logging.Level;
 
 import org.adempiere.exceptions.AverageCostingZeroQtyException;
 import org.compiere.model.ICostInfo;
-import org.compiere.model.I_M_InOutLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MClientInfo;
@@ -41,10 +40,14 @@ import org.compiere.model.MCostDetail;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MCurrency;
 import org.compiere.model.MFactAcct;
+import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MLandedCostAllocation;
+import org.compiere.model.MOrderLandedCost;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MOrderLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.MTax;
 import org.compiere.model.ProductCost;
 import org.compiere.model.Query;
@@ -635,7 +638,7 @@ public class Doc_Invoice extends Doc
 				//
 				if (tl != null && invoice.getReversal_ID() > 0 && invoice.getReversal_ID() < invoice.getC_Invoice_ID())
 				{
-					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE);
+					tl.updateReverseLine(MInvoice.Table_ID, invoice.getReversal_ID(), 0, BigDecimal.ONE, null, false);
 				}
 			}
 			//  Expense         DR
@@ -1102,15 +1105,17 @@ public class Doc_Invoice extends Doc
 					Timestamp oDateAcct = getDateAcct();
 					if (lca.getM_InOutLine_ID() > 0)
 					{
-						I_M_InOutLine iol = lca.getM_InOutLine();
+						MInOutLine iol = new MInOutLine(getCtx(),  lca.getM_InOutLine_ID(), getTrxName());
 						if (iol.getC_OrderLine_ID() > 0)
 						{
-							oCurrencyId =  iol.getC_OrderLine().getC_Currency_ID();
-							oDateAcct = iol.getC_OrderLine().getC_Order().getDateAcct();
+							MOrderLine orderLine = new MOrderLine(getCtx(), iol.getC_OrderLine_ID(), getTrxName());
+							oCurrencyId =  orderLine.getC_Currency_ID();
+							oDateAcct = orderLine.getParent().getDateAcct();
 							MOrderLandedCostAllocation[] allocations = MOrderLandedCostAllocation.getOfOrderLine(iol.getC_OrderLine_ID(), getTrxName());
 							for(MOrderLandedCostAllocation allocation : allocations)
 							{
-								if (allocation.getC_OrderLandedCost().getM_CostElement_ID() != lca.getM_CostElement_ID())
+								MOrderLandedCost lcost = new MOrderLandedCost(getCtx(), allocation.getC_OrderLandedCost_ID(), getTrxName());
+								if (lcost.getM_CostElement_ID() != lca.getM_CostElement_ID())
 									continue;
 								
 								BigDecimal amt = allocation.getAmt();
@@ -1186,16 +1191,11 @@ public class Doc_Invoice extends Doc
 						{
 							int AD_Org_ID = lca.getAD_Org_ID();
 							int M_AttributeSetInstance_ID = lca.getM_AttributeSetInstance_ID();
-
-							if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
-							{
-								AD_Org_ID = 0;
-								M_AttributeSetInstance_ID = 0;
-							}
-							else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
-								M_AttributeSetInstance_ID = 0;
-							else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
-								AD_Org_ID = 0;
+							MProduct product = new MProduct(lca.getCtx(), lca.getM_Product_ID(), lca.get_TrxName());
+							String costingLevel = product.getCostingLevel(as);
+							MCost.CostingKey costKey = MCost.CostingKey.resolve(AD_Org_ID, M_AttributeSetInstance_ID, costingLevel);
+							AD_Org_ID = costKey.AD_Org_ID();
+							M_AttributeSetInstance_ID = costKey.M_AttributeSetInstance_ID();
 							
 							MCostDetail cd = MCostDetail.getInvoice(as, lca.getM_Product_ID(), M_AttributeSetInstance_ID, 
 									C_InvoiceLine_ID, lca.getM_CostElement_ID(), getDateAcct(), getTrxName());
@@ -1285,16 +1285,11 @@ public class Doc_Invoice extends Doc
 					costDetailQty = BigDecimal.ZERO;
 					int AD_Org_ID = lca.getAD_Org_ID();
 					int M_AttributeSetInstance_ID = lca.getM_AttributeSetInstance_ID();
-
-					if (MAcctSchema.COSTINGLEVEL_Client.equals(as.getCostingLevel()))
-					{
-						AD_Org_ID = 0;
-						M_AttributeSetInstance_ID = 0;
-					}
-					else if (MAcctSchema.COSTINGLEVEL_Organization.equals(as.getCostingLevel()))
-						M_AttributeSetInstance_ID = 0;
-					else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(as.getCostingLevel()))
-						AD_Org_ID = 0;
+					MProduct product = new MProduct(lca.getCtx(), lca.getM_Product_ID(), lca.get_TrxName());
+					String costingLevel = product.getCostingLevel(as);
+					MCost.CostingKey costKey = MCost.CostingKey.resolve(AD_Org_ID, M_AttributeSetInstance_ID, costingLevel);
+					AD_Org_ID = costKey.AD_Org_ID();
+					M_AttributeSetInstance_ID = costKey.M_AttributeSetInstance_ID();
 					String key = lca.getM_Product_ID()+"_"+M_AttributeSetInstance_ID;
 					if (!costDetailAmtMap.containsKey(key)) {
 						costDetailAmtMap.put(key, BigDecimal.ZERO);

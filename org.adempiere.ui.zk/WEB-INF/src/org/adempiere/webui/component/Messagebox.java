@@ -32,6 +32,7 @@ import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.SystemProperties;
@@ -46,9 +47,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.annotation.Listen;
-import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
-import org.zkoss.zul.Vbox;
 
 /**
 * Messagebox : Replaces ZK's Messagebox
@@ -201,24 +200,24 @@ public class Messagebox extends Window implements EventListener<Event>
 		pnlInput.setStyle(MESSAGE_PANEL_STYLE);
 		pnlInput.appendChild(inputField.getComponent());
 
-		Vbox pnlText = new Vbox();
+		FlexVlayout pnlText = new FlexVlayout();
 		pnlText.appendChild(pnlMessage);
 		pnlText.appendChild(pnlInput);
 
-		Hbox pnlImage = new Hbox();
+		FlexHlayout pnlImage = new FlexHlayout();
 
 		String iconSclass = null;
 		Label label = null;
 		if (ThemeManager.isUseFontIconForImage()) 
 		{
 			if (imgSrc.equals(QUESTION))
-				iconSclass = "z-icon-QuestionMessageBox";
+				iconSclass = Icon.getIconSclass(Icon.QUESTION_MESSAGE_BOX);
 			else if (imgSrc.equals(EXCLAMATION))
-				iconSclass = "z-icon-ExclamationMessageBox";
+				iconSclass = Icon.getIconSclass(Icon.EXCLAMATION_MESSAGE_BOX);
 			else if (imgSrc.equals(INFORMATION))
-				iconSclass = "z-icon-InformationMessageBox";
+				iconSclass = Icon.getIconSclass(Icon.INFORMATION_MESSAGE_BOX);
 			else if (imgSrc.equals(ERROR))
-				iconSclass = "z-icon-ErrorMessageBox";
+				iconSclass = Icon.getIconSclass(Icon.ERROR_MESSAGE_BOX);
 		}
 			
 		if (ThemeManager.isUseFontIconForImage() && iconSclass != null)
@@ -230,24 +229,24 @@ public class Messagebox extends Window implements EventListener<Event>
 			img.setSrc(imgSrc);
 
 		ZKUpdateUtil.setWidth(pnlImage, "72px");
-		pnlImage.setAlign("center");
-		pnlImage.setPack("center");
+		pnlImage.setAlign(FlexHlayout.AlignType.CENTER);
+		pnlImage.setPack(FlexHlayout.PackType.CENTER);
 		if (ThemeManager.isUseFontIconForImage() && iconSclass != null)
 			pnlImage.appendChild(label);
 		else
 			pnlImage.appendChild(img);
 				
-		Hbox north = new Hbox();
-		north.setAlign("center");
+		FlexHlayout north = new FlexHlayout();
+		north.setAlign(FlexHlayout.AlignType.CENTER);
 		this.appendChild(north);		
 		north.appendChild(pnlImage);
 		north.appendChild(pnlText);
 		north.setSclass("dialog-content");
-		north.setWidth("100%");;
+		north.setWidth("100%");
 
-		Hbox pnlButtons = new Hbox();
-		pnlButtons.setAlign("center");
-		pnlButtons.setPack("end");
+		FlexHlayout pnlButtons = new FlexHlayout();
+		pnlButtons.setAlign(FlexHlayout.AlignType.CENTER);
+		pnlButtons.setPack(FlexHlayout.PackType.END);
 		pnlButtons.appendChild(btnOk);
 		pnlButtons.appendChild(btnCancel);
 		pnlButtons.appendChild(btnYes);

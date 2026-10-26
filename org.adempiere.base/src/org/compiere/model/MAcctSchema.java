@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.BackDateTrxNotAllowedException;
 import org.compiere.report.MReportTree;
 import org.compiere.util.CCache;
+import org.compiere.util.CacheMgt;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
@@ -47,9 +48,9 @@ import org.idempiere.cache.ImmutablePOSupport;
 public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 {
 	/**
-	 * generated serial id
+	 * 
 	 */
-	private static final long serialVersionUID = 2740537819749888011L;
+	private static final long serialVersionUID = -992571446107996264L;
 
 	/**
 	 *  Get AccountSchema
@@ -493,7 +494,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	 * @deprecated only orgs are now fetched automatically
 	 * @throws IllegalStateException every time when you call it 
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public void setOnlyOrgs (Integer[] orgs)
 	{
 		throw new IllegalStateException("The OnlyOrgs are now fetched automatically");
@@ -732,6 +733,12 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 				return false; 
 			}
 		}
+		// Validate that StartDate is not after EndDate
+		if (getStartDate() != null && getEndDate() != null && getStartDate().after(getEndDate()))
+		{
+			log.saveError("Error", Msg.getMsg(getCtx(), "EndDateAfterStartDate"));
+			return false;
+		}
 		return true;
 	}	//	beforeSave
 	
@@ -770,7 +777,20 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 			m_default.markImmutable();
 		return this;
 	}
-	
+
+	/**
+	 * Checks if the given accounting date falls within the valid date range (start and end date)
+	 * of the accounting schema.
+	 * 
+	 * @param  dateAcct the accounting date to check
+	 * @return          true if the accounting date is within the range, false otherwise
+	 */
+	public boolean isAcctDateInRange(Timestamp dateAcct)
+	{
+		return (getStartDate() == null || dateAcct.equals(getStartDate()) || dateAcct.after(getStartDate()))
+				&& (getEndDate() == null || dateAcct.equals(getEndDate()) || dateAcct.before(getEndDate()));
+	}
+
 	/**
 	 * Convenient method for testing if a back-date transaction is allowed in primary accounting schema
 	 * @param ctx
@@ -796,7 +816,7 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 	 */
 	public static boolean isBackDateTrxAllowed(Properties ctx, int tableID, int recordID, String trxName)
 	{
-		Timestamp dateAcct = MCostDetail.getDateAcct(tableID, recordID, trxName);;
+		Timestamp dateAcct = MCostDetail.getDateAcct(tableID, recordID, trxName);
 		if (dateAcct == null)
 			return true;
 		return isBackDateTrxAllowed(ctx, dateAcct, trxName);
@@ -839,4 +859,29 @@ public class MAcctSchema extends X_C_AcctSchema implements ImmutablePOSupport
 		}
 		return true;
 	}
+
+	/**
+	 * @return
+	 */
+	public MCurrency getCurrency() {
+		return MCurrency.get(getCtx(), getC_Currency_ID());
+	}
+
+	@Override
+	protected boolean afterSave(boolean newRecord, boolean success) {
+		if (!success)
+			return success;
+		if (   newRecord
+			|| is_ValueChanged(COLUMNNAME_StartDate)
+			|| is_ValueChanged(COLUMNNAME_EndDate)
+			|| is_ValueChanged(COLUMNNAME_Period_OpenHistory)
+			|| is_ValueChanged(COLUMNNAME_Period_OpenFuture)
+			|| is_ValueChanged(COLUMNNAME_BackDateDay)
+			|| is_ValueChanged(COLUMNNAME_AutoPeriodControl)) {
+			CacheMgt.scheduleCacheReset(MPeriod.Table_Name, -1, false, get_TrxName());
+			CacheMgt.scheduleCacheReset(s_schema.getTableName(), -1, false, get_TrxName());
+		}
+		return success;
+	}
+
 }	//	MAcctSchema

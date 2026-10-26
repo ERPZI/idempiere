@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for AD_Attachment
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_Attachment")
 public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
 {
@@ -31,7 +31,7 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260309L;
 
     /** Standard Constructor */
     public X_AD_Attachment (Properties ctx, int AD_Attachment_ID, String trxName)
@@ -146,6 +146,7 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
 		return (String)get_Value(COLUMNNAME_AD_Attachment_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_StorageProvider getAD_StorageProvider() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_StorageProvider)MTable.get(getCtx(), org.compiere.model.I_AD_StorageProvider.Table_ID)
@@ -173,6 +174,7 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Table)MTable.get(getCtx(), org.compiere.model.I_AD_Table.Table_ID)
@@ -270,11 +272,22 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
 		return (String)get_Value(COLUMNNAME_TextMsg);
 	}
 
+	/** Title AD_Reference_ID=200275 */
+	public static final int TITLE_AD_Reference_ID=200275;
+	/** None = . */
+	public static final String TITLE_None = ".";
+	/** List in Attachment File = laf */
+	public static final String TITLE_ListInAttachmentFile = "laf";
+	/** List in XML = xml */
+	public static final String TITLE_ListInXML = "xml";
+	/** List in ZIP file = zip */
+	public static final String TITLE_ListInZIPFile = "zip";
 	/** Set Title.
 		@param Title Name this entity is referred to as
 	*/
 	public void setTitle (String Title)
 	{
+
 		set_Value (COLUMNNAME_Title, Title);
 	}
 
@@ -291,6 +304,6 @@ public class X_AD_Attachment extends PO implements I_AD_Attachment, I_Persistent
       */
     public KeyNamePair getKeyNamePair()
     {
-        return new KeyNamePair(get_ID(), getTitle());
+        return new KeyNamePair(get_ID(), String.valueOf(getTitle()));
     }
 }

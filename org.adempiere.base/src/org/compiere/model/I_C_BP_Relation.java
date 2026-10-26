@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for C_BP_Relation
  *  @author iDempiere (generated) 
- *  @version Release 12
+ *  @version Release 13
  */
 public interface I_C_BP_Relation 
 {
@@ -97,6 +97,7 @@ public interface I_C_BP_Relation
 	  */
 	public int getC_BPartnerRelation_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_BPartnerRelation() throws RuntimeException;
 
     /** Column name C_BPartnerRelation_Location_ID */
@@ -112,6 +113,7 @@ public interface I_C_BP_Relation
 	  */
 	public int getC_BPartnerRelation_Location_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner_Location getC_BPartnerRelation_Location() throws RuntimeException;
 
     /** Column name C_BPartner_ID */
@@ -127,6 +129,7 @@ public interface I_C_BP_Relation
 	  */
 	public int getC_BPartner_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getC_BPartner() throws RuntimeException;
 
     /** Column name C_BPartner_Location_ID */
@@ -142,6 +145,7 @@ public interface I_C_BP_Relation
 	  */
 	public int getC_BPartner_Location_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
 
     /** Column name Created */
@@ -202,15 +206,13 @@ public interface I_C_BP_Relation
     /** Column name IsPayFrom */
     public static final String COLUMNNAME_IsPayFrom = "IsPayFrom";
 
-	/** Set Pay-From Address.
-	  * Business Partner pays from that address and we&#039;
-ll send dunning letters there
+	/** Set Pay-From.
+	  * Business Partner can pay invoices from the related Business Partner
 	  */
 	public void setIsPayFrom (boolean IsPayFrom);
 
-	/** Get Pay-From Address.
-	  * Business Partner pays from that address and we&#039;
-ll send dunning letters there
+	/** Get Pay-From.
+	  * Business Partner can pay invoices from the related Business Partner
 	  */
 	public boolean isPayFrom();
 

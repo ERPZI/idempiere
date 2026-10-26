@@ -20,18 +20,28 @@
  *****************************************************************************/
 package org.adempiere.base;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.adempiere.base.event.IEventManager;
 import org.adempiere.base.markdown.IMarkdownRenderer;
+import org.adempiere.base.search.ISearchProvider;
 import org.adempiere.base.upload.IUploadService;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.model.IAddressValidation;
@@ -40,26 +50,38 @@ import org.adempiere.model.ITaxProvider;
 import org.adempiere.model.MShipperFacade;
 import org.adempiere.util.DefaultReservationTracerFactory;
 import org.adempiere.util.IReservationTracerFactory;
+import org.compiere.Adempiere;
 import org.compiere.impexp.BankStatementLoaderInterface;
 import org.compiere.impexp.BankStatementMatcherInterface;
 import org.compiere.model.Callout;
 import org.compiere.model.I_AD_PrintHeaderFooter;
 import org.compiere.model.MAddressValidation;
 import org.compiere.model.MAuthorizationAccount;
+import org.compiere.model.MAuthorizationCredential;
+import org.compiere.model.MAuthorizationProvider;
 import org.compiere.model.MBankAccountProcessor;
 import org.compiere.model.MPaymentProcessor;
+import org.compiere.model.MRule;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MTaxProvider;
 import org.compiere.model.ModelValidator;
 import org.compiere.model.PO;
 import org.compiere.model.PaymentInterface;
 import org.compiere.model.PaymentProcessor;
+import org.compiere.model.ServerStateChangeEvent;
+import org.compiere.model.ServerStateChangeListener;
 import org.compiere.model.StandardTaxProvider;
+import org.compiere.model.SystemIDs;
 import org.compiere.process.ProcessCall;
+import org.compiere.process.ProcessInfo;
+import org.compiere.print.ReportEngine;
+import org.compiere.tools.FileUtil;
 import org.compiere.util.CCache;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.DefaultKeyStore;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.PaymentExport;
 import org.compiere.util.ReplenishInterface;
 import org.compiere.util.Util;
@@ -71,6 +93,11 @@ import org.idempiere.fa.service.api.IDepreciationMethod;
 import org.idempiere.fa.service.api.IDepreciationMethodFactory;
 import org.idempiere.model.IMappedModelFactory;
 import org.idempiere.print.IPrintHeaderFooter;
+import org.idempiere.print.IReportContentProcessor;
+import org.idempiere.print.IReportContentRenderer;
+import org.idempiere.print.IReportContentRendererFactory;
+import org.idempiere.print.ReportContentRequest;
+import org.idempiere.print.ReportContentType;
 import org.idempiere.print.renderer.IReportRenderer;
 import org.idempiere.print.renderer.IReportRendererConfiguration;
 import org.idempiere.process.IMappedProcessFactory;
@@ -274,7 +301,19 @@ public class Core {
 		return null;
 	}
 
+	/**
+	 * Get the password reset service for the current tenant. Delegates to
+	 * {@link PasswordResetServiceFactory}, which honors the {@code PASSWORD_RESET_SERVICE_CLASS}
+	 * config and falls back to the default provider.
+	 * @return {@link IPasswordResetService}, or null if none is registered
+	 */
+	public static IPasswordResetService getPasswordResetService()
+	{
+		return PasswordResetServiceFactory.getService(Env.getAD_Client_ID(Env.getCtx()));
+	}
+
 	private static IServiceReferenceHolder<IKeyStore> s_keystoreServiceReference = null;
+	private static volatile boolean s_legacyKeyWarningLogged = false;
 	
 	/**
 	 * 
@@ -297,8 +336,23 @@ public class Core {
 				//test key store service is working
 				SecretKey key = service.getKey(0);
 				if (key != null) {
-					if (key.getAlgorithm().equals(DefaultKeyStore.LEGACY_ALGORITHM))
-						s_log.warning("Encryption with legacy key algorithm DES detected - it is recommended to migrate to a stronger algorithm");
+					if (!s_legacyKeyWarningLogged) {
+						final boolean legacyKeyDetected = key.getAlgorithm().equals(DefaultKeyStore.LEGACY_ALGORITHM);
+						if (legacyKeyDetected)
+							s_log.warning("Encryption with legacy key algorithm DES detected - it is recommended to migrate to a stronger algorithm");
+						if (DB.isConnected()) {
+							updateLegacyKeyWarningSysConfig(legacyKeyDetected);
+						} else {
+							Adempiere.addServerStateChangeListener(new ServerStateChangeListener() {
+								@Override
+								public void stateChange(ServerStateChangeEvent event) {
+									if (event.getEventType() == ServerStateChangeEvent.SERVER_START) 
+										updateLegacyKeyWarningSysConfig(legacyKeyDetected);
+								}
+							});
+						}
+					}
+					s_legacyKeyWarningLogged = true;
 					keystoreService = service;
 					s_keystoreServiceReference = refHolder;
 					break;
@@ -314,6 +368,28 @@ public class Core {
 		return keystoreService;
 	}
 	
+	/**
+	 * Update SECURITY_DASHBOARD_LEGACY_KEY_WARNING SysConfig.
+	 * This method will be called asynchronously to avoid issues when DB is not yet connected.
+	 */
+	private static void updateLegacyKeyWarningSysConfig(boolean legacyKeyDetected) {
+		// Run in a separate thread to avoid blocking and to retry until DB is connected
+		String warn = MSysConfig.getValue(MSysConfig.SECURITY_DASHBOARD_LEGACY_KEY_WARNING, "Y");
+		if ("D".equals(warn))
+			return; // warning disabled by sysadmin, do not override
+		if ("Y".equals(warn) && legacyKeyDetected)
+			return; // warning already enabled and legacy key still detected, no update needed
+		if ("N".equals(warn) && !legacyKeyDetected)
+			return; // warning already negated and no legacy key detected, no update needed
+
+		MSysConfig conf = new MSysConfig(Env.getCtx(), SystemIDs.SYSCONFIG_SECURITY_DASHBOARD_LEGACY_KEY_WARNING, null);
+		conf.setValue(legacyKeyDetected ? "Y" : "N");
+		conf.saveEx();
+
+		if (s_log.isLoggable(Level.INFO))
+			s_log.info("Updated SECURITY_DASHBOARD_LEGACY_KEY_WARNING SysConfig");
+	}
+
 	private static final CCache<String, IServiceReferenceHolder<IPaymentProcessorFactory>> s_paymentProcessorFactoryCache = new CCache<>(IPAYMENT_PROCESSOR_FACTORY_CACHE_TABLE_NAME, "IPaymentProcessorFactory", 100, false);
 	
 	/**
@@ -794,7 +870,8 @@ public class Core {
 
 		return null;
 	}
-	
+
+
 	private final static CCache<String, IServiceReferenceHolder<IDepreciationMethodFactory>> s_depreciationMethodFactoryCache = new CCache<>(IDEPRECIATION_METHOD_FACTORY_CACHE_TABLE_NAME, "IDepreciationMethodFactory", 100, false);
 	
 	/**
@@ -1031,7 +1108,9 @@ public class Core {
 	 * @return {@link IUploadService}
 	 */
 	public static IUploadService getUploadService(MAuthorizationAccount account) {
-		String provider = account.getAD_AuthorizationCredential().getAD_AuthorizationProvider().getName();
+		MAuthorizationCredential credential = new MAuthorizationCredential(account.getCtx(), account.getAD_AuthorizationCredential_ID(), account.get_TrxName());
+		MAuthorizationProvider authProvider = new MAuthorizationProvider(account.getCtx(), credential.getAD_AuthorizationProvider_ID(), account.get_TrxName());
+		String provider = authProvider.getName();
 		ServiceQuery query = new ServiceQuery();
 		query.put("provider", provider);
 		IServiceHolder<IUploadService> holder = Service.locator().locate(IUploadService.class, query);
@@ -1166,11 +1245,302 @@ public class Core {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Gets a cached report content renderer using the first applicable factory in
+	 * OSGi service ranking order, or the standard report engine as fallback.
+	 * Post-processing is controlled by the report content request.
+	 *
+	 * @param request report content request
+	 * @return renderer or {@code null}
+	 */
+	public static IReportContentRenderer getReportContentRenderer(ReportContentRequest request) {
+		if (request == null)
+			return null;
+
+		IReportContentRenderer renderer = null;
+		for (IReportContentRendererFactory factory : ReportContentServiceProvider.getRendererFactories()) {
+			if (factory != null) {
+				renderer = factory.createRenderer(request);
+				if (renderer != null)
+					break;
+			}
+		}
+		if (renderer == null && request.reportEngine() != null)
+			renderer = new ReportEngineContentRenderer(request.reportEngine());
+		return renderer != null ? new CachedReportContentRenderer(request, renderer) : null;
+	}
+
+	/**
+	 * Creates report content through the highest-ranking applicable service and
+	 * falls back to the standard {@link org.compiere.print.ReportEngine}.
+	 *
+	 * @param request report content request
+	 * @param contentType requested MIME type
+	 * @param fileExtension requested file extension
+	 * @return generated content or {@code null}
+	 */
+	public static File getReportContent(ReportContentRequest request, String contentType, String fileExtension) {
+		File outputFile = null;
+		ProcessInfo processInfo = request != null && request.reportEngine() != null
+				? request.reportEngine().getProcessInfo()
+				: null;
+		if ("pdf".equalsIgnoreCase(fileExtension) && processInfo != null
+				&& !Util.isEmpty(processInfo.getPDFFileName(), true)) {
+			try {
+				outputFile = FileUtil.createFile(processInfo.getPDFFileName());
+			} catch (IOException e) {
+				throw new AdempiereException("Unable to create report output file "
+						+ processInfo.getPDFFileName(), e);
+			}
+		}
+		return getReportContent(request, contentType, fileExtension, outputFile);
+	}
+
+	/**
+	 * Creates report content through the highest-ranking applicable service and
+	 * copies it to {@code outputFile} when supplied.
+	 *
+	 * @param request report content request
+	 * @param contentType requested MIME type
+	 * @param fileExtension requested file extension
+	 * @param outputFile optional target file
+	 * @return generated content or {@code null}
+	 */
+	public static File getReportContent(ReportContentRequest request, String contentType, String fileExtension,
+			File outputFile) {
+		if (request == null)
+			return null;
+
+		IReportContentRenderer renderer = getReportContentRenderer(request);
+		File content = renderer != null ? renderer.getContent(contentType, fileExtension) : null;
+		if (content == null && request.reportEngine() != null) {
+			String extension = fileExtension != null ? fileExtension.toLowerCase() : "";
+			content = switch (extension) {
+				case "html" -> request.reportEngine().getHTML();
+				case "csv" -> request.reportEngine().getCSV();
+				case "xls" -> request.reportEngine().getXLS();
+				case "xlsx" -> request.reportEngine().getXLSX();
+				default -> request.reportEngine().getPDF();
+			};
+			content = processReportContent(request, contentType, fileExtension, content);
+		}
+
+		if (content == null || outputFile == null || content.equals(outputFile))
+			return content;
+		try {
+			Files.copy(content.toPath(), outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			return outputFile;
+		} catch (IOException e) {
+			throw new AdempiereException("Unable to copy report content to " + outputFile, e);
+		}
+	}
+
+	/**
+	 * Applies all applicable report content processors in descending OSGi service
+	 * ranking order.
+	 *
+	 * @param request report content request
+	 * @param contentType requested MIME type
+	 * @param fileExtension requested file extension
+	 * @param content generated content
+	 * @return processed content, or {@code null} when {@code content} is {@code null}
+	 */
+	public static File processReportContent(ReportContentRequest request, String contentType, String fileExtension,
+			File content) {
+		if (content == null || (request != null && !request.applyPostProcessing()))
+			return content;
+
+		for (IReportContentProcessor processor : ReportContentServiceProvider.getProcessors()) {
+			if (processor == null || !processor.isApplicable(request, contentType, fileExtension))
+				continue;
+			content = processor.process(request, contentType, fileExtension, content);
+			if (content == null)
+				throw new AdempiereException("Report content processor returned no content: "
+						+ processor.getClass().getName());
+		}
+		return content;
+	}
+
+	private static final class ReportEngineContentRenderer implements IReportContentRenderer {
+		private static final ReportContentType[] SUPPORTED_CONTENT_TYPES = {
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FilePDF"), "pdf", "application/pdf"),
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FileHTML"), "html", "text/html"),
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FileHTML"), "html",
+						ReportContentType.HTML_INTERACTIVE_CONTENT_TYPE),
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FileCSV"), "csv", "text/csv"),
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FileXLS"), "xls", "application/vnd.ms-excel"),
+				new ReportContentType(Msg.getMsg(Env.getCtx(), "FileXLSX"), "xlsx",
+						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") };
+
+		private final ReportEngine reportEngine;
+
+		private ReportEngineContentRenderer(ReportEngine reportEngine) {
+			this.reportEngine = reportEngine;
+		}
+
+		@Override
+		public File getContent(String contentType, String fileExtension) {
+			if (ReportContentType.isInteractiveHTML(contentType))
+				return null;
+			String extension = fileExtension != null ? fileExtension.toLowerCase() : "";
+			if (!List.of("pdf", "html", "csv", "xls", "xlsx").contains(extension))
+				return null;
+			try {
+				File file = FileUtil.createTempFile(FileUtil.makePrefix(reportEngine.getName()), "." + extension);
+				switch (extension) {
+					case "pdf" -> ensureCreated(reportEngine.createPDF(file), extension);
+					case "html" -> ensureCreated(
+							reportEngine.createHTML(file, false, Env.getLanguage(reportEngine.getCtx())), extension);
+					case "csv" -> ensureCreated(
+							reportEngine.createCSV(file, ',', Env.getLanguage(reportEngine.getCtx())), extension);
+					case "xls" -> reportEngine.createXLS(file, Env.getLanguage(reportEngine.getCtx()));
+					case "xlsx" -> reportEngine.createXLSX(file, Env.getLanguage(reportEngine.getCtx()));
+				}
+				return file;
+			} catch (Exception e) {
+				if (e instanceof RuntimeException runtimeException)
+					throw runtimeException;
+				throw new AdempiereException(e);
+			}
+		}
+
+		private void ensureCreated(boolean created, String extension) {
+			if (!created)
+				throw new AdempiereException("Failed to create report content: " + extension);
+		}
+
+		@Override
+		public ReportContentType[] getSupportedContentTypes() {
+			return SUPPORTED_CONTENT_TYPES;
+		}
+
+		@Override
+		public int getRowCount() {
+			return reportEngine.getRowCount();
+		}
+	}
+
+	private static final class CachedReportContentRenderer implements IReportContentRenderer {
+		private final ReportContentRequest request;
+		private final IReportContentRenderer renderer;
+		private final Map<String, File> content = new HashMap<>();
+
+		private CachedReportContentRenderer(ReportContentRequest request, IReportContentRenderer renderer) {
+			this.request = request;
+			this.renderer = renderer;
+		}
+
+		@Override
+		public File getContent(String contentType, String fileExtension) {
+			String key = contentType + ";" + fileExtension;
+			if (content.containsKey(key))
+				return content.get(key);
+			File generated = renderer.getContent(contentType, fileExtension);
+			File processed = processReportContent(request, contentType, fileExtension, generated);
+			if (processed != null)
+				content.put(key, processed);
+			return processed;
+		}
+
+		@Override
+		public ReportContentType[] getSupportedContentTypes() {
+			return renderer.getSupportedContentTypes();
+		}
+
+		@Override
+		public int getRowCount() {
+			return renderer.getRowCount();
+		}
+	}
+
+	/** Cache for compiled scripts, keyed by AD_Rule_ID */
+	private final static CCache<Integer, CompiledScript> s_compiledScriptCache = new CCache<>(MRule.Table_Name, "CompiledScript", 100, false);
+
+	/**
+	 * Get a compiled script for the given rule.
+	 * Uses JSR-223 Compilable interface for caching pre-compiled scripts.
+	 * This significantly improves performance for repeatedly executed scripts
+	 * (e.g., table validators, callouts) by avoiding re-parsing and re-compilation.
+	 *
+	 * @param  rule MRule containing the script
+	 * @return      CompiledScript if engine supports compilation, null otherwise
+	 */
+	public static CompiledScript getCompiledScript(MRule rule)
+	{
+		if (rule == null || rule.getAD_Rule_ID() <= 0 || Util.isEmpty(rule.getScript(), true))
+			return null;
+
+		// Cache only supported for Groovy script engine
+		if (!"groovy".equalsIgnoreCase(rule.getEngineName()))
+		{
+			if (s_log.isLoggable(Level.FINE))
+				s_log.fine("Script compilation caching is only supported for Groovy engine, skipping: " + rule.getEngineName());
+			return null;
+		}
+
+		Integer key = Integer.valueOf(rule.getAD_Rule_ID());
+
+		// Check cache first
+		CompiledScript compiled = s_compiledScriptCache.get(key);
+		if (compiled != null)
+			return compiled;
+
+		// Get script engine
+		ScriptEngine engine = getScriptEngine(rule.getEngineName());
+		if (engine == null)
+		{
+			s_log.log(Level.WARNING, "Script engine not found: " + rule.getEngineName());
+			return null;
+		}
+
+		// Check if engine supports compilation
+		if (!(engine instanceof Compilable))
+		{
+			if (s_log.isLoggable(Level.FINE))
+				s_log.fine("Script engine " + rule.getEngineName() + " does not support compilation");
+			return null;
+		}
+
+		// Compile and cache
+		try
+		{
+			compiled = ((Compilable) engine).compile(rule.getScript());
+			s_compiledScriptCache.put(key, compiled);
+			if (s_log.isLoggable(Level.FINE))
+				s_log.fine("Compiled and cached script: " + rule.getValue());
+			return compiled;
+		}
+		catch (ScriptException e)
+		{
+			s_log.log(Level.SEVERE, "Failed to compile script: " + rule.getValue() + ", Error: " + e.getLocalizedMessage(), e);
+			return null;
+		}
+	} // getCompiledScript
+
 	/**
 	 * Get markdown renderer service
 	 * @return markdown renderer service
 	 */
+
+	/**
+	 * @return list of search providers
+	 */
+	public static List<ISearchProvider> getSearchProviders() {
+		List<ISearchProvider> providers = new ArrayList<>();
+		List<IServiceReferenceHolder<ISearchProvider>> refs = Service.locator().list(ISearchProvider.class)
+				.getServiceReferences();
+		if (refs != null) {
+			for (IServiceReferenceHolder<ISearchProvider> ref : refs) {
+				ISearchProvider provider = ref.getService();
+				if (provider != null) {
+					providers.add(provider);
+				}
+			}
+		}
+		return providers;
+	}
+
 	public static IMarkdownRenderer getMarkdownRenderer() {
 		IServiceReferenceHolder<IMarkdownRenderer> holder = Service.locator().locate(IMarkdownRenderer.class).getServiceReference();
 		return holder != null ? holder.getService() : null; 

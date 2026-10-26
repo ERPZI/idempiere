@@ -25,7 +25,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Model for C_PaySelectionLine
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="C_PaySelectionLine")
 public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260309L;
 
     /** Standard Constructor */
     public X_C_PaySelectionLine (Properties ctx, int C_PaySelectionLine_ID, String trxName)
@@ -169,6 +169,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
       return sb.toString();
     }
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_ID)
@@ -197,6 +198,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_PaySelectionCheck getC_PaySelectionCheck() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_PaySelectionCheck)MTable.get(getCtx(), org.compiere.model.I_C_PaySelectionCheck.Table_ID)
@@ -270,6 +272,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 		return (String)get_Value(COLUMNNAME_C_PaySelectionLine_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_PaySelection getC_PaySelection() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_PaySelection)MTable.get(getCtx(), org.compiere.model.I_C_PaySelection.Table_ID)
@@ -319,7 +322,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	*/
 	public void setDifferenceAmt (BigDecimal DifferenceAmt)
 	{
-		set_ValueNoCheck (COLUMNNAME_DifferenceAmt, DifferenceAmt);
+		set_Value (COLUMNNAME_DifferenceAmt, DifferenceAmt);
 	}
 
 	/** Get Difference.
@@ -338,7 +341,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	*/
 	public void setDiscountAmt (BigDecimal DiscountAmt)
 	{
-		set_ValueNoCheck (COLUMNNAME_DiscountAmt, DiscountAmt);
+		set_Value (COLUMNNAME_DiscountAmt, DiscountAmt);
 	}
 
 	/** Get Discount Amount.
@@ -554,7 +557,7 @@ public class X_C_PaySelectionLine extends PO implements I_C_PaySelectionLine, I_
 	*/
 	public void setWriteOffAmt (BigDecimal WriteOffAmt)
 	{
-		set_ValueNoCheck (COLUMNNAME_WriteOffAmt, WriteOffAmt);
+		set_Value (COLUMNNAME_WriteOffAmt, WriteOffAmt);
 	}
 
 	/** Get Write-off Amount.

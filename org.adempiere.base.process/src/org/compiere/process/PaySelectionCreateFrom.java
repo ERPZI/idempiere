@@ -32,6 +32,7 @@ import org.compiere.model.MProcessPara;
 import org.compiere.model.X_C_Order;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 
 /**
@@ -63,6 +64,7 @@ public class PaySelectionCreateFrom extends SvrProcess
 	private boolean		p_OnlyPositive = false;
 	
 	private Timestamp p_DueDate = null;
+	private String p_docTypeIDs = "";
 
 	//MPo,31/10/2016 Add PrCtr to payment selection
 	//MPo,31/10/2016 Add WHT exclusion parameter (automatic payment currently does not support WHT deduction
@@ -116,6 +118,9 @@ public class PaySelectionCreateFrom extends SvrProcess
 			else if (name.equals("AD_Org_ID"))
 				p_AD_Org_ID = para[i].getParameterAsInt();
 			//
+
+			else if (name.equals("C_DocType_ID"))
+				p_docTypeIDs = para[i].getParameterAsCSVInt();
 			else
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
@@ -264,7 +269,10 @@ public class PaySelectionCreateFrom extends SvrProcess
 			
 			sqlWhere.append(onlyPositiveWhere);
 		}
-	
+
+		if (!Util.isEmpty(p_docTypeIDs))
+			sqlWhere.append(" AND i.C_DocType_ID IN (").append(p_docTypeIDs).append(")");
+
 		sql.append(sqlWhere.toString());
 		//
 		int lines = 0;

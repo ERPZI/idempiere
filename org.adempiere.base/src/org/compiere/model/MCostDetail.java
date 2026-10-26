@@ -80,7 +80,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if created
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createOrder (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int C_OrderLine_ID, int M_CostElement_ID, 
@@ -146,6 +146,7 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setProcessed(false);
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
+				// Treat delta adjustments as backdated transactions to trigger back-date processing (e.g. current-date deltas)
 				if (!cd.isBackDate())
 					cd.setIsBackDate(true);
 			}
@@ -177,7 +178,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if created
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createInvoice (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int C_InvoiceLine_ID, int M_CostElement_ID, 
@@ -243,6 +244,7 @@ public class MCostDetail extends X_M_CostDetail
 				cd.setProcessed(false);
 				cd.setAmt(Amt);
 				cd.setQty(Qty);
+				// Treat delta adjustments as backdated transactions to trigger back-date processing (e.g. current-date deltas)
 				if (!cd.isBackDate())
 					cd.setIsBackDate(true);
 			}
@@ -275,7 +277,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createShipment (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int M_InOutLine_ID, int M_CostElement_ID, 
@@ -370,7 +372,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createInventory (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int M_InventoryLine_ID, int M_CostElement_ID, 
@@ -464,7 +466,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createMovement (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int M_MovementLine_ID, int M_CostElement_ID, 
@@ -560,7 +562,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createProduction (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int M_ProductionLine_ID, int M_CostElement_ID, 
@@ -652,7 +654,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createMatchInvoice (MAcctSchema as, int AD_Org_ID, 
 			int M_Product_ID, int M_AttributeSetInstance_ID,
 			int M_MatchInv_ID, int M_CostElement_ID, 
@@ -744,7 +746,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return true if no error
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static boolean createProjectIssue (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int C_ProjectIssue_ID, int M_CostElement_ID, 
@@ -903,7 +905,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@return cost detail
 	 *  @deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static MCostDetail get (Properties ctx, String whereClause,
 		int ID, int M_AttributeSetInstance_ID, String trxName)
 	{
@@ -1007,7 +1009,6 @@ public class MCostDetail extends X_M_CostDetail
 				+ "M_CostDetail.M_CostDetail_ID")
 		.list();
 		for (MCostDetail cd : list) {
-			System.out.println("processProduct0="+cd+","+cd.isProcessed());
 			if (cd.process())	//	saves
 				counterOK++;
 			else
@@ -1044,7 +1045,6 @@ public class MCostDetail extends X_M_CostDetail
 				+ "M_CostDetail.M_CostDetail_ID")
 		.list();
 		for (MCostDetail cd : list) {
-			System.out.println("processProduct1="+cd+","+cd.isProcessed());
 			if (cd.process())	//	saves
 				counterOK++;
 			else
@@ -1119,7 +1119,7 @@ public class MCostDetail extends X_M_CostDetail
 	 *	@param trxName transaction
 	 *	@deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public MCostDetail (MAcctSchema as, int AD_Org_ID, 
 		int M_Product_ID, int M_AttributeSetInstance_ID,
 		int M_CostElement_ID, BigDecimal amt, BigDecimal qty,
@@ -1346,15 +1346,9 @@ public class MCostDetail extends X_M_CostDetail
 		//	Org Element
 		int Org_ID = getAD_Org_ID();
 		int M_ASI_ID = getM_AttributeSetInstance_ID();
-		if (MAcctSchema.COSTINGLEVEL_Client.equals(CostingLevel))
-		{
-			Org_ID = 0;
-			M_ASI_ID = 0;
-		}
-		else if (MAcctSchema.COSTINGLEVEL_Organization.equals(CostingLevel))
-			M_ASI_ID = 0;
-		else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(CostingLevel))
-			Org_ID = 0;
+		MCost.CostingKey costKey = MCost.CostingKey.resolve(Org_ID, M_ASI_ID, CostingLevel);
+		Org_ID = costKey.AD_Org_ID();
+		M_ASI_ID = costKey.M_AttributeSetInstance_ID();
 
 		//	Create Material Cost elements
 		if (getM_CostElement_ID() == 0)
@@ -1555,10 +1549,14 @@ public class MCostDetail extends X_M_CostDetail
 			if (io.getReversal_ID() > 0)
 				cost.setSkipAverageCostingQtyCheck(io.getReversal_ID() > 0);
 			else { // skip average costing qty check for drop shipment
-				MOrder sOrder = new MOrder(getCtx(), io.getC_Order_ID(), get_TrxName());
-				if (sOrder.getLink_Order_ID() > 0) {
-					MOrder lOrder = new MOrder(getCtx(), sOrder.getLink_Order_ID(), get_TrxName());
-					cost.setSkipAverageCostingQtyCheck(lOrder.isDropShip());
+				int C_Order_ID = io.getC_Order_ID();
+				if (C_Order_ID > 0) {
+					MOrder sOrder = new MOrder(getCtx(), C_Order_ID, get_TrxName());
+					int Link_Order_ID = sOrder.getLink_Order_ID();
+					if (Link_Order_ID > 0) {
+						MOrder lOrder = new MOrder(getCtx(), Link_Order_ID, get_TrxName());
+						cost.setSkipAverageCostingQtyCheck(lOrder.isDropShip());
+					}
 				}
 			}
 		} else if (getC_ProjectIssue_ID() > 0) { // skip average costing qty check for reversed project issue
@@ -1570,10 +1568,6 @@ public class MCostDetail extends X_M_CostDetail
 			cost.setSkipAverageCostingQtyCheck(i.getReversal_ID() > 0);
 		}
 		
-		System.out.println("process0="+as+","+ce);
-		System.out.println("process1="+cd+","+this);
-		System.out.println("process11="+cost.getAD_Org_ID()+","+this.getAD_Org_ID());
-		System.out.println("process2="+cost+","+cost.getCurrentQty());
 		ICostInfo costInfo = MCost.getCostInfo(product.getCtx(), product.getAD_Client_ID(), Org_ID, product.getM_Product_ID(), 
 					as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(), M_ASI_ID, getDateAcct(), 
 					cd != null ? cd : this, get_TrxName());
@@ -1583,8 +1577,6 @@ public class MCostDetail extends X_M_CostDetail
 			cost.setCurrentCostPrice(costInfo.getCurrentCostPrice());
 			cost.setCumulatedQty(costInfo.getCumulatedQty());
 			cost.setCumulatedAmt(costInfo.getCumulatedAmt());
-			System.out.println("process3="+costInfo+","+costInfo.getCurrentQty());
-			System.out.println("process4="+cost+","+cost.getCurrentQty());
 		}
 		
 		DB.getDatabase().forUpdate(cost, 120);
@@ -1781,6 +1773,18 @@ public class MCostDetail extends X_M_CostDetail
 			boolean addition = qty.signum() > 0;
 			boolean adjustment = getM_InventoryLine_ID() > 0 && qty.signum() == 0 && amt.signum() != 0;
 			boolean isVendorRMA = isVendorRMA();
+			
+			//If not import and it is due to inventory then don't mark as addition
+			if(addition && getM_InventoryLine_ID() != 0) {
+				MInventoryLine invLine = new MInventoryLine(getCtx(), getM_InventoryLine_ID(), get_TrxName());
+				// Only apply import-line check for Physical Inventory, not Internal Use
+				if (!invLine.isInternalUseInventory()) {
+					int I_Inventory_ID = MInventoryLine.getImportLine_ID(getM_InventoryLine_ID(), get_TrxName());
+					if (I_Inventory_ID <= 0)
+						addition = false;
+				}
+			}
+			
 			//
 			if (ce.isAverageInvoice())
 			{
@@ -1788,7 +1792,8 @@ public class MCostDetail extends X_M_CostDetail
 				{
 					if (adjustment)
 					{
-						costingMethod = getM_InventoryLine().getM_Inventory().getCostingMethod();
+						MInventoryLine invLine = new MInventoryLine(getCtx(), getM_InventoryLine_ID(), get_TrxName());
+						costingMethod = invLine.getParent().getCostingMethod();
 						if (MCostElement.COSTINGMETHOD_AverageInvoice.equals(costingMethod))
 						{
 							if (cost.getCurrentQty().signum() == 0 && qty.signum() == 0) {
@@ -1818,7 +1823,8 @@ public class MCostDetail extends X_M_CostDetail
 			{
 				if (adjustment)
 				{
-					costingMethod = getM_InventoryLine().getM_Inventory().getCostingMethod();
+					MInventoryLine invLine = new MInventoryLine(getCtx(), getM_InventoryLine_ID(), get_TrxName());
+					costingMethod = invLine.getParent().getCostingMethod();
 					if (MCostElement.COSTINGMETHOD_AveragePO.equals(costingMethod))
 					{
 						if (cost.getCurrentQty().signum() == 0 && qty.signum() == 0) {
@@ -1893,7 +1899,8 @@ public class MCostDetail extends X_M_CostDetail
 			{
 				if (adjustment)
 				{
-					costingMethod = getM_InventoryLine().getM_Inventory().getCostingMethod();
+					MInventoryLine invLine = new MInventoryLine(getCtx(), getM_InventoryLine_ID(), get_TrxName());
+					costingMethod = invLine.getParent().getCostingMethod();
 					if (MCostElement.COSTINGMETHOD_StandardCosting.equals(costingMethod))
 					{
 						cost.add(amt.multiply(cost.getCurrentQty()), qty);					
@@ -1979,7 +1986,6 @@ public class MCostDetail extends X_M_CostDetail
 				|| history.getNewCostPrice().compareTo(history.getOldCostPrice()) != 0
 				|| (ce.isAveragePO() || ce.isAverageInvoice()))
 		{
-			System.out.println("history="+history.getOldQty()+" > "+history.getNewQty());
 			if (!history.save())
 				return false;
 		}

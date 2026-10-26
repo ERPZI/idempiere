@@ -82,6 +82,21 @@ public class FinReport extends SvrProcess
 	private int					p_PA_Hierarchy_ID = 0;
 	/** Optional report cube			*/
 	private int 				p_PA_ReportCube_ID = 0;
+	/** BPartner Employee Parameter */
+	private int					p_C_Employee_ID				= 0;
+	/** Charge Parameter */
+	private int					p_C_Charge_ID				= 0;
+	/** Cost Center Parameter */
+	private int					p_C_CostCenter_ID			= 0;
+	/** Department Parameter */
+	private int					p_C_Department_ID			= 0;
+	/** Warehouse Parameter */
+	private int					p_M_Warehouse_ID			= 0;
+	/** Asset Parameter */
+	private int					p_A_Asset_ID				= 0;
+	/** Attribute Set Instance Parameter */
+	private int					p_M_AttributeSetInstance_ID	= 0;
+
 	/** Exclude Adjustment Period		*/
 	private String				p_AdjPeriodToExclude = "";
 
@@ -146,6 +161,20 @@ public class FinReport extends SvrProcess
 				p_DetailsSourceFirst = "Y".equals(para[i].getParameter());
 			else if (name.equals("PA_ReportCube_ID"))
 				p_PA_ReportCube_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_Employee_ID"))
+				p_C_Employee_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_Charge_ID"))
+				p_C_Charge_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_CostCenter_ID"))
+				p_C_CostCenter_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_Department_ID"))
+				p_C_Department_ID = para[i].getParameterAsInt();
+			else if (name.equals("M_Warehouse_ID"))
+				p_M_Warehouse_ID = para[i].getParameterAsInt();
+			else if (name.equals("A_Asset_ID"))
+				p_A_Asset_ID = para[i].getParameterAsInt();
+			else if (name.equals("M_AttributeSetInstance_ID"))
+				p_M_AttributeSetInstance_ID = para[i].getParameterAsInt();
 			else
 				MProcessPara.validateUnknownParameter(getProcessInfo().getAD_Process_ID(), para[i]);
 		}
@@ -157,6 +186,27 @@ public class FinReport extends SvrProcess
 		if (p_C_BPartner_ID != 0)
 			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
 				p_PA_Hierarchy_ID, MAcctSchemaElement.ELEMENTTYPE_BPartner, p_C_BPartner_ID));
+		//	Optional Employee
+		if (p_C_Employee_ID != 0)
+			m_parameterWhere.append(" AND C_Employee_ID = ").append(p_C_Employee_ID);
+		//	Optional Charge
+		if (p_C_Charge_ID != 0)
+			m_parameterWhere.append(" AND C_Charge_ID = ").append(p_C_Charge_ID);
+		//	Optional Cost Center
+		if (p_C_CostCenter_ID != 0)
+			m_parameterWhere.append(" AND C_CostCenter_ID = ").append(p_C_CostCenter_ID);
+		//	Optional Department
+		if (p_C_Department_ID != 0)
+			m_parameterWhere.append(" AND C_Department_ID = ").append(p_C_Department_ID);
+		//	Optional Warehouse
+		if (p_M_Warehouse_ID != 0)
+			m_parameterWhere.append(" AND M_Warehouse_ID = ").append(p_M_Warehouse_ID);
+		// Optional Asset
+		if (p_A_Asset_ID != 0)
+			m_parameterWhere.append(" AND A_Asset_ID = ").append(p_A_Asset_ID);
+		// Optional ASI
+		if (p_M_AttributeSetInstance_ID != 0)
+			m_parameterWhere.append(" AND M_AttributeSetInstance_ID = ").append(p_M_AttributeSetInstance_ID);
 		//	Optional Product
 		if (p_M_Product_ID != 0)
 			m_parameterWhere.append(" AND ").append(MReportTree.getWhereClause(getCtx(), 
@@ -342,7 +392,8 @@ public class FinReport extends SvrProcess
 		doColumnPercentageOfLineForMultiRange();
 
 		deleteUnprintedLines();
-		
+		cleanBlankLines();
+
 		scaleResults();
 
 		//	Create Report
@@ -1580,7 +1631,8 @@ public class FinReport extends SvrProcess
 		no = DB.executeUpdateEx(sql.toString(), get_TrxName());
 		if (log.isLoggable(Level.FINE)) log.fine("Name #=" + no + " - " + sql.toString());
 
-		if (m_report.isListTrx())
+		// List Trx Lines not supported by report cube
+		if (m_report.isListTrx() && p_PA_ReportCube_ID == 0)
 			insertLineTrx (line, variable);
 	}	//	insertLineSource
 
@@ -1760,6 +1812,30 @@ public class FinReport extends SvrProcess
 			}
 		}	//	for all lines
 	}	//	deleteUnprintedLines
+
+	/**
+	 *	Clean Blank Lines
+	 */
+	private void cleanBlankLines()
+	{
+		final String sql = """
+			UPDATE T_Report SET Col_0=NULL,
+				Col_1=NULL, Col_2=NULL, Col_3=NULL, Col_4=NULL, Col_5=NULL, Col_6=NULL, Col_7=NULL, Col_8=NULL, Col_9=NULL, Col_10=NULL,
+				Col_11=NULL, Col_12=NULL, Col_13=NULL, Col_14=NULL, Col_15=NULL, Col_16=NULL, Col_17=NULL, Col_18=NULL, Col_19=NULL, Col_20=NULL,
+				Col_21=NULL, Col_22=NULL, Col_23=NULL, Col_24=NULL, Col_25=NULL, Col_26=NULL, Col_27=NULL, Col_28=NULL, Col_29=NULL, Col_30=NULL
+				WHERE AD_PInstance_ID=? AND PA_ReportLine_ID=?
+			""";
+		for (int line = 0; line < m_lines.length; line++)
+		{
+			//	Blank Lines - Clean values
+			if (m_lines[line].isLineTypeBlankLine())
+			{
+				int no = DB.executeUpdateEx(sql, new Object[] {getAD_PInstance_ID(), m_lines[line].getPA_ReportLine_ID()}, get_TrxName());
+				if (no > 0)
+					if (log.isLoggable(Level.FINE)) log.fine(m_lines[line].getName() + " - #" + no);
+			}
+		}	//	for all lines
+	}	//	cleanBlankLines
 
 	/**
 	 * Update result with multiplier and rounding factor

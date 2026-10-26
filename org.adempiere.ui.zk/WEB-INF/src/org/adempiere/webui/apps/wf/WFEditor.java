@@ -30,6 +30,7 @@ import org.adempiere.webui.component.Window;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.ADForm;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.apps.wf.WFGraphLayout;
 import org.compiere.apps.wf.WFNodeWidget;
@@ -53,7 +54,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Menupopup;
 import org.zkoss.zul.North;
@@ -61,7 +62,7 @@ import org.zkoss.zul.Separator;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
 import org.zkoss.zul.Toolbarbutton;
-import org.zkoss.zul.Vbox;
+import org.adempiere.webui.component.FlexVlayout;
 
 /**
  * Workflow editor form
@@ -112,7 +113,7 @@ public class WFEditor extends ADForm {
 		// Zoom
 		zoomButton = new Toolbarbutton();
 		if (ThemeManager.isUseFontIconForImage())
-			zoomButton.setIconSclass("z-icon-Zoom");
+			zoomButton.setIconSclass(Icon.getIconSclass(Icon.ZOOM));
 		else
 			zoomButton.setImage(ThemeManager.getThemeResource("images/Zoom16.png"));
 		toolbar.appendChild(zoomButton);
@@ -121,7 +122,7 @@ public class WFEditor extends ADForm {
 		// New Node
 		newButton = new Toolbarbutton();
 		if (ThemeManager.isUseFontIconForImage())
-			newButton.setIconSclass("z-icon-New");
+			newButton.setIconSclass(Icon.getIconSclass(Icon.NEW));
 		else
 			newButton.setImage(ThemeManager.getThemeResource("images/New16.png"));
 		toolbar.appendChild(newButton);
@@ -130,7 +131,7 @@ public class WFEditor extends ADForm {
 		// Refresh
 		refreshButton = new Toolbarbutton();
 		if (ThemeManager.isUseFontIconForImage())
-			refreshButton.setIconSclass("z-icon-Refresh");
+			refreshButton.setIconSclass(Icon.getIconSclass(Icon.REFRESH));
 		else
 			refreshButton.setImage(ThemeManager.getThemeResource("images/Refresh16.png"));
 		toolbar.appendChild(refreshButton);
@@ -225,10 +226,10 @@ public class WFEditor extends ADForm {
 		String title = Msg.getMsg(Env.getCtx(), "CreateNewNode");
 		final Window w = new Window();
 		w.setTitle(title);
-		Vbox vbox = new Vbox();
+		FlexVlayout vbox = new FlexVlayout();
 		w.appendChild(vbox);
 		vbox.appendChild(new Separator());
-		Hbox hbox = new Hbox();
+		FlexHlayout hbox = new FlexHlayout();
 		hbox.appendChild(new Label(nameLabel));
 		hbox.appendChild(new Space());
 		final Textbox text = new Textbox();

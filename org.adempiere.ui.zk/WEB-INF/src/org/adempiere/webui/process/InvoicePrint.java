@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.compiere.model.MClient;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMailText;
@@ -44,6 +45,7 @@ import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
 import org.compiere.util.Util;
+import org.idempiere.print.ReportContentRequest;
 
 /**
  *	Print Invoices on Paper or send PDFs
@@ -65,7 +67,8 @@ public class InvoicePrint extends SvrProcess
 	protected String		m_DocumentNo_From = null;
 	protected String		m_DocumentNo_To = null;
 	private String		p_IsPaid = null;
-	private int			m_C_DocType_ID = 0;
+	private int[]		m_C_DocType_IDs;
+	private boolean		negateDocType = false;
 	private String		p_IsPrinted = null;
 	private String		m_PaymentRule = null;
 	private int	  	    m_C_PaymentTerm_ID = 0;
@@ -113,8 +116,10 @@ public class InvoicePrint extends SvrProcess
 			}
 			else if (name.equals("IsPaid"))
 				p_IsPaid = (String)para[i].getParameter();
-			else if (name.equals("C_DocType_ID"))
-				m_C_DocType_ID = para[i].getParameterAsInt();
+			else if (name.equals("C_DocType_ID")) {
+				negateDocType = para[i].isNotClause();
+				m_C_DocType_IDs = para[i].getParameterAsIntArray();
+			}
 			else if (name.equals("IsPrinted"))
 				p_IsPrinted = (String)para[i].getParameter();
 			else if (name.equals("PaymentRule"))
@@ -160,7 +165,7 @@ public class InvoicePrint extends SvrProcess
 			+ ", DateInvoiced=" + m_dateInvoiced_From + "-" + m_dateInvoiced_To
 			+ ", DocumentNo=" + m_DocumentNo_From + "-" + m_DocumentNo_To
 			+ ", IsPaid=" + p_IsPaid
-			+ ", C_DocType_ID=" + m_C_DocType_ID
+			+ ", C_DocType_ID=" + m_C_DocType_IDs
 			+ ", IsPrinted=" + p_IsPrinted
 			+ ", PaymentRule=" + m_PaymentRule
 			+ ", C_PaymentTerm_ID=" + m_C_PaymentTerm_ID
@@ -301,7 +306,8 @@ public class InvoicePrint extends SvrProcess
 					File invoice = null;
 					if (!Ini.isClient())
 						invoice = new File(MInvoice.getPDFFileName(documentDir, C_Invoice_ID));
-					File attachment = re.getPDF(invoice);
+					File attachment = Core.getReportContent(new ReportContentRequest(re, getProcessInfo(), DocumentNo),
+							"application/pdf", "pdf", invoice);
 					if (log.isLoggable(Level.FINE)) log.fine(to + " - " + attachment);
 					email.addAttachment(attachment);
 					//
@@ -325,7 +331,8 @@ public class InvoicePrint extends SvrProcess
 				}
 				else
 				{
-					pdfList.add(re.getPDF());
+					pdfList.add(Core.getReportContent(new ReportContentRequest(re, getProcessInfo(), DocumentNo),
+							"application/pdf", "pdf"));
 					count++;
 					printed = true;
 				}
@@ -431,10 +438,18 @@ public class InvoicePrint extends SvrProcess
 				sql.append(" AND i.IsPaid=?");
 				params.add(p_IsPaid);
 			}
-			if (m_C_DocType_ID != 0)
+			if (m_C_DocType_IDs != null && m_C_DocType_IDs.length > 0)
 			{
-				sql.append (" AND i.C_DocTypeTarget_ID=?");
-				params.add(m_C_DocType_ID);
+				sql.append(" AND i.C_DocTypeTarget_ID ");
+			    sql.append(negateDocType ? "NOT IN (" : "IN (");
+			    for (int i = 0; i < m_C_DocType_IDs.length; i++) {
+			        sql.append("?");
+			        if (i < m_C_DocType_IDs.length - 1) {
+			            sql.append(", ");
+			        }
+			        params.add(m_C_DocType_IDs[i]);
+			    }
+			    sql.append(")");
 			}
 			if (p_IsPrinted != null && p_IsPrinted.length() == 1)
 			{

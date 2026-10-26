@@ -30,13 +30,13 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAttributeSet;
 import org.compiere.model.MAttributeSetInstance;
 import org.compiere.model.MCost;
+import org.compiere.model.MCostElement;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInventory;
 import org.compiere.model.MInventoryLine;
 import org.compiere.model.MProcessPara;
 import org.compiere.model.MProduct;
-import org.compiere.model.MProductCategoryAcct;
 import org.compiere.model.ModelValidationEngine;
-import org.compiere.model.PO;
 import org.compiere.model.X_I_Inventory;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.CLogger;
@@ -471,12 +471,12 @@ public class ImportInventory extends SvrProcess implements ImportProcess
 				if (!DocumentEngine.processIt(costingDoc, DocAction.ACTION_Complete)) 
 				{
 					StringBuilder msg = new StringBuilder();
-					I_C_DocType docType = costingDoc.getC_DocType();
+					MDocType docType = MDocType.get(getCtx(), costingDoc.getC_DocType_ID());
 					msg.append(Msg.getMsg(getCtx(), "ProcessFailed")).append(": ");
 					if (Env.isBaseLanguage(getCtx(), I_C_DocType.Table_Name))
 						msg.append(docType.getName());
 					else
-						msg.append(((PO)docType).get_Translation(I_C_DocType.COLUMNNAME_Name));
+						msg.append(docType.get_Translation(I_C_DocType.COLUMNNAME_Name));
 					throw new AdempiereUserError(msg.toString());
 				}
 				costingDoc.saveEx();
@@ -522,26 +522,12 @@ public class ImportInventory extends SvrProcess implements ImportProcess
 
 	protected void updateCosting(X_I_Inventory imp, MProduct product,
 			MInventoryLine line) {
-		String costingLevel = null;
-		if(product.getM_Product_Category_ID() > 0){
-			MProductCategoryAcct pca = MProductCategoryAcct.get(getCtx(), product.getM_Product_Category_ID(), p_C_AcctSchema_ID, get_TrxName());
-			costingLevel = pca.getCostingLevel();
-			if (costingLevel == null) {
-				costingLevel = acctSchema.getCostingLevel();
-			}
-
-		}
-
+		String costingLevel = product.getCostingLevel(acctSchema);
 		int costOrgID = p_AD_OrgTrx_ID;
 		int costASI = line.getM_AttributeSetInstance_ID();
-		if (MAcctSchema.COSTINGLEVEL_Client.equals(costingLevel)){
-			costOrgID = 0;
-			costASI = 0;
-		} else if (MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel)) { 
-			costASI = 0;
-		} else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel)) {
-			costOrgID = 0;
-		}
+		MCost.CostingKey costKey = MCost.CostingKey.resolve(costOrgID, costASI, costingLevel);
+		costOrgID = costKey.AD_Org_ID();
+		costASI = costKey.M_AttributeSetInstance_ID();
 		MCost cost = MCost.get (product, costASI
 				, acctSchema, costOrgID, p_M_CostElement_ID, get_TrxName());
 		if (cost.is_new())
@@ -549,7 +535,8 @@ public class ImportInventory extends SvrProcess implements ImportProcess
 		if (costingDoc == null) {
 			costingDoc = new MInventory(getCtx(), 0, get_TrxName());
 			costingDoc.setC_DocType_ID(p_C_DocType_ID);
-			costingDoc.setCostingMethod(cost.getM_CostElement().getCostingMethod());
+			MCostElement costElement = MCostElement.get(cost.getM_CostElement_ID());
+			costingDoc.setCostingMethod(costElement.getCostingMethod());
 			costingDoc.setAD_Org_ID(imp.getAD_Org_ID());
 			costingDoc.setDocAction(DocAction.ACTION_Complete);
 			costingDoc.saveEx();

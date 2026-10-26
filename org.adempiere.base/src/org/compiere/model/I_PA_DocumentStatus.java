@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for PA_DocumentStatus
  *  @author iDempiere (generated) 
- *  @version Release 12
+ *  @version Release 13
  */
 public interface I_PA_DocumentStatus 
 {
@@ -49,6 +49,22 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Client_ID();
 
+    /** Column name AD_FieldGroup_ID */
+    public static final String COLUMNNAME_AD_FieldGroup_ID = "AD_FieldGroup_ID";
+
+	/** Set Field Group.
+	  * Logical grouping of fields
+	  */
+	public void setAD_FieldGroup_ID (int AD_FieldGroup_ID);
+
+	/** Get Field Group.
+	  * Logical grouping of fields
+	  */
+	public int getAD_FieldGroup_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_FieldGroup getAD_FieldGroup() throws RuntimeException;
+
     /** Column name AD_Form_ID */
     public static final String COLUMNNAME_AD_Form_ID = "AD_Form_ID";
 
@@ -62,7 +78,24 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Form_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Form getAD_Form() throws RuntimeException;
+
+    /** Column name AD_InfoWindow_ID */
+    public static final String COLUMNNAME_AD_InfoWindow_ID = "AD_InfoWindow_ID";
+
+	/** Set Info Window.
+	  * Info and search/select Window
+	  */
+	public void setAD_InfoWindow_ID (int AD_InfoWindow_ID);
+
+	/** Get Info Window.
+	  * Info and search/select Window
+	  */
+	public int getAD_InfoWindow_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_InfoWindow getAD_InfoWindow() throws RuntimeException;
 
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
@@ -77,6 +110,22 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name AD_Process_ID */
+    public static final String COLUMNNAME_AD_Process_ID = "AD_Process_ID";
+
+	/** Set Process.
+	  * Process or Report
+	  */
+	public void setAD_Process_ID (int AD_Process_ID);
+
+	/** Get Process.
+	  * Process or Report
+	  */
+	public int getAD_Process_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_Process getAD_Process() throws RuntimeException;
+
     /** Column name AD_Role_ID */
     public static final String COLUMNNAME_AD_Role_ID = "AD_Role_ID";
 
@@ -90,6 +139,7 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Role_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Role getAD_Role() throws RuntimeException;
 
     /** Column name AD_Table_ID */
@@ -105,6 +155,7 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Table_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Table getAD_Table() throws RuntimeException;
 
     /** Column name AD_User_ID */
@@ -120,6 +171,7 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_User_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getAD_User() throws RuntimeException;
 
     /** Column name AD_Window_ID */
@@ -135,6 +187,7 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getAD_Window_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Window getAD_Window() throws RuntimeException;
 
     /** Column name C_Project_ID */
@@ -150,6 +203,7 @@ public interface I_PA_DocumentStatus
 	  */
 	public int getC_Project_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Project getC_Project() throws RuntimeException;
 
     /** Column name Created */
@@ -196,6 +250,19 @@ public interface I_PA_DocumentStatus
 	  */
 	public String getEntityType();
 
+    /** Column name Help */
+    public static final String COLUMNNAME_Help = "Help";
+
+	/** Set Comment/Help.
+	  * Comment or Hint
+	  */
+	public void setHelp (String Help);
+
+	/** Get Comment/Help.
+	  * Comment or Hint
+	  */
+	public String getHelp();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -208,6 +275,19 @@ public interface I_PA_DocumentStatus
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name IsHideWhenZero */
+    public static final String COLUMNNAME_IsHideWhenZero = "IsHideWhenZero";
+
+	/** Set Hide when Zero.
+	  * Hide when the Value is Zero
+	  */
+	public void setIsHideWhenZero (boolean IsHideWhenZero);
+
+	/** Get Hide when Zero.
+	  * Hide when the Value is Zero
+	  */
+	public boolean isHideWhenZero();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
@@ -222,6 +302,18 @@ public interface I_PA_DocumentStatus
 	  */
 	public String getName();
 
+    /** Column name Name_PrintColorZero_ID */
+    public static final String COLUMNNAME_Name_PrintColorZero_ID = "Name_PrintColorZero_ID";
+
+	/** Set Print Color for Name when Zero	  */
+	public void setName_PrintColorZero_ID (int Name_PrintColorZero_ID);
+
+	/** Get Print Color for Name when Zero	  */
+	public int getName_PrintColorZero_ID();
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_AD_PrintColor getName_PrintColorZero() throws RuntimeException;
+
     /** Column name Name_PrintColor_ID */
     public static final String COLUMNNAME_Name_PrintColor_ID = "Name_PrintColor_ID";
 
@@ -231,6 +323,7 @@ public interface I_PA_DocumentStatus
 	/** Get Print Color for Name	  */
 	public int getName_PrintColor_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PrintColor getName_PrintColor() throws RuntimeException;
 
     /** Column name Name_PrintFont_ID */
@@ -242,6 +335,7 @@ public interface I_PA_DocumentStatus
 	/** Get Print Font for Name	  */
 	public int getName_PrintFont_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PrintFont getName_PrintFont() throws RuntimeException;
 
     /** Column name Number_PrintColor_ID */
@@ -253,6 +347,7 @@ public interface I_PA_DocumentStatus
 	/** Get Print Color for Number	  */
 	public int getNumber_PrintColor_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PrintColor getNumber_PrintColor() throws RuntimeException;
 
     /** Column name Number_PrintFont_ID */
@@ -264,6 +359,7 @@ public interface I_PA_DocumentStatus
 	/** Get Print Font for Number	  */
 	public int getNumber_PrintFont_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_PrintFont getNumber_PrintFont() throws RuntimeException;
 
     /** Column name PA_DocumentStatus_ID */

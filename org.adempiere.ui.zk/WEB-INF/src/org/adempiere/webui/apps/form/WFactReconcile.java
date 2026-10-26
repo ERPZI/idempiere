@@ -66,6 +66,7 @@ import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.DateRangeButton;
 import org.compiere.apps.form.FactReconcile;
@@ -88,7 +89,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 
@@ -207,7 +208,7 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		bZoomDoc.setLabel(Msg.translate(Env.getCtx(), "ZoomDocument"));
 		bSelect.setMode("toggle");
 		if (ThemeManager.isUseFontIconForImage())
-			bSelect.setIconSclass("z-icon-SelectAll");
+			bSelect.setIconSclass(Icon.getIconSclass(Icon.SELECT_ALL));
 		else
 			bSelect.setImage(ThemeManager.getThemeResource("images/SelectAll24.png"));
 		bSelect.setTooltiptext(Msg.getCleanMsg(Env.getCtx(), "SelectAll"));
@@ -276,7 +277,7 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		row.appendCellChild(labelDateAcct.rightAlign());
 		row.appendCellChild(fieldDateAcct.getComponent(), 2);
 		row.appendCellChild(labelDateAcct2.rightAlign());
-		Hbox boxTo = new Hbox();
+		FlexHlayout boxTo = new FlexHlayout();
 		boxTo.appendChild(fieldDateAcct2.getComponent());
 		DateRangeButton drb = (new DateRangeButton(fieldDateAcct, fieldDateAcct2));
 		boxTo.appendChild(drb);
@@ -491,7 +492,7 @@ implements IFormController, EventListener<Event>, WTableModelListener, ValueChan
 		dataStatus.setText(info.toString());
 		//
 		bGenerate.setEnabled(m_noSelected != 0 && Env.ZERO.compareTo(m_selectedAmt) == 0 && !isReconciled.isSelected());
-		bReset.setEnabled(m_noSelected > 0 && isReconciled.isSelected());
+		bReset.setEnabled(m_noSelected > 0 && Env.ZERO.compareTo(m_selectedAmt) == 0 && isReconciled.isSelected());
 	}   //  calculateSelection
 	
 	@Override

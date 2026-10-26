@@ -56,6 +56,7 @@ import org.adempiere.webui.panel.TimeoutPanel;
 import org.adempiere.webui.part.ITabOnSelectHandler;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.UserPreference;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.GridField;
@@ -215,7 +216,6 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
     /**
      * Create desktop layout from "zul/desktop/desktop.zul".
      */
-    @SuppressWarnings("serial")
 	protected Component doCreatePart(Component parent)
     {
     	PageDefinition pagedef = Executions.getCurrent().getPageDefinition(ThemeManager.getThemeResource("zul/desktop/desktop.zul"));
@@ -347,7 +347,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         	Component content = e.getFirstChild();
         	eastPopup = new Popup();
         	ToolBarButton btn = new ToolBarButton();
-        	btn.setIconSclass("z-icon-remove");
+        	btn.setIconSclass(Icon.getIconSclass(Icon.REMOVE));
         	btn.addEventListener(Events.ON_CLICK, evt -> {
 				eastPopup.close();
 				isQuickInfoOpen = false;
@@ -420,7 +420,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        };
 	        toolbar.appendChild(showHeader);
 	        if (ThemeManager.isUseFontIconForImage())
-	        	showHeader.setIconSclass("z-icon-ThreeLineMenu");
+	        	showHeader.setIconSclass(Icon.getIconSclass(Icon.THREE_LINE_MENU));
 			else
 				showHeader.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        showHeader.addEventListener(Events.ON_CLICK, this);
@@ -430,7 +430,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	        max = new ToolBarButton();
 	        toolbar.appendChild(max);
 	        if (ThemeManager.isUseFontIconForImage())
-	        	max.setIconSclass("z-icon-Collapsing");
+	        	max.setIconSclass(Icon.getIconSclass(Icon.COLLAPSING));
 			else
 				max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 	        max.addEventListener(Events.ON_CLICK, this);
@@ -440,7 +440,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         contextHelp = new ToolBarButton();
         toolbar.appendChild(contextHelp);
         if (ThemeManager.isUseFontIconForImage())
-        	contextHelp.setIconSclass("z-icon-Help");
+        	contextHelp.setIconSclass(Icon.getIconSclass(Icon.HELP));
         else
         	contextHelp.setImage(ThemeManager.getThemeResource(IMAGES_CONTEXT_HELP_PNG));
         contextHelp.addEventListener(Events.ON_CLICK, this);
@@ -459,7 +459,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
         if (mobile) {
 	        westBtn = new ToolBarButton();
 	        if (ThemeManager.isUseFontIconForImage())
-	        	westBtn.setIconSclass("z-icon-ThreeLineMenu");
+	        	westBtn.setIconSclass(Icon.getIconSclass(Icon.THREE_LINE_MENU));
 			else
 				westBtn.setImage(ThemeManager.getThemeResource(IMAGES_THREELINE_MENU_PNG));
 	        westBtn.addEventListener(Events.ON_CLICK, this);
@@ -638,7 +638,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 		if (mobile)
 		{
 			ToolBarButton btn = new ToolBarButton();
-        	btn.setIconSclass("z-icon-remove");
+        	btn.setIconSclass(Icon.getIconSclass(Icon.REMOVE));
         	btn.addEventListener(Events.ON_CLICK, evt -> {
         		westPopup.close();
         		westPopup.removeAttribute(POPUP_OPEN_ATTR);
@@ -777,7 +777,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void restoreHeader() {
 		layout.getNorth().setVisible(true);
 		if (ThemeManager.isUseFontIconForImage())
-        	max.setIconSclass("z-icon-Collapsing");
+        	max.setIconSclass(Icon.getIconSclass(Icon.COLLAPSING));
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_UPARROW_PNG));
 		showHeader.setVisible(false);
@@ -793,7 +793,7 @@ public class DefaultDesktop extends TabbedDesktop implements MenuListener, Seria
 	protected void collapseHeader() {
 		layout.getNorth().setVisible(false);
 		if (ThemeManager.isUseFontIconForImage())
-        	max.setIconSclass("z-icon-Expanding");
+        	max.setIconSclass(Icon.getIconSclass(Icon.EXPANDING));
 		else
 			max.setImage(ThemeManager.getThemeResource(IMAGES_DOWNARROW_PNG));
 		showHeader.setVisible(true);

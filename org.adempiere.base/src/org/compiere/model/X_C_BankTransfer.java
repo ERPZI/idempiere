@@ -25,7 +25,7 @@ import org.compiere.util.Env;
 
 /** Generated Model for C_BankTransfer
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="C_BankTransfer")
 public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persistent
 {
@@ -33,7 +33,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260507L;
 
     /** Standard Constructor */
     public X_C_BankTransfer (Properties ctx, int C_BankTransfer_ID, String trxName)
@@ -256,6 +256,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return (String)get_Value(COLUMNNAME_C_BankTransfer_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_ConversionType getC_ConversionType() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_ConversionType)MTable.get(getCtx(), org.compiere.model.I_C_ConversionType.Table_ID)
@@ -461,6 +462,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return bd;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getFrom_C_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -489,6 +491,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BankAccount getFrom_C_BankAccount() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
@@ -516,6 +519,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Charge getFrom_C_Charge() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
@@ -543,6 +547,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getFrom_C_Currency() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
@@ -565,6 +570,34 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 	public int getFrom_C_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_From_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_DocType getFrom_DocType() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getFrom_DocType_ID(), get_TrxName());
+	}
+
+	/** Set From Document Type.
+		@param From_DocType_ID From Document Type
+	*/
+	public void setFrom_DocType_ID (int From_DocType_ID)
+	{
+		if (From_DocType_ID < 1)
+			set_Value (COLUMNNAME_From_DocType_ID, null);
+		else
+			set_Value (COLUMNNAME_From_DocType_ID, Integer.valueOf(From_DocType_ID));
+	}
+
+	/** Get From Document Type.
+		@return From Document Type	  */
+	public int getFrom_DocType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_From_DocType_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -742,6 +775,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return bd;
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BPartner getTo_C_BPartner() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BPartner)MTable.get(getCtx(), org.compiere.model.I_C_BPartner.Table_ID)
@@ -770,6 +804,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_BankAccount getTo_C_BankAccount() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_BankAccount)MTable.get(getCtx(), org.compiere.model.I_C_BankAccount.Table_ID)
@@ -797,6 +832,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Charge getTo_C_Charge() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Charge)MTable.get(getCtx(), org.compiere.model.I_C_Charge.Table_ID)
@@ -824,6 +860,7 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 		return ii.intValue();
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getTo_C_Currency() throws RuntimeException
 	{
 		return (org.compiere.model.I_C_Currency)MTable.get(getCtx(), org.compiere.model.I_C_Currency.Table_ID)
@@ -846,6 +883,34 @@ public class X_C_BankTransfer extends PO implements I_C_BankTransfer, I_Persiste
 	public int getTo_C_Currency_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_To_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	@Deprecated(since="13") // use better methods with cache
+	public org.compiere.model.I_C_DocType getTo_DocType() throws RuntimeException
+	{
+		return (org.compiere.model.I_C_DocType)MTable.get(getCtx(), org.compiere.model.I_C_DocType.Table_ID)
+			.getPO(getTo_DocType_ID(), get_TrxName());
+	}
+
+	/** Set To Document Type.
+		@param To_DocType_ID To Document Type
+	*/
+	public void setTo_DocType_ID (int To_DocType_ID)
+	{
+		if (To_DocType_ID < 1)
+			set_Value (COLUMNNAME_To_DocType_ID, null);
+		else
+			set_Value (COLUMNNAME_To_DocType_ID, Integer.valueOf(To_DocType_ID));
+	}
+
+	/** Get To Document Type.
+		@return To Document Type	  */
+	public int getTo_DocType_ID()
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_To_DocType_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

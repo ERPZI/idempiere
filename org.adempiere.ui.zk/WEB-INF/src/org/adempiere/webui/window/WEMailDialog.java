@@ -22,9 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -54,6 +52,8 @@ import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.CKEditor;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.Lookup;
 import org.compiere.model.MAttachment;
@@ -70,7 +70,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.EMail;
 import org.compiere.util.Env;
-import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
 import org.zkforge.ckez.CKeditor;
@@ -174,14 +173,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		this.setMaximizable(true);
 		this.setSizable(true);
 		        
-		fMessage = new CKeditor();
-		if (ClientInfo.isMobile())
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config-min.js");
-		else
-			fMessage.setCustomConfigurationsPath("/js/ckeditor/config.js");
-		Map<String,Object> lang = new HashMap<String,Object>();
-		lang.put("language", Language.getLoginLanguage().getAD_Language());
-		fMessage.setConfig(lang);
+		fMessage = CKEditor.get();
 
 		commonInit(from, to, subject, message, attachment);	
 
@@ -411,20 +403,24 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 		
 		Button btn = new Button();
 		if (ThemeManager.isUseFontIconForImage())
-			btn.setIconSclass("z-icon-Attachment");
+			btn.setIconSclass(Icon.getIconSclass(Icon.ATTACHMENT));
 		else
 			btn.setImage(ThemeManager.getThemeResource("images/Attachment24.png"));
 		btn.setUpload(AdempiereWebUI.getUploadSetting());
 		btn.addEventListener(Events.ON_UPLOAD, this);
+		btn.setLabel(Msg.getMsg(Env.getCtx(), "Attachment"));
 		btn.setTooltiptext(Msg.getMsg(Env.getCtx(), "Attachment"));
+		btn.setSclass("mail-template-btn");
 		confirmPanel.addComponentsLeft(btn);
 
 		bAddDefaultMailText = new Button();
 		if(ThemeManager.isUseFontIconForImage())
-			bAddDefaultMailText.setIconSclass("z-icon-GetMail");
+			bAddDefaultMailText.setIconSclass(Icon.getIconSclass(Icon.GET_MAIL));
 		else
 			bAddDefaultMailText.setImage(ThemeManager.getThemeResource("images/DefaultMailText.png"));
 		bAddDefaultMailText.addEventListener(Events.ON_CLICK, this);
+		bAddDefaultMailText.setLabel(Msg.getMsg(Env.getCtx(), "AddDefaultMailText"));
+		bAddDefaultMailText.setSclass("mail-template-btn");
 		bAddDefaultMailText.setTooltiptext(Msg.getMsg(Env.getCtx(), "AddDefaultMailTextContent"));
 		if (new MUser(Env.getCtx(), Env.getAD_User_ID(Env.getCtx()), null).getR_DefaultMailText_ID() > 0)
 			confirmPanel.addComponentsLeft(bAddDefaultMailText);
@@ -952,7 +948,7 @@ public class WEMailDialog extends Window implements EventListener<Event>, ValueC
 	 */
 	private void addMailText()
 	{
-		MMailText mt = (MMailText) MUser.get(Env.getCtx()).getR_DefaultMailText();
+		MMailText mt = new MMailText(Env.getCtx(), MUser.get(Env.getCtx()).getR_DefaultMailText_ID(), null);
 		if (mt.get_ID() > 0) {
 			mt.setPO(MUser.get(Env.getCtx()));
 			try (MAttachment attachment = MAttachment.get(Env.getCtx(), MMailText.Table_ID, mt.get_ID(), null, null);) {

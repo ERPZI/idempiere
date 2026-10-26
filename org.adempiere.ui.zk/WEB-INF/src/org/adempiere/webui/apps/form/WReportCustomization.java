@@ -46,6 +46,7 @@ import org.adempiere.webui.panel.WRC5SummaryFieldsPanel;
 import org.adempiere.webui.panel.WRCTabPanel;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.ZkReportViewer;
@@ -67,10 +68,10 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Foot;
 import org.zkoss.zul.Footer;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Separator;
-import org.zkoss.zul.Vbox;
+import org.adempiere.webui.component.FlexVlayout;
 
 /**
  * Form to customize print format of a {@link ReportEngine} instance (i.e starting from report output).<br/> 
@@ -301,7 +302,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		btnSave.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Save")));
 		//devCoffee #6142
 		if (ThemeManager.isUseFontIconForImage())
-			btnSave.setIconSclass("z-icon-Save");
+			btnSave.setIconSclass(Icon.getIconSclass(Icon.SAVE));
 		else
 			btnSave.setImage(ThemeManager.getThemeResource("images/Save24.png"));
 		if(fm.getAD_Client_ID()== 0 || !isChange)
@@ -317,7 +318,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 		{
 			//devCoffee #6142
 			if (ThemeManager.isUseFontIconForImage())
-				bExport.setIconSclass("z-icon-Export");
+				bExport.setIconSclass(Icon.getIconSclass(Icon.EXPORT));
 			else
 				bExport.setImage(ThemeManager.getThemeResource("images/Export24.png"));
 			bExport.setName("btnExport");
@@ -501,7 +502,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 			cboType.appendItem("xlsx" + " - " + Msg.getMsg(Env.getCtx(), "FileXLSX"), "xlsx");
 			cboType.setSelectedItem(li);
 			
-			Hbox hb = new Hbox();
+			FlexHlayout hb = new FlexHlayout();
 			Div div = new Div();
 			div.setStyle("text-align: right;");
 			div.appendChild(new Label(Msg.getMsg(Env.getCtx(), "FilesOfType")));
@@ -511,7 +512,7 @@ public class WReportCustomization  implements IFormController,EventListener<Even
 			ZKUpdateUtil.setVflex(hb, "1");
 			hb.setStyle("margin-top: 10px");
 
-			Vbox vb = new Vbox();
+			FlexVlayout vb = new FlexVlayout();
 			ZKUpdateUtil.setVflex(vb, "1");
 			ZKUpdateUtil.setWidth(vb, "100%");
 			winExportFile.appendChild(vb);

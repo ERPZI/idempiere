@@ -76,6 +76,7 @@ import org.compiere.util.Language;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
 import org.compiere.util.Util;
+import org.idempiere.db.util.SQLFragment;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
@@ -532,7 +533,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 	            	jasperPrint.setProperty(IDEMPIERE_REPORT_TYPE, processInfo.getReportType());
 	            }
 	            try {
-					viewerLauncher.openViewer(jasperPrint, pi.getTitle(), printInfo);
+					viewerLauncher.openViewer(jasperPrint, pi.getTitle(), printInfo, pi);
 				} catch (JRException e) {
 					throw new AdempiereException(e.getLocalizedMessage() + (e.getCause() != null ? " -> " + e.getCause().getLocalizedMessage() : ""), e);
 				}
@@ -542,7 +543,7 @@ public class ReportStarter implements ProcessCall, ClientProcess
 	            	throw new AdempiereException("Can not find a viewer provider for multiple jasper reports");
 	            }
 	            try {
-					viewerLauncher.openViewer(jasperPrintList, pi.getTitle(), printInfo);
+					viewerLauncher.openViewer(jasperPrintList, pi.getTitle(), printInfo, pi);
 				} catch (JRException e) {
 					throw new AdempiereException(e.getLocalizedMessage() + (e.getCause() != null ? " -> " + e.getCause().getLocalizedMessage() : ""), e);
 				}
@@ -649,15 +650,15 @@ public class ReportStarter implements ProcessCall, ClientProcess
 		    				
 		    				MQuery query = new MQuery(tableName);
 		    				for (int recordId : pi.getRecord_IDs())
-		    					query.addRestriction(tableVariable + "." + query.getTableName() + "_ID" + MQuery.EQUAL + recordId, false, 0);
+		    					query.addRestriction(new SQLFragment(tableVariable + "." + query.getTableName() + "_ID" + MQuery.EQUAL + recordId), false, 0);
 		    				
 		    				String newQueryText = null;
 		    				int index3 = originalQueryTemp.indexOf("WHERE");
 		    				if (index3 != -1)
-		    					newQueryText = originalQueryText + " AND " + query.toString();
+		    					newQueryText = originalQueryText + " AND " + query.getSQLFilter().toSQLWithParameters();
 		    				else
-		    					newQueryText = originalQueryText + " WHERE " + query.toString();
-		    				
+		    					newQueryText = originalQueryText + " WHERE " + query.getSQLFilter().toSQLWithParameters();
+
 		    			    File jrxmlFile = File.createTempFile(FileUtil.makePrefix(jasperReport.getName()), ".jrxml");
 		            		JRXmlWriter.writeReport(jasperReport, new FileOutputStream(jrxmlFile), "UTF-8");
 		            		
@@ -751,7 +752,12 @@ public class ReportStarter implements ProcessCall, ClientProcess
 			ext = "pdf";
 		
 		try {						
-			File exportFile = File.createTempFile(FileUtil.makePrefix(jasperPrint.getName()), "." + ext);
+			String exportFilePrefix = Util.isEmpty(jasperPrint.getName(), true)
+					? "jasper"
+					: FileUtil.makePrefix(jasperPrint.getName());
+			if (exportFilePrefix.length() < 3)
+				exportFilePrefix = "jasper";
+			File exportFile = File.createTempFile(exportFilePrefix, "." + ext);
 
 			try (FileOutputStream outputStream = new FileOutputStream(exportFile);) {
 

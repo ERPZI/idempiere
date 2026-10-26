@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 
@@ -92,7 +93,7 @@ import org.compiere.process.DocAction;
 import org.compiere.process.DocumentEngine;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ServerProcessCtl;
-import org.compiere.util.DB;
+import org.compiere.util.CacheMgt;
 import org.compiere.util.Env;
 import org.compiere.util.TimeUtil;
 import org.compiere.util.Util;
@@ -105,7 +106,6 @@ import org.idempiere.test.DictionaryIDs;
 import org.idempiere.test.FactAcct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
-import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.MockedStatic;
 
 @Isolated
@@ -116,13 +116,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 
 	@Test
 	public void testMaterialReceipt() {
-		MProduct product = null;
 		MClient client = MClient.get(Env.getCtx());
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		try {
-			product = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> mockedProduct = mockStatic(MProduct.class)) {
+			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
 			product.setName("testMaterialReceipt");
 			product.setValue("testMaterialReceipt");
@@ -133,6 +132,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product.saveEx();
+			
+			mockProductGet(mockedProduct, product);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -181,13 +182,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			cd = MCostDetail.get(Env.getCtx(), "C_OrderLine_ID=?", receiptLine.getC_OrderLine_ID(), 0, as.get_ID(), getTrxName());
 			assertEquals(0, cd.getQty().intValue(), "Unexpected MCostDetail Qty");
 			assertEquals(new BigDecimal("0.00"), cd.getAmt().setScale(2, RoundingMode.HALF_UP), "Unexpected MCostDetail Amt");
-		} finally {
-			rollback();
-			
-			if (product != null) {
-				product.set_TrxName(null);
-				product.deleteEx(true);
-			}
 		}
 	}
 	
@@ -379,18 +373,24 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MProduct mulch = new MProduct(Env.getCtx(), DictionaryIDs.M_Product.MULCH.id, getTrxName());
 		MProduct azb = new MProduct(Env.getCtx(), DictionaryIDs.M_Product.AZALEA_BUSH.id, getTrxName());
 		
-		MProduct mulchX = new MProduct(Env.getCtx(), 0, null);
-		mulchX.setName("MulchX2");
-		mulchX.setIsBOM(true);
-		mulchX.setIsStocked(true);
-		mulchX.setC_UOM_ID(mulch.getC_UOM_ID());
-		mulchX.setM_Product_Category_ID(mulch.getM_Product_Category_ID());
-		mulchX.setProductType(mulch.getProductType());
-		mulchX.setM_AttributeSet_ID(mulch.getM_AttributeSet_ID());
-		mulchX.setC_TaxCategory_ID(mulch.getC_TaxCategory_ID());
-		mulchX.saveEx();
-		
-		try {
+		try (MockedStatic<MProduct> mockedProduct = mockStatic(MProduct.class)) {			
+			MProduct mulchX = new MProduct(Env.getCtx(), 0, getTrxName());
+			mulchX.setName("MulchX2");
+			mulchX.setIsBOM(true);
+			mulchX.setIsStocked(true);
+			mulchX.setC_UOM_ID(mulch.getC_UOM_ID());
+			mulchX.setM_Product_Category_ID(mulch.getM_Product_Category_ID());
+			mulchX.setProductType(mulch.getProductType());
+			mulchX.setM_AttributeSet_ID(mulch.getM_AttributeSet_ID());
+			mulchX.setC_TaxCategory_ID(mulch.getC_TaxCategory_ID());
+			mulchX.saveEx();
+			
+			mockedProduct.when(() -> MProduct.getCopy(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(anyInt())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(any(Properties.class), anyInt())).thenCallRealMethod();
+			mockProductGet(mockedProduct, mulchX);
+			
 			MClient client = MClient.get(Env.getCtx());
 			MAcctSchema as = client.getAcctSchema();
 			assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
@@ -424,7 +424,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			line2.setQtyBOM(new BigDecimal("1"));
 			line2.saveEx();
 			
-			mulchX.load((String)null);
+			mulchX.load(getTrxName());
 			mulchX.setIsVerified(true);
 			mulchX.saveEx();
 			
@@ -510,11 +510,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			assertEquals(1, cd.getQty().intValue(), "Unexpected MCostDetail Qty");
 			assertEquals(azbCost.setScale(2, RoundingMode.HALF_UP), cd.getAmt().setScale(2, RoundingMode.HALF_UP), "Unexpected MCostDetail Amt");
 			cost = azb.getCostingRecord(as, getAD_Org_ID(), 0, as.getCostingMethod());
-		} finally {
-			rollback();
-			DB.executeUpdateEx("delete from m_cost where m_product_id=?", new Object[] {mulchX.get_ID()}, null);
-			mulchX.set_TrxName(null);
-			mulchX.deleteEx(true);
 		}
 	}
 	
@@ -522,37 +517,41 @@ public class AveragePOCostingTest extends AbstractTestCase {
 	public void testMRAndShipmentByLot() {
 		MClient client = MClient.get(Env.getCtx());
 		MAcctSchema as = client.getAcctSchema();
+
+		MAttributeSet mas = new MAttributeSet(Env.getCtx(), DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id, getTrxName());
+		mas.setMandatoryType(MAttributeSet.MANDATORYTYPE_NotMandatory);
+		mas.saveEx();
 		
-		MProductCategory lotLevel = new MProductCategory(Env.getCtx(), 0, null);
-		lotLevel.setName("testMaterialReceiptLot");
-		lotLevel.saveEx();
-				
-		MProduct product = null;
-		MAttributeSetExclude exclude = null;
-		MAttributeSetExclude exclude1 = null;
-		try {
-			MAttributeSet mas = new MAttributeSet(Env.getCtx(), DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id, getTrxName());
-			mas.setMandatoryType(MAttributeSet.MANDATORYTYPE_NotMandatory);
-			mas.saveEx();
+		MAttributeSetExclude exclude = new MAttributeSetExclude(Env.getCtx(), 0, null);
+		exclude.setM_AttributeSet_ID(mas.get_ID());
+		exclude.setAD_Table_ID(MOrderLine.Table_ID);
+		exclude.setIsSOTrx(true);
+		exclude.saveEx();
+		
+		MAttributeSetExclude exclude1 = new MAttributeSetExclude(Env.getCtx(), 0, null);
+		exclude1.setM_AttributeSet_ID(mas.get_ID());
+		exclude1.setAD_Table_ID(MInOutLine.Table_ID);
+		exclude1.setIsSOTrx(true);
+		exclude1.saveEx();
+		
+		try (MockedStatic<MProduct> mockedProduct = mockStatic(MProduct.class);
+			MockedStatic<MProductCategory> mockedCategory = mockStatic(MProductCategory.class)) {	
 			
-			exclude = new MAttributeSetExclude(Env.getCtx(), 0, null);
-			exclude.setM_AttributeSet_ID(mas.get_ID());
-			exclude.setAD_Table_ID(MOrderLine.Table_ID);
-			exclude.setIsSOTrx(true);
-			exclude.saveEx();
+			MProductCategory lotLevel = new MProductCategory(Env.getCtx(), 0, getTrxName());
+			lotLevel.setName("testMaterialReceiptLot");
+			lotLevel.saveEx();
 			
-			exclude1 = new MAttributeSetExclude(Env.getCtx(), 0, null);
-			exclude1.setM_AttributeSet_ID(mas.get_ID());
-			exclude1.setAD_Table_ID(MInOutLine.Table_ID);
-			exclude1.setIsSOTrx(true);
-			exclude1.saveEx();
-			
-			MProductCategoryAcct lotLevelAcct = MProductCategoryAcct.get(lotLevel.get_ID(), as.get_ID());
-			lotLevelAcct = new MProductCategoryAcct(Env.getCtx(), lotLevelAcct);
+			mockedCategory.when(() -> MProductCategory.get(any(Properties.class), anyInt())).thenCallRealMethod();
+			mockedCategory.when(() -> MProductCategory.get(any(Properties.class), eq(lotLevel.get_ID()))).thenReturn(lotLevel);
+						
+			MProductCategoryAcct lotLevelAcct = MProductCategoryAcct.get(lotLevel.get_ID(), as.get_ID(), getTrxName());
+			lotLevelAcct = new MProductCategoryAcct(Env.getCtx(), lotLevelAcct, getTrxName());
 			lotLevelAcct.setCostingLevel(MAcctSchema.COSTINGLEVEL_BatchLot);
 			lotLevelAcct.saveEx();
+			CacheMgt.get().reset(MProductCategoryAcct.Table_Name);
+			MProductCategoryAcct.get(lotLevel.get_ID(), as.get_ID(), getTrxName());
 			
-			product = new MProduct(Env.getCtx(), 0, null);
+			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(lotLevel.get_ID());
 			product.setName("testMaterialReceiptLot");
 			product.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -563,6 +562,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			product.saveEx();
+			
+			mockedProduct.when(() -> MProduct.getCopy(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(anyInt())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			mockedProduct.when(() -> MProduct.get(any(Properties.class), anyInt())).thenCallRealMethod();
+			mockProductGet(mockedProduct, product);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -758,20 +763,10 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			assertEquals(0, cd.getQty().intValue(), "Unexpected MCostDetail Qty");
 			assertEquals(new BigDecimal("0").setScale(2, RoundingMode.HALF_UP), cd.getAmt().setScale(2, RoundingMode.HALF_UP), "Unexpected MCostDetail Amt");
 		} finally {
-			rollback();
+			rollback();			
 			
-			if (exclude != null)
-				exclude.deleteEx(true);
-			
-			if (exclude1 != null)
-				exclude1.deleteEx(true);
-			
-			if (product != null) {
-				product.set_TrxName(null);
-				product.deleteEx(true);
-			}
-			
-			lotLevel.deleteEx(true);
+			exclude.deleteEx(true);
+			exclude1.deleteEx(true);
 		}
 	}
 	
@@ -784,13 +779,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 	 * PI Reverse-Accrual (Period 3)
 	 */
 	@Test
-	@ResourceLock(value = MConversionRate.Table_Name)
 	public void testMRAndInternalUse() {
 		MClient client = MClient.get(Env.getCtx());
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 
-		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
+		Timestamp currentDate = TimeUtil.getDay(Env.getContextAsDate(Env.getCtx(), "#Date"));
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		cal.add(Calendar.DAY_OF_MONTH, -2);
@@ -806,25 +800,16 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MCurrency thb = MCurrency.get(206); // THB
 		
 		BigDecimal usdToThb1 = new BigDecimal(33.765676939525);
-		MConversionRate crUsd1 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date1, usdToThb1, true);		
 		BigDecimal usdToThb2 = new BigDecimal(33.676559212063);
-		MConversionRate crUsd2 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date2, usdToThb2, true);
 		BigDecimal usdToThb3 = new BigDecimal(34.060623004218);
-		MConversionRate crUsd3 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date3, usdToThb3, true);
 
 		BigDecimal eurToThb1 = new BigDecimal(35.514331076906);
-		MConversionRate crEur1 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date1, eurToThb1, true);		
 		BigDecimal eurToThb2 = new BigDecimal(34.968463021279);
-		MConversionRate crEur2 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date2, eurToThb2, true);
 		BigDecimal eurToThb3 = new BigDecimal(35.413895000609);
-		MConversionRate crEur3 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date3, eurToThb3, true);
 		
 		BigDecimal usdToEur = new BigDecimal(0.85);
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date1, usdToEur, true);
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date2, usdToEur, true);
-		MConversionRate cr3 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date3, usdToEur, true);
 		
-		MPriceList priceList = new MPriceList(Env.getCtx(), 0, null);
+		MPriceList priceList = new MPriceList(Env.getCtx(), 0, getTrxName());
 		priceList.setName("Import THB " + System.currentTimeMillis());
 		priceList.setC_Currency_ID(thb.getC_Currency_ID());
 		priceList.setPricePrecision(thb.getStdPrecision());
@@ -835,12 +820,25 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		plv.setValidFrom(date1);
 		plv.saveEx();
 		 
-		MProduct product1 = null;
-		MProduct product2 = null;
-		MProductPrice pp1 = null;
-		MProductPrice pp2 = null;
-		try {
-			product1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic();
+			 MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			 MockedStatic<MPriceList> priceListMock = mockStatic(MPriceList.class)) {
+			mockGetRate(conversionRateMock, usd, thb, 0, date1, usdToThb1);
+			mockGetRate(conversionRateMock, usd, thb, 0, date2, usdToThb2);
+			mockGetRate(conversionRateMock, usd, thb, 0, date3, usdToThb3);
+			
+			mockGetRate(conversionRateMock, euro, thb, 0, date1, eurToThb1);
+			mockGetRate(conversionRateMock, euro, thb, 0, date2, eurToThb2);
+			mockGetRate(conversionRateMock, euro, thb, 0, date3, eurToThb3);
+			
+			mockGetRate(conversionRateMock, usd, euro, 0, date1, usdToEur);
+			mockGetRate(conversionRateMock, usd, euro, 0, date2, usdToEur);
+			mockGetRate(conversionRateMock, usd, euro, 0, date3, usdToEur);
+			
+			priceListMock.when(() -> MPriceList.get(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			priceListMock.when(() -> MPriceList.get(any(Properties.class), eq(priceList.get_ID()), any())).thenReturn(priceList);
+			
+			MProduct product1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
 			product1.setName("testMRAndInternalUse1");
 			product1.setValue("testMRAndInternalUse1");
@@ -852,11 +850,13 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product1.saveEx();
  			
+			mockProductGet(productMock, product1);
+			
 			BigDecimal priceInThb1 = new BigDecimal(100);
-			pp1 = new MProductPrice(plv, product1.getM_Product_ID(), priceInThb1, priceInThb1, Env.ZERO);
+			MProductPrice pp1 = new MProductPrice(plv, product1.getM_Product_ID(), priceInThb1, priceInThb1, Env.ZERO);
 			pp1.saveEx();
 			
-			product2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct product2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
 			product2.setName("testMRAndInternalUse2");
 			product2.setValue("testMRAndInternalUse2");
@@ -868,8 +868,10 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product2.saveEx();
  			
+			mockProductGet(productMock, product2);
+			
 			BigDecimal priceInThb2 = new BigDecimal(185);
-			pp2 = new MProductPrice(plv, product2.getM_Product_ID(), priceInThb2, priceInThb2, Env.ZERO);
+			MProductPrice pp2 = new MProductPrice(plv, product2.getM_Product_ID(), priceInThb2, priceInThb2, Env.ZERO);
 			pp2.saveEx();
 			
 			// PO
@@ -1051,7 +1053,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				assertTrue(mi.isPosted());
 				
 				Doc doc = DocManager.getDocument(as, MMatchInv.Table_ID, mi.get_ID(), getTrxName());
-				doc.setC_BPartner_ID(mi.getC_InvoiceLine().getC_Invoice().getC_BPartner_ID());
+				MInvoiceLine invLine = new MInvoiceLine(Env.getCtx(), mi.getC_InvoiceLine_ID(), getTrxName());
+				doc.setC_BPartner_ID(invLine.getParent().getC_BPartner_ID());
 				MAccount acctNIR = doc.getAccount(Doc.ACCTTYPE_NotInvoicedReceipts, as);
 				
 				ProductCost pc = new ProductCost (Env.getCtx(), mi.getM_Product_ID(), mi.getM_AttributeSetInstance_ID(), getTrxName());
@@ -1091,34 +1094,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 					new FactAcct(acctLiability, new BigDecimal("9.55"), 2, false),
 					new FactAcct(acctLiability, new BigDecimal("-836.74"), 2, true));
 			assertFactAcctEntries(factAccts, expected);
-		} finally {
-			ConversionRateHelper.deleteConversionRate(crUsd1);
-			ConversionRateHelper.deleteConversionRate(crUsd2);
-			ConversionRateHelper.deleteConversionRate(crUsd3);
-			ConversionRateHelper.deleteConversionRate(crEur1);
-			ConversionRateHelper.deleteConversionRate(crEur2);
-			ConversionRateHelper.deleteConversionRate(crEur3);
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
-			ConversionRateHelper.deleteConversionRate(cr3);
-			
-			if (pp1 != null)
-				pp1.deleteEx(true);
-			if (pp2 != null)
-				pp2.deleteEx(true);
-			plv.deleteEx(true);
-			priceList.deleteEx(true);
-			
-			rollback();
-			
-			if (product1 != null) {
-				product1.set_TrxName(null);
-				product1.deleteEx(true);
-			}
-			if (product2 != null) {
-				product2.set_TrxName(null);
-				product2.deleteEx(true);
-			}
 		}
 	}
 	
@@ -1131,13 +1106,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 	 * MR2, Product1, Qty=85, Price=100; Product2, Qty=100, Price=185 (Period 3) - Reverse-Correct
 	 */
 	@Test
-	@ResourceLock(value = MConversionRate.Table_Name)
 	public void testReverseCorrectMultipleMR() {
 		MClient client = MClient.get(Env.getCtx());
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 
-		Timestamp currentDate = Env.getContextAsDate(Env.getCtx(), "#Date");
+		Timestamp currentDate = TimeUtil.getDay(Env.getContextAsDate(Env.getCtx(), "#Date"));
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(currentDate.getTime());
 		cal.add(Calendar.DAY_OF_MONTH, -2);
@@ -1153,25 +1127,16 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MCurrency thb = MCurrency.get(206); // THB
 		
 		BigDecimal usdToThb1 = new BigDecimal(33.765676939525);
-		MConversionRate crUsd1 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date1, usdToThb1, true);		
 		BigDecimal usdToThb2 = new BigDecimal(33.676559212063);
-		MConversionRate crUsd2 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date2, usdToThb2, true);
 		BigDecimal usdToThb3 = new BigDecimal(34.060623004218);
-		MConversionRate crUsd3 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date3, usdToThb3, true);
 
 		BigDecimal eurToThb1 = new BigDecimal(35.514331076906);
-		MConversionRate crEur1 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date1, eurToThb1, true);		
 		BigDecimal eurToThb2 = new BigDecimal(34.968463021279);
-		MConversionRate crEur2 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date2, eurToThb2, true);
 		BigDecimal eurToThb3 = new BigDecimal(35.413895000609);
-		MConversionRate crEur3 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), thb.getC_Currency_ID(), C_ConversionType_ID, date3, eurToThb3, true);
 		
 		BigDecimal usdToEur = new BigDecimal(0.85);
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date1, usdToEur, true);
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date2, usdToEur, true);
-		MConversionRate cr3 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, date3, usdToEur, true);
 		
-		MPriceList priceList = new MPriceList(Env.getCtx(), 0, null);
+		MPriceList priceList = new MPriceList(Env.getCtx(), 0, getTrxName());
 		priceList.setName("Import THB " + System.currentTimeMillis());
 		priceList.setC_Currency_ID(thb.getC_Currency_ID());
 		priceList.setPricePrecision(thb.getStdPrecision());
@@ -1182,12 +1147,23 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		plv.setValidFrom(date1);
 		plv.saveEx();
 		 
-		MProduct product1 = null;
-		MProduct product2 = null;
-		MProductPrice pp1 = null;
-		MProductPrice pp2 = null;
-		try {
-			product1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic();
+			 MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			 MockedStatic<MPriceList> priceListMock = mockStatic(MPriceList.class)) {
+			mockGetRate(conversionRateMock, usd, thb, C_ConversionType_ID, date1, usdToThb1);
+			mockGetRate(conversionRateMock, usd, thb, C_ConversionType_ID, date2, usdToThb2);
+			mockGetRate(conversionRateMock, usd, thb, C_ConversionType_ID, date3, usdToThb3);
+			
+			mockGetRate(conversionRateMock, euro, thb, C_ConversionType_ID, date1, eurToThb1);
+			mockGetRate(conversionRateMock, euro, thb, C_ConversionType_ID, date2, eurToThb2);
+			mockGetRate(conversionRateMock, euro, thb, C_ConversionType_ID, date3, eurToThb3);
+			
+			mockGetRate(conversionRateMock, usd, euro, C_ConversionType_ID, null, usdToEur);
+			
+			priceListMock.when(() -> MPriceList.get(any(Properties.class), anyInt(), any())).thenCallRealMethod();
+			priceListMock.when(() -> MPriceList.get(any(Properties.class), eq(priceList.get_ID()), any())).thenReturn(priceList);
+			
+			MProduct product1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
 			product1.setName("testMultipleMR1");
 			product1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -1198,11 +1174,13 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product1.saveEx();
  			
+			mockProductGet(productMock, product1);
+					
 			BigDecimal priceInThb1 = new BigDecimal(100);
-			pp1 = new MProductPrice(plv, product1.getM_Product_ID(), priceInThb1, priceInThb1, Env.ZERO);
+			MProductPrice pp1 = new MProductPrice(plv, product1.getM_Product_ID(), priceInThb1, priceInThb1, Env.ZERO);
 			pp1.saveEx();
 			
-			product2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct product2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			product2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.CHEMICALS.id);
 			product2.setName("testMultipleMR2");
 			product2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -1213,8 +1191,10 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product2.saveEx();
  			
+			mockProductGet(productMock, product2);
+						
 			BigDecimal priceInThb2 = new BigDecimal(185);
-			pp2 = new MProductPrice(plv, product2.getM_Product_ID(), priceInThb2, priceInThb2, Env.ZERO);
+			MProductPrice pp2 = new MProductPrice(plv, product2.getM_Product_ID(), priceInThb2, priceInThb2, Env.ZERO);
 			pp2.saveEx();
 			
 			// PO
@@ -1559,34 +1539,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			cost2 = product2.getCostingRecord(as, getAD_Org_ID(), 0, as.getCostingMethod());
 			assertNotNull(cost2, "No MCost record found");			
 			assertEquals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP), cost2.getCurrentQty().setScale(2, RoundingMode.HALF_UP), "Unexpected current quantity");
-		} finally {
-			ConversionRateHelper.deleteConversionRate(crUsd1);
-			ConversionRateHelper.deleteConversionRate(crUsd2);
-			ConversionRateHelper.deleteConversionRate(crUsd3);
-			ConversionRateHelper.deleteConversionRate(crEur1);
-			ConversionRateHelper.deleteConversionRate(crEur2);
-			ConversionRateHelper.deleteConversionRate(crEur3);
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
-			ConversionRateHelper.deleteConversionRate(cr3);
-			
-			if (pp1 != null)
-				pp1.deleteEx(true);
-			if (pp2 != null)
-				pp2.deleteEx(true);
-			plv.deleteEx(true);
-			priceList.deleteEx(true);
-			
-			rollback();
-			
-			if (product1 != null) {
-				product1.set_TrxName(null);
-				product1.deleteEx(true);
-			}
-			if (product2 != null) {
-				product2.set_TrxName(null);
-				product2.deleteEx(true);
-			}
 		}
 	}
 	
@@ -1706,9 +1658,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct product = null;
-		try {
-			product = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			product.setName("testLandedCostForPO");
 			product.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -1718,6 +1669,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product.saveEx();
+			
+			mockProductGet(productMock, product);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -1832,13 +1785,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			expected = Arrays.asList(new FactAcct(assetAccount, new BigDecimal("2.30"), 2, false),
 					new FactAcct(nivReceiptAccount, new BigDecimal("2.00"), 2, true), new FactAcct(landedCostAccount, new BigDecimal("0.30"), 2, true));
 			assertFactAcctEntries(list, expected);
-		} finally {
-			rollback();
-			
-			if (product != null) {
-				product.set_TrxName(null);
-				product.deleteEx(true);
-			}
 		}
 	}
 	
@@ -1848,9 +1794,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct product = null;
-		try {
-			product = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			product.setName("testLandedCostForPOAndInvoice");
 			product.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -1860,6 +1805,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product.saveEx();
+			
+			mockProductGet(productMock, product);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -2034,29 +1981,21 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			assertFactAcctEntries(list, expected);
 			cost = product.getCostingRecord(as, getAD_Org_ID(), 0, as.getCostingMethod());
 			assertEquals(new BigDecimal("2.40"), cost.getCurrentCostPrice().setScale(2, RoundingMode.HALF_UP), "Unexpected current cost price");
-		} finally {
-			rollback();
-			
-			if (product != null) {
-				product.set_TrxName(null);
-				product.deleteEx(true);
-			}
 		}
 	}
 	
 	@Test
-	public void testLandedCostWtihNoEstimateForPOAndInvoice() {
-		testLandedCostWtihNoEstimateForPOAndInvoice(true);
-		testLandedCostWtihNoEstimateForPOAndInvoice(false);
+	public void testLandedCostWithNoEstimateForPOAndInvoice() {
+		testLandedCostWithNoEstimateForPOAndInvoice(true);
+		testLandedCostWithNoEstimateForPOAndInvoice(false);
 	}
-	public void testLandedCostWtihNoEstimateForPOAndInvoice(boolean forProduct) {
+	public void testLandedCostWithNoEstimateForPOAndInvoice(boolean forProduct) {
 		MClient client = MClient.get(Env.getCtx());
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct product = null;
-		try {
-			product = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			product.setName("testLandedCostWtihNoEstimateForPOAndInvoice");
 			product.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -2066,6 +2005,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			product.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			product.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			product.saveEx();
+			
+			mockProductGet(productMock, product);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -2164,7 +2105,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			
 			if (!invoice.isPosted()) {
 				String error = DocumentEngine.postImmediate(Env.getCtx(), invoice.getAD_Client_ID(), MInvoice.Table_ID, invoice.get_ID(), false, getTrxName());
-				assertNull(error, error);
+				assertTrue(error == null);
 			}
 			invoice.load(getTrxName());
 			assertTrue(invoice.isPosted());
@@ -2252,13 +2193,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			
 			cost = product.getCostingRecord(as, getAD_Org_ID(), 0, as.getCostingMethod());
 			assertEquals(new BigDecimal("2.00"), cost.getCurrentCostPrice().setScale(2, RoundingMode.HALF_UP), "Unexpected current cost price");
-		} finally {
-			rollback();
-			
-			if (product != null) {
-				product.set_TrxName(null);
-				product.deleteEx(true);
-			}
 		}
 	}
 
@@ -2274,10 +2208,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostWtihMultipleMRAndShipment1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -2288,6 +2220,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -2297,7 +2231,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostWtihMultipleMRAndShipment2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -2307,6 +2241,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.saveEx();
+			
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -2664,18 +2600,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			assertEquals(p2price.add(p2a1.divide(p2QtyOnHand, 2, RoundingMode.HALF_UP))
 					.add(p2a2Asset.divide(p2QtyOnHand, 2, RoundingMode.HALF_UP))
 					.setScale(1, RoundingMode.HALF_UP), p1mcost.getCurrentCostPrice().setScale(1, RoundingMode.HALF_UP), "Unexpected current cost price");
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			if (p2 != null) {
-				p2.set_TrxName(null);
-				p2.deleteEx(true);
-			}
 		}
 	}
 	
@@ -2685,10 +2609,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversal1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -2699,6 +2621,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -2708,7 +2632,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostReversal2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -2718,6 +2642,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.saveEx();
+			
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -3003,18 +2929,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			if (p2 != null) {
-				p2.set_TrxName(null);
-				p2.deleteEx(true);
-			}
 		}
 	}
 	
@@ -3255,10 +3169,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalAfterShipment1.1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -3269,6 +3181,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -3278,7 +3192,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostReversalAfterShipment1.2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -3288,6 +3202,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.saveEx();
+			
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -3622,18 +3538,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 					new FactAcct(assetAccount, p1cogs, 2, false),
 					new FactAcct(assetAccount, p2cogs, 2, false));
 			assertFactAcctEntries(factAccts, expected);
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			if (p2 != null) {
-				p2.set_TrxName(null);
-				p2.deleteEx(true);
-			}
 		}
 	}
 	
@@ -3647,18 +3551,18 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
 		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); 
 		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); 
-		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.SPOT.id; 
 		Timestamp today = TimeUtil.getDay(null);		
 		Timestamp tomorrow = TimeUtil.addDays(today, 1);
 		BigDecimal crate1 = new BigDecimal("1.05");
 		BigDecimal crate2 = new BigDecimal("1.12");
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, today, crate1, true);	
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, tomorrow, crate2, true);
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic()) {
+			mockGetRate(conversionRateMock, euro, usd, 0, today, crate1);
+			mockGetRate(conversionRateMock, euro, usd, 0, tomorrow, crate2);
+			
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalAfterShipment3");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -3668,6 +3572,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
+			
+			mockProductGet(productMock, p1);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.IMPORT.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -3959,16 +3865,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
 		}
 	}
 	
@@ -3978,17 +3874,16 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
 		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); 
 		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); 
-		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.SPOT.id; 
 		Timestamp today = TimeUtil.getDay(null);		
 		Timestamp tomorrow = TimeUtil.addDays(today, 1);
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, today, new BigDecimal("0.91"), true);	
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(usd.getC_Currency_ID(), euro.getC_Currency_ID(), C_ConversionType_ID, tomorrow, new BigDecimal("0.85"), true);
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			 MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic()) {
+			mockGetRate(conversionRateMock, usd, euro, 0, today, new BigDecimal("0.91"));
+			mockGetRate(conversionRateMock, usd, euro, 0, tomorrow, new BigDecimal("0.85"));
+			
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalAfterShipment2.1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -3999,6 +3894,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -4008,7 +3905,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, 	getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostReversalAfterShipment2.2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -4018,6 +3915,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.saveEx();
+			
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -4353,21 +4252,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			if (p2 != null) {
-				p2.set_TrxName(null);
-				p2.deleteEx(true);
-			}
-			
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
 		}
 	}
 	
@@ -4378,19 +4262,18 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
 		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); 
 		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); 
-		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.SPOT.id; 
 		Timestamp today = TimeUtil.getDay(null);		
 		Timestamp tomorrow = TimeUtil.addDays(today, 1);
 		BigDecimal crate1 = new BigDecimal("1.05");
 		BigDecimal crate2 = new BigDecimal("1.12");
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, today, crate1, true);	
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, tomorrow, crate2, true);
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			 MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic()) {
+			mockGetRate(conversionRateMock, euro, usd, 0, today, crate1);
+			mockGetRate(conversionRateMock, euro, usd, 0, tomorrow, crate2);
+			
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalAfterInventoryUseASI.1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -4402,6 +4285,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.IMPORT.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -4411,7 +4296,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostReversalAfterInventoryUseASI.2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -4422,6 +4307,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.setM_AttributeSet_ID(DictionaryIDs.M_AttributeSet.FERTILIZER_LOT.id);
 			p2.saveEx();
+			
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -4842,18 +4729,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
-		}	
-	
+		}		
 	}
 	
 	@Test
@@ -4862,19 +4738,18 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		MProduct p2 = null;
 		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id); 
 		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id); 
-		int C_ConversionType_ID = DictionaryIDs.C_ConversionType.SPOT.id; 
 		Timestamp today = TimeUtil.getDay(null);		
 		Timestamp tomorrow = TimeUtil.addDays(today, 1);
 		BigDecimal crate1 = new BigDecimal("1.05");
 		BigDecimal crate2 = new BigDecimal("1.12");
-		MConversionRate cr1 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, today, crate1, true);	
-		MConversionRate cr2 = ConversionRateHelper.createConversionRate(euro.getC_Currency_ID(), usd.getC_Currency_ID(), C_ConversionType_ID, tomorrow, crate2, true);
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+			 MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic()) {
+			mockGetRate(conversionRateMock, euro, usd, 0, today, crate1);
+			mockGetRate(conversionRateMock, euro, usd, 0, tomorrow, crate2);
+			
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalAfterInventoryUse.1");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -4885,6 +4760,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
 			
+			mockProductGet(productMock, p1);
+			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.IMPORT.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -4894,7 +4771,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			pp.setPriceList(p1price);
 			pp.saveEx();
 			
-			p2 = new MProduct(Env.getCtx(), 0, null);
+			MProduct p2 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p2.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p2.setName("testUnplannedLandedCostReversalAfterInventoryUse.2");
 			p2.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -4904,6 +4781,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p2.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p2.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p2.saveEx();
+					
+			mockProductGet(productMock, p2);
 			
 			pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
 			pp.setM_PriceList_Version_ID(plv.getM_PriceList_Version_ID());
@@ -5304,16 +5183,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}
-			
-			ConversionRateHelper.deleteConversionRate(cr1);
-			ConversionRateHelper.deleteConversionRate(cr2);
 		}	
 	}
 	
@@ -5327,9 +5196,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		MAcctSchema as = client.getAcctSchema();
 		assertEquals(as.getCostingMethod(), MCostElement.COSTINGMETHOD_AveragePO, "Default costing method not Average PO");
 		
-		MProduct p1 = null;
-		try {
-			p1 = new MProduct(Env.getCtx(), 0, null);
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+			MProduct p1 = new MProduct(Env.getCtx(), 0, getTrxName());
 			p1.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			p1.setName("testUnplannedLandedCostReversalWithZeroOnHand");
 			p1.setProductType(MProduct.PRODUCTTYPE_Item);
@@ -5339,6 +5207,8 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			p1.setC_UOM_ID(DictionaryIDs.C_UOM.EACH.id);
 			p1.setC_TaxCategory_ID(DictionaryIDs.C_TaxCategory.STANDARD.id);
 			p1.saveEx();
+			
+			mockProductGet(productMock, p1);
 			
 			MPriceListVersion plv = MPriceList.get(DictionaryIDs.M_PriceList.PURCHASE.id).getPriceListVersion(null);
 			MProductPrice pp = new MProductPrice(Env.getCtx(), 0, getTrxName());
@@ -5613,14 +5483,6 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				}
 				assertFactAcctEntries(rFactAccts, expected);
 			}
-
-		} finally {
-			rollback();
-			
-			if (p1 != null) {
-				p1.set_TrxName(null);
-				p1.deleteEx(true);
-			}			
 		}	
 	}
 	
@@ -6153,6 +6015,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 					new FactAcct(landedCostAccount, new BigDecimal("30.00"), 2, false));
 			assertFactAcctEntries(list, expected);
 		} finally {
+			rollback();
 			costElement.deleteEx(true);
 		}
 	}
@@ -6355,6 +6218,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				assertFactAcctEntries(list, expected);
 			}
 		} finally {
+			rollback();
 			costElement.deleteEx(true);
 		}
 	}
@@ -6591,6 +6455,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				assertFactAcctEntries(list, expected);
 			}
 		} finally {
+			rollback();
 			costElement.deleteEx(true);
 		}
 	}
@@ -6682,7 +6547,7 @@ public class AveragePOCostingTest extends AbstractTestCase {
 			
 			if (!invoice.isPosted()) {
 				String error = DocumentEngine.postImmediate(Env.getCtx(), invoice.getAD_Client_ID(), MInvoice.Table_ID, invoice.get_ID(), false, getTrxName());
-				assertTrue(error == null);
+				assertNull(error, error);
 			}
 			invoice.load(getTrxName());
 			assertTrue(invoice.isPosted());
@@ -7354,10 +7219,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				List<MFactAcct> factAccts = query.list();
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, false));
 					expected.add(new FactAcct(assetAccount, mrQty1.multiply(invPrice.subtract(poPrice)), 2, true));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, false));
 					expected.add(new FactAcct(assetAccount, mrQty2.multiply(invPrice.subtract(poPrice)), 2, true));
@@ -7412,10 +7279,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				boolean isDebit = mi.getQty().signum() >= 0;
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, !isDebit));
 					expected.add(new FactAcct(assetAccount, mrQty1.multiply(invPrice.subtract(poPrice)), 2, isDebit));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, !isDebit));
 					expected.add(new FactAcct(assetAccount, mrQty2.multiply(invPrice.subtract(poPrice)), 2, isDebit));
@@ -7690,10 +7559,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				List<MFactAcct> factAccts = query.list();
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, false));
 					expected.add(new FactAcct(assetAccount, mrQty1.multiply(poPrice.subtract(invPrice)), 2, false));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, false));
 					expected.add(new FactAcct(assetAccount, mrQty2.multiply(poPrice.subtract(invPrice)), 2, false));
@@ -7748,10 +7619,12 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				boolean isDebit = mi.getQty().signum() >= 0;
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, !isDebit));
 					expected.add(new FactAcct(assetAccount, mrQty1.multiply(poPrice.subtract(invPrice)), 2, !isDebit));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, !isDebit));
 					expected.add(new FactAcct(assetAccount, mrQty2.multiply(poPrice.subtract(invPrice)), 2, !isDebit));
@@ -7799,7 +7672,17 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		cal.add(Calendar.DAY_OF_MONTH, -1);
 		Timestamp date1 = new Timestamp(cal.getTimeInMillis());
 		
-		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class)) {
+		MCurrency usd = MCurrency.get(DictionaryIDs.C_Currency.USD.id);
+		MCurrency euro = MCurrency.get(DictionaryIDs.C_Currency.EUR.id);
+
+		BigDecimal crate1 = new BigDecimal("31.346223109251");
+		BigDecimal crate2 = new BigDecimal("32.573724925968");
+		
+		try (MockedStatic<MProduct> productMock = mockStatic(MProduct.class);
+				MockedStatic<MConversionRate> conversionRateMock = ConversionRateHelper.mockStatic()) {
+			mockGetRate(conversionRateMock, usd, euro, 0, date1, crate1);
+			mockGetRate(conversionRateMock, usd, euro, 0, today, crate2);
+			
 			MProduct product = new MProduct(Env.getCtx(), 0, getTrxName());
 			product.setM_Product_Category_ID(DictionaryIDs.M_Product_Category.STANDARD.id);
 			product.setName("testReverseCorrectMRWithMultiASILines3");
@@ -7939,9 +7822,11 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				List<MFactAcct> factAccts = query.list();
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, false));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, true));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, false));
 				}
@@ -7989,9 +7874,11 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				boolean isDebit = mi.getQty().signum() >= 0;
 				List<FactAcct> expected = new ArrayList<FactAcct>();
 				if (mi.getM_InOutLine_ID() == receiptLine1.getM_InOutLine_ID()) {
+					assertEquals(receiptLine1.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 1");
 					expected.add(new FactAcct(acctNIR, mrQty1.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty1.multiply(invPrice), 2, !isDebit));
 				} else if (mi.getM_InOutLine_ID() == receiptLine2.getM_InOutLine_ID()) {
+					assertEquals(receiptLine2.getM_AttributeSetInstance_ID(), mi.getM_AttributeSetInstance_ID(), "Unexpected match invoice ASI for receipt line 2");
 					expected.add(new FactAcct(acctNIR, mrQty2.multiply(poPrice), 2, isDebit));
 					expected.add(new FactAcct(acctInvClr, mrQty2.multiply(invPrice), 2, !isDebit));
 				}
@@ -8057,11 +7944,17 @@ public class AveragePOCostingTest extends AbstractTestCase {
 				assertFactAcctEntries(factAccts, expected);
 			}
 			
+			MAcctSchema[] ass = MAcctSchema.getClientAcctSchema(Env.getCtx(), getAD_Client_ID());
 			product.set_TrxName(getTrxName());
-			cost = product.getCostingRecord(as, getAD_Org_ID(), 0, MCostElement.COSTINGMETHOD_AveragePO);
-			assertNotNull(cost, "No MCost record found");
-			assertEquals(new BigDecimal("10.00"), cost.getCurrentQty().setScale(2, RoundingMode.HALF_UP), "Unexpected current quantity");
-			assertEquals(new BigDecimal("10.00"), cost.getCurrentCostPrice().setScale(2, RoundingMode.HALF_UP), "Unexpected current cost price");
+			for (MAcctSchema as0 : ass) {
+				cost = product.getCostingRecord(as0, getAD_Org_ID(), 0, MCostElement.COSTINGMETHOD_AveragePO);
+				assertNotNull(cost, "No MCost record found");
+				assertEquals(new BigDecimal("10.00"), cost.getCurrentQty().setScale(2, RoundingMode.HALF_UP), "Unexpected current quantity");
+				if (as0.getC_Currency_ID() == DictionaryIDs.C_Currency.USD.id)
+					assertEquals(new BigDecimal("10.00"), cost.getCurrentCostPrice().setScale(2, RoundingMode.HALF_UP), "Unexpected current cost price");
+				else if (as0.getC_Currency_ID() == DictionaryIDs.C_Currency.EUR.id)
+					assertEquals(new BigDecimal("313.46"), cost.getCurrentCostPrice().setScale(2, RoundingMode.HALF_UP), "Unexpected current cost price");
+			}
 		} finally {
 			rollback();
 		}
@@ -8118,5 +8011,13 @@ public class AveragePOCostingTest extends AbstractTestCase {
 		}
 		
 		return receiptLine1;
+	}
+	
+	private void mockGetRate(MockedStatic<MConversionRate> conversionRateMock, MCurrency fromCurrency,
+			MCurrency toCurrency, int C_ConversionType_ID, Timestamp conversionDate, BigDecimal multiplyRate) {
+		ConversionRateHelper.mockGetRate(conversionRateMock, fromCurrency, toCurrency, C_ConversionType_ID, 
+				conversionDate, multiplyRate, getAD_Client_ID(), getAD_Org_ID());
+		ConversionRateHelper.mockGetRate(conversionRateMock, toCurrency, fromCurrency, C_ConversionType_ID, 
+				conversionDate, BigDecimal.valueOf(1d/multiplyRate.doubleValue()), getAD_Client_ID(), getAD_Org_ID());
 	}
 }

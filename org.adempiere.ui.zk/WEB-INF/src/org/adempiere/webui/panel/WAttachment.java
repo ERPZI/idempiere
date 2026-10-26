@@ -48,6 +48,7 @@ import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
 import org.adempiere.webui.window.WEMailDialog;
@@ -77,7 +78,7 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.Filedownload;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Iframe;
 import org.zkoss.zul.North;
@@ -173,7 +174,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *  @param Record_ID record key
 	 *  @param trxName transaction
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public WAttachment(	int WindowNo, int AD_Attachment_ID,
 						int AD_Table_ID, int Record_ID, String trxName)
 	{
@@ -190,7 +191,7 @@ public class WAttachment extends Window implements EventListener<Event>
 	 *  @param trxName transaction
 	 *  @param eventListener
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public WAttachment(	int WindowNo, int AD_Attachment_ID,
 			int AD_Table_ID, int Record_ID, String trxName, EventListener<Event> eventListener)
 	{
@@ -336,7 +337,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		bSave.setEnabled(false);
 		bSave.setSclass("img-btn");
 		if (ThemeManager.isUseFontIconForImage())
-			bSave.setIconSclass("z-icon-Export");
+			bSave.setIconSclass(Icon.getIconSclass(Icon.EXPORT));
 		else
 			bSave.setImage(ThemeManager.getThemeResource("images/Export24.png"));
 		bSave.setTooltiptext(Msg.getMsg(Env.getCtx(), "AttachmentSave"));
@@ -345,14 +346,14 @@ public class WAttachment extends Window implements EventListener<Event>
 		bSaveAllAsZip.setEnabled(false);
 		bSaveAllAsZip.setSclass("img-btn");
 		if (ThemeManager.isUseFontIconForImage())
-			bSaveAllAsZip.setIconSclass("z-icon-file-zip-o");
+			bSaveAllAsZip.setIconSclass(Icon.getIconSclass(Icon.FILE_ZIP));
 		else
 			bSaveAllAsZip.setImage(ThemeManager.getThemeResource("images/SaveAsZip24.png"));
 		bSaveAllAsZip.setTooltiptext(Msg.getMsg(Env.getCtx(), "ExportZIP"));
 		bSaveAllAsZip.addEventListener(Events.ON_CLICK, this);
 
 		if (ThemeManager.isUseFontIconForImage())
-			bLoad.setIconSclass("z-icon-Import");
+			bLoad.setIconSclass(Icon.getIconSclass(Icon.IMPORT));
 		else
 			bLoad.setImage(ThemeManager.getThemeResource("images/Import24.png"));
 		bLoad.setSclass("img-btn");
@@ -365,7 +366,7 @@ public class WAttachment extends Window implements EventListener<Event>
 
 		bEmail.setEnabled(false);
 		if (ThemeManager.isUseFontIconForImage())
-			bEmail.setIconSclass("z-icon-SendMail");
+			bEmail.setIconSclass(Icon.getIconSclass(Icon.SEND_MAIL));
 		else
 			bEmail.setImage(ThemeManager.getThemeResource("images/SendMail24.png"));
 		bLoad.setSclass("img-btn");
@@ -393,7 +394,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		bOk.addEventListener(Events.ON_CLICK, this);
 
 		if (ThemeManager.isUseFontIconForImage())
-			bDeleteAll.setIconSclass("z-icon-Delete");
+			bDeleteAll.setIconSclass(Icon.getIconSclass(Icon.DELETE));
 		else
 			bDeleteAll.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
 		bDeleteAll.setSclass("img-btn");
@@ -401,7 +402,7 @@ public class WAttachment extends Window implements EventListener<Event>
 		bDeleteAll.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "DeleteAll")));
 
 		if (ThemeManager.isUseFontIconForImage())
-			bPreview.setIconSclass("z-icon-Find");
+			bPreview.setIconSclass(Icon.getIconSclass(Icon.FIND));
 		else
 			bPreview.setImage(ThemeManager.getThemeResource("images/Find24.png"));
 		bPreview.setSclass("img-btn");
@@ -411,8 +412,8 @@ public class WAttachment extends Window implements EventListener<Event>
 		confirmPanel.appendChild(bDeleteAll);
 		confirmPanel.appendChild(bPreview);
 		ZKUpdateUtil.setHflex(confirmPanel, "1");
-		Hbox hbox = new Hbox();
-		hbox.setPack("end");
+		FlexHlayout hbox = new FlexHlayout();
+		hbox.setPack(FlexHlayout.PackType.END);
 		ZKUpdateUtil.setHflex(hbox, "1");
 		confirmPanel.appendChild(hbox);
 		hbox.appendChild(bOk);
@@ -706,7 +707,7 @@ public class WAttachment extends Window implements EventListener<Event>
 						saveAttachment();
 					}
 				} else {
-					m_attachment.delete(true);
+					m_attachment.deleteEx(true);
 					m_attachment = null;
 				}
 
@@ -742,8 +743,9 @@ public class WAttachment extends Window implements EventListener<Event>
 	 * Save the attachment to database
 	 */
 	private void saveAttachment() {
-		m_attachment.setBinaryData(new byte[0]); // ATTENTION! HEAVY HACK HERE... Else it will not save :(
-		m_attachment.setTextMsg(text.getText());
+		if (m_attachment.getTitle() == null || !m_attachment.getTitle().equals(MAttachment.TITLE_ListInAttachmentFile))
+			m_attachment.setBinaryData(new byte[0]); // ATTENTION! HEAVY HACK HERE... Else it will not save :(
+		m_attachment.setTextMsg(Util.isEmpty(text.getText()) ? null : text.getText());
 		m_attachment.saveEx();
 		m_change = false;
 	}
@@ -893,7 +895,7 @@ public class WAttachment extends Window implements EventListener<Event>
 				if (result)
 				{
 					if (m_attachment != null) {
-						m_attachment.delete(true);
+						m_attachment.deleteEx(true);
 						m_attachment = null;
 					}
 					dispose();

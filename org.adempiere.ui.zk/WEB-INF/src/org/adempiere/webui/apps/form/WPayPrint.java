@@ -664,7 +664,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 		SimplePDFViewer chequeViewer = null;
 		try
 		{
-			File outFile = File.createTempFile("WPayPrint", null);
+			File outFile = File.createTempFile("WPayPrint", ".pdf");
+			outFile.deleteOnExit();
 			AEnv.mergePdf(pdfList, outFile);
 			chequeViewer = new SimplePDFViewer(form.getFormName(), new FileInputStream(outFile));
 			chequeViewer.setAttribute(Window.MODE_KEY, Window.MODE_EMBEDDED);
@@ -675,6 +676,11 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			return;
 		}
+		finally
+		{
+			deleteTemporaryFiles(pdfList);
+		}
+		
 		final SimplePDFViewer chequeViewerRef = chequeViewer;
 
 		Dialog.ask(m_WindowNo, "VPayPrintPrintRemittance", new Callback<Boolean>() {
@@ -689,7 +695,8 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	
 					try
 					{
-						File outFile = File.createTempFile("WPayPrint", null);
+						File outFile = File.createTempFile("WPayPrint", ".pdf");
+						outFile.deleteOnExit();						
 						AEnv.mergePdf(pdfList, outFile);
 						String name = Msg.translate(Env.getCtx(), "Remittance");
 						remitViewer = new SimplePDFViewer(form.getFormName() + " - " + name, new FileInputStream(outFile));
@@ -699,6 +706,10 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 					catch (Exception e)
 					{
 						log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+					}
+					finally
+					{
+						deleteTemporaryFiles(pdfList);
 					}
 				}
 				
@@ -735,7 +746,18 @@ public class WPayPrint extends PayPrint implements IFormController, EventListene
 	public ADForm getForm() {
 		return form;
 	}
-
+	private void deleteTemporaryFiles(List<File> files)
+	{
+		if (files == null)
+			return;
+		for (File file : files)
+		{
+			if (file != null && file.exists() && !file.delete())
+				file.deleteOnExit();
+		}
+	}
+	
+	
 	/**
 	 *  Vetoable Change Listener.<br/>
 	 *  - Payment Selection

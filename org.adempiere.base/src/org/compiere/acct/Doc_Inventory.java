@@ -36,7 +36,9 @@ import org.compiere.model.MInventoryLine;
 import org.compiere.model.MInventoryLineMA;
 import org.compiere.model.MProduct;
 import org.compiere.model.ProductCost;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 import org.compiere.util.Util;
 
 /**
@@ -256,15 +258,9 @@ public class Doc_Inventory extends Doc
 				product = line.getProduct();
 				int orgId = line.getAD_Org_ID();
 				int asiId = line.getM_AttributeSetInstance_ID();
-				if (MAcctSchema.COSTINGLEVEL_Client.equals(costingLevel))
-				{
-					orgId = 0;
-					asiId = 0;
-				}
-				else if (MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel))
-					asiId = 0;
-				else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel))
-					orgId = 0;
+				MCost.CostingKey costKey = MCost.CostingKey.resolve(orgId, asiId, costingLevel);
+				orgId = costKey.AD_Org_ID();
+				asiId = costKey.M_AttributeSetInstance_ID();
 				MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), docCostingMethod, orgId);
 				MCostDetail cd = MCostDetail.getInventory(as, product.getM_Product_ID(), asiId, line.get_ID(), ce.getM_CostElement_ID(), getTrxName());
 				ICostInfo cost = MCost.getCostInfo(product, asiId, as, 
@@ -316,8 +312,24 @@ public class Doc_Inventory extends Doc
 					}					
 					if (costs == null || costs.signum() == 0)
 					{
-						p_Error = "No Costs for " + line.getProduct().getName();
-						return null;
+						if (product.isStocked())
+						{
+							//ok if we have purchased zero cost item from vendor before
+							int count = DB.getSQLValue(null, "SELECT Count(*) FROM M_CostDetail WHERE M_Product_ID=? AND Processed='Y' AND Amt=0.00 AND Qty > 0 AND (C_OrderLine_ID > 0 OR C_InvoiceLine_ID > 0)", 
+									product.getM_Product_ID());
+							if (count > 0)
+							{
+								costs = BigDecimal.ZERO;
+							}
+							else
+							{
+								p_Error = Msg.getMsg(getCtx(), "No Costs for") + " " + line.getProduct().getName();
+								log.log(Level.WARNING, p_Error);
+								return null;
+							}
+						}
+						else	//	ignore service
+							continue;
 					}
 				}
 				else

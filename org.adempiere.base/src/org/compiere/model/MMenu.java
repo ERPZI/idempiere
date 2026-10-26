@@ -105,7 +105,7 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 	 * @return MMenu[]
 	 * @deprecated
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public static MMenu[] get (Properties ctx, String whereClause)
 	{
 		return get(ctx, whereClause, null);
@@ -286,6 +286,13 @@ public class MMenu extends X_AD_Menu implements ImmutablePOSupport
 			}
 			else if (ACTION_Info.equals(getAction())) {
 				MUserDefInfo userDef = MUserDefInfo.getBestMatch(getCtx(), getAD_InfoWindow_ID());
+				if (userDef != null) {
+					if (userDef.getName() != null)
+						return userDef.getName();
+				}
+			}
+			else if (ACTION_Form.equals(getAction())) {
+				MUserDefForm userDef = MUserDefForm.getBestMatch(getCtx(), getAD_Form_ID());
 				if (userDef != null) {
 					if (userDef.getName() != null)
 						return userDef.getName();

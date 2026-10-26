@@ -22,7 +22,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for AD_Role
  *  @author iDempiere (generated) 
- *  @version Release 12
+ *  @version Release 13
  */
 public interface I_AD_Role 
 {
@@ -97,6 +97,7 @@ public interface I_AD_Role
 	  */
 	public int getAD_Tree_Menu_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Menu() throws RuntimeException;
 
     /** Column name AD_Tree_Org_ID */
@@ -112,6 +113,7 @@ public interface I_AD_Role
 	  */
 	public int getAD_Tree_Org_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Tree getAD_Tree_Org() throws RuntimeException;
 
     /** Column name Allow_Info_Account */
@@ -243,6 +245,7 @@ public interface I_AD_Role
 	  */
 	public int getC_Currency_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_C_Currency getC_Currency() throws RuntimeException;
 
     /** Column name ConfirmQueryRecords */
@@ -434,13 +437,13 @@ public interface I_AD_Role
     /** Column name IsMasterRole */
     public static final String COLUMNNAME_IsMasterRole = "IsMasterRole";
 
-	/** Set Master Role.
-	  * A master role cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
+	/** Set Role Template.
+	  * A role template cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
 	  */
 	public void setIsMasterRole (boolean IsMasterRole);
 
-	/** Get Master Role.
-	  * A master role cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
+	/** Get Role Template.
+	  * A role template cannot be assigned to users, it is intended to define access to menu option and documents and inherit to other roles
 	  */
 	public boolean isMasterRole();
 
@@ -596,6 +599,7 @@ public interface I_AD_Role
 	  */
 	public int getSupervisor_ID();
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_User getSupervisor() throws RuntimeException;
 
     /** Column name Updated */

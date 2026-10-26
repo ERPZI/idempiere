@@ -47,12 +47,15 @@ import org.adempiere.webui.event.ContextMenuListener;
 import org.adempiere.webui.event.ValueChangeEvent;
 import org.adempiere.webui.event.ValueChangeListener;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WFieldRecordInfo;
 import org.compiere.model.GridField;
 import org.compiere.model.GridTab;
+import org.compiere.model.MField;
 import org.compiere.model.MRole;
 import org.compiere.model.MStyle;
+import org.idempiere.ui.zk.field.FieldDynamicDisplayListenerProvider;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Evaluatee;
@@ -353,6 +356,22 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
         		adwindow.getADWindowContent().setLastFocusEditor(component);
         	}
         });
+        
+        if (gridField != null) {
+        	int fieldId = gridField.getAD_Field_ID();
+        	if (fieldId > 0) {
+        		MField mField = MField.get(Env.getCtx(), fieldId);
+        		if (mField != null) {
+        			String uu = mField.getAD_Field_UU();
+        			if (uu != null) {
+        				WEditor.DynamicDisplayListener[] list = FieldDynamicDisplayListenerProvider.getListeners(uu);
+        				for (WEditor.DynamicDisplayListener listener : list) {
+        					addDynamicDisplayListener(listener);
+        				}
+        			}
+        		}
+        	}
+        }
     }
 
     /**
@@ -873,7 +892,7 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
     /**
      * @deprecated
      */
-    @Deprecated
+    @Deprecated (since="13", forRemoval=true)
 	public void updateLabelStyle() {				
 		updateStyle();
 	}
@@ -941,7 +960,7 @@ public abstract class WEditor implements EventListener<Event>, PropertyChangeLis
 		editor.setAttribute("EVENT", WEditorPopupMenu.EDITOR_EVENT);
 		editor.setLabel(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Editor")).intern());
         if (ThemeManager.isUseFontIconForImage())
-        	editor.setIconSclass("z-icon-Edit");
+        	editor.setIconSclass(Icon.getIconSclass(Icon.EDIT));
         else
         	editor.setImage(ThemeManager.getThemeResource("images/Editor16.png"));
         editor.addEventListener(Events.ON_CLICK, popupMenu);

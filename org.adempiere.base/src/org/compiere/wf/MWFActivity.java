@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import org.adempiere.base.Core;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MAttachment;
 import org.compiere.model.MBPartner;
@@ -70,6 +71,7 @@ import org.compiere.util.Trx;
 import org.compiere.util.TrxEventListener;
 import org.compiere.util.Util;
 import org.compiere.util.ValueNamePair;
+import org.idempiere.print.ReportContentRequest;
 
 /**
  *	Extended Workflow Activity Model for AD_WF_Activity. <br/>
@@ -317,7 +319,15 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			if (m_process == null)
 				m_process = new MWFProcess (getCtx(), getAD_WF_Process_ID(),
 					this.get_TrxName());
-			m_process.checkActivities(this.get_TrxName(), m_po);
+			try{
+				m_process.checkActivities(this.get_TrxName(), m_po);
+			}catch (Exception e) {
+				setWFState(WFSTATE_Terminated); 
+				m_process.setWFState(MWFProcess.WFSTATE_Terminated);
+				 m_docStatus = DocAction.STATUS_Invalid;
+				 m_process.setProcessMsg(e.getLocalizedMessage());
+				 log.log(Level.SEVERE, e.getLocalizedMessage());
+			}
 		}
 		else
 		{
@@ -657,6 +667,13 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 	{
 		//	Responsible
 		int AD_WF_Responsible_ID = getNode().getAD_WF_Responsible_ID();
+		// get Client WF Responsible from the cache
+		MWFResponsible ovrResp = MWFResponsible.getClientWFResp(p_ctx, AD_WF_Responsible_ID);
+		if (ovrResp != null)
+		{
+			AD_WF_Responsible_ID = ovrResp.getAD_WF_Responsible_ID();
+		}
+				
 		if (AD_WF_Responsible_ID == 0)	//	not defined on Node Level
 			AD_WF_Responsible_ID = process.getAD_WF_Responsible_ID();
 		setAD_WF_Responsible_ID (AD_WF_Responsible_ID);
@@ -1157,7 +1174,11 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 			ReportEngine re = ReportEngine.get(getCtx(), pi);
 			if (re == null)
 				throw new IllegalStateException("Cannot create Report AD_Process_ID=" + m_node.getAD_Process_ID());
-			File report = re.getPDF();
+			re.setProcessInfo(pi);
+			File report = Core.getReportContent(new ReportContentRequest(re, pi, pi.getTitle()),
+					"application/pdf", "pdf");
+			if (report == null)
+				throw new IllegalStateException("Cannot create PDF report AD_Process_ID=" + m_node.getAD_Process_ID());
 			//	Notice
 			int AD_Message_ID = MESSAGE_WORKFLOWRESULT;		//	HARDCODED WorkflowResult
 			MNote note = new MNote(getCtx(), AD_Message_ID, getAD_User_ID(), trx.getTrxName());
@@ -1484,63 +1505,42 @@ public class MWFActivity extends X_AD_WF_Activity implements Runnable
 		if (getNode().isUserApproval() && getPO(trx) instanceof DocAction)
 		{
 			DocAction doc = (DocAction)m_po;
-			try
-			{
-				//	Not approved
-				if (!"Y".equals(value))
-				{
-					newState = StateEngine.STATE_Aborted;
-					if (!(doc.processIt (DocAction.ACTION_Reject)))
-						setTextMsgBefore ("Cannot Reject - Document Status: " + doc.getDocStatus());
-				}
-				else
-				{
-					if (isInvoker())
-					{
-						int startAD_User_ID = Env.getAD_User_ID(getCtx());
-						if (startAD_User_ID == 0)
-							startAD_User_ID = doc.getDoc_User_ID();
-						int nextAD_User_ID = getApprovalUser(startAD_User_ID,
-							doc.getC_Currency_ID(), doc.getApprovalAmt(),
-							doc.getAD_Org_ID(),
-							startAD_User_ID == doc.getDoc_User_ID());	//	own doc
-						//	No Approver
-						if (nextAD_User_ID <= 0)
-						{
-							newState = StateEngine.STATE_Aborted;
-							setTextMsgBefore (Msg.getMsg(getCtx(), "NoApprover"));
-							doc.processIt (DocAction.ACTION_Reject);
-						}
-						else if (startAD_User_ID != nextAD_User_ID)
-						{
-							forwardTo(nextAD_User_ID, "Next Approver");
-							newState = StateEngine.STATE_Suspended;
-						}
-						else	//	Approve
-						{
-							if (!(doc.processIt (DocAction.ACTION_Approve)))
-							{
-								newState = StateEngine.STATE_Aborted;
-								setTextMsgBefore ("Cannot Approve - Document Status: " + doc.getDocStatus());
-							}
-						}
-					}
-					//	No Invoker - Approve
-					else if (!(doc.processIt (DocAction.ACTION_Approve)))
-					{
+			// Not approved
+			if (!"Y".equals(value)) {
+				newState = StateEngine.STATE_Aborted;
+				if (!(doc.processIt(DocAction.ACTION_Reject)))
+					setTextMsgBefore("Cannot Reject - Document Status: " + doc.getDocStatus());
+			} else {
+				if (isInvoker()) {
+					int startAD_User_ID = Env.getAD_User_ID(getCtx());
+					if (startAD_User_ID == 0)
+						startAD_User_ID = doc.getDoc_User_ID();
+					int nextAD_User_ID = getApprovalUser(startAD_User_ID, doc.getC_Currency_ID(), doc.getApprovalAmt(),
+							doc.getAD_Org_ID(), startAD_User_ID == doc.getDoc_User_ID()); // own doc
+					// No Approver
+					if (nextAD_User_ID <= 0) {
 						newState = StateEngine.STATE_Aborted;
-						setTextMsgBefore ("Cannot Approve - Document Status: " + doc.getDocStatus());
+						setTextMsgBefore(Msg.getMsg(getCtx(), "NoApprover"));
+						doc.processIt(DocAction.ACTION_Reject);
+					} else if (startAD_User_ID != nextAD_User_ID) {
+						forwardTo(nextAD_User_ID, "Next Approver");
+						newState = StateEngine.STATE_Suspended;
+					} else // Approve
+					{
+						if (!(doc.processIt(DocAction.ACTION_Approve))) {
+							newState = StateEngine.STATE_Aborted;
+							setTextMsgBefore("Cannot Approve - Document Status: " + doc.getDocStatus());
+						}
 					}
 				}
-				doc.saveEx();
+				// No Invoker - Approve
+				else if (!(doc.processIt(DocAction.ACTION_Approve))) {
+					newState = StateEngine.STATE_Aborted;
+					setTextMsgBefore("Cannot Approve - Document Status: " + doc.getDocStatus());
+				}
 			}
-			catch (Exception e)
-			{
-				newState = StateEngine.STATE_Terminated;
-				setTextMsgBefore ("User Choice: " + e.toString());
-				addTextMsg(e);
-				log.log(Level.WARNING, "", e);
-			}
+			doc.saveEx();
+				
 			// Send Approval Notification
 			if (newState.equals(StateEngine.STATE_Aborted)) {
 				MUser to = new MUser(getCtx(), doc.getDoc_User_ID(), null);

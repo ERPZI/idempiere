@@ -32,6 +32,7 @@ import org.adempiere.webui.desktop.TabbedDesktop;
 import org.adempiere.webui.panel.IHelpContext;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.ZkReportViewer;
 import org.compiere.model.MSysConfig;
@@ -211,7 +212,7 @@ public class WindowContainer extends AbstractUIPart implements EventListener<Eve
         {
         	ToolBarButton homeButton = new ToolBarButton();
         	if (ThemeManager.isUseFontIconForImage())
-        		homeButton.setIconSclass("z-icon-Home");
+        		homeButton.setIconSclass(Icon.getIconSclass(Icon.HOME));
         	else
         		homeButton.setImage(ThemeManager.getThemeResource("images/Home16.png"));
         	homeButton.setSclass("window-container-toolbar-btn");
@@ -225,7 +226,7 @@ public class WindowContainer extends AbstractUIPart implements EventListener<Eve
         	tabListBtn = new ToolBarButton();
         	if (ThemeManager.isUseFontIconForImage()) 
         	{
-        		tabListBtn.setIconSclass("z-icon-Expand");
+        		tabListBtn.setIconSclass(Icon.getIconSclass(Icon.EXPAND));
         	} 
         	else 
         	{
@@ -332,60 +333,7 @@ public class WindowContainer extends AbstractUIPart implements EventListener<Eve
 		popup.setPage(tabbox.getPage());
 		popup.open(tabListBtn, "after_start");
 	}
-
-	/**
-     * @deprecated keep for compatible, replace by {@link #addWindow(Component, String, boolean, DecorateInfo)}
-     * @param comp
-     * @param title
-     * @param closeable
-     * @return
-     */
-	@Deprecated(forRemoval = true, since = "11")
-    public Tab addWindow(Component comp, String title, boolean closeable){
-    	return addWindow(comp, title, closeable, true, null);
-    }
-    
-    /**
-     * @deprecated keep for compatible, replace by {@link #addWindow(Component, String, boolean, boolean, DecorateInfo)}
-     * @param comp
-     * @param title
-     * @param closeable
-     * @param enable
-     * @return
-     */
-	@Deprecated(forRemoval = true, since = "11")
-    public Tab addWindow(Component comp, String title, boolean closeable, boolean enable) {
-    	return addWindow(comp, title, closeable, true, null);
-    }
-    
-    /**
-     * @deprecated keep for compatible, replace by {@link #insertBefore(Tab, Component, String, boolean, boolean, DecorateInfo)}
-     * @param refTab
-     * @param comp
-     * @param title
-     * @param closeable
-     * @param enable
-     * @return
-     */
-    @Deprecated(forRemoval = true, since = "11")
-    public Tab insertBefore(Tab refTab, Component comp, String title, boolean closeable, boolean enable){
-    	return insertBefore(refTab, comp, title, closeable, enable, null);
-    }
-    
-    /**
-     * @deprecated keep for compatible, replace by {@link #insertAfter(Tab, Component, String, boolean, boolean, DecorateInfo)}
-     * @param refTab
-     * @param comp
-     * @param title
-     * @param closeable
-     * @param enable
-     * @return
-     */
-    @Deprecated(forRemoval = true,since = "11")
-    public Tab insertAfter(Tab refTab, Component comp, String title, boolean closeable, boolean enable){
-    	return insertAfter(refTab, comp, title, closeable, enable, null);
-    }
-    
+   
     /**
      * Add comp as new tab
      * @param comp

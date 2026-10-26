@@ -48,6 +48,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
+import org.idempiere.db.util.SQLFragment;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.HtmlBasedComponent;
 import org.zkoss.zk.ui.event.Event;
@@ -332,7 +333,7 @@ public class WQuickEntry extends AbstractWQuickEntry implements EventListener<Ev
 			}
 			MQuery query = new MQuery(gridtab.getAD_Table_ID());
 			if (id == 0) {	//new record			
-				query.addRestriction("1=2");
+				query.addRestriction(new SQLFragment("1=2"));
 				gridtab.setQuery(query);
 				gridtab.query(false);
 				if (gridtab.isInsertRecord())

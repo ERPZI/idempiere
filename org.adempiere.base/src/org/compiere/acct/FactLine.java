@@ -38,6 +38,7 @@ import org.compiere.model.X_C_AcctSchema_Element;
 import org.compiere.model.X_Fact_Acct;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 
 /**
  *  Accounting Fact Entry.
@@ -61,9 +62,9 @@ import org.compiere.util.Env;
 public final class FactLine extends X_Fact_Acct
 {
 	/**
-	 * generated serial id
+	 * 
 	 */
-	private static final long serialVersionUID = -601720541421664784L;
+	private static final long serialVersionUID = -3630377500351331099L;
 
 	/**
 	 *	Constructor
@@ -107,6 +108,7 @@ public final class FactLine extends X_Fact_Acct
 		FactLine reversal = new FactLine (getCtx(), getAD_Table_ID(), getRecord_ID(), getLine_ID(), get_TrxName());
 		reversal.setClientOrg(this);	//	needs to be set explicitly
 		reversal.setDocumentInfo(m_doc, m_docLine);
+		reversal.setDocumentTextInfo(m_acctSchema);
 		reversal.setAccount(m_acctSchema, m_acct);
 		reversal.setPostingType(getPostingType());
 		//
@@ -120,6 +122,12 @@ public final class FactLine extends X_Fact_Acct
 		reversal.setC_Project_ID(getC_Project_ID());
 		reversal.setC_Campaign_ID(getC_Campaign_ID());
 		reversal.setC_Activity_ID(getC_Activity_ID());
+		reversal.setA_Asset_ID(getA_Asset_ID());
+		reversal.setC_Employee_ID(getC_Employee_ID());
+		reversal.setC_Charge_ID(getC_Charge_ID());
+		reversal.setC_CostCenter_ID(getC_CostCenter_ID());
+		reversal.setC_Department_ID(getC_Department_ID());
+		reversal.setM_Warehouse_ID(getM_Warehouse_ID());
 		reversal.setAD_OrgTrx_ID(getAD_OrgTrx_ID());
 		reversal.setC_SalesRegion_ID(getC_SalesRegion_ID());
 		reversal.setC_LocTo_ID(getC_LocTo_ID());
@@ -128,6 +136,12 @@ public final class FactLine extends X_Fact_Acct
 		reversal.setUser2_ID(getUser2_ID());
 		reversal.setUserElement1_ID(getUserElement1_ID());
 		reversal.setUserElement2_ID(getUserElement2_ID());
+		reversal.setM_AttributeSetInstance_ID(getM_AttributeSetInstance_ID());
+		reversal.setCustomFieldText1(getCustomFieldText1());
+		reversal.setCustomFieldText2(getCustomFieldText2());
+		reversal.setCustomFieldText3(getCustomFieldText3());
+		reversal.setCustomFieldText4(getCustomFieldText4());
+		reversal.setC_Tax_ID(getC_Tax_ID());
 		
 		return reversal;
 	}	//	reverse
@@ -142,6 +156,7 @@ public final class FactLine extends X_Fact_Acct
 		FactLine accrual = new FactLine (getCtx(), getAD_Table_ID(), getRecord_ID(), getLine_ID(), get_TrxName());
 		accrual.setClientOrg(this);	//	needs to be set explicitly
 		accrual.setDocumentInfo(m_doc, m_docLine);
+		accrual.setDocumentTextInfo(m_acctSchema);
 		accrual.setAccount(m_acctSchema, m_acct);
 		accrual.setPostingType(getPostingType());
 		//
@@ -450,6 +465,42 @@ public final class FactLine extends X_Fact_Acct
 			setC_Activity_ID (m_docLine.getC_Activity_ID());
 		if (getC_Activity_ID() == 0)
 			setC_Activity_ID (m_doc.getC_Activity_ID());
+		//	BPartner Employee
+		if (m_docLine != null)
+			setC_Employee_ID(m_docLine.getC_Employee_ID());
+		if (getC_Employee_ID() == 0)
+			setC_Employee_ID(m_doc.getC_Employee_ID());
+
+		if (m_docLine != null)
+			setA_Asset_ID(m_docLine.getA_Asset_ID());
+		if (getA_Asset_ID() == 0)
+			setA_Asset_ID(m_doc.getA_Asset_ID());
+
+		if (m_docLine != null)
+			setC_Charge_ID(m_docLine.getC_Charge_ID());
+		if (getC_Charge_ID() == 0)
+			setC_Charge_ID(m_doc.getC_Charge_ID());
+
+		if (m_docLine != null)
+			setM_Warehouse_ID(m_docLine.getM_Warehouse_ID());
+		if (getM_Warehouse_ID() == 0)
+			setM_Warehouse_ID(m_doc.getM_Warehouse_ID());
+
+		if (m_docLine != null)
+			setC_CostCenter_ID(m_docLine.getC_CostCenter_ID());
+		if (getC_CostCenter_ID() == 0)
+			setC_CostCenter_ID(m_doc.getC_CostCenter_ID());
+
+		if (m_docLine != null)
+			setC_Department_ID(m_docLine.getC_Department_ID());
+		if (getC_Department_ID() == 0)
+			setC_Department_ID(m_doc.getC_Department_ID());
+
+		if (m_docLine != null)
+			setM_AttributeSetInstance_ID(m_docLine.getM_AttributeSetInstance_ID());
+		if (getM_AttributeSetInstance_ID() == 0)
+			setM_AttributeSetInstance_ID(m_doc.getM_AttributeSetInstance_ID());
+		
 		//	User List 1
 		if (m_docLine != null)
 			setUser1_ID (m_docLine.getUser1_ID());
@@ -462,6 +513,77 @@ public final class FactLine extends X_Fact_Acct
 			setUser2_ID (m_doc.getUser2_ID());
 		//	References in setAccount
 	}   //  setDocumentInfo
+
+	public void  setDocumentTextInfo(MAcctSchema acctSchema){
+		
+		if (m_acctSchema == null)
+			m_acctSchema = acctSchema;
+
+		if (m_acctSchema == null)
+			return;
+
+		MAcctSchemaElement cf1 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_CustomField1);
+		if (cf1 != null)
+		{
+			String columnName1 = cf1.getDisplayColumnName();
+			if (columnName1 != null)
+			{
+				String value = getDocValueAsString(columnName1);
+				if (!Util.isEmpty(value))
+					setCustomFieldText1(value);
+			}
+		}
+		
+		MAcctSchemaElement cf2 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_CustomField2);
+		if (cf2 != null)
+		{
+			String columnName2 = cf2.getDisplayColumnName();
+			if (columnName2 != null)
+			{
+				String value = getDocValueAsString(columnName2);
+				if (!Util.isEmpty(value))
+					setCustomFieldText2(value);
+			}
+		}
+		
+		MAcctSchemaElement cf3 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_CustomField3);
+		if (cf3 != null)
+		{
+			String columnName3 = cf3.getDisplayColumnName();
+			if (columnName3 != null)
+			{
+				String value = getDocValueAsString(columnName3);
+				if (!Util.isEmpty(value))
+					setCustomFieldText3(value);
+			}
+		}
+		
+		MAcctSchemaElement cf4 = m_acctSchema.getAcctSchemaElement(X_C_AcctSchema_Element.ELEMENTTYPE_CustomField4);
+		if (cf4 != null)
+		{
+			String columnName4 = cf4.getDisplayColumnName();
+			if (columnName4 != null)
+			{
+				String value = getDocValueAsString(columnName4);
+				if (!Util.isEmpty(value))
+					setCustomFieldText4(value);
+			}
+		}
+	}
+
+	private String getDocValueAsString(String ColumnName2)
+	{
+		String value = null;
+		if (m_docLine != null)
+			value = m_docLine.get_ValueAsString(ColumnName2);
+		if (Util.isEmpty(value))
+		{
+			if (m_doc == null)
+				throw new IllegalArgumentException("Document not set yet");
+			value = m_doc.get_ValueAsString(ColumnName2);
+		}
+		return value;
+	}
 
 	/**
 	 * 	Get Document Line
@@ -754,17 +876,35 @@ public final class FactLine extends X_Fact_Acct
 			if (amtAcctCr.scale() > stdPrecision)
 				amtAcctCr = amtAcctCr.setScale(stdPrecision, RoundingMode.HALF_UP);
 			setAmtAcctCr(amtAcctCr);
-		} 
+		} 	
 		else 
 		{
-			setAmtAcctDr (MConversionRate.convert (getCtx(),
+			BigDecimal amtSourceDr = getAmtSourceDr();
+			BigDecimal amtAcctDr = MConversionRate.convert (getCtx(),
 					getAmtSourceDr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
-					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
+					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID);
+			if (amtSourceDr.signum() != 0) {
+				if (amtAcctDr == null || amtAcctDr.signum() == 0) {
+					log.warning("No conversion from " + getC_Currency_ID() + " to " + m_acctSchema.getC_Currency_ID() +
+							" ConverstionType="+C_ConversionType_ID + " ConversionDate="+convDate.toString());
+					return false;
+				}
+			}
+			setAmtAcctDr (amtAcctDr);
 			if (getAmtAcctDr() == null)
 				return false;
-			setAmtAcctCr (MConversionRate.convert (getCtx(),
+			BigDecimal amtSourceCr = getAmtSourceCr();
+			BigDecimal amtAcctCr = MConversionRate.convert (getCtx(),
 					getAmtSourceCr(), getC_Currency_ID(), m_acctSchema.getC_Currency_ID(),
-					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID));
+					convDate, C_ConversionType_ID, m_doc.getAD_Client_ID(), AD_Org_ID);
+			if (amtSourceCr.signum() != 0) {
+				if (amtAcctCr == null || amtAcctCr.signum() == 0) {
+					log.warning("No conversion from " + getC_Currency_ID() + " to " + m_acctSchema.getC_Currency_ID() +
+							" ConverstionType="+C_ConversionType_ID + " ConversionDate="+convDate.toString());
+					return false;
+				}
+			}
+			setAmtAcctCr (amtAcctCr);
 		}
 		return true;
 	}	//	convert
@@ -985,7 +1125,11 @@ public final class FactLine extends X_Fact_Acct
 						getC_SalesRegion_ID(), getC_Project_ID(),
 						getC_Campaign_ID(), getC_Activity_ID(), 
 						getUser1_ID(), getUser2_ID(), 
-						getUserElement1_ID(), getUserElement2_ID())
+						getUserElement1_ID(), getUserElement2_ID(),
+						getA_Asset_ID(), getC_Employee_ID(), getM_Warehouse_ID(), getC_Charge_ID(),
+						getC_CostCenter_ID(), getC_Department_ID(), getM_AttributeSetInstance_ID(), getCustomFieldText1(), 
+						getCustomFieldText2(), getCustomFieldText3(), getCustomFieldText4(), 
+						getC_Tax_ID())
 					);
 			}
 		}
@@ -1020,6 +1164,17 @@ public final class FactLine extends X_Fact_Acct
 	 *  @param User2_ID user2
 	 *  @param UserElement1_ID user element 1
 	 *  @param UserElement2_ID user element 2
+	 *  @param A_Asset_ID
+	 *  @param C_Employee_ID
+	 *  @param M_Warehouse_ID
+	 *  @param C_Charge_ID
+	 *  @param C_CostCenter_ID
+	 *  @param C_Department_ID
+	 * @param CustomFieldText4 
+	 * @param CustomFieldText3 
+	 * @param CustomFieldText2 
+	 * @param CustomFieldText1 
+	 *  @param C_Tax_ID
 	 *  @return Account_ID for Unearned Revenue or Revenue Account if not found
 	 */
 	private int createRevenueRecognition (
@@ -1029,7 +1184,10 @@ public final class FactLine extends X_Fact_Acct
 		int M_Product_ID, int C_BPartner_ID, int AD_OrgTrx_ID,
 		int C_LocFrom_ID, int C_LocTo_ID, int C_SRegion_ID, int C_Project_ID,
 		int	C_Campaign_ID, int C_Activity_ID, 
-		int User1_ID, int User2_ID, int UserElement1_ID, int UserElement2_ID)
+		int User1_ID, int User2_ID, int UserElement1_ID, int UserElement2_ID,
+		int A_Asset_ID, int C_Employee_ID, int M_Warehouse_ID, int C_Charge_ID,
+		int C_CostCenter_ID, int C_Department_ID, int M_AttributeSetInstance_ID, String CustomFieldText1,
+		String CustomFieldText2, String CustomFieldText3, String CustomFieldText4, int C_Tax_ID)
 	{
 		if (log.isLoggable(Level.FINE)) log.fine("From Account_ID=" + Account_ID);
 		//  get VC for P_Revenue (from Product)
@@ -1037,7 +1195,8 @@ public final class FactLine extends X_Fact_Acct
 			AD_Client_ID, AD_Org_ID, getC_AcctSchema_ID(), Account_ID, C_SubAcct_ID,
 			M_Product_ID, C_BPartner_ID, AD_OrgTrx_ID, C_LocFrom_ID, C_LocTo_ID, C_SRegion_ID, 
 			C_Project_ID, C_Campaign_ID, C_Activity_ID, 
-			User1_ID, User2_ID, UserElement1_ID, UserElement2_ID, get_TrxName());
+			User1_ID, User2_ID, UserElement1_ID, UserElement2_ID,
+			get_TrxName());
 		if (revenue != null && revenue.get_ID() == 0)
 			revenue.saveEx();
 		if (revenue == null || revenue.get_ID() == 0)
@@ -1143,12 +1302,30 @@ public final class FactLine extends X_Fact_Acct
 	 * 	@param multiplier targetQty/documentQty
 	 *  @param otherLine reversal line created before this. if not null, this reversal should reverse the opposite sign.
 	 * 	@return true if success
+	 */
+	public boolean updateReverseLine (int AD_Table_ID, int Record_ID, int Line_ID,
+		BigDecimal multiplier, FactLine otherLine)
+	{
+		return updateReverseLine(AD_Table_ID, Record_ID, Line_ID, multiplier, otherLine, true);
+	}
+
+	/**
+	 * 	Update Line with reversed Original Amount in Accounting Currency.
+	 * 	Also copies original dimensions like Project, etc.
+	 * 	Called from Doc_MatchInv
+	 * 	@param AD_Table_ID table
+	 * 	@param Record_ID record
+	 * 	@param Line_ID line
+	 * 	@param multiplier targetQty/documentQty
+	 *  @param otherLine reversal line created before this. if not null, this reversal should reverse the opposite sign.
+	 *  @param updateTaxAndAmounts define if it must update tax and amounts, useful if they are already set in the origin
+	 * 	@return true if success
 	 * <p>
 	 * NOTE: otherLine is required in cases where the original DR/CR postings are done in the same account.
 	 * In this case looking just for the first posting is wrong and results in a non-balanced reversal posting
 	 */
 	public boolean updateReverseLine (int AD_Table_ID, int Record_ID, int Line_ID,
-		BigDecimal multiplier, FactLine otherLine)
+		BigDecimal multiplier, FactLine otherLine, boolean updateTaxAndAmounts)
 	{
 		boolean success = false;
 
@@ -1202,17 +1379,16 @@ public final class FactLine extends X_Fact_Acct
 			if (rs.next())
 			{
 				MFactAcct fact = new MFactAcct(getCtx(), rs, get_TrxName());
-				//  Accounted Amounts - reverse
 				BigDecimal dr = fact.getAmtAcctDr();
 				BigDecimal cr = fact.getAmtAcctCr();
-				setAmtAcct(getC_Currency_ID(), cr.multiply(multiplier), dr.multiply(multiplier));
-				//  
-				//  Bayu Sistematika - Source Amounts
-				//  Fixing source amounts
-				BigDecimal drSourceAmt = fact.getAmtSourceDr();
-				BigDecimal crSourceAmt = fact.getAmtSourceCr();
-				setAmtSource(fact.getC_Currency_ID(), crSourceAmt.multiply(multiplier), drSourceAmt.multiply(multiplier));
-				//  end Bayu Sistematika
+				if (updateTaxAndAmounts) {
+					//  Accounted Amounts - reverse
+					setAmtAcct(getC_Currency_ID(), cr.multiply(multiplier), dr.multiply(multiplier));
+					//  Fixing source amounts
+					BigDecimal drSourceAmt = fact.getAmtSourceDr();
+					BigDecimal crSourceAmt = fact.getAmtSourceCr();
+					setAmtSource(fact.getC_Currency_ID(), crSourceAmt.multiply(multiplier), drSourceAmt.multiply(multiplier));
+				}
 				//
 				success = true;
 				if (log.isLoggable(Level.FINE)) log.fine(new StringBuilder("(Table=").append(AD_Table_ID)
@@ -1235,10 +1411,22 @@ public final class FactLine extends X_Fact_Acct
 				setC_LocTo_ID(fact.getC_LocTo_ID());
 				setM_Product_ID(fact.getM_Product_ID());
 				setM_Locator_ID(fact.getM_Locator_ID());
+				setA_Asset_ID(fact.getA_Asset_ID());
+				setM_Warehouse_ID(fact.getM_Warehouse_ID());
+				if (updateTaxAndAmounts)
+					setC_Tax_ID(fact.getC_Tax_ID());
+				setC_Charge_ID(fact.getC_Charge_ID());
+				setC_CostCenter_ID(fact.getC_CostCenter_ID());
+				setC_Department_ID(fact.getC_Department_ID());	
+				setC_Employee_ID(fact.getC_Employee_ID());		
 				setUser1_ID(fact.getUser1_ID());
 				setUser2_ID(fact.getUser2_ID());
 				setC_UOM_ID(fact.getC_UOM_ID());
-				setC_Tax_ID(fact.getC_Tax_ID());
+				setM_AttributeSetInstance_ID(fact.getM_AttributeSetInstance_ID());	
+				setCustomFieldText1(fact.getCustomFieldText1());
+				setCustomFieldText2(fact.getCustomFieldText2());
+				setCustomFieldText3(fact.getCustomFieldText3());
+				setCustomFieldText4(fact.getCustomFieldText4());
 				//	Org for cross charge
 				setAD_Org_ID (fact.getAD_Org_ID());
 				if (fact.getQty() != null) {
@@ -1268,5 +1456,68 @@ public final class FactLine extends X_Fact_Acct
 		}
 		return success;
 	}   //  updateReverseLine
+
+	/**
+	 * Returns true if this FactLine and the given FactLine have the same accounting dimensions.
+	 * @param other the FactLine to compare with
+	 * @return true if both FactLines have identical accounting dimensions
+	 */
+	public boolean hasSameAccountingDimensions(FactLine other) {
+
+		if (other == null)
+			return false;
+
+		return (getA_Asset_ID() == other.getA_Asset_ID()
+				&& getAccount_ID() == other.getAccount_ID()
+				&& getAD_Client_ID() == other.getAD_Client_ID()
+				&& getAD_Org_ID() == other.getAD_Org_ID()
+				&& getAD_OrgTrx_ID() == other.getAD_OrgTrx_ID()
+				&& getC_AcctSchema_ID() == other.getC_AcctSchema_ID()
+				&& getC_Activity_ID() == other.getC_Activity_ID()
+				&& getC_BPartner_ID() == other.getC_BPartner_ID()
+				&& getC_Campaign_ID() == other.getC_Campaign_ID()
+				&& getC_Currency_ID() == other.getC_Currency_ID()
+				&& getC_LocFrom_ID() == other.getC_LocFrom_ID()
+				&& getC_LocTo_ID() == other.getC_LocTo_ID()
+				&& getC_Period_ID() == other.getC_Period_ID()
+				&& getC_Project_ID() == other.getC_Project_ID()
+				&& getC_ProjectPhase_ID() == other.getC_ProjectPhase_ID()
+				&& getC_ProjectTask_ID() == other.getC_ProjectTask_ID()
+				&& getC_SalesRegion_ID() == other.getC_SalesRegion_ID()
+				&& getC_SubAcct_ID() == other.getC_SubAcct_ID()
+				&& getC_Tax_ID() == other.getC_Tax_ID()
+				&& getC_UOM_ID() == other.getC_UOM_ID()
+				&& getGL_Budget_ID() == other.getGL_Budget_ID()
+				&& getGL_Category_ID() == other.getGL_Category_ID()
+				&& getM_Locator_ID() == other.getM_Locator_ID()
+				&& getM_Product_ID() == other.getM_Product_ID()
+				&& getUserElement1_ID() == other.getUserElement1_ID()
+				&& getUserElement2_ID() == other.getUserElement2_ID()
+				&& getUser1_ID() == other.getUser1_ID()
+				&& getUser2_ID() == other.getUser2_ID()
+				&& getC_Employee_ID() == other.getC_Employee_ID()
+				&& getC_Charge_ID() == other.getC_Charge_ID()
+				&& getC_CostCenter_ID() == other.getC_CostCenter_ID()
+				&& getC_Department_ID() == other.getC_Department_ID()
+				&& getM_Warehouse_ID() == other.getM_Warehouse_ID()
+				&& getM_AttributeSetInstance_ID() == other.getM_AttributeSetInstance_ID())
+				&& areCustomFieldsEqual(getCustomFieldText1(), other.getCustomFieldText1())
+				&& areCustomFieldsEqual(getCustomFieldText2(), other.getCustomFieldText2())
+				&& areCustomFieldsEqual(getCustomFieldText3(), other.getCustomFieldText3())
+				&& areCustomFieldsEqual(getCustomFieldText4(), other.getCustomFieldText4());
+	}
+
+	/**
+	 * Compares two custom field text values.
+	 * 
+	 * @param  cfieldText1 fact from Custom Field Text
+	 * @param  cfieldText2 fact to Custom Field Text
+	 * @return
+	 */
+	private boolean areCustomFieldsEqual(String cfieldText1, String cfieldText2)
+	{
+		return (Util.isEmpty(cfieldText1) && Util.isEmpty(cfieldText2))
+				|| (!Util.isEmpty(cfieldText1) && cfieldText1.equalsIgnoreCase(cfieldText2));
+	} // areCustomFieldsEqual
 
 }	//	FactLine

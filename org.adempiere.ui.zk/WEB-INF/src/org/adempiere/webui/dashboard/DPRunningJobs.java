@@ -21,8 +21,10 @@ import org.adempiere.base.Core;
 import org.adempiere.base.event.EventManager;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.apps.BackgroundJob;
+import org.adempiere.webui.component.FlexVlayout;
 import org.adempiere.webui.component.ToolBarButton;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ServerPushTemplate;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MPInstance;
@@ -42,12 +44,11 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.DesktopCleanup;
 import org.zkoss.zul.A;
-import org.zkoss.zul.Box;
 import org.zkoss.zul.Image;
+import org.zkoss.zul.Layout;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.Toolbar;
-import org.zkoss.zul.Vbox;
 
 /**
  * Dashboard gadget: running background jobs (Run As Job in Process Dialog).
@@ -63,7 +64,7 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 	
 	private static TopicSubscriber topicSubscriber;
 
-	private Box bxJobs;
+	private Layout bxJobs;
 
 	/** Login user id */
 	private int AD_User_ID;
@@ -87,7 +88,7 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 
 		Panelchildren jobsContent = new Panelchildren();
 		panel.appendChild(jobsContent);
-		bxJobs = new Vbox();
+		bxJobs = new FlexVlayout();
 		ZKUpdateUtil.setHflex(bxJobs, "1");
 		this.setSclass("recentitems-box");
 		jobsContent.appendChild(bxJobs);
@@ -98,7 +99,7 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 		if (ThemeManager.isUseFontIconForImage())
 		{
 			ToolBarButton btn = new ToolBarButton();
-			btn.setIconSclass("z-icon-Refresh");
+			btn.setIconSclass(Icon.getIconSclass(Icon.REFRESH));
 			btn.setSclass("trash-toolbarbutton");
 			jobsToolbar.appendChild(btn);
 			btn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "Refresh")));
@@ -210,7 +211,7 @@ public class DPRunningJobs extends DashboardPanel implements EventListener<Event
 			bxJobs.appendChild(btnJob);
 			btnJob.setLabel(label);
 			if (ThemeManager.isUseFontIconForImage())
-				btnJob.setIconSclass("z-icon-Window");
+				btnJob.setIconSclass(Icon.getIconSclass(Icon.WINDOW));
 			else
 				btnJob.setImage(ThemeManager.getThemeResource("images/mWindow.png"));
 			btnJob.addEventListener(Events.ON_CLICK, this);

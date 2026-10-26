@@ -910,7 +910,7 @@ public class ImportOrder extends SvrProcess
 						order.setDateAcct(imp.getDateAcct());
 					
 					// Set Order Source
-					if (imp.getC_OrderSource() != null)
+					if (imp.getC_OrderSource_ID() > 0)
 						order.setC_OrderSource_ID(imp.getC_OrderSource_ID());
 					//
 					//MPo, 25/8/25 E.g. Shopee orders

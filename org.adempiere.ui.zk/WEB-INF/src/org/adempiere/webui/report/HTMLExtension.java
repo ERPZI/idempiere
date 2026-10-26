@@ -22,6 +22,7 @@ import java.net.URL;
 import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.apache.ecs.ConcreteElement;
 import org.apache.ecs.xhtml.a;
 import org.apache.ecs.xhtml.body;
@@ -140,7 +141,7 @@ public class HTMLExtension implements IHTMLExtension {
 		// set attribute value for create menu context
 		StringBuilder windowIconAttr = new StringBuilder();
 		if(ThemeManager.isUseFontIconForImage()) {
-			windowIconAttr.append("z-icon-Window");
+			windowIconAttr.append(Icon.getIconSclass(Icon.WINDOW));
 		}
 		else {
 			String windowIco = ThemeManager.getThemeResource("images/mWindow.png");
@@ -157,7 +158,7 @@ public class HTMLExtension implements IHTMLExtension {
 		}
 		StringBuilder reportIconAttr = new StringBuilder();
 		if(ThemeManager.isUseFontIconForImage()) {
-			reportIconAttr.append("z-icon-Report");
+			reportIconAttr.append(Icon.getIconSclass(Icon.REPORT));
 		}
 		else {
 			String reportIco = ThemeManager.getThemeResource("images/mReport.png");
@@ -174,7 +175,7 @@ public class HTMLExtension implements IHTMLExtension {
 		}
 		StringBuilder drillAssistantIconAttr = new StringBuilder();
 		if(ThemeManager.isUseFontIconForImage()) {
-			drillAssistantIconAttr.append("z-icon-Zoom");
+			drillAssistantIconAttr.append(Icon.getIconSclass(Icon.ZOOM));
 		}
 		else {
 			String drillAssistantIco = ThemeManager.getThemeResource("images/Zoom16.png");
@@ -211,7 +212,7 @@ public class HTMLExtension implements IHTMLExtension {
 		// Support to Parse Context Variable
 		if (resFile.contains("@"))
 		{
-			resFile = Env.parseContext(Env.getCtx(), 0, resFile, false);
+			resFile = Env.parseContext(Env.getCtx(), 0, resFile, false, false, false, false);
 			if (Util.isEmpty(resFile))
 			{
 				log.warning("Report theme URL '"+ theme +"' failed to parse, Defaulting to default report.css url");

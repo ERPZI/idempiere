@@ -22,7 +22,7 @@ import java.util.Properties;
 
 /** Generated Model for AD_Role_Included
  *  @author iDempiere (generated)
- *  @version Release 12 - $Id$ */
+ *  @version Release 13 - $Id$ */
 @org.adempiere.base.Model(table="AD_Role_Included")
 public class X_AD_Role_Included extends PO implements I_AD_Role_Included, I_Persistent
 {
@@ -30,7 +30,7 @@ public class X_AD_Role_Included extends PO implements I_AD_Role_Included, I_Pers
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20241222L;
+	private static final long serialVersionUID = 20260309L;
 
     /** Standard Constructor */
     public X_AD_Role_Included (Properties ctx, int AD_Role_Included_ID, String trxName)
@@ -112,6 +112,7 @@ public class X_AD_Role_Included extends PO implements I_AD_Role_Included, I_Pers
       return sb.toString();
     }
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Role getAD_Role() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Role)MTable.get(getCtx(), org.compiere.model.I_AD_Role.Table_ID)
@@ -155,14 +156,15 @@ public class X_AD_Role_Included extends PO implements I_AD_Role_Included, I_Pers
 		return (String)get_Value(COLUMNNAME_AD_Role_Included_UU);
 	}
 
+	@Deprecated(since="13") // use better methods with cache
 	public org.compiere.model.I_AD_Role getIncluded_Role() throws RuntimeException
 	{
 		return (org.compiere.model.I_AD_Role)MTable.get(getCtx(), org.compiere.model.I_AD_Role.Table_ID)
 			.getPO(getIncluded_Role_ID(), get_TrxName());
 	}
 
-	/** Set Included Role.
-		@param Included_Role_ID Included Role
+	/** Set Included Role Template.
+		@param Included_Role_ID Included Role Template
 	*/
 	public void setIncluded_Role_ID (int Included_Role_ID)
 	{
@@ -172,8 +174,8 @@ public class X_AD_Role_Included extends PO implements I_AD_Role_Included, I_Pers
 			set_ValueNoCheck (COLUMNNAME_Included_Role_ID, Integer.valueOf(Included_Role_ID));
 	}
 
-	/** Get Included Role.
-		@return Included Role	  */
+	/** Get Included Role Template.
+		@return Included Role Template	  */
 	public int getIncluded_Role_ID()
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Included_Role_ID);

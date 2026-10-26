@@ -34,6 +34,7 @@ import org.adempiere.webui.panel.CustomForm;
 import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.TreeUtils;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.Dialog;
@@ -51,7 +52,7 @@ import org.zkoss.zul.Borderlayout;
 import org.zkoss.zul.Center;
 import org.zkoss.zul.DefaultTreeNode;
 import org.zkoss.zul.East;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.ListModel;
 import org.zkoss.zul.North;
@@ -131,10 +132,10 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 	private void jbInit () throws Exception
 	{
 		if (ThemeManager.isUseFontIconForImage()) {
-			bAddAll.setIconSclass("z-icon-FastBack");
-			bAdd.setIconSclass("z-icon-StepBack");
-			bDelete.setIconSclass("z-icon-StepForward");
-			bDeleteAll.setIconSclass("z-icon-FastForward");
+			bAddAll.setIconSclass(Icon.getIconSclass(Icon.FAST_BACK));
+			bAdd.setIconSclass(Icon.getIconSclass(Icon.STEP_BACK));
+			bDelete.setIconSclass(Icon.getIconSclass(Icon.STEP_FORWARD));
+			bDeleteAll.setIconSclass(Icon.getIconSclass(Icon.FAST_FORWARD));
 		} else {
 			bAddAll.setImage(ThemeManager.getThemeResource("images/FastBack24.png"));
 			bAdd.setImage(ThemeManager.getThemeResource("images/StepBack24.png"));
@@ -169,9 +170,9 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 		ZKUpdateUtil.setWidth(northPanel, "100%");
 		ZKUpdateUtil.setVflex(northPanel, "min");
 		//
-		Hbox hbox = new Hbox();
+		FlexHlayout hbox = new FlexHlayout();
 		hbox.setStyle("padding: 3px;");
-		hbox.setAlign("center");
+		hbox.setAlign(FlexHlayout.AlignType.CENTER);
 		ZKUpdateUtil.setHflex(hbox, "1");
 		ZKUpdateUtil.setVflex(hbox, "1");
 		northPanel.appendChild(hbox);
@@ -185,8 +186,8 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 
 		if (ClientInfo.maxWidth(ClientInfo.SMALL_WIDTH-1))
 		{
-			hbox = new Hbox();
-			hbox.setAlign("center");
+			hbox = new FlexHlayout();
+			hbox.setAlign(FlexHlayout.AlignType.CENTER);
 			hbox.setStyle("padding-top: 3px; padding-bottom: 3px;");
 			ZKUpdateUtil.setWidth(hbox, "100%");
 			ZKUpdateUtil.setVflex(hbox, "min");
@@ -207,7 +208,7 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 		searchBox.addEventListener(Events.ON_CLICK, this);
 		searchBox.getTextbox().addEventListener(Events.ON_OK, this);
 		if (ThemeManager.isUseFontIconForImage())
-			searchBox.getButton().setIconSclass("z-icon-Search");
+			searchBox.getButton().setIconSclass(Icon.getIconSclass(Icon.SEARCH));
 		else
 			searchBox.getButton().setImage(ThemeManager.getThemeResource("images/Find16.png"));
 		searchBox.setToolTipText(Msg.getCleanMsg(Env.getCtx(), "TreeSearch"));
@@ -467,11 +468,11 @@ public class WTreeMaintenance extends TreeMaintenance implements IFormController
 				Treeitem ti = centerTree.renderItemByPath(model.getPath(stn));
 				ti.setTooltiptext(item.description);
 			} else {
+				addNode(item);
+
 				stn = new DefaultTreeNode<Object>(new MTreeNode(item.id, 0, item.name, item.description, 0, item.isSummary,
 						item.imageIndicator, false, null), new ArrayList<TreeNode<Object>>());
 				model.addNode(stn);
-				//	May cause Error if in tree
-				addNode(item);
 			}			
 		}
 	}	//	action_treeAdd

@@ -34,6 +34,7 @@ import org.compiere.model.ServerStateChangeListener;
 import org.compiere.model.X_AD_Package_Imp;
 import org.compiere.util.AdempiereSystemError;
 import org.compiere.util.CLogger;
+import org.compiere.util.CacheMgt;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 import org.osgi.framework.BundleContext;
@@ -170,21 +171,27 @@ public class Incremental2PackActivator extends AbstractActivator {
 				trx.close();
 			}
 		}
-		Collections.sort(list, new Comparator<TwoPackEntry>() {
-			@Override
-			public int compare(TwoPackEntry o1, TwoPackEntry o2) {
-				return new Version(o1.version).compareTo(new Version(o2.version));
-			}
-		});		
-				
+		try {
+			Collections.sort(list, new Comparator<TwoPackEntry>() {
+				@Override
+				public int compare(TwoPackEntry o1, TwoPackEntry o2) {
+					return new Version(o1.version).compareTo(new Version(o2.version));
+				}
+			});		
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Exception sorting 2packs on " + getName(), e);
+			return;
+		}
+
+		boolean cacheReset = false;
 		try {
 			if (getDBLock()) {
 				for(TwoPackEntry entry : list) {
 					if (!installedVersions.contains(entry.version)) {
-						if (!packIn(entry.url)) {
-							// stop processing further packages if one fail
-							break;
-						}
+						if (packIn(entry.url))
+							cacheReset = true;
+						else
+							break; // stop processing further packages if one fail
 					}
 				}
 			} else {
@@ -195,6 +202,9 @@ public class Incremental2PackActivator extends AbstractActivator {
 		} finally {
 			releaseLock();
 		}
+		logger.log(Level.INFO, "Cache Reset: " + cacheReset);
+		if (cacheReset)
+			CacheMgt.get().reset();
 	}
 
 	private String extractVersionString(URL u) {

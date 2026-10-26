@@ -124,7 +124,7 @@
         <setEntry value="jakarta.xml.bind-api@default:default"/>
         <setEntry value="jakarta.xml.soap-api@default:default"/>
         <setEntry value="jakarta.xml.ws-api@default:default"/>
-        <setEntry value="javassist@default:default"/>
+        <setEntry value="javassist*3.30.2.GA@default:default"/>
         <setEntry value="javax.enterprise.cdi-api@default:default"/>
         <setEntry value="javax.interceptor-api@default:default"/>
         <setEntry value="javax.validation.api@default:default"/>
@@ -341,6 +341,7 @@
         <setEntry value="org.osgi.util.pushstream@default:default"/>
         <setEntry value="org.osgi.util.tracker@default:default"/>
         <setEntry value="org.osgi.util.xml@default:default"/>
+        <setEntry value="org.owasp.encoder@default:default"/>
         <setEntry value="org.passay@default:default"/>
         <setEntry value="org.postgresql.jdbc@default:default"/>
         <setEntry value="org.sat4j.core@default:default"/>
@@ -356,7 +357,7 @@
         <setEntry value="stax2-api@default:default"/>
         <setEntry value="wrapped.com.google.http-client.google-http-client-gson@default:default"/>
         <setEntry value="wrapped.com.google.zxing.javase@default:default"/>
-        <setEntry value="wrapped.com.oracle.database.jdbc.ojdbc10@default:default"/>
+        <setEntry value="wrapped.com.oracle.database.jdbc.ojdbc17@default:default"/>
         <setEntry value="wrapped.com.sun.org.apache.xml.internal.resolver@default:default"/>
         <setEntry value="wrapped.com.zaxxer.SparseBitSet@default:default"/>
         <setEntry value="wrapped.dev.samstevens.totp.totp@default:default"/>

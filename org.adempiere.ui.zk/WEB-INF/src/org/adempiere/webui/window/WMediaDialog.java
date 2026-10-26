@@ -29,6 +29,7 @@ import org.adempiere.webui.component.ZkCssHelper;
 import org.adempiere.webui.editor.WBinaryEditor;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.CLogger;
@@ -45,7 +46,7 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.North;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Filedownload;
-import org.zkoss.zul.Hbox;
+import org.adempiere.webui.component.FlexHlayout;
 import org.zkoss.zul.Iframe;
 
 
@@ -82,9 +83,9 @@ public class WMediaDialog extends Window implements EventListener<Event>
 	
 	private Borderlayout mainPanel = new Borderlayout();
 
-	private Hbox toolBar = new Hbox();	
+	private FlexHlayout toolBar = new FlexHlayout();	
 	
-	private Hbox confirmPanel = new Hbox();
+	private FlexHlayout confirmPanel = new FlexHlayout();
 
 	private boolean m_cancel;
 	/* SysConfig USE_ESC_FOR_TAB_CLOSING */
@@ -161,14 +162,14 @@ public class WMediaDialog extends Window implements EventListener<Event>
 		
 		bSave.setEnabled(false);
 		if (ThemeManager.isUseFontIconForImage())
-			bSave.setIconSclass("z-icon-Export");
+			bSave.setIconSclass(Icon.getIconSclass(Icon.EXPORT));
 		else
 			bSave.setImage(ThemeManager.getThemeResource("images/Download24.png"));
 		bSave.setTooltiptext(Msg.getMsg(Env.getCtx(), "AttachmentSave"));
 		bSave.addEventListener(Events.ON_CLICK, this);
 
 		if (ThemeManager.isUseFontIconForImage())
-			bLoad.setIconSclass("z-icon-Import");
+			bLoad.setIconSclass(Icon.getIconSclass(Icon.IMPORT));
 		else
 			bLoad.setImage(ThemeManager.getThemeResource("images/Upload24.png"));
 		bLoad.setTooltiptext(Msg.getMsg(Env.getCtx(), "Load"));
@@ -176,7 +177,7 @@ public class WMediaDialog extends Window implements EventListener<Event>
 		bLoad.setUpload(AdempiereWebUI.getUploadSetting());
 
 		if (ThemeManager.isUseFontIconForImage())
-			bDelete.setIconSclass("z-icon-Delete");
+			bDelete.setIconSclass(Icon.getIconSclass(Icon.DELETE));
 		else
 			bDelete.setImage(ThemeManager.getThemeResource("images/Delete24.png"));
 		bDelete.setTooltiptext(Msg.getMsg(Env.getCtx(), "Delete"));
@@ -200,13 +201,13 @@ public class WMediaDialog extends Window implements EventListener<Event>
 		ZKUpdateUtil.setVflex(southPane, "min");		
 		
 		if(ThemeManager.isUseFontIconForImage())
-			bOk.setIconSclass("z-icon-Ok");
+			bOk.setIconSclass(Icon.getIconSclass(Icon.OK));
 		else
 			bOk.setImage(ThemeManager.getThemeResource("images/Ok24.png"));
 		bOk.addEventListener(Events.ON_CLICK, this);
 				
 		if(ThemeManager.isUseFontIconForImage())
-			bCancel.setIconSclass("z-icon-Cancel");
+			bCancel.setIconSclass(Icon.getIconSclass(Icon.CANCEL));
 		else
 			bCancel.setImage(ThemeManager.getThemeResource("images/Cancel24.png"));
 		bCancel.addEventListener(Events.ON_CLICK, this);

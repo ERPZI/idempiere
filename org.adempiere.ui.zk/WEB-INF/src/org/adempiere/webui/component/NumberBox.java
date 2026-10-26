@@ -24,6 +24,7 @@ import java.text.ParseException;
 import org.adempiere.webui.ClientInfo;
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.compiere.model.MSysConfig;
 import org.compiere.util.DisplayType;
@@ -34,9 +35,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Popup;
-import org.zkoss.zul.Vbox;
 
 /**
  * Composite component of {@link Decimalbox} and {@link Button}
@@ -138,7 +137,7 @@ public class NumberBox extends Div
 		
 		btn = new Button();
 		if (ThemeManager.isUseFontIconForImage())
-			btn.setIconSclass("z-icon-Calculator");
+			btn.setIconSclass(Icon.getIconSclass(Icon.CALCULATOR));
 		else
 			btn.setImage(ThemeManager.getThemeResource("images/Calculator16.png"));
 		btn.setTabindex(-1);
@@ -265,7 +264,7 @@ public class NumberBox extends Div
     {
         Popup popup = new Popup();
 
-        Vbox vbox = new Vbox();
+        FlexVlayout vbox = new FlexVlayout();
 
         char separatorChar = DisplayType.getNumberFormat(DisplayType.Number, null).getDecimalFormatSymbols().getDecimalSeparator();
         String separator = Character.toString(separatorChar);
@@ -303,7 +302,7 @@ public class NumberBox extends Div
         String txtCalcId = txtCalc.getId();
 
         vbox.appendChild(txtCalc);
-        Hbox row1 = new Hbox();
+        FlexHlayout row1 = new FlexHlayout();
 
         Button btnAC = new Button();
         ZKUpdateUtil.setWidth(btnAC, "40px");
@@ -336,7 +335,7 @@ public class NumberBox extends Div
         row1.appendChild(btn9);
         row1.appendChild(btnMultiply);
 
-        Hbox row2 = new Hbox();
+        FlexHlayout row2 = new FlexHlayout();
 
         Button btnC = new Button();
         ZKUpdateUtil.setWidth(btnC, "40px");
@@ -369,7 +368,7 @@ public class NumberBox extends Div
         row2.appendChild(btn6);
         row2.appendChild(btnDivide);
 
-        Hbox row3 = new Hbox();
+        FlexHlayout row3 = new FlexHlayout();
 
         Button btnModulo = new Button();
         ZKUpdateUtil.setWidth(btnModulo, "40px");
@@ -402,7 +401,7 @@ public class NumberBox extends Div
         row3.appendChild(btn3);
         row3.appendChild(btnSubstract);
 
-        Hbox row4 = new Hbox();
+        FlexHlayout row4 = new FlexHlayout();
 
         Button btnCurrency = new Button();
         ZKUpdateUtil.setWidth(btnCurrency, "40px");

@@ -441,8 +441,7 @@ public class FileUtil
 			title=Env.parseVariable(title, po, trxName, true);
 		}
 		else 
-			title=  Env.parseContext (ctx, m_WindowNo, title,
-					true, true);
+			title=  Env.parseContext (ctx, m_WindowNo, title, true, true, false, false);
 		return title;
 	}
 
@@ -527,6 +526,29 @@ public class FileUtil
 		char[] nameArray = name.toCharArray();
 		for (char ch : nameArray) {
 			if (Character.isLetterOrDigit(ch)) {
+				prefix.append(ch);
+			} else {
+				prefix.append("_");
+			}
+		}
+		return prefix.toString();
+	}
+	
+	/**
+	 * Creates a valid file name prefix from "name", replacing every
+	 * character outside the US-ASCII range with an underscore.
+	 * Accented characters are transliterated first via
+	 * {@link Util#setFilenameCorrect(String)}, so e.g. "Ü" becomes "U".
+	 * The result is safe to embed in URLs and URIs.
+	 * @param name
+	 * @return ASCII-safe file name prefix
+	 */
+    public static String makeASCIIPrefix(String name) {
+		String output = Util.setFilenameCorrect(name);
+		StringBuilder prefix = new StringBuilder();
+		char[] nameArray = output.toCharArray();
+		for (char ch : nameArray) {
+			if (ch < 128 && Character.isLetterOrDigit(ch)) {
 				prefix.append(ch);
 			} else {
 				prefix.append("_");

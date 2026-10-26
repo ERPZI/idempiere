@@ -21,6 +21,7 @@ import org.adempiere.webui.component.Menupopup;
 import org.adempiere.webui.desktop.IDesktop;
 import org.adempiere.webui.event.ZoomEvent;
 import org.adempiere.webui.theme.ThemeManager;
+import org.adempiere.webui.util.Icon;
 import org.adempiere.webui.util.ZKUpdateUtil;
 import org.adempiere.webui.window.WCtxHelpSuggestion;
 import org.compiere.model.GridField;
@@ -38,6 +39,7 @@ import org.compiere.model.MQuery;
 import org.compiere.model.MRole;
 import org.compiere.model.MTab;
 import org.compiere.model.MTask;
+import org.compiere.model.MUserDefForm;
 import org.compiere.model.MUserDefInfo;
 import org.compiere.model.PO;
 import org.compiere.model.X_AD_CtxHelp;
@@ -411,18 +413,20 @@ public class HelpController
         	else if (ctxType.equals(X_AD_CtxHelp.CTXTYPE_Form))
         	{
         		MForm form = MForm.get(recordId);
+        		MUserDefForm userDef = MUserDefForm.getBestMatch(Env.getCtx(), recordId);
+
         		if (!Env.isBaseLanguage(Env.getCtx(), "AD_Form")) {
 
-					nameMsg = form.get_Translation("Name",false);
+					nameMsg = userDef != null && userDef.getName() != null ? userDef.getName() : form.get_Translation("Name",false);
 					if (form != null && nameMsg != null
 							&& nameMsg.length() != 0)
 						translatedContent.append("<p><strong>" + nameMsg + "</strong></p>\n");
 
-					descMsg = form.get_Translation("Description",false);
+					descMsg = userDef != null && userDef.getDescription() != null ? userDef.getDescription() : form.get_Translation("Description",false);
 					if (descMsg != null && descMsg.length() != 0)
 						translatedContent.append("<p><em>" + descMsg + "</em></p>\n");
 
-					helpMsg = form.get_Translation("Help",false);
+					helpMsg = userDef != null && userDef.getHelp() != null ? userDef.getHelp() : form.get_Translation("Help",false);
 					if (helpMsg != null && helpMsg.length() != 0)
 						translatedContent.append("<p>" + helpMsg + "</p>\n");
 
@@ -432,18 +436,20 @@ public class HelpController
 					}
 				} 
 
-				if (form != null && form.getName() != null
-						&& form.getName().length() != 0) 
-					baseContent.append("<p><strong>" + form.getName() + "</strong></p>\n");
+        		if (form != null) {
+        			nameMsg = userDef != null && userDef.getName() != null ? userDef.getName() : form.getName();
+        			if (!Util.isEmpty(nameMsg))
+        				baseContent.append("<p><strong>").append(nameMsg).append("</strong></p>\n");
 
-				if (form.getDescription() != null
-						&& form.getDescription().length() != 0)
-					baseContent.append("<p><em>" + form.getDescription() + "</em></p>\n");
+        			descMsg = userDef != null && userDef.getDescription() != null ? userDef.getDescription() : form.getDescription();
+        			if (!Util.isEmpty(descMsg))
+        				baseContent.append("<p><em>").append(descMsg).append("</em></p>\n");
 
-				if (form.getHelp() != null
-						&& form.getHelp().length() != 0)
-					baseContent.append("<p>" + form.getHelp() + "</p>\n");
-				
+        			helpMsg = userDef != null && userDef.getHelp() != null ? userDef.getHelp() : form.getHelp();
+        			if (!Util.isEmpty(helpMsg))
+        				baseContent.append("<p>").append(helpMsg).append("</p>\n");
+        		}
+
 				if (baseContent.length() > 0)
 				{
 					appendEntityType(baseContent, form.getEntityType());
@@ -836,7 +842,7 @@ public class HelpController
 				item.setLabel(Msg.getElement(Env.getCtx(), "AD_CtxHelpSuggestion_ID"));
 			}
 			if (ThemeManager.isUseFontIconForImage())
-				item.setIconSclass("z-icon-FieldSuggestion");
+				item.setIconSclass(Icon.getIconSclass(Icon.FIELD_SUGGESTION));
 			else
 				item.setImage(ThemeManager.getThemeResource("images/FieldSuggestion16.png"));
 			appendChild(item);

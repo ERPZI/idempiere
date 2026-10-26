@@ -17,9 +17,11 @@
 package org.compiere.model;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -35,7 +37,7 @@ import org.compiere.util.Util;
 public class MTimeExpenseLine extends X_S_TimeExpenseLine
 {
 	/**
-	 * 
+	 * generated serial id
 	 */
 	private static final long serialVersionUID = 3580618153284679385L;
 
@@ -112,11 +114,10 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 
 	/**	Currency of Report			*/
 	private int m_C_Currency_Report_ID = 0;
-
 	
 	/**
 	 * 	Get Qty Invoiced
-	 *	@return entered or qty
+	 *	@return QtyInvoiced or Qty if QtyInvoiced is zero
 	 */
 	public BigDecimal getQtyInvoiced ()
 	{
@@ -128,7 +129,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 
 	/**
 	 * 	Get Qty Reimbursed
-	 *	@return entered or qty
+	 *	@return QtyReimbursed or Qty if QtyReimbursed is zero
 	 */
 	public BigDecimal getQtyReimbursed ()
 	{
@@ -137,11 +138,10 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			return getQty();
 		return bd;
 	}	//	getQtyReimbursed
-	
-	
+		
 	/**
 	 * 	Get Price Invoiced
-	 *	@return entered or invoice price
+	 *	@return PriceInvoiced or InvoicePrice if PriceInvoiced is zero 
 	 */
 	public BigDecimal getPriceInvoiced ()
 	{
@@ -153,7 +153,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	
 	/**
 	 * 	Get Price Reimbursed
-	 *	@return entered or converted amt
+	 *	@return PriceReimbursed or converted amt if PriceReimbursed is zero
 	 */
 	public BigDecimal getPriceReimbursed ()
 	{
@@ -162,8 +162,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			return getConvertedAmt();
 		return bd;
 	}	//	getPriceReimbursed
-	
-	
+		
 	/**
 	 * 	Get Approval Amt
 	 *	@return qty * converted amt
@@ -171,14 +170,13 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	public BigDecimal getApprovalAmt()
 	{
 		//MPo, 30/11/23
-//		return getQty().multiply(getConvertedAmt());
+		//return getQty().multiply(getConvertedAmt());
 		return getLineNetAmt();
 	}	//	getApprovalAmt
-	
-	
+		
 	/**
 	 * 	Get C_Currency_ID of Report (Price List)
-	 *	@return currency
+	 *	@return C_Currency_ID of Report (if set) or C_Currency_ID of header
 	 */
 	public int getC_Currency_Report_ID()
 	{
@@ -198,14 +196,8 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	{
 		m_C_Currency_Report_ID = C_Currency_ID;
 	}	//	getC_Currency_Report_ID
-
 	
-	/**
-	 * 	Before Save.
-	 * 	Calculate converted amt
-	 *	@param newRecord new
-	 *	@return true
-	 */
+	@Override
 	protected boolean beforeSave (boolean newRecord)
 	{
 		if (newRecord && getParent().isProcessed()) {
@@ -213,7 +205,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			return false;
 		}
 		
-		//	Calculate Converted Amount
+		//	Calculate Converted Amount from ExpenseAmt
 
 		//  MPo, 11/4/2015
 		//	Get from DB
@@ -232,9 +224,9 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 		// End MPo, 11/4/2015	
 				
 		// ZI,MPo, 18/5/2016 Fixes Bug where conversion to functional currency doesn't take place if currencies are changed
-		// without saving 
-		// if (newRecord || is_ValueChanged("ExpenseAmt") || is_ValueChanged("C_Currency_ID"))
-		// {
+		// without saving		
+		//if (newRecord || is_ValueChanged("ExpenseAmt") || is_ValueChanged("C_Currency_ID"))
+		//{
 			if (getC_Currency_ID() == getC_Currency_Report_ID())
 				setConvertedAmt(getExpenseAmt());
 			else
@@ -243,14 +235,15 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 					getExpenseAmt(), getC_Currency_ID(), getC_Currency_Report_ID(), 
 					getDateExpense(), C_ConversionType_ID, getAD_Client_ID(), getAD_Org_ID()) );
 			}
-		
-		// calculate Line Net Amount
+				
+		// Calculate Line Net Amount
 		//if (newRecord || is_ValueChanged(COLUMNNAME_Qty) || is_ValueChanged(COLUMNNAME_ExpenseAmt))
-		//{			
+		//{
 			BigDecimal lineNetAmt = getConvertedAmt().multiply(getQty());
 			setLineNetAmt(lineNetAmt);
-		// ZI,MPo, 18/5/2016 } 
+			// ZI,MPo, 18/5/2016 }
 		
+		// Set expense, converted and line net amount to zero if IsTimeReport=Y
 		if (isTimeReport())
 		{
 			setExpenseAmt(Env.ZERO);
@@ -260,12 +253,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 		return true;
 	}	//	beforeSave
 	
-	/**
-	 * 	After Save
-	 *	@param newRecord new
-	 *	@param success success
-	 *	@return success
-	 */
+	@Override
 	protected boolean afterSave (boolean newRecord, boolean success)
 	{
 		if (success)
@@ -277,11 +265,11 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 				int old_S_ResourceAssignment_ID = 0;
 				if (!newRecord)
 				{
+					// Delete previous resource assignment record
 					Object ii = get_ValueOld("S_ResourceAssignment_ID");
 					if (ii instanceof Integer)
 					{
-						old_S_ResourceAssignment_ID = ((Integer)ii).intValue();
-						//	Changed Assignment
+						old_S_ResourceAssignment_ID = ((Integer)ii).intValue();						
 						if (old_S_ResourceAssignment_ID != S_ResourceAssignment_ID
 							&& old_S_ResourceAssignment_ID != 0)
 						{
@@ -291,7 +279,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 						}
 					}
 				}
-				//	Sync Assignment
+				// Sync Resource Assignment (Qty and Description) 
 				if (S_ResourceAssignment_ID != 0)
 				{
 					MResourceAssignment ra = new MResourceAssignment (getCtx(), 
@@ -308,13 +296,8 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 		}
 		return success;
 	}	//	afterSave
-	
-	
-	/**
-	 * 	After Delete
-	 *	@param success success
-	 *	@return success
-	 */
+		
+	@Override
 	protected boolean afterDelete (boolean success)
 	{
 		if (success)
@@ -325,7 +308,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 			if (ii instanceof Integer)
 			{
 				int old_S_ResourceAssignment_ID = ((Integer)ii).intValue();
-				//	Deleted Assignment
+				//	Delete Previous Resource Assignment record
 				if (old_S_ResourceAssignment_ID != 0)
 				{
 					MResourceAssignment ra = new MResourceAssignment (getCtx(), 
@@ -339,7 +322,7 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 	
 	/**
 	 * 	Update Header.
-	 * 	Set Approved Amount
+	 * 	Set Approved Amount.
 	 */
 	private void updateHeader()
 	{
@@ -351,5 +334,47 @@ public class MTimeExpenseLine extends X_S_TimeExpenseLine
 		@SuppressWarnings("unused")
 		int no = DB.executeUpdate(sql, get_TrxName());
 	}	//	updateHeader
-	
+
+	/**
+	 * Get Labor Cost from Expense Report
+	 * 
+	 * @param  as Account Schema
+	 * @return    Unit Labor Cost
+	 */
+	public BigDecimal getLaborCost(MAcctSchema as)
+	{
+		// Todor Lulov 30.01.2008
+		BigDecimal retValue = Env.ZERO;
+		BigDecimal qty = Env.ZERO;
+
+		String sql = "SELECT ConvertedAmt, Qty FROM S_TimeExpenseLine " +
+				" WHERE S_TimeExpenseLine.S_TimeExpenseLine_ID = ?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, as.get_TrxName());
+			pstmt.setInt(1, getS_TimeExpenseLine_ID());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				retValue = rs.getBigDecimal(1);
+				qty = rs.getBigDecimal(2);
+				retValue = retValue.multiply(qty);
+				if (log.isLoggable(Level.FINE)) log.fine("ExpLineCost = " + retValue);
+			}
+			else
+				log.warning("Not found for S_TimeExpenseLine_ID=" + getS_TimeExpenseLine_ID());
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			pstmt = null; rs = null;
+		}
+		return retValue;
+	}	//	getLaborCost
 }	//	MTimeExpenseLine

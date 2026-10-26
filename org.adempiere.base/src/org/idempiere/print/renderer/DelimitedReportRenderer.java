@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MSysConfig;
 import org.compiere.print.MPrintFormat;
 import org.compiere.print.MPrintFormatItem;
 import org.compiere.print.PrintData;
@@ -41,6 +43,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Ini;
 import org.compiere.util.Language;
+import org.compiere.util.Util;
 
 /**
  * Abstract base class for renderer that output delimited text content.
@@ -61,14 +64,19 @@ public abstract class DelimitedReportRenderer<C extends DelimitedReportRendererC
 				fw = new OutputStreamWriter(new FileOutputStream(configuration.getOutputFile(), false), Ini.getCharset());
 			else 
 				fw = configuration.getOutputWriter();
-			createdDelimitedOutput(reportEngine, fw, configuration.getDelimiter(), configuration.getLanguage());
+			if (!createdDelimitedOutput(reportEngine, fw, configuration.getDelimiter(), configuration.getLanguage()))
+				throw new AdempiereException("Failed to create delimited report content");
 		}
 		catch (FileNotFoundException fnfe) {
 			log.log(Level.SEVERE, "(f) - " + fnfe.toString());
+			throw new AdempiereException(fnfe);
 		}
 		catch (Exception e) {
 			log.log(Level.SEVERE, "(f)", e);
-		}		
+			if (e instanceof RuntimeException runtimeException)
+				throw runtimeException;
+			throw new AdempiereException(e);
+		}
 	}
 
 	@Override
@@ -247,6 +255,8 @@ public abstract class DelimitedReportRenderer<C extends DelimitedReportRendererC
 		if (content == null || content.length() == 0)
 			return;
 		//
+		if (MSysConfig.getBooleanValue(MSysConfig.CSV_EXPORT_SANITIZATION, true, Env.getAD_Client_ID(Env.getCtx())))
+			content = Util.sanitizeCsvValue(content);
 		boolean needMask = false;
 		StringBuilder buff = new StringBuilder();
 		char chars[] = content.toCharArray();

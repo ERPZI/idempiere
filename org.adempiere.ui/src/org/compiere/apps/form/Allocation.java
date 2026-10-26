@@ -41,7 +41,6 @@ import org.compiere.util.Util;
 /**
  * Form to create allocation (C_AllocationHdr and C_AllocationLine).
  * @author hengsin
- *
  */
 public class Allocation
 {
@@ -125,7 +124,7 @@ public class Allocation
 	 * @param paymentTable not used
 	 * @return list of payment record
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public Vector<Vector<Object>> getPaymentData(boolean isMultiCurrency, Object date, IMiniTable paymentTable)
 	{
 		return getPaymentData(isMultiCurrency, (Timestamp) date, (String)null);
@@ -204,7 +203,7 @@ public class Allocation
 	 * @param invoiceTable not use
 	 * @return list of unpaid invoice data
 	 */
-	@Deprecated
+	@Deprecated (since="13", forRemoval=true)
 	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Object date, IMiniTable invoiceTable)
 	{
 		return getInvoiceData(isMultiCurrency, (Timestamp) date, (String)null);
@@ -219,11 +218,25 @@ public class Allocation
 	 */
 	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Timestamp date, String trxName)
 	{
-		//MPo, 5/10/23 Add PrCtr Selection
-		//return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, trxName);
-		return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, m_User1_ID, trxName);
-		//
+		return getInvoiceData(isMultiCurrency, date, true, trxName);
 	}
+
+	/**
+	 * Get unpaid invoices
+	 * @param isMultiCurrency
+	 * @param date
+	 * @param sameBP
+	 * @param trxName optional trx name
+	 * @return list of unpaid invoice data
+	 */
+	public Vector<Vector<Object>> getInvoiceData(boolean isMultiCurrency, Timestamp date, boolean sameBP, String trxName)
+	{
+		//MPo, 5/10/23 Add PrCtr Selection
+		//MPo, Update 28/9/26 release 13
+		//return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, sameBP, trxName);
+		return MInvoice.getUnpaidInvoiceData(isMultiCurrency, date, m_AD_Org_ID, m_C_Currency_ID, m_C_BPartner_ID, sameBP, m_User1_ID, trxName);
+	}
+	
 
 	/**
 	 * Get column names for {@link #getInvoiceData(boolean, Timestamp, String)}
@@ -231,6 +244,17 @@ public class Allocation
 	 * @return list of column name/header
 	 */
 	public Vector<String> getInvoiceColumnNames(boolean isMultiCurrency)
+	{
+		return getInvoiceColumnNames(isMultiCurrency, true);
+	}
+
+	/**
+	 * Get column names for {@link #getInvoiceData(boolean, Timestamp, String)}
+	 * @param isMultiCurrency
+	 * @param sameBP
+	 * @return list of column name/header
+	 */
+	public Vector<String> getInvoiceColumnNames(boolean isMultiCurrency, boolean sameBP)
 	{
 		//  Header Info
 		Vector<String> columnNames = new Vector<String>();
@@ -248,7 +272,8 @@ public class Allocation
 		columnNames.add(Msg.getMsg(Env.getCtx(), "WriteOff"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "AppliedAmt"));
 		columnNames.add(Msg.getMsg(Env.getCtx(), "OverUnderAmt"));
-		
+		if (!sameBP)
+			columnNames.add(Util.cleanAmp(Msg.translate(Env.getCtx(), "Name")));
 		return columnNames;
 	}
 	
@@ -258,6 +283,17 @@ public class Allocation
 	 * @param isMultiCurrency
 	 */
 	public void setInvoiceColumnClass(IMiniTable invoiceTable, boolean isMultiCurrency)
+	{
+		setInvoiceColumnClass(invoiceTable, isMultiCurrency, true);
+	}
+
+	/**
+	 * Set class type for each column
+	 * @param invoiceTable
+	 * @param isMultiCurrency
+	 * @param sameBP
+	 */
+	public void setInvoiceColumnClass(IMiniTable invoiceTable, boolean isMultiCurrency, boolean sameBP)
 	{
 		int i = 0;
 		invoiceTable.setColumnClass(i++, Boolean.class, false);         //  0-Selection
@@ -274,6 +310,10 @@ public class Allocation
 		invoiceTable.setColumnClass(i++, BigDecimal.class, false);      //  8-Conv WriteOff
 		invoiceTable.setColumnClass(i++, BigDecimal.class, false);      //  9-Conv OverUnder
 		invoiceTable.setColumnClass(i++, BigDecimal.class, true);		//	10-Conv Applied
+		if (!sameBP)
+		{
+			invoiceTable.setColumnClass(i++, String.class, true);       //  11-BPName
+		}
 		//  Table UI
 		invoiceTable.autoSize();
 	}

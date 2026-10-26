@@ -25,6 +25,7 @@ import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -37,8 +38,6 @@ import org.adempiere.exceptions.AverageCostingZeroQtyException;
 import org.adempiere.exceptions.DBException;
 import org.compiere.model.ICostInfo;
 import org.compiere.model.I_M_CostDetail;
-import org.compiere.model.I_C_Order;
-import org.compiere.model.I_C_OrderLine;
 import org.compiere.model.MAccount;
 import org.compiere.model.MAcctSchema;
 import org.compiere.model.MAcctSchemaElement;
@@ -47,13 +46,18 @@ import org.compiere.model.MCost;
 import org.compiere.model.MCostDetail;
 import org.compiere.model.MCostElement;
 import org.compiere.model.MCurrency;
+import org.compiere.model.MDocType;
 import org.compiere.model.MFactAcct;
 import org.compiere.model.MInOut;
 import org.compiere.model.MInOutLine;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MInvoiceLine;
 import org.compiere.model.MMatchInv;
+import org.compiere.model.MOrder;
+import org.compiere.model.MOrderLandedCost;
 import org.compiere.model.MOrderLandedCostAllocation;
+import org.compiere.model.MOrderLine;
+import org.compiere.model.MProduct;
 import org.compiere.model.MTax;
 import org.compiere.model.MUOM;
 import org.compiere.model.ProductCost;
@@ -193,7 +197,8 @@ public class Doc_MatchInv extends Doc
 				return createCreditMemoFacts(as);
 		}
 		
-		if (m_receiptLine.getParent().getC_DocType().getDocBaseType().equals(DOCTYPE_MatShipment))
+		MDocType dt = MDocType.get(m_receiptLine.getParent().getC_DocType_ID());
+		if (dt.getDocBaseType().equals(DOCTYPE_MatShipment))
 			return createMatShipmentFacts(as);
 					
 		//  create Fact Header
@@ -361,8 +366,14 @@ public class Doc_MatchInv extends Doc
 		cr.setC_ProjectPhase_ID(m_invoiceLine.getC_ProjectPhase_ID());
 		cr.setC_ProjectTask_ID(m_invoiceLine.getC_ProjectTask_ID());
 		cr.setC_UOM_ID(m_invoiceLine.getC_UOM_ID());
+		cr.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
+		cr.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
 		cr.setUser1_ID(m_invoiceLine.getUser1_ID());
 		cr.setUser2_ID(m_invoiceLine.getUser2_ID());
+		cr.setC_CostCenter_ID(m_invoiceLine.getC_CostCenter_ID());
+		cr.setC_Department_ID(m_invoiceLine.getC_Department_ID());
+		cr.setM_AttributeSetInstance_ID(m_invoiceLine.getM_AttributeSetInstance_ID());
+
 		if (m_matchInv.isReversal())
 		{
 			cr.setQty(getQty().negate());
@@ -517,7 +528,7 @@ public class Doc_MatchInv extends Doc
 						m_pc.getAccount(ProductCost.ACCTTYPE_P_AverageCostVariance, as), as.getC_Currency_ID(),
 						amtVariance);
 				updateFactLine(varianceLine);
-//				varianceLine.setM_AttributeSetInstance_ID(matchInv.getM_AttributeSetInstance_ID());
+				varianceLine.setM_AttributeSetInstance_ID(matchInv.getM_AttributeSetInstance_ID());
 				
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
@@ -528,7 +539,7 @@ public class Doc_MatchInv extends Doc
 			{
 				FactLine line = fact.createLine(null, account, as.getC_Currency_ID(), amtAsset);
 				updateFactLine(line);
-//				line.setM_AttributeSetInstance_ID(matchInv.getM_AttributeSetInstance_ID());
+				line.setM_AttributeSetInstance_ID(matchInv.getM_AttributeSetInstance_ID());
 
 				if (m_invoiceLine.getParent().getC_Currency_ID() != as.getC_Currency_ID())
 				{
@@ -684,8 +695,9 @@ public class Doc_MatchInv extends Doc
 			int Ref_CostDetail_ID = 0;
 			if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
 			{
+				MMatchInv originalMatchInv = new MMatchInv(getCtx(), matchInv.getReversal_ID(), getTrxName());
 				MCostDetail cd = MCostDetail.getInvoice(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-						matchInv.getReversal().getC_InvoiceLine_ID(), 0, matchInv.getReversal().getDateAcct(), getTrxName());
+						originalMatchInv.getC_InvoiceLine_ID(), 0, originalMatchInv.getDateAcct(), getTrxName());
 				if (cd != null)
 					Ref_CostDetail_ID = cd.getM_CostDetail_ID();
 			}		
@@ -699,8 +711,8 @@ public class Doc_MatchInv extends Doc
 			}
 			
 			Map<Integer, BigDecimal> landedCostMap = new LinkedHashMap<Integer, BigDecimal>();
-			I_C_OrderLine orderLine = m_receiptLine.getC_OrderLine();
-			if (orderLine == null)
+			MOrderLine orderLine = new MOrderLine(getCtx(), m_receiptLine.getC_OrderLine_ID(), getTrxName());
+			if (orderLine.getC_OrderLine_ID() == 0 || orderLine.getC_OrderLine_ID() != m_receiptLine.getC_OrderLine_ID())
 				return "";
 			
 			int C_OrderLine_ID = orderLine.getC_OrderLine_ID();
@@ -712,7 +724,7 @@ public class Doc_MatchInv extends Doc
 				BigDecimal amt = totalAmt.multiply(tQty).divide(totalQty, 12, RoundingMode.HALF_UP);			
 				if (orderLine.getC_Currency_ID() != as.getC_Currency_ID())
 				{
-					I_C_Order order = orderLine.getC_Order();
+					MOrder order = orderLine.getParent();
 					Timestamp dateAcct = order.getDateAcct();
 					BigDecimal rate = MConversionRate.getRate(
 						order.getC_Currency_ID(), as.getC_Currency_ID(),
@@ -727,7 +739,8 @@ public class Doc_MatchInv extends Doc
 					if (amt.scale() > as.getCostingPrecision())
 						amt = amt.setScale(as.getCostingPrecision(), RoundingMode.HALF_UP);
 				}
-				int elementId = allocation.getC_OrderLandedCost().getM_CostElement_ID();
+				MOrderLandedCost olc = new MOrderLandedCost(getCtx(), allocation.getC_OrderLandedCost_ID(), getTrxName());
+				int elementId = olc.getM_CostElement_ID();
 				BigDecimal elementAmt = landedCostMap.get(elementId);
 				if (elementAmt == null) 
 				{
@@ -746,8 +759,9 @@ public class Doc_MatchInv extends Doc
 				Ref_CostDetail_ID = 0;
 				if (matchInv.getReversal_ID() > 0 && matchInv.get_ID() > matchInv.getReversal_ID())
 				{
+					MMatchInv originalMatchInv = new MMatchInv(getCtx(), matchInv.getReversal_ID(), getTrxName());
 					MCostDetail cd = MCostDetail.getShipment(as, getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
-							matchInv.getReversal().getM_InOutLine_ID(), 0, getTrxName());
+							originalMatchInv.getM_InOutLine_ID(), 0, getTrxName());
 					if (cd != null)
 						Ref_CostDetail_ID = cd.getM_CostDetail_ID();
 				}
@@ -955,8 +969,12 @@ public class Doc_MatchInv extends Doc
 			cr.setC_ProjectPhase_ID(m_invoiceLine.getC_ProjectPhase_ID());
 			cr.setC_ProjectTask_ID(m_invoiceLine.getC_ProjectTask_ID());
 			cr.setC_UOM_ID(m_invoiceLine.getC_UOM_ID());
+			cr.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
+			cr.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
 			cr.setUser1_ID(m_invoiceLine.getUser1_ID());
 			cr.setUser2_ID(m_invoiceLine.getUser2_ID());
+			cr.setC_CostCenter_ID(m_invoiceLine.getC_CostCenter_ID());
+			cr.setC_Department_ID(m_invoiceLine.getC_Department_ID());
 		}
 		else
 		{
@@ -1133,8 +1151,14 @@ public class Doc_MatchInv extends Doc
 			dr.setC_ProjectPhase_ID(refInvLine.getC_ProjectPhase_ID());
 			dr.setC_ProjectTask_ID(refInvLine.getC_ProjectTask_ID());
 			dr.setC_UOM_ID(refInvLine.getC_UOM_ID());
+			dr.setC_Charge_ID(refInvLine.getC_Charge_ID());
+			dr.setA_Asset_ID(refInvLine.getA_Asset_ID());
 			dr.setUser1_ID(refInvLine.getUser1_ID());
 			dr.setUser2_ID(refInvLine.getUser2_ID());
+			dr.setC_CostCenter_ID(refInvLine.getC_CostCenter_ID());
+			dr.setC_Department_ID(refInvLine.getC_Department_ID());
+			dr.setM_AttributeSetInstance_ID(refInvLine.getM_AttributeSetInstance_ID());
+			
 		}
 		else
 		{
@@ -1266,8 +1290,13 @@ public class Doc_MatchInv extends Doc
 			cr.setC_ProjectPhase_ID(m_invoiceLine.getC_ProjectPhase_ID());
 			cr.setC_ProjectTask_ID(m_invoiceLine.getC_ProjectTask_ID());
 			cr.setC_UOM_ID(m_invoiceLine.getC_UOM_ID());
+			cr.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
+			cr.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
 			cr.setUser1_ID(m_invoiceLine.getUser1_ID());
 			cr.setUser2_ID(m_invoiceLine.getUser2_ID());
+			cr.setC_CostCenter_ID(m_invoiceLine.getC_CostCenter_ID());
+			cr.setC_Department_ID(m_invoiceLine.getC_Department_ID());
+			cr.setM_AttributeSetInstance_ID(m_invoiceLine.getM_AttributeSetInstance_ID());
 		}
 		else
 		{
@@ -1339,9 +1368,14 @@ public class Doc_MatchInv extends Doc
 		factLine.setC_ProjectPhase_ID(m_invoiceLine.getC_ProjectPhase_ID());
 		factLine.setC_ProjectTask_ID(m_invoiceLine.getC_ProjectTask_ID());
 		factLine.setC_UOM_ID(m_invoiceLine.getC_UOM_ID());
+		factLine.setC_Charge_ID(m_invoiceLine.getC_Charge_ID());
+		factLine.setA_Asset_ID(m_invoiceLine.getA_Asset_ID());
 		factLine.setUser1_ID(m_invoiceLine.getUser1_ID());
 		factLine.setUser2_ID(m_invoiceLine.getUser2_ID());
 		factLine.setM_Product_ID(m_invoiceLine.getM_Product_ID());
+		factLine.setC_CostCenter_ID(m_invoiceLine.getC_CostCenter_ID());
+		factLine.setC_Department_ID(m_invoiceLine.getC_Department_ID());
+		factLine.setM_AttributeSetInstance_ID(m_invoiceLine.getM_AttributeSetInstance_ID());
 		factLine.setQty(getQty());
 	}
 	
@@ -1669,7 +1703,7 @@ public class Doc_MatchInv extends Doc
 		{
 			MMatchInv[] matchInvs = MMatchInv.getInvoice(getCtx(), invoice.get_ID(), getTrxName());
 			
-			ArrayList<Integer> skipMatchInvIdList = new ArrayList<Integer>();
+			Set<Integer> skipMatchInvIdList = new HashSet<Integer>();
 			skipMatchInvIdList.add(m_matchInv.get_ID());
 			for (MMatchInv matchInv : matchInvs)
 			{
@@ -1763,27 +1797,13 @@ public class Doc_MatchInv extends Doc
 			}
 			
 			{
-				List<MMatchInv> candidates = candidatesByInvoice.get(invoice.getC_Invoice_ID());
+				List<MMatchInv> candidates = candidatesByInvoice.getOrDefault(invoice.getC_Invoice_ID(), Collections.emptyList());
 				
 				for (MMatchInv matchInv : candidates)
 				{
-					// Replicate the original per-sibling SQL exclusion conditions:
-					//   - if the CURRENT match invoice is a reversal: exclude sibling's own record if
-					//     sibling itself is a reversal, and only include records with ID < reversal target
-					//   - else: exclude sibling's own record if it has a reversal
 					boolean excludeSelfRecord = false;
-					Integer reversalBeforeId = null;
-					if (m_matchInv.isReversal())
-					{
-						if (matchInv.isReversal())
-							excludeSelfRecord = true;
-						reversalBeforeId = m_matchInv.getReversal_ID();
-					}
-					else
-					{
-						if (matchInv.getReversal_ID() > 0)
-							excludeSelfRecord = true;
-					}
+					if (matchInv.getReversal_ID() > 0)
+						excludeSelfRecord = true;
 					
 					// Replicate the original Qty > 0 / Qty < 0 filter for Ref_MatchInv_ID > 0
 					Boolean qtyPositive = null; // null = no Qty-sign filter applied
@@ -1802,8 +1822,6 @@ public class Doc_MatchInv extends Doc
 						if (recId == -1)
 							continue;
 						if (excludeSelfRecord && recId == matchInv.get_ID())
-							continue;
-						if (reversalBeforeId != null && recId >= reversalBeforeId)
 							continue;
 						
 						List<Object[]> rows = acctRowsByRecord.get(recId);
@@ -1837,8 +1855,6 @@ public class Doc_MatchInv extends Doc
 						if (recId == -1)
 							continue;
 						if (excludeSelfRecord && recId == matchInv.get_ID())
-							continue;
-						if (reversalBeforeId != null && recId >= reversalBeforeId)
 							continue;
 						
 						List<Object[]> rows = glRowsByRecord.get(recId);
@@ -2044,7 +2060,7 @@ public class Doc_MatchInv extends Doc
 			{
 				MMatchInv[] matchInvs = MMatchInv.getInvoiceLine(getCtx(), invoiceLine.get_ID(), getTrxName());
 				
-				ArrayList<Integer> skipMatchInvIdList = new ArrayList<Integer>();
+				Set<Integer> skipMatchInvIdList = new HashSet<Integer>();
 				skipMatchInvIdList.add(m_matchInv.get_ID());
 				for (MMatchInv matchInv : matchInvs)
 				{
@@ -2068,17 +2084,8 @@ public class Doc_MatchInv extends Doc
 						.append(" AND PostingType='A'")
 						.append(" AND Account_ID=?");
 					
-					if (m_matchInv.isReversal())
-					{
-						if (matchInv.isReversal())
-							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
-					}
-					else
-					{
-						if (matchInv.getReversal_ID() > 0)
-							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-					}
+					if (matchInv.getReversal_ID() > 0)
+						sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
 					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
@@ -2127,17 +2134,8 @@ public class Doc_MatchInv extends Doc
 						.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 						.append(" AND Description LIKE 'Invoice Line%'");
 					
-					if (m_matchInv.isReversal())
-					{
-						if (matchInv.isReversal())
-							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-						sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
-					}
-					else
-					{
-						if (matchInv.getReversal_ID() > 0)
-							sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-					}
+					if (matchInv.getReversal_ID() > 0)
+						sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
 					
 					if (matchInv.getRef_MatchInv_ID() > 0)
 					{
@@ -2468,7 +2466,7 @@ public class Doc_MatchInv extends Doc
 		}
 		
 		MMatchInv[] matchInvs = MMatchInv.getInOut(getCtx(), M_InOut_ID, getTrxName());
-		ArrayList<Integer> skipMatchInvIdList = new ArrayList<Integer>();
+		Set<Integer> skipMatchInvIdList = new HashSet<Integer>();
 		skipMatchInvIdList.add(m_matchInv.get_ID());
 		for (MMatchInv matchInv : matchInvs)
 		{
@@ -2537,26 +2535,12 @@ public class Doc_MatchInv extends Doc
 		
 		for (MMatchInv matchInv : candidates)
 		{
-			// Replicate the original per-sibling SQL exclusion conditions:
-			//   - if the CURRENT match invoice is a reversal: exclude sibling's own record if
-			//     sibling itself is a reversal, and only include records with ID < reversal target
-			//   - else: exclude sibling's own record if it has a reversal
 			boolean excludeSelfRecord = false;
-			Integer reversalBeforeId = null;
-			if (m_matchInv.isReversal())
-			{
-				if (matchInv.isReversal())
-					excludeSelfRecord = true;
-				reversalBeforeId = m_matchInv.getReversal_ID();
-			}
-			else
-			{
-				if (matchInv.getReversal_ID() > 0)
-					excludeSelfRecord = true;
-			}
+			if (matchInv.getReversal_ID() > 0)
+				excludeSelfRecord = true;
 			
 			int recId = matchInv.get_ID();
-			boolean skip = (excludeSelfRecord) || (reversalBeforeId != null && recId >= reversalBeforeId);
+			boolean skip = excludeSelfRecord;
 			
 			// --- Account-matched sums ---
 			totalAmtSourceDr = Env.ZERO;
@@ -2726,7 +2710,7 @@ public class Doc_MatchInv extends Doc
 		}
 		
 		MMatchInv[] matchInvs = MMatchInv.getInOutLine(getCtx(), m_receiptLine.get_ID(), getTrxName());
-		ArrayList<Integer> skipMatchInvIdList = new ArrayList<Integer>();
+		Set<Integer> skipMatchInvIdList = new HashSet<Integer>();
 		skipMatchInvIdList.add(m_matchInv.get_ID());
 		for (MMatchInv matchInv : matchInvs)
 		{
@@ -2750,17 +2734,8 @@ public class Doc_MatchInv extends Doc
 				.append(" AND PostingType='A'")
 				.append(" AND Account_ID=?");
 			
-			if (m_matchInv.isReversal())
-			{
-				if (matchInv.isReversal())
-					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
-			}
-			else
-			{
-				if (matchInv.getReversal_ID() > 0)
-					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-			}
+			if (matchInv.getReversal_ID() > 0)
+				sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
 			
 			// For Match Inv
 			List<Object> valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
@@ -2792,17 +2767,8 @@ public class Doc_MatchInv extends Doc
 				.append(" AND (Account_ID=? OR Account_ID=? OR Account_ID=?)")
 				.append(" AND Description LIKE 'InOut Line%'");
 			
-			if (m_matchInv.isReversal())
-			{
-				if (matchInv.isReversal())
-					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-				sql.append(" AND Record_ID < ").append(m_matchInv.getReversal_ID());
-			}
-			else
-			{
-				if (matchInv.getReversal_ID() > 0)
-					sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
-			}
+			if (matchInv.getReversal_ID() > 0)
+				sql.append(" AND Record_ID <> ").append(matchInv.get_ID());
 			
 			// For Match Inv
 			valuesMatchInv = DB.getSQLValueObjectsEx(getTrxName(), sql.toString(),
@@ -2875,18 +2841,14 @@ public class Doc_MatchInv extends Doc
 	 * or falling back to MCost.getCostInfo if neither is found.
 	 */
 	private BigDecimal resolveQtyCostForAveragePO(MAcctSchema as, MMatchInv matchInv, String costingMethod) {
-	    // Costing-level AD_Org_ID and M_AttributeSetInstance_ID
+		// Costing-level AD_Org_ID and M_AttributeSetInstance_ID
  		int AD_Org_ID = m_receiptLine.getAD_Org_ID();
  	    int M_AttributeSetInstance_ID = matchInv.getM_AttributeSetInstance_ID();
- 	    String costingLevel = as.getCostingLevel();
- 	    if (MAcctSchema.COSTINGLEVEL_Client.equals(costingLevel)) {
- 	        AD_Org_ID = 0;
- 	        M_AttributeSetInstance_ID = 0;
- 	    } else if (MAcctSchema.COSTINGLEVEL_Organization.equals(costingLevel)) {
- 	        M_AttributeSetInstance_ID = 0;
- 	    } else if (MAcctSchema.COSTINGLEVEL_BatchLot.equals(costingLevel)) {
- 	        AD_Org_ID = 0;
- 	    }
+ 	    MProduct product = new MProduct(matchInv.getCtx(), matchInv.getM_Product_ID(), matchInv.get_TrxName());
+ 	    String costingLevel = product.getCostingLevel(as);
+ 	    MCost.CostingKey costKey = MCost.CostingKey.resolve(AD_Org_ID, M_AttributeSetInstance_ID, costingLevel);
+		AD_Org_ID = costKey.AD_Org_ID();
+		M_AttributeSetInstance_ID = costKey.M_AttributeSetInstance_ID();
 	    MCostElement ce = MCostElement.getMaterialCostElement(getCtx(), costingMethod, AD_Org_ID);
 	    if (matchInv.getReversal_ID() > 0) {
 		    MCostDetail cd = MCostDetail.getMatchInvoice(as, matchInv.getM_Product_ID(), matchInv.getM_AttributeSetInstance_ID(),
@@ -2920,7 +2882,7 @@ public class Doc_MatchInv extends Doc
 			    }
 	    	}
 	    }
-
+	    
 	    ICostInfo c = MCost.getCostInfo(getCtx(), getAD_Client_ID(), AD_Org_ID, m_invoiceLine.getM_Product_ID(),
 	            as.getM_CostType_ID(), as.getC_AcctSchema_ID(), ce.getM_CostElement_ID(),
 	            M_AttributeSetInstance_ID, 
@@ -2979,11 +2941,14 @@ public class Doc_MatchInv extends Doc
 	 * @param handler invoked once per result row for the caller to extract
 	 *        columns and update its own aggregation structures
 	 */
-	private void executeBatchedFactAcctQuery(String sqlTemplate, List<Object> leadingParams,
-	        Collection<Integer> recordIds, List<Object> trailingParams, FactAcctRowHandler handler)
+	private void executeBatchedFactAcctQuery(String sqlTemplate, List<?> leadingParams,
+	        Collection<Integer> recordIds, List<?> trailingParams, FactAcctRowHandler handler)
 	{
 	    if (recordIds == null || recordIds.isEmpty())
 	        return;
+	    
+	    List<?> effectiveLeadingParams = leadingParams != null ? leadingParams : Collections.emptyList();
+	    List<?> effectiveTrailingParams = trailingParams != null ? trailingParams : Collections.emptyList();
 
 	    List<Integer> recordIdList = new ArrayList<Integer>(recordIds);
 	    final int batchSize = 1000; // stay under Oracle's 1000-item IN-list limit
@@ -2999,10 +2964,10 @@ public class Doc_MatchInv extends Doc
 	        {
 	            pstmt = DB.prepareStatement(sql, getTrxName());
 	            List<Object> params = new ArrayList<Object>();
-	            params.addAll(leadingParams);
+	            params.addAll(effectiveLeadingParams);
 	            params.addAll(batch);
-	            params.addAll(trailingParams);
-	            DB.setParameters(pstmt, params.toArray());
+	            params.addAll(effectiveTrailingParams);
+	            DB.setParameters(pstmt, params);
 	            rs = pstmt.executeQuery();
 	            while (rs.next())
 	            {

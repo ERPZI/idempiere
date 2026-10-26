@@ -45,6 +45,13 @@ public class PO_Record
 	private static CLogger log = CLogger.getCLogger (PO_Record.class);
 	
 	/**
+	 * Reset the KeyNamePair<AD_Table_ID, TableName> cache for constraint types + Record_ID/Record_UU reference id
+	 */
+	public static void resetCache() {
+		s_po_record_tables_cache.reset();
+	}
+	
+	/**
 	 * 	Delete Cascade including (selected)parent relationships
 	 *	@param AD_Table_ID table
 	 *	@param Record_IDorUU record ID (int) or UUID (String)
@@ -59,7 +66,11 @@ public class PO_Record
 		if (Record_IDorUU instanceof Integer) {
 			refId = DisplayType.RecordID;
 			columnName = "Record_ID";
-		} else if (Record_IDorUU instanceof String) {
+		} else if (Record_IDorUU instanceof String uuid) {
+			
+			if (Util.isEmpty(uuid))
+				return true;
+			
 			refId = DisplayType.RecordUU;
 			columnName = "Record_UU";
 		} else {
@@ -105,7 +116,11 @@ public class PO_Record
 		int refId;
 		if (Record_IDorUU instanceof Integer) {
 			refId = DisplayType.RecordID;
-		} else if (Record_IDorUU instanceof String) {
+		} else if (Record_IDorUU instanceof String uuid) {
+
+			if (Util.isEmpty(uuid))
+				return;
+
 			refId = DisplayType.RecordUU;
 		} else {
 			throw new IllegalArgumentException(Record_IDorUU.getClass().getName() + " not supported for ID/UUID");
@@ -197,7 +212,11 @@ public class PO_Record
 		if (Record_IDorUU instanceof Integer) {
 			refId = DisplayType.RecordID;
 			columnName = "Record_ID";
-		} else if (Record_IDorUU instanceof String) {
+		} else if (Record_IDorUU instanceof String uuid) {
+
+			if (Util.isEmpty(uuid))
+				return;
+
 			refId = DisplayType.RecordUU;
 			columnName = "Record_UU";
 		} else {
