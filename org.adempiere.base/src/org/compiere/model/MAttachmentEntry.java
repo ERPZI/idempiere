@@ -354,7 +354,10 @@ public class MAttachmentEntry
         }
 
         try {
-            return getFile (new File(Files.createTempDirectory("attachment_").toFile() , fileName));
+        	//MPo, 29/10/26 Fix error message that path tmp/attachment/100000/100000.... does not exist
+        	fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+        	//
+        	return getFile (new File(Files.createTempDirectory("attachment_").toFile() , fileName));
         } catch (IOException e) {
             throw new AdempiereException(e);
         }

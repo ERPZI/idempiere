@@ -46,7 +46,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-//import com.amazonaws.services.s3.model.DeleteObjectRequest; //MPo, 21/5/22 resolve compiler warning
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -55,6 +55,7 @@ import com.amazonaws.services.s3.model.S3Object;
  * @author rgriepsma
  *
  */
+@SuppressWarnings("unused")
 public class AttachmentS3System implements IAttachmentStore {
 	
 	private final CLogger log = CLogger.getCLogger(getClass());
@@ -84,6 +85,7 @@ public class AttachmentS3System implements IAttachmentStore {
 				
 				try {
 					entryFile = attach.m_items.get(i).getFile();
+	
 				} catch (Exception ex) {}
 				
 				if (entryFile != null)
@@ -93,7 +95,6 @@ public class AttachmentS3System implements IAttachmentStore {
 					if (log.isLoggable(Level.FINE)) log.fine(path + " - " + attachmentPathRoot);
 	
 					StringBuilder fileLocation = new StringBuilder().append(getAttachmentPathSnippet(attach)).append(File.separator).append(entryFile.getName());
-	
 					s3.putObject(new PutObjectRequest(attachmentPathRoot, fileLocation.toString(), entryFile));
 				}
 				
@@ -228,11 +229,14 @@ public class AttachmentS3System implements IAttachmentStore {
 
 	@Override
 	public boolean deleteEntry(MAttachment attach, MStorageProvider provider, int index) {
-		//String attachmentBucket = provider.getURL(); //MPo, 21/5/22
-		//final MAttachmentEntry entry = attach.m_items.get(index); //MPo, 21/5/22
+	
+	AmazonS3 s3 = getS3Client();
 		
-    	//Try not actually deleting the files from S3 to prevent errors
-		//s3.deleteObject(new DeleteObjectRequest(attachmentBucket, entry.getName()));
+	String attachmentBucket = provider.getURL();
+	final MAttachmentEntry entry = attach.m_items.get(index);
+		
+   	//MPo, 29/10/2026 Enable deletions of attachment entry
+	s3.deleteObject(new DeleteObjectRequest(attachmentBucket, entry.getName()));
 
 	    attach.m_items.remove(index);
 		attach.save(); // must save here as the operation cannot be rolled back on filesystem
